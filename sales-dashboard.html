@@ -127,6 +127,8 @@
   .btn-primary:hover { background: #7d9bff; }
   .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
   .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .icon-btn { background: none; border: none; cursor: pointer; padding: 2px 4px; font-size: 0.85rem; opacity: 0.5; transition: opacity 0.15s; border-radius: 4px; }
+  .icon-btn:hover { opacity: 1; background: var(--surface2); }
 
   /* ── Projection chart ── */
   .proj-legend { display: flex; gap: 20px; margin-bottom: 16px; flex-wrap: wrap; }
@@ -246,6 +248,7 @@
               <th class="num" onclick="sortTable('roi')">ROI ↕</th>
               <th>Referred By</th>
               <th>Notes</th>
+              <th style="width:72px"></th>
             </tr>
           </thead>
           <tbody id="orderTbody"></tbody>
@@ -419,7 +422,7 @@
 <!-- Add Order Modal -->
 <div class="modal-overlay" id="addOrderModal">
   <div class="modal">
-    <h2>Log New Order</h2>
+    <h2 id="aoTitle">Log New Order</h2>
     <div class="field-row">
       <div class="field">
         <label>Date</label>
@@ -470,7 +473,7 @@
     </div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeAddOrder()">Cancel</button>
-      <button class="btn-primary" onclick="saveNewOrder()">Save Order</button>
+      <button class="btn-primary" id="aoSaveBtn" onclick="saveNewOrder()">Save Order</button>
     </div>
   </div>
 </div>
@@ -547,17 +550,32 @@ const PIPELINE = [
 // ═══════════════════════════════════════════════════════════
 //  DATA LAYER
 // ═══════════════════════════════════════════════════════════
-const LS_KEY = 'riser_orders_v1';
+const LS_KEY    = 'riser_orders_v1';
+const LS_ORDERS = 'vp_orders_v2';   // unified store (same as vault-pine-collective)
 let sortCol = 'date', sortDir = -1;
 let orderMonthFilter = 'all';
 
+// TODAY as a live date string (not hardcoded)
+const TODAY = new Date().toISOString().slice(0, 10);
+
+// rawOrders: reads the unified vp_orders_v2 store; falls back to seeding from HISTORICAL
+function rawOrders() {
+  const stored = localStorage.getItem(LS_ORDERS);
+  if (stored) return JSON.parse(stored);
+  // First visit: seed from HISTORICAL + legacy LS_KEY
+  const legacy = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+  const seeded = [...HISTORICAL.map(o => ({ ...o })), ...legacy];
+  localStorage.setItem(LS_ORDERS, JSON.stringify(seeded));
+  return seeded;
+}
+
 function getOrders() {
-  const extra = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
-  return [...HISTORICAL, ...extra].sort((a,b) => a.date.localeCompare(b.date));
+  return rawOrders().sort((a,b) => a.date.localeCompare(b.date));
 }
 function saveOrder(o) {
-  const arr = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
-  arr.push(o); localStorage.setItem(LS_KEY, JSON.stringify(arr));
+  const arr = rawOrders();
+  arr.push(o);
+  localStorage.setItem(LS_ORDERS, JSON.stringify(arr));
 }
 
 function uid() { return 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2); }
@@ -763,6 +781,10 @@ function renderOrderTable() {
       <td class="num" style="color:${roiColor}">${roi}%</td>
       <td style="font-size:.78rem;color:var(--text2)">${esc(o.referredBy || '—')}</td>
       <td style="font-size:.75rem;color:var(--text2);max-width:160px">${esc(o.notes || '')}</td>
+      <td style="text-align:right;white-space:nowrap">
+        <button class="icon-btn" title="Edit order" onclick="openAddOrder('${o.id}')">✏️</button>
+        <button class="icon-btn" title="Delete order" onclick="deleteOrder('${o.id}')">✕</button>
+      </td>
     </tr>`;
   }).join('');
 
@@ -1032,30 +1054,86 @@ function renderInsights() {
 // ═══════════════════════════════════════════════════════════
 //  ADD ORDER
 // ═══════════════════════════════════════════════════════════
-function openAddOrder() {
-  document.getElementById('aoDate').value = '2026-06-02';
+let editOrderId = null;
+
+function setProductSelect(val) {
+  const sel = document.getElementById('aoProduct');
+  if (val && ![...sel.options].some(o => o.value === val)) {
+    sel.add(new Option(val, val));
+  }
+  sel.value = val || sel.options[0].value;
+}
+
+function openAddOrder(id) {
+  editOrderId = id || null;
+  const titleEl = document.getElementById('aoTitle');
+  const saveEl  = document.getElementById('aoSaveBtn');
+  if (id) {
+    const o = rawOrders().find(x => x.id === id);
+    if (!o) { toast('Order not found.'); return; }
+    document.getElementById('aoDate').value     = o.date;
+    document.getElementById('aoCustomer').value = o.customer;
+    setProductSelect(o.product);
+    document.getElementById('aoQty').value      = o.sets || 1;
+    document.getElementById('aoSale').value     = o.salePrice;
+    document.getElementById('aoCogs').value     = o.cogs;
+    document.getElementById('aoRef').value      = o.referredBy || '';
+    document.getElementById('aoNotes').value    = o.notes || '';
+    if (titleEl) titleEl.textContent = 'Edit Order';
+    if (saveEl)  saveEl.textContent  = 'Save Changes';
+  } else {
+    document.getElementById('aoDate').value     = TODAY;
+    document.getElementById('aoCustomer').value = '';
+    setProductSelect(null);
+    document.getElementById('aoQty').value      = 1;
+    document.getElementById('aoSale').value     = '';
+    document.getElementById('aoCogs').value     = 21.33;
+    document.getElementById('aoRef').value      = '';
+    document.getElementById('aoNotes').value    = '';
+    if (titleEl) titleEl.textContent = 'Log New Order';
+    if (saveEl)  saveEl.textContent  = 'Save Order';
+  }
   document.getElementById('addOrderModal').classList.add('open');
   setTimeout(() => document.getElementById('aoCustomer').focus(), 50);
 }
-function closeAddOrder() { document.getElementById('addOrderModal').classList.remove('open'); }
+
+function closeAddOrder() {
+  editOrderId = null;
+  document.getElementById('addOrderModal').classList.remove('open');
+}
+
 function saveNewOrder() {
   const sale = parseFloat(document.getElementById('aoSale').value);
   const cogs = parseFloat(document.getElementById('aoCogs').value);
   const cust = document.getElementById('aoCustomer').value.trim();
   const date = document.getElementById('aoDate').value;
   if (!cust || !date || isNaN(sale)) { toast('Fill in Date, Customer, and Sale Price.'); return; }
-  const o = {
-    id: uid(), date, customer: cust,
+  const fields = {
+    date, customer: cust,
     product:    document.getElementById('aoProduct').value,
     sets:       parseInt(document.getElementById('aoQty').value) || 1,
     salePrice:  sale, cogs: isNaN(cogs) ? 21.33 : cogs,
     referredBy: document.getElementById('aoRef').value.trim(),
     notes:      document.getElementById('aoNotes').value.trim()
   };
-  saveOrder(o);
+  const wasEditing = editOrderId;
+  if (editOrderId) {
+    const arr = rawOrders();
+    const o = arr.find(x => x.id === editOrderId);
+    if (o) { Object.assign(o, fields); localStorage.setItem(LS_ORDERS, JSON.stringify(arr)); }
+  } else {
+    saveOrder({ id: uid(), ...fields });
+  }
   closeAddOrder();
   renderAll();
-  toast(`Order logged: ${fmt$(sale)} from ${cust}`);
+  toast(wasEditing ? `Order updated.` : `Order logged: ${fmt$(sale)} from ${cust}`);
+}
+
+function deleteOrder(id) {
+  if (!confirm('Delete this order? This cannot be undone.')) return;
+  localStorage.setItem(LS_ORDERS, JSON.stringify(rawOrders().filter(x => x.id !== id)));
+  renderAll();
+  toast('Order deleted.');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1569,7 +1647,6 @@ function renderMonthlyGoal() {
 
   const orders  = getOrders();
   const goal    = getGoal();
-  const TODAY   = '2026-06-02';
   const CUR_MK  = TODAY.slice(0, 7);
 
   // Days in current month / days elapsed
