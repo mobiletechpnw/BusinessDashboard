@@ -2199,7 +2199,7 @@ function importBackup(file) {
     if (d.pinRestocks !== undefined) localStorage.setItem(PIN_RESTOCK_KEY,  JSON.stringify(d.pinRestocks));
     loadGoals(); renderSalesAll(); renderGoals(); renderExpensesAll();
     if (typeof renderJtAll === 'function') renderJtAll();
-    if (typeof renderPinsAll === 'function') renderPinsAll();
+    if (typeof renderPinAll === 'function') renderPinAll();
     toast('Backup restored — all data including Jet Tags & Pins.');
   };
   reader.readAsText(file);
