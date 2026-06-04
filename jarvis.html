@@ -456,68 +456,176 @@ function animateVitals(){
 setInterval(animateVitals,3000);
 
 // ── RESPONSE OVERLAY ──
-function showResponse(text,duration=4000){
-  const el=document.getElementById('response-overlay');
-  document.getElementById('transcript-area').textContent=text;
-  el.textContent=text;el.classList.add('show');
-  setTimeout(()=>{el.classList.remove('show');document.getElementById('transcript-area').textContent='JARVIS COMMAND CENTER / MANAGER AGENT';},duration);
+// ── JARVIS VOICE ENGINE ──
+let jarvisVoice = null;
+let voiceReady = false;
+let speakQueue = [];
+let isSpeaking = false;
+
+function loadVoices() {
+  const voices = window.speechSynthesis.getVoices();
+  if (!voices.length) return;
+  // Priority: British male > UK English > any English
+  const priority = [
+    v => v.name.includes('Daniel') && v.lang.includes('en'),          // macOS British
+    v => v.name.includes('Google UK English Male'),                     // Chrome UK Male
+    v => v.name.includes('Microsoft George'),                           // Windows British
+    v => v.name.includes('Microsoft Daniel'),                           // Windows British alt
+    v => v.name.toLowerCase().includes('british'),
+    v => v.lang === 'en-GB',
+    v => v.name.includes('Google UK English Female'),
+    v => v.lang.startsWith('en') && v.name.toLowerCase().includes('male'),
+    v => v.lang.startsWith('en'),
+  ];
+  for (const test of priority) {
+    const match = voices.find(test);
+    if (match) { jarvisVoice = match; break; }
+  }
+  voiceReady = true;
+  // Drain queue
+  if (speakQueue.length) { const t = speakQueue.shift(); _speak(t); }
+}
+
+window.speechSynthesis.onvoiceschanged = loadVoices;
+loadVoices();
+
+function _speak(text) {
+  if (!voiceReady || !window.speechSynthesis) { isSpeaking = false; return; }
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  if (jarvisVoice) utt.voice = jarvisVoice;
+  utt.pitch  = 0.88;   // Slightly deeper — authoritative
+  utt.rate   = 0.92;   // Measured, deliberate pace
+  utt.volume = 1.0;
+  utt.onend  = () => {
+    isSpeaking = false;
+    if (speakQueue.length) { const next = speakQueue.shift(); _speak(next); }
+  };
+  utt.onerror = () => { isSpeaking = false; };
+  isSpeaking = true;
+  window.speechSynthesis.speak(utt);
+}
+
+function jarvisSpeak(text) {
+  if (isSpeaking) {
+    window.speechSynthesis.cancel();
+    isSpeaking = false;
+    speakQueue = [];
+  }
+  if (!voiceReady) { speakQueue.push(text); return; }
+  _speak(text);
+}
+
+function showResponse(text, duration=5000) {
+  const el = document.getElementById('response-overlay');
+  document.getElementById('transcript-area').textContent = text;
+  el.textContent = text; el.classList.add('show');
+  jarvisSpeak(text);
+  setTimeout(() => {
+    el.classList.remove('show');
+    document.getElementById('transcript-area').textContent = 'JARVIS COMMAND CENTER / MANAGER AGENT';
+  }, duration);
 }
 
 // ── VOICE COMMANDS ──
-const commands={
-  'open sales':()=>{showResponse('Navigating to Sales Dashboard...');setTimeout(()=>location.href='sales-dashboard.html',1500);},
-  'open goals':()=>{showResponse('Navigating to Goals & Objectives...');setTimeout(()=>location.href='goals-dashboard.html',1500);},
-  'open vault':()=>{showResponse('Navigating to Vault & Pine Collective...');setTimeout(()=>location.href='vault-pine-collective.html',1500);},
-  'go home':()=>{showResponse('Returning to Command Center home...');setTimeout(()=>location.href='index.html',1500);},
-  'show status':()=>showResponse('All systems nominal. Neural core at optimal levels. Signal strength 96.9%. No anomalies detected.'),
-  'what time is it':()=>showResponse('Current time: '+new Date().toLocaleTimeString()),
-  'system status':()=>showResponse('JARVIS online. All subsystems operational. Encryption active. Uplink stable.'),
-  'hello jarvis':()=>showResponse('Hello. All systems are online and running at optimal capacity. How can I assist you?'),
-  'hey jarvis':()=>showResponse('Yes? I\'m listening. All systems ready.'),
-  'jarvis':()=>showResponse('Online. Standing by for your command.'),
+const commands = {
+  'open sales': () => {
+    showResponse('Of course. Pulling up the Sales Dashboard now.');
+    setTimeout(() => location.href = 'sales-dashboard.html', 2200);
+  },
+  'open goals': () => {
+    showResponse('Navigating to Goals and Objectives. Stay focused.');
+    setTimeout(() => location.href = 'goals-dashboard.html', 2200);
+  },
+  'open vault': () => {
+    showResponse('Opening the Vault and Pine Collective dashboard.');
+    setTimeout(() => location.href = 'vault-pine-collective.html', 2200);
+  },
+  'go home': () => {
+    showResponse('Returning to the Command Center.');
+    setTimeout(() => location.href = 'index.html', 2000);
+  },
+  'show status': () => showResponse(
+    'All systems nominal. Neural core operating at thirty-seven percent. Signal strength ninety-six point nine percent. No anomalies detected. You\'re clear.'
+  ),
+  'what time is it': () => {
+    const t = new Date().toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit',hour12:true});
+    showResponse(`The current time is ${t}.`);
+  },
+  'system status': () => showResponse(
+    'J.A.R.V.I.S. is fully operational. All subsystems online. Encryption active. Uplink stable. Awaiting your instructions.'
+  ),
+  'how are we doing': () => {
+    const orders = JSON.parse(localStorage.getItem('vp_orders_v2') || '[]');
+    const rev = orders.reduce((s,o) => s + o.salePrice, 0);
+    const profit = orders.reduce((s,o) => s + o.salePrice - o.cogs, 0);
+    showResponse(`Based on current data, total revenue stands at ${rev > 0 ? '$' + rev.toFixed(0) : 'zero'}, with a net profit of ${profit > 0 ? '$' + profit.toFixed(0) : 'zero'} across ${orders.length} orders. You\'re making progress.`, 8000);
+  },
+  'how many orders': () => {
+    const n = JSON.parse(localStorage.getItem('vp_orders_v2') || '[]').length;
+    showResponse(`You currently have ${n} order${n !== 1 ? 's' : ''} on record.`);
+  },
+  'hello jarvis': () => showResponse(
+    'Good to hear from you. All systems are online and running at optimal capacity. How can I be of assistance?'
+  ),
+  'hey jarvis': () => showResponse("Yes? I'm listening. All systems ready."),
+  'good morning': () => showResponse(
+    'Good morning. All systems are online. Your business data is ready when you are. Shall we get to work?'
+  ),
+  'good evening': () => showResponse(
+    'Good evening. Systems nominal. A productive day, I hope. How can I assist you?'
+  ),
+  'jarvis': () => showResponse('Online. Standing by for your command.'),
+  'thank you jarvis': () => showResponse("You're welcome. Always a pleasure."),
+  'shut down': () => showResponse('Understood. Powering down voice systems. Goodbye.', 3000),
 };
 
-let recognition=null;
-let listening=false;
+let recognition = null;
+let listening = false;
 
-function setupSpeech(){
-  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SpeechRecognition){showResponse('Voice recognition not supported in this browser. Try Chrome.');return;}
-  recognition=new SpeechRecognition();
-  recognition.continuous=true;recognition.interimResults=true;recognition.lang='en-US';
-  recognition.onresult=e=>{
-    const transcript=Array.from(e.results).map(r=>r[0].transcript).join('').toLowerCase().trim();
-    document.getElementById('transcript-area').textContent=transcript.toUpperCase();
-    if(e.results[e.results.length-1].isFinal){
-      const matched=Object.keys(commands).find(k=>transcript.includes(k));
-      if(matched)commands[matched]();
+function setupSpeech() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) { showResponse('Voice recognition not supported in this browser. Try Chrome.'); return; }
+  recognition = new SpeechRecognition();
+  recognition.continuous = true; recognition.interimResults = true; recognition.lang = 'en-US';
+  recognition.onresult = e => {
+    const transcript = Array.from(e.results).map(r => r[0].transcript).join('').toLowerCase().trim();
+    document.getElementById('transcript-area').textContent = transcript.toUpperCase();
+    if (e.results[e.results.length - 1].isFinal) {
+      const matched = Object.keys(commands).find(k => transcript.includes(k));
+      if (matched) commands[matched]();
     }
   };
-  recognition.onerror=e=>{if(e.error!=='no-speech')showResponse('Voice error: '+e.error);};
-  recognition.onend=()=>{if(listening)recognition.start();};
+  recognition.onerror = e => { if (e.error !== 'no-speech') showResponse('Voice input error: ' + e.error); };
+  recognition.onend = () => { if (listening) recognition.start(); };
 }
 
-function toggleListening(){
-  if(!recognition)setupSpeech();
-  if(!recognition)return;
-  const btn=document.getElementById('mic-btn');
-  if(listening){
-    recognition.stop();listening=false;isListening=false;
+function toggleListening() {
+  if (!recognition) setupSpeech();
+  if (!recognition) return;
+  const btn = document.getElementById('mic-btn');
+  if (listening) {
+    recognition.stop(); listening = false; isListening = false;
     btn.classList.remove('listening');
-    showResponse('Voice recognition paused.', 2000);
+    showResponse('Voice recognition suspended. Microphone offline.', 3000);
   } else {
-    recognition.start();listening=true;isListening=true;
+    recognition.start(); listening = true; isListening = true;
     btn.classList.add('listening');
-    showResponse('Voice recognition active. Say "Hey Jarvis" to begin.', 3000);
+    showResponse('Voice systems online. Say "Hey Jarvis" to begin.', 3500);
   }
 }
 
-document.getElementById('mic-btn').addEventListener('click',toggleListening);
-
-// Also listen for keyword via keyboard shortcut
-document.addEventListener('keydown',e=>{if(e.code==='Space'&&!e.target.matches('input,textarea'))toggleListening();});
+document.getElementById('mic-btn').addEventListener('click', toggleListening);
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' && !e.target.matches('input,textarea')) toggleListening();
+});
 
 setupSpeech();
+
+// Startup greeting — spoken after a short delay
+setTimeout(() => {
+  jarvisSpeak('Good day. J.A.R.V.I.S. is online. All systems operational. Click the microphone or press space to activate voice control.');
+}, 1200);
 </script>
 </body>
 </html>
