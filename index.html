@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Business Command Center</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a; --border: #2e3350;
+    --accent: #6c8cff; --accent2: #a78bfa; --green: #34d399; --yellow: #fbbf24;
+    --red: #f87171; --orange: #fb923c; --text: #e2e8f0; --text2: #8892b0; --radius: 10px;
+  }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh; display: flex; flex-direction: column;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0 32px; display: flex; align-items: center;
+    justify-content: space-between; min-height: 60px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .brand { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.4px; }
+  .brand .hi { color: var(--accent); }
+  .brand .lo { color: var(--accent2); }
+  .header-date { font-size: 0.75rem; color: var(--text2); }
+
+  /* ── Hero ── */
+  .hero {
+    text-align: center; padding: 64px 24px 48px;
+    background: radial-gradient(ellipse at 50% 0%, #1a1d3a 0%, var(--bg) 70%);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-eyebrow {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
+  }
+  .hero-title {
+    font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 900;
+    letter-spacing: -1px; line-height: 1.1; margin-bottom: 16px;
+  }
+  .hero-title .grad {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-sub {
+    font-size: 1rem; color: var(--text2); max-width: 500px; margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* ── Grid ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px; max-width: 1100px; margin: 48px auto; padding: 0 24px;
+    flex: 1;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px;
+    text-decoration: none; color: var(--text);
+    display: flex; flex-direction: column; gap: 14px;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+  }
+  .card:hover {
+    border-color: var(--accent); transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(108,140,255,0.12);
+  }
+  .card-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+  }
+  .card-icon.blue  { background: rgba(108,140,255,0.12); }
+  .card-icon.purple { background: rgba(167,139,250,0.12); }
+  .card-icon.green { background: rgba(52,211,153,0.12); }
+  .card-title {
+    font-size: 1.05rem; font-weight: 700; letter-spacing: -0.2px;
+  }
+  .card-desc { font-size: 0.83rem; color: var(--text2); line-height: 1.55; }
+  .card-arrow {
+    margin-top: auto; font-size: 0.78rem; font-weight: 600;
+    color: var(--accent); display: flex; align-items: center; gap: 6px;
+  }
+  .card-arrow::after { content: '→'; transition: transform 0.2s; }
+  .card:hover .card-arrow::after { transform: translateX(4px); }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center; padding: 24px;
+    font-size: 0.72rem; color: var(--text2);
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><span class="hi">Business</span> <span class="lo">Command Center</span></div>
+  <div class="header-date" id="hdate"></div>
+</header>
+
+<div class="hero">
+  <div class="hero-eyebrow">Your Hub</div>
+  <h1 class="hero-title">Life Manager &amp; <span class="grad">Business Planner</span></h1>
+  <p class="hero-sub">Track your sales, hit your goals, and manage your business — all in one place.</p>
+</div>
+
+<div class="grid">
+
+  <a class="card" href="vault-pine-collective.html">
+    <div class="card-icon blue">🌲</div>
+    <div class="card-title">Vault &amp; Pine Collective</div>
+    <div class="card-desc">Full business overview — combined sales and goals dashboard in one unified view.</div>
+    <div class="card-arrow">Open Dashboard</div>
+  </a>
+
+  <a class="card" href="sales-dashboard.html">
+    <div class="card-icon green">📈</div>
+    <div class="card-title">Sales Dashboard</div>
+    <div class="card-desc">Track revenue, monitor performance metrics, and stay on top of your sales pipeline.</div>
+    <div class="card-arrow">View Sales</div>
+  </a>
+
+  <a class="card" href="goals-dashboard.html">
+    <div class="card-icon purple">🎯</div>
+    <div class="card-title">Goals &amp; Objectives</div>
+    <div class="card-desc">Set targets, track progress, and stay focused on what matters most.</div>
+    <div class="card-arrow">View Goals</div>
+  </a>
+
+</div>
+
+<footer>Business Command Center &nbsp;·&nbsp; Built for you</footer>
+
+<script>
+  const d = new Date();
+  document.getElementById('hdate').textContent = d.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+</script>
+
+</body>
+</html>
