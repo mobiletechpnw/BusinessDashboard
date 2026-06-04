@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f1117">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<script src="shared.js" defer></script>
+<title>Content Planner — VPC</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3350;
+  --accent:#6c8cff;--accent2:#a78bfa;--green:#34d399;--yellow:#fbbf24;
+  --red:#f87171;--orange:#fb923c;--text:#e2e8f0;--text2:#8892b0;--radius:10px;
+  --pink:#f472b6;--teal:#2dd4bf;
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;}
+
+/* HEADER */
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;justify-content:space-between;min-height:58px;position:sticky;top:0;z-index:100;gap:12px;flex-wrap:wrap;}
+.brand{font-size:1rem;font-weight:800;letter-spacing:-0.3px;white-space:nowrap;}
+.brand span{color:var(--accent);}
+.header-tabs{display:flex;align-items:stretch;gap:0;}
+.h-tab{padding:0 18px;font-size:0.82rem;font-weight:600;color:var(--text2);cursor:pointer;border-bottom:3px solid transparent;transition:all .15s;display:flex;align-items:center;min-height:58px;}
+.h-tab:hover{color:var(--text);}
+.h-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.header-right{display:flex;align-items:center;gap:10px;}
+.btn-primary{background:var(--accent);color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.btn-primary:hover{background:#7d9bff;}
+.btn-ghost{background:none;border:1px solid var(--border);border-radius:7px;padding:7px 14px;font-size:0.8rem;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.back-link{font-size:0.75rem;color:var(--text2);text-decoration:none;padding:5px 10px;border:1px solid var(--border);border-radius:6px;transition:all .15s;white-space:nowrap;}
+.back-link:hover{color:var(--accent);border-color:var(--accent);}
+
+/* STAT BAR */
+.stat-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);}
+.stat-cell{background:var(--surface);padding:14px 20px;}
+.stat-val{font-size:1.3rem;font-weight:800;letter-spacing:-0.4px;}
+.stat-lbl{font-size:0.65rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+
+/* MAIN LAYOUT */
+main{max-width:1300px;margin:0 auto;padding:24px 20px;}
+
+/* SECTION PANELS */
+.section{display:none;}.section.active{display:block;}
+
+/* CALENDAR WEEK */
+.week-nav{display:flex;align-items:center;gap:14px;margin-bottom:18px;flex-wrap:wrap;}
+.week-label{font-size:0.9rem;font-weight:700;min-width:200px;}
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:28px;}
+.day-col{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);min-height:140px;overflow:hidden;}
+.day-col.today{border-color:var(--accent);}
+.day-head{padding:8px 10px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.day-name{font-size:0.65rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;}
+.day-num{font-size:0.9rem;font-weight:700;}
+.day-num.today-num{color:var(--accent);}
+.day-items{padding:6px;display:flex;flex-direction:column;gap:4px;}
+.cal-chip{padding:4px 7px;border-radius:5px;font-size:0.62rem;font-weight:600;cursor:pointer;transition:opacity .15s;line-height:1.3;}
+.cal-chip:hover{opacity:.8;}
+.cal-add-btn{width:100%;background:none;border:1px dashed var(--border);border-radius:5px;padding:4px;font-size:0.65rem;color:var(--text2);cursor:pointer;transition:all .15s;margin-top:2px;}
+.cal-add-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* CONTENT LIST */
+.toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+.search-input{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--text);font-size:0.83rem;outline:none;min-width:220px;}
+.search-input:focus{border-color:var(--accent);}
+.filter-chip{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:0.72rem;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;}
+.filter-chip:hover,.filter-chip.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+/* CONTENT CARDS */
+.content-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+.content-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .2s,transform .15s;}
+.content-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+.card-top{padding:14px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.card-title{font-size:0.9rem;font-weight:700;line-height:1.35;flex:1;}
+.card-actions{display:flex;gap:4px;flex-shrink:0;}
+.icon-btn{background:none;border:none;color:var(--text2);padding:4px 6px;font-size:0.85rem;border-radius:5px;cursor:pointer;}
+.icon-btn:hover{background:var(--surface2);color:var(--text);}
+.card-body{padding:10px 16px 14px;display:flex;flex-direction:column;gap:8px;}
+.card-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:0.62rem;font-weight:700;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.3px;}
+
+/* Category colors */
+.cat-show   {background:rgba(108,140,255,.15);color:var(--accent);}
+.cat-product{background:rgba(52,211,153,.15);color:var(--green);}
+.cat-card   {background:rgba(167,139,250,.15);color:var(--accent2);}
+.cat-custom {background:rgba(251,191,36,.15);color:var(--yellow);}
+
+/* Type colors */
+.type-post  {background:rgba(251,191,36,.15);color:var(--yellow);}
+.type-story {background:rgba(244,114,182,.15);color:var(--pink);}
+.type-reel  {background:rgba(45,212,191,.15);color:var(--teal);}
+.type-video {background:rgba(251,146,60,.15);color:var(--orange);}
+
+/* Status */
+.status-draft    {background:rgba(139,146,176,.12);color:var(--text2);}
+.status-ready    {background:rgba(251,191,36,.15);color:var(--yellow);}
+.status-scheduled{background:rgba(52,211,153,.15);color:var(--green);}
+.status-posted   {background:rgba(108,140,255,.15);color:var(--accent);}
+
+/* Platform pills */
+.platform{font-size:0.6rem;padding:2px 7px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);}
+
+/* Caption preview */
+.card-caption{font-size:0.75rem;color:var(--text2);line-height:1.5;background:var(--surface2);border-radius:6px;padding:8px 10px;white-space:pre-wrap;max-height:60px;overflow:hidden;}
+.card-date{font-size:0.72rem;color:var(--text2);}
+.card-date span{color:var(--text);font-weight:600;}
+
+/* TEMPLATES */
+.templates-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+.template-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;cursor:pointer;transition:all .2s;}
+.template-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 20px rgba(108,140,255,.12);}
+.tmpl-icon{font-size:1.8rem;margin-bottom:10px;}
+.tmpl-title{font-size:0.9rem;font-weight:700;margin-bottom:4px;}
+.tmpl-desc{font-size:0.75rem;color:var(--text2);line-height:1.5;}
+.tmpl-footer{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;width:580px;max-width:95vw;max-height:90vh;overflow-y:auto;}
+.modal h2{font-size:1.1rem;font-weight:800;margin-bottom:22px;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:0.72rem;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
+.field input,.field textarea,.field select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 12px;font-size:0.88rem;outline:none;font-family:inherit;transition:border-color .15s;}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent);}
+.field textarea{resize:vertical;min-height:80px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.platform-select{display:flex;gap:8px;flex-wrap:wrap;}
+.plat-btn{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:0.75rem;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;}
+.plat-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(108,140,255,.12);}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;}
+
+/* Checklist (caption builder) */
+.caption-helper{background:var(--surface2);border-radius:8px;padding:12px;margin-bottom:4px;}
+.caption-helper-title{font-size:0.68rem;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;}
+.caption-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.caption-tag{font-size:0.7rem;padding:4px 10px;background:var(--surface);border:1px solid var(--border);border-radius:20px;cursor:pointer;color:var(--text2);transition:all .15s;}
+.caption-tag:hover{border-color:var(--accent2);color:var(--accent2);}
+
+/* STATUS DOT */
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;}
+.dot-draft{background:var(--text2);}
+.dot-ready{background:var(--yellow);}
+.dot-scheduled{background:var(--green);}
+.dot-posted{background:var(--accent);}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:60px 20px;color:var(--text2);}
+.empty-icon{font-size:3rem;margin-bottom:14px;}
+.empty-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:6px;}
+.empty-sub{font-size:0.82rem;line-height:1.6;}
+
+@media(max-width:700px){
+  .stat-bar{grid-template-columns:repeat(3,1fr);}
+  .week-grid{grid-template-columns:repeat(4,1fr);}
+  .field-row{grid-template-columns:1fr;}
+  main{padding:14px;}
+  .content-grid{grid-template-columns:1fr;}
+  header{padding:0 14px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:18px;">
+    <div class="brand">Content <span>Planner</span></div>
+    <nav class="header-tabs">
+      <div class="h-tab active" data-tab="calendar">📅 Calendar</div>
+      <div class="h-tab" data-tab="queue">📋 Queue</div>
+      <div class="h-tab" data-tab="templates">⚡ Templates</div>
+    </nav>
+  </div>
+  <div class="header-right">
+    <a href="index.html" class="back-link">⌂ Home</a>
+    <button class="btn-primary" onclick="openModal()">+ New Content</button>
+  </div>
+</header>
+
+<!-- STAT BAR -->
+<div class="stat-bar">
+  <div class="stat-cell"><div class="stat-val" id="st-total">0</div><div class="stat-lbl">Total Planned</div></div>
+  <div class="stat-cell"><div class="stat-val" style="color:var(--yellow)" id="st-ready">0</div><div class="stat-lbl">Ready to Post</div></div>
+  <div class="stat-cell"><div class="stat-val" style="color:var(--green)" id="st-scheduled">0</div><div class="stat-lbl">Scheduled</div></div>
+  <div class="stat-cell"><div class="stat-val" style="color:var(--accent)" id="st-posted">0</div><div class="stat-lbl">Posted This Month</div></div>
+  <div class="stat-cell"><div class="stat-val" style="color:var(--accent2)" id="st-week">0</div><div class="stat-lbl">This Week</div></div>
+</div>
+
+<main>
+
+  <!-- ── CALENDAR ── -->
+  <div class="section active" id="tab-calendar">
+    <div class="week-nav">
+      <button class="btn-ghost" onclick="shiftWeek(-1)">← Prev</button>
+      <div class="week-label" id="week-label"></div>
+      <button class="btn-ghost" onclick="shiftWeek(1)">Next →</button>
+      <button class="btn-ghost" onclick="goToday()">Today</button>
+    </div>
+    <div class="week-grid" id="week-grid"></div>
+  </div>
+
+  <!-- ── QUEUE ── -->
+  <div class="section" id="tab-queue">
+    <div class="toolbar">
+      <input class="search-input" id="queue-search" placeholder="Search content…" oninput="renderQueue()">
+      <div id="cat-filters" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+      <div id="status-filters" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+    </div>
+    <div class="content-grid" id="queue-grid"></div>
+  </div>
+
+  <!-- ── TEMPLATES ── -->
+  <div class="section" id="tab-templates">
+    <div style="margin-bottom:20px;">
+      <div style="font-size:1rem;font-weight:800;margin-bottom:4px;">Content Templates</div>
+      <div style="font-size:0.82rem;color:var(--text2);">Click any template to instantly create a new content item from it.</div>
+    </div>
+    <div class="templates-grid" id="templates-grid"></div>
+  </div>
+
+</main>
+
+<!-- ── ADD/EDIT MODAL ── -->
+<div class="modal-overlay" id="content-modal">
+  <div class="modal">
+    <h2 id="modal-title">New Content</h2>
+    <div class="field-row">
+      <div class="field">
+        <label>Category</label>
+        <select id="f-category">
+          <option value="show-schedule">📅 Show Schedule</option>
+          <option value="product">📦 Product</option>
+          <option value="card-spotlight">✨ Card Spotlight</option>
+          <option value="custom">🎨 Custom</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Content Type</label>
+        <select id="f-type">
+          <option value="post">📸 Post</option>
+          <option value="story">⭕ Story</option>
+          <option value="reel">🎬 Reel</option>
+          <option value="video">▶️ Video</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Title / Content Name</label>
+      <input type="text" id="f-title" placeholder="e.g. Upcoming Show Announcement">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Scheduled Date</label>
+        <input type="date" id="f-date">
+      </div>
+      <div class="field">
+        <label>Time (optional)</label>
+        <input type="time" id="f-time">
+      </div>
+    </div>
+    <div class="field">
+      <label>Status</label>
+      <select id="f-status">
+        <option value="draft">Draft</option>
+        <option value="ready">Ready to Post</option>
+        <option value="scheduled">Scheduled</option>
+        <option value="posted">Posted</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Platforms</label>
+      <div class="platform-select" id="platform-select">
+        <div class="plat-btn on" data-p="instagram">📸 Instagram</div>
+        <div class="plat-btn" data-p="tiktok">🎵 TikTok</div>
+        <div class="plat-btn" data-p="twitter">🐦 Twitter/X</div>
+        <div class="plat-btn" data-p="facebook">👥 Facebook</div>
+        <div class="plat-btn" data-p="youtube">▶️ YouTube</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Caption / Script</label>
+      <div class="caption-helper">
+        <div class="caption-helper-title">Quick insert hashtags</div>
+        <div class="caption-tags">
+          <div class="caption-tag" onclick="insertTag('#PokemonTCG')">#PokemonTCG</div>
+          <div class="caption-tag" onclick="insertTag('#CardFest')">#CardFest</div>
+          <div class="caption-tag" onclick="insertTag('#VaultAndPine')">#VaultAndPine</div>
+          <div class="caption-tag" onclick="insertTag('#TCG')">#TCG</div>
+          <div class="caption-tag" onclick="insertTag('#PokemonCards')">#PokemonCards</div>
+          <div class="caption-tag" onclick="insertTag('#CardCollector')">#CardCollector</div>
+          <div class="caption-tag" onclick="insertTag('#SeattleTCG')">#SeattleTCG</div>
+          <div class="caption-tag" onclick="insertTag('#CardShow')">#CardShow</div>
+        </div>
+      </div>
+      <textarea id="f-caption" placeholder="Write your caption, script, or talking points…"></textarea>
+    </div>
+    <div class="field">
+      <label>Notes / Ideas</label>
+      <input type="text" id="f-notes" placeholder="Props needed, shoot location, inspiration…">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveContent()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CONTENT_KEY = 'vpc_content_v1';
+let editId = null;
+let weekOffset = 0;
+let catFilter = 'all';
+let statusFilter = 'all';
+
+// ── TEMPLATES ──────────────────────────────────────
+const TEMPLATES = [
+  {
+    id: 'show-announcement',
+    icon: '📣',
+    title: 'Upcoming Show Announcement',
+    desc: 'Hype post for an upcoming card show or convention.',
+    category: 'show-schedule', type: 'post',
+    caption: '🚨 WE\'RE GOING TO [SHOW NAME]!\n\n📅 Date: \n📍 Location: \n🏷️ Table #: \n\nCome see us for Pokémon display risers, Jet Tags, pins & more!\n\n#PokemonTCG #CardFest #VaultAndPine #CardShow',
+  },
+  {
+    id: 'show-countdown',
+    icon: '⏳',
+    title: 'Show Week Countdown',
+    desc: 'Story countdown for the week of an upcoming show.',
+    category: 'show-schedule', type: 'story',
+    caption: '⏳ [X] DAYS UNTIL [SHOW NAME]!\n\nCome find us — Tag your friends who should stop by 👇',
+  },
+  {
+    id: 'table-locator',
+    icon: '📍',
+    title: 'Show Table Locator',
+    desc: 'Story showing exactly where your table is at the show.',
+    category: 'show-schedule', type: 'story',
+    caption: '📍 FIND US AT [SHOW NAME]!\n\nTable #: \nWe\'re selling:\n✅ Pokémon Display Risers\n✅ Jet Tags\n✅ Pins\n\nTag someone who needs to visit our table!',
+  },
+  {
+    id: 'sealed-product',
+    icon: '📦',
+    title: 'Sealed Product Available',
+    desc: 'Story announcing sealed Pokémon product in stock.',
+    category: 'product', type: 'story',
+    caption: '🔥 SEALED PRODUCT JUST IN!\n\n📦 \n💰 Price: \n📍 Available: In person / DM to order\n\nLimited quantities — slide in the DMs before it\'s gone!\n\n#PokemonTCG #SealedProduct #PokemonCards',
+  },
+  {
+    id: 'pc-showcase',
+    icon: '✨',
+    title: 'PC Showcase',
+    desc: 'Post spotlighting a card from your personal collection.',
+    category: 'card-spotlight', type: 'post',
+    caption: '✨ PC SHOWCASE\n\n🃏 Card: \n📅 Set: \n💎 Grade/Condition: \n💬 Story behind it: \n\nDrop your favorite PC card below 👇\n\n#PokemonTCG #PersonalCollection #CardSpotlight #PokemonCards',
+  },
+  {
+    id: 'riser-demo',
+    icon: '🖨️',
+    title: 'Riser Product Demo',
+    desc: 'Reel or post showing your display risers in action.',
+    category: 'product', type: 'reel',
+    caption: '🖨️ LEVEL UP YOUR DISPLAY SETUP!\n\nOur custom 3D-printed Pokémon card risers 👆\n\n✅ Fits standard binders & displays\n✅ Made to order\n✅ DM us to order!\n\n#PokemonTCG #CardDisplay #CardRisers #VaultAndPine',
+  },
+  {
+    id: 'jet-tag-drop',
+    icon: '🏷️',
+    title: 'Jet Tag Drop',
+    desc: 'Story or post announcing new Jet Tag characters available.',
+    category: 'product', type: 'story',
+    caption: '🏷️ NEW JET TAGS AVAILABLE!\n\n🎮 Characters: \n💰 $5 each\n📍 Available at shows & DM\n\nWhich character do you want? Comment below 👇\n\n#PokemonTCG #JetTags #PokemonAccessories',
+  },
+  {
+    id: 'pin-drop',
+    icon: '📌',
+    title: 'Pin Drop',
+    desc: 'Story announcing new Pokémon pins available.',
+    category: 'product', type: 'story',
+    caption: '📌 PINS ARE IN STOCK!\n\n🎮 Characters: \n💰 $5 each\n📍 Find us at shows or DM to order\n\n#PokemonTCG #PokemonPins #VaultAndPine',
+  },
+];
+
+// ── DATA ───────────────────────────────────────────
+function getContent() { return JSON.parse(localStorage.getItem(CONTENT_KEY) || '[]'); }
+function saveContentData(arr) { localStorage.setItem(CONTENT_KEY, JSON.stringify(arr)); }
+
+// ── UTILS ──────────────────────────────────────────
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtDate(d) {
+  if (!d) return '—';
+  const [y,m,day] = d.split('-');
+  return new Date(+y,+m-1,+day).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+const CAT_LABELS = {'show-schedule':'Show Schedule','product':'Product','card-spotlight':'Card Spotlight','custom':'Custom'};
+const CAT_CSS    = {'show-schedule':'cat-show','product':'cat-product','card-spotlight':'cat-card','custom':'cat-custom'};
+const TYPE_CSS   = {'post':'type-post','story':'type-story','reel':'type-reel','video':'type-video'};
+const STATUS_CSS = {'draft':'status-draft','ready':'status-ready','scheduled':'status-scheduled','posted':'status-posted'};
+const STATUS_DOT = {'draft':'dot-draft','ready':'dot-ready','scheduled':'dot-scheduled','posted':'dot-posted'};
+const PLAT_ICONS = {instagram:'📸',tiktok:'🎵',twitter:'🐦',facebook:'👥',youtube:'▶️'};
+
+// ── STATS ──────────────────────────────────────────
+function renderStats() {
+  const all = getContent();
+  const now = new Date();
+  const month = now.toISOString().slice(0,7);
+  const weekStart = new Date(now); weekStart.setDate(now.getDate()-now.getDay());
+  const weekEnd   = new Date(weekStart); weekEnd.setDate(weekStart.getDate()+6);
+  document.getElementById('st-total').textContent      = all.length;
+  document.getElementById('st-ready').textContent      = all.filter(c=>c.status==='ready').length;
+  document.getElementById('st-scheduled').textContent  = all.filter(c=>c.status==='scheduled').length;
+  document.getElementById('st-posted').textContent     = all.filter(c=>c.status==='posted'&&c.date&&c.date.startsWith(month)).length;
+  document.getElementById('st-week').textContent       = all.filter(c=>{
+    if(!c.date) return false;
+    const d=new Date(c.date+'T12:00:00');return d>=weekStart&&d<=weekEnd;
+  }).length;
+}
+
+// ── CALENDAR ──────────────────────────────────────
+function getWeekDates(offset=0) {
+  const now = new Date();
+  const sunday = new Date(now);
+  sunday.setDate(now.getDate() - now.getDay() + (offset * 7));
+  return Array.from({length:7},(_,i)=>{const d=new Date(sunday);d.setDate(sunday.getDate()+i);return d;});
+}
+
+function renderCalendar() {
+  const days = getWeekDates(weekOffset);
+  const today = new Date().toISOString().slice(0,10);
+  const all = getContent();
+  const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  document.getElementById('week-label').textContent =
+    days[0].toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' – ' +
+    days[6].toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+  document.getElementById('week-grid').innerHTML = days.map(day => {
+    const iso = day.toISOString().slice(0,10);
+    const isToday = iso === today;
+    const dayItems = all.filter(c => c.date === iso);
+    const chips = dayItems.map(c => `
+      <div class="cal-chip ${CAT_CSS[c.category]||'cat-custom'}" onclick="openModal('${c.id}')" title="${esc(c.title)}">
+        <span style="opacity:.7">${c.type==='story'?'⭕':c.type==='reel'?'🎬':c.type==='video'?'▶️':'📸'}</span>
+        ${esc(c.title.length>18?c.title.slice(0,18)+'…':c.title)}
+      </div>`).join('');
+    return `<div class="day-col${isToday?' today':''}">
+      <div class="day-head">
+        <span class="day-name">${DAY_NAMES[day.getDay()]}</span>
+        <span class="day-num${isToday?' today-num':''}">${day.getDate()}</span>
+      </div>
+      <div class="day-items">
+        ${chips}
+        <button class="cal-add-btn" onclick="openModalDate('${iso}')">+ Add</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function shiftWeek(dir) { weekOffset += dir; renderCalendar(); }
+function goToday() { weekOffset = 0; renderCalendar(); }
+
+// ── QUEUE ──────────────────────────────────────────
+function renderQueueFilters() {
+  const cats = ['all','show-schedule','product','card-spotlight','custom'];
+  const statuses = ['all','draft','ready','scheduled','posted'];
+  document.getElementById('cat-filters').innerHTML = cats.map(c =>
+    `<div class="filter-chip${catFilter===c?' on':''}" onclick="setCatFilter('${c}')">${c==='all'?'All Categories':CAT_LABELS[c]||c}</div>`
+  ).join('');
+  document.getElementById('status-filters').innerHTML = statuses.map(s =>
+    `<div class="filter-chip${statusFilter===s?' on':''}" onclick="setStatusFilter('${s}')">${s==='all'?'All Status':s.charAt(0).toUpperCase()+s.slice(1)}</div>`
+  ).join('');
+}
+function setCatFilter(v) { catFilter=v; renderQueueFilters(); renderQueue(); }
+function setStatusFilter(v) { statusFilter=v; renderQueueFilters(); renderQueue(); }
+
+function renderQueue() {
+  const q = (document.getElementById('queue-search').value||'').toLowerCase();
+  let items = getContent();
+  if (catFilter !== 'all') items = items.filter(c => c.category === catFilter);
+  if (statusFilter !== 'all') items = items.filter(c => c.status === statusFilter);
+  if (q) items = items.filter(c => (c.title+c.caption+c.notes+c.category).toLowerCase().includes(q));
+  items.sort((a,b) => (a.date||'9999').localeCompare(b.date||'9999'));
+
+  const el = document.getElementById('queue-grid');
+  if (!items.length) {
+    el.innerHTML = `<div class="empty" style="grid-column:1/-1">
+      <div class="empty-icon">📭</div>
+      <div class="empty-title">No content found</div>
+      <div class="empty-sub">Try changing your filters or create new content.</div>
+    </div>`;
+    return;
+  }
+  el.innerHTML = items.map(c => {
+    const plats = (c.platforms||[]).map(p=>`<span class="platform">${PLAT_ICONS[p]||''} ${p}</span>`).join('');
+    return `<div class="content-card">
+      <div class="card-top">
+        <div class="card-title">${esc(c.title)}</div>
+        <div class="card-actions">
+          <button class="icon-btn" title="Edit" onclick="openModal('${c.id}')">✏️</button>
+          <button class="icon-btn" title="Mark posted" onclick="markPosted('${c.id}')" ${c.status==='posted'?'style="opacity:.4"':''}>✅</button>
+          <button class="icon-btn" title="Delete" onclick="deleteContent('${c.id}')">✕</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-meta">
+          <span class="badge ${CAT_CSS[c.category]||'cat-custom'}">${CAT_LABELS[c.category]||c.category}</span>
+          <span class="badge ${TYPE_CSS[c.type]||'type-post'}">${c.type}</span>
+          <span class="badge ${STATUS_CSS[c.status]||'status-draft'}"><span class="status-dot ${STATUS_DOT[c.status]||'dot-draft'}"></span>${c.status}</span>
+        </div>
+        ${plats?`<div style="display:flex;gap:5px;flex-wrap:wrap">${plats}</div>`:''}
+        ${c.caption?`<div class="card-caption">${esc(c.caption)}</div>`:''}
+        <div class="card-date">${c.date?`📅 <span>${fmtDate(c.date)}${c.time?' · '+c.time:''}</span>`:'<span style="color:var(--text2)">No date set</span>'}</div>
+        ${c.notes?`<div style="font-size:.72rem;color:var(--text2)">💡 ${esc(c.notes)}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── TEMPLATES ──────────────────────────────────────
+function renderTemplates() {
+  document.getElementById('templates-grid').innerHTML = TEMPLATES.map(t => `
+    <div class="template-card" onclick="createFromTemplate('${t.id}')">
+      <div class="tmpl-icon">${t.icon}</div>
+      <div class="tmpl-title">${esc(t.title)}</div>
+      <div class="tmpl-desc">${esc(t.desc)}</div>
+      <div class="tmpl-footer">
+        <span class="badge ${CAT_CSS[t.category]||'cat-custom'}">${CAT_LABELS[t.category]||t.category}</span>
+        <span class="badge ${TYPE_CSS[t.type]||'type-post'}">${t.type}</span>
+      </div>
+    </div>`
+  ).join('');
+}
+
+function createFromTemplate(id) {
+  const t = TEMPLATES.find(x => x.id === id);
+  if (!t) return;
+  openModal();
+  document.getElementById('f-category').value = t.category;
+  document.getElementById('f-type').value = t.type;
+  document.getElementById('f-title').value = t.title;
+  document.getElementById('f-caption').value = t.caption;
+  // Switch to queue tab so user sees the form context
+}
+
+// ── MODAL ──────────────────────────────────────────
+function openModal(id) {
+  editId = id || null;
+  const c = id ? getContent().find(x => x.id === id) : null;
+  document.getElementById('modal-title').textContent = c ? 'Edit Content' : 'New Content';
+  document.getElementById('f-category').value  = c?.category || 'show-schedule';
+  document.getElementById('f-type').value      = c?.type     || 'post';
+  document.getElementById('f-title').value     = c?.title    || '';
+  document.getElementById('f-date').value      = c?.date     || '';
+  document.getElementById('f-time').value      = c?.time     || '';
+  document.getElementById('f-status').value    = c?.status   || 'draft';
+  document.getElementById('f-caption').value   = c?.caption  || '';
+  document.getElementById('f-notes').value     = c?.notes    || '';
+  const plats = c?.platforms || ['instagram'];
+  document.querySelectorAll('.plat-btn').forEach(b => {
+    b.classList.toggle('on', plats.includes(b.dataset.p));
+  });
+  document.getElementById('content-modal').classList.add('open');
+}
+
+function openModalDate(date) { openModal(); document.getElementById('f-date').value = date; }
+function closeModal() { document.getElementById('content-modal').classList.remove('open'); editId = null; }
+
+document.querySelectorAll('.plat-btn').forEach(b => {
+  b.addEventListener('click', () => b.classList.toggle('on'));
+});
+
+function insertTag(tag) {
+  const ta = document.getElementById('f-caption');
+  const pos = ta.selectionStart;
+  const val = ta.value;
+  ta.value = val.slice(0, pos) + tag + ' ' + val.slice(pos);
+  ta.focus(); ta.selectionStart = ta.selectionEnd = pos + tag.length + 1;
+}
+
+function saveContent() {
+  const title = document.getElementById('f-title').value.trim();
+  if (!title) { alert('Please enter a title.'); return; }
+  const platforms = [...document.querySelectorAll('.plat-btn.on')].map(b => b.dataset.p);
+  const item = {
+    id: editId || Math.random().toString(36).slice(2),
+    category: document.getElementById('f-category').value,
+    type:     document.getElementById('f-type').value,
+    title,
+    date:     document.getElementById('f-date').value,
+    time:     document.getElementById('f-time').value,
+    status:   document.getElementById('f-status').value,
+    platforms,
+    caption:  document.getElementById('f-caption').value,
+    notes:    document.getElementById('f-notes').value.trim(),
+  };
+  const arr = getContent();
+  const idx = arr.findIndex(x => x.id === item.id);
+  if (idx >= 0) arr[idx] = item; else arr.push(item);
+  saveContentData(arr);
+  closeModal();
+  renderAll();
+}
+
+function deleteContent(id) {
+  if (!confirm('Delete this content item?')) return;
+  saveContentData(getContent().filter(x => x.id !== id));
+  renderAll();
+}
+
+function markPosted(id) {
+  const arr = getContent();
+  const item = arr.find(x => x.id === id);
+  if (!item) return;
+  item.status = 'posted';
+  if (!item.date) item.date = new Date().toISOString().slice(0,10);
+  saveContentData(arr);
+  renderAll();
+}
+
+// ── TABS ───────────────────────────────────────────
+document.querySelectorAll('.h-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.h-tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('tab-' + t.dataset.tab).classList.add('active');
+  });
+});
+
+// Close modal on overlay click
+document.getElementById('content-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('content-modal')) closeModal();
+});
+
+// ── RENDER ALL ─────────────────────────────────────
+function renderAll() {
+  renderStats();
+  renderCalendar();
+  renderQueueFilters();
+  renderQueue();
+  renderTemplates();
+}
+
+renderAll();
+</script>
+</body>
+</html>
