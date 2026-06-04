@@ -7,18 +7,14 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="styles.css">
 <script src="shared.js" defer></script>
 <script src="supabase-sync.js" defer></script>
 <title>Content Planner — VPC</title>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3350;
-  --accent:#6c8cff;--accent2:#a78bfa;--green:#34d399;--yellow:#fbbf24;
-  --red:#f87171;--orange:#fb923c;--text:#e2e8f0;--text2:#8892b0;--radius:10px;
-  --pink:#f472b6;--teal:#2dd4bf;
-}
-body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;}
+/* content-specific extra tokens */
+:root { --pink:#f472b6; --teal:#2dd4bf; }
+body{min-height:100vh;}
 
 /* HEADER */
 header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;justify-content:space-between;min-height:58px;position:sticky;top:0;z-index:100;gap:12px;flex-wrap:wrap;}

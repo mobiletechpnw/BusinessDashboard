@@ -7,23 +7,13 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="styles.css">
 <script src="shared.js" defer></script>
 <script src="supabase-sync.js" defer></script>
 <title>Business Intelligence · VPC</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a; --border: #2e3350;
-    --accent: #6c8cff; --accent2: #a78bfa; --green: #34d399; --yellow: #fbbf24;
-    --red: #f87171; --orange: #fb923c; --text: #e2e8f0; --text2: #8892b0; --radius: 10px;
-  }
-  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+  body { min-height: 100vh; }
 
-  header {
-    background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 0 32px; display: flex; align-items: center;
-    justify-content: space-between; min-height: 58px; position: sticky; top: 0; z-index: 200;
-  }
   .brand { font-size: 1.05rem; font-weight: 800; }
   .brand span { color: var(--accent); }
   .home-link { font-size: 0.8rem; color: var(--text2); text-decoration: none; padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; transition: all 0.15s; }
@@ -262,11 +252,13 @@ const JT_COST_DEFAULT  = 0.862;
 const PIN_COST_DEFAULT = 0.95;
 
 // ── Helpers ──
-const $  = id => document.getElementById(id);
-const fmt = n  => '$' + (n || 0).toFixed(2);
-const fmtK = n => n >= 1000 ? '$' + (n/1000).toFixed(1) + 'k' : fmt(n);
+const $   = id => document.getElementById(id);
+const fmt  = n  => '$' + (n || 0).toFixed(2);
+const fmtK = n  => n >= 1000 ? '$' + (n/1000).toFixed(1) + 'k' : fmt(n);
 const pct  = (a, b) => b ? ((a / b) * 100).toFixed(1) + '%' : '—';
 const clr  = (margin) => margin >= 60 ? 'var(--green)' : margin >= 40 ? 'var(--yellow)' : 'var(--red)';
+// XSS-safe HTML escaping for any user-supplied string inserted into innerHTML
+const esc  = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
 function getRaw() {
   return {
@@ -624,7 +616,7 @@ function renderTrends() {
     <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
       <span style="color:var(--text2);width:18px;font-size:0.75rem">${i+1}</span>
       <div style="flex:1">
-        <div style="font-size:0.85rem;font-weight:600">${n}</div>
+        <div style="font-size:0.85rem;font-weight:600">${esc(n)}</div>
         <div style="background:var(--surface2);border-radius:3px;height:4px;margin-top:4px">
           <div style="background:var(--accent);width:${(r/maxCust*100).toFixed(0)}%;height:4px;border-radius:3px"></div>
         </div>
@@ -642,7 +634,7 @@ function renderTrends() {
     <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
       <span style="color:var(--text2);width:18px;font-size:0.75rem">${i+1}</span>
       <div style="flex:1">
-        <div style="font-size:0.82rem;font-weight:600">${n}</div>
+        <div style="font-size:0.82rem;font-weight:600">${esc(n)}</div>
         <div style="background:var(--surface2);border-radius:3px;height:4px;margin-top:4px">
           <div style="background:var(--accent2);width:${(r/maxProd*100).toFixed(0)}%;height:4px;border-radius:3px"></div>
         </div>

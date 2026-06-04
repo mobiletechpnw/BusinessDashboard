@@ -7,17 +7,12 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="styles.css">
 <script src="shared.js" defer></script>
 <script src="supabase-sync.js" defer></script>
 <title>Vault &amp; Pine Collective</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a; --border: #2e3350;
-    --accent: #6c8cff; --accent2: #a78bfa; --green: #34d399; --yellow: #fbbf24;
-    --red: #f87171; --orange: #fb923c; --text: #e2e8f0; --text2: #8892b0; --radius: 10px;
-  }
-  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+  body { min-height: 100vh; }
 
   /* ── Master Header ── */
   header {
@@ -428,7 +423,7 @@
     <!-- Orders -->
     <div class="panel" id="panel-orders">
       <div class="toolbar">
-        <input class="search-input" id="orderSearch" placeholder="Search customer, product, referral…" oninput="renderOrderTable()">
+        <input class="search-input" id="orderSearch" placeholder="Search customer, product, referral…" oninput="orderPage=0; renderOrderTable()">
         <div id="orderMonthFilters" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
       </div>
       <div class="card">
@@ -1331,6 +1326,8 @@ const PIPELINE = [
 const LS_ORDERS    = 'vp_orders_v2';      // unified, fully-editable order store
 const LS_ORDERS_V1 = 'riser_orders_v1';   // legacy custom-orders store (pre-migration)
 let sortCol = 'date', sortDir = -1, orderMonthFilter = 'all';
+const ORDER_PAGE_SIZE = 50;
+let orderPage = 0;
 
 // One-time seed: load the built-in HISTORICAL baseline + any previously-logged
 // custom orders into the unified store. After this, ALL orders are editable.
@@ -1504,7 +1501,7 @@ function renderOrderMonthFilters() {
     return `<div class="filter-chip ${orderMonthFilter===mk?'active':''}" onclick="setMonthFilter('${mk}')">${label}</div>`;
   }).join('');
 }
-function setMonthFilter(mk) { orderMonthFilter = mk; renderOrderMonthFilters(); renderOrderTable(); }
+function setMonthFilter(mk) { orderMonthFilter = mk; orderPage = 0; renderOrderMonthFilters(); renderOrderTable(); }
 
 function renderOrderTable() {
   const q = (document.getElementById('orderSearch').value || '').toLowerCase();
@@ -1516,17 +1513,32 @@ function renderOrderTable() {
     if (typeof av === 'string') return av.localeCompare(bv) * sortDir;
     return (av - bv) * sortDir;
   });
-  const PAY_LABELS = { paid: '✅ Paid', partial: '🟡 Partial', unpaid: '🔴 Unpaid' };
+
+  // ── Pagination ───────────────────────────────────────
+  const total     = orders.length;
+  const pageCount = Math.max(1, Math.ceil(total / ORDER_PAGE_SIZE));
+  if (orderPage >= pageCount) orderPage = pageCount - 1;
+  const pageStart = orderPage * ORDER_PAGE_SIZE;
+  const pageEnd   = Math.min(pageStart + ORDER_PAGE_SIZE, total);
+  const pageOrders = orders.slice(pageStart, pageEnd);
+
+  // Totals span all filtered orders (not just the current page)
+  const totalRev  = orders.reduce((s,o) => s + o.salePrice, 0);
+  const totalProf = orders.reduce((s,o) => s + o.salePrice - o.cogs, 0);
+  const totalCogs = orders.reduce((s,o) => s + o.cogs, 0);
+
+  const PAY_LABELS  = { paid: '✅ Paid', partial: '🟡 Partial', unpaid: '🔴 Unpaid' };
   const FILL_LABELS = { completed: '✅ Done', in_progress: '🔵 In Progress' };
-  const rows = orders.map(o => {
-    const profit = o.salePrice - o.cogs;
-    const roi = (profit / o.cogs * 100).toFixed(1);
+
+  const rows = pageOrders.map(o => {
+    const profit   = o.salePrice - o.cogs;
+    const roi      = (profit / o.cogs * 100).toFixed(1);
     const roiColor = roi >= 80 ? 'var(--green)' : roi >= 70 ? 'var(--yellow)' : 'var(--text)';
-    const pay  = o.payStatus    || 'paid';
-    const fill = o.fulfillStatus|| 'completed';
+    const pay      = o.payStatus     || 'paid';
+    const fill     = o.fulfillStatus || 'completed';
     const payBadge  = `<span class="badge badge-${pay}"  title="Click to cycle" onclick="togglePayStatus('${o.id}')">${PAY_LABELS[pay]||pay}</span>`;
     const fillBadge = `<span class="badge badge-${fill}" title="Click to toggle" onclick="toggleFulfillStatus('${o.id}')">${FILL_LABELS[fill]||fill}</span>`;
-    const actions =
+    const actions   =
       `<button class="icon-btn" title="Edit order" onclick="openAddOrder('${o.id}')">✏️</button>
        <button class="icon-btn" title="Delete order" onclick="deleteOrder('${o.id}')">✕</button>`;
     return `<tr>
@@ -1544,20 +1556,53 @@ function renderOrderTable() {
       <td style="text-align:right;white-space:nowrap">${actions}</td>
     </tr>`;
   }).join('');
-  const totalRev  = orders.reduce((s,o) => s + o.salePrice, 0);
-  const totalProf = orders.reduce((s,o) => s + o.salePrice - o.cogs, 0);
-  const totalCogs = orders.reduce((s,o) => s + o.cogs, 0);
-  document.getElementById('orderTbody').innerHTML = rows + `<tr style="background:var(--surface2);font-weight:700">
-    <td colspan="3" style="color:var(--text2)">Total — ${orders.length} orders</td>
+
+  // Summary footer row (always shows totals across all filtered orders)
+  const footerRow = `<tr style="background:var(--surface2);font-weight:700">
+    <td colspan="3" style="color:var(--text2)">Total — ${total} orders${pageCount > 1 ? ` (page ${orderPage+1}/${pageCount})` : ''}</td>
     <td class="num green">${fmt$(totalRev)}</td>
     <td class="num" style="color:var(--text2)">${fmt$(totalCogs)}</td>
     <td class="num" style="color:var(--accent)">${fmt$(totalProf)}</td>
-    <td class="num" style="color:var(--yellow)">${(totalProf/totalCogs*100).toFixed(1)}%</td>
+    <td class="num" style="color:var(--yellow)">${totalCogs ? (totalProf/totalCogs*100).toFixed(1) : '0.0'}%</td>
     <td colspan="5"></td>
   </tr>`;
+
+  document.getElementById('orderTbody').innerHTML = rows + footerRow;
+
+  // Render pagination controls below the table card
+  let pgEl = document.getElementById('orderPagination');
+  if (!pgEl) {
+    pgEl = document.createElement('div');
+    pgEl.id = 'orderPagination';
+    document.getElementById('panel-orders').querySelector('.card').after(pgEl);
+  }
+  if (pageCount <= 1) {
+    pgEl.innerHTML = '';
+  } else {
+    const prevDisabled = orderPage === 0 ? 'disabled' : '';
+    const nextDisabled = orderPage >= pageCount - 1 ? 'disabled' : '';
+    const pageButtons  = Array.from({ length: pageCount }, (_, i) =>
+      `<button class="page-btn${i === orderPage ? ' active' : ''}" onclick="setOrderPage(${i})">${i+1}</button>`
+    ).join('');
+    pgEl.innerHTML = `<div class="pagination">
+      <button class="page-btn" onclick="setOrderPage(${orderPage-1})" ${prevDisabled}>← Prev</button>
+      ${pageButtons}
+      <button class="page-btn" onclick="setOrderPage(${orderPage+1})" ${nextDisabled}>Next →</button>
+      <span style="margin-left:8px;color:var(--text2)">Showing ${pageStart+1}–${pageEnd} of ${total}</span>
+    </div>`;
+  }
 }
+
+function setOrderPage(p) {
+  orderPage = p;
+  renderOrderTable();
+  // Scroll table back into view
+  document.getElementById('panel-orders')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 function sortTable(col) {
   if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = -1; }
+  orderPage = 0; // reset to first page on sort change
   renderOrderTable();
 }
 

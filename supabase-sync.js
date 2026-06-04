@@ -96,7 +96,8 @@ function dequeueKey(key) {
 
 const VpcSync = {
   _listeners: [],
-  _status: 'idle', // idle | syncing | synced | error | offline
+  _status:  'idle',   // idle | syncing | synced | error | offline
+  _pulling: false,    // true while pull() is in flight — blocks monkey-patch pushes
 
   onStatus(fn) { this._listeners.push(fn); },
   _emit(status, detail = '') {
@@ -111,6 +112,7 @@ const VpcSync = {
    */
   async pull() {
     this._emit('syncing', 'Pulling from cloud…');
+    this._pulling = true;   // block monkey-patch pushes during pull
     try {
       const rows = await sbFetchAll(SYNC_KEYS);
       let pulled = 0, skipped = 0;
@@ -137,6 +139,8 @@ const VpcSync = {
       console.warn('[VpcSync] pull failed:', e.message);
       this._emit(navigator.onLine ? 'error' : 'offline', e.message);
       return { pulled: 0, skipped: 0 };
+    } finally {
+      this._pulling = false;   // always unblock, even on error
     }
   },
 
@@ -296,16 +300,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Monkey-patch localStorage.setItem so every write auto-pushes to Supabase.
 // Only patches keys in SYNC_KEYS to avoid noise.
 
-(function() {
-  const _setItem = localStorage.setItem.bind(localStorage);
-  localStorage.setItem = function(key, value) {
+(function () {
+  const _setItem    = localStorage.setItem.bind(localStorage);
+  const _syncTimers = new Map();   // module-scoped — never attach to host objects
+
+  localStorage.setItem = function (key, value) {
     _setItem(key, value);
-    if (SYNC_KEYS.includes(key)) {
-      // Debounce: don't flood Supabase on rapid writes (e.g. typing in a form)
-      clearTimeout(localStorage._syncTimers?.[key]);
-      if (!localStorage._syncTimers) localStorage._syncTimers = {};
-      localStorage._syncTimers[key] = setTimeout(() => VpcSync.push(key), 800);
-    }
+    // Skip sync keys, and skip writes that happen while a pull is in flight
+    // (VpcSync._pulling is set true during pull() and false in its finally block)
+    if (!SYNC_KEYS.includes(key) || VpcSync._pulling) return;
+
+    // Debounce: don't flood Supabase on rapid writes (e.g. typing in a form)
+    clearTimeout(_syncTimers.get(key));
+    _syncTimers.set(key, setTimeout(() => {
+      _syncTimers.delete(key);
+      VpcSync.push(key);
+    }, 800));
   };
 })();
 

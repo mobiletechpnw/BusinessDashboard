@@ -254,7 +254,7 @@ function buildSearchIndex() {
   // Pages
   [
     { title: 'Vault & Pine Collective', sub: 'Sales · Goals · Expenses · Jet Tags · Pins · Events', url: 'vault-pine-collective.html', icon: '🌲', type: 'Page' },
-    { title: 'Sales Dashboard', sub: 'Riser orders and projections', url: 'sales-dashboard.html', icon: '📈', type: 'Page' },
+    { title: 'Analytics', sub: 'Margins, show breakdowns, trends', url: 'analytics.html', icon: '📈', type: 'Page' },
     { title: 'Goals & Objectives', sub: 'Track your goals', url: 'goals-dashboard.html', icon: '🎯', type: 'Page' },
     { title: 'JARVIS', sub: 'AI command center with voice control', url: 'jarvis.html', icon: '🤖', type: 'Page' },
   ].forEach(p => results.push(p));
