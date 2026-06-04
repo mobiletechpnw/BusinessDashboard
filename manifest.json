@@ -1,0 +1,32 @@
+{
+  "name": "Business Command Center",
+  "short_name": "VPC Hub",
+  "description": "Vault & Pine Collective — Life Manager & Business Tracker",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#0f1117",
+  "theme_color": "#0f1117",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='24' fill='%230f1117'/><text y='130' x='96' text-anchor='middle' font-size='120'>🌲</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    { "name": "Sales Dashboard", "url": "/vault-pine-collective.html", "description": "Open sales tracker" },
+    { "name": "Goals", "url": "/goals-dashboard.html", "description": "View goals" },
+    { "name": "JARVIS", "url": "/jarvis.html", "description": "AI command center" }
+  ]
+}
