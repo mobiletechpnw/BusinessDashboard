@@ -286,13 +286,22 @@
   .dt-btn:hover { border-color: var(--accent); color: var(--accent); }
 
   @media (max-width: 700px) {
-    header { padding: 0 16px; flex-wrap: wrap; min-height: auto; }
-    .main-nav { margin-left: 0; }
+    header { padding: 0 12px; flex-wrap: wrap; min-height: auto; gap: 6px; }
+    .main-nav { margin-left: 0; overflow-x: auto; gap: 0; }
+    .main-tab { padding: 0 12px; font-size: 0.75rem; }
     .kpi-bar, .goals-stat-bar { grid-template-columns: repeat(2, 1fr); }
+    .jt-stat-bar { grid-template-columns: repeat(2, 1fr); }
     .grid-2, .grid-3 { grid-template-columns: 1fr; }
-    .tab-bar { padding: 0 12px; overflow-x: auto; }
-    main { padding: 16px; }
+    .tab-bar { padding: 0 8px; overflow-x: auto; white-space: nowrap; }
+    main { padding: 12px; }
     .goals-grid { grid-template-columns: 1fr; }
+    .header-stats { display: none; }
+    .table-wrap { overflow-x: auto; }
+    table { font-size: 0.72rem; }
+    .card { padding: 14px; }
+    .toolbar { flex-direction: column; gap: 8px; }
+    .btn-primary, .btn-ghost { padding: 8px 14px; font-size: 0.78rem; }
+    #backup-banner { width: 92%; flex-wrap: wrap; }
   }
 </style>
 </head>
@@ -311,6 +320,7 @@
       <div class="main-tab" data-section="expenses">Expenses</div>
       <div class="main-tab" data-section="jettags">🏷 Jet Tags</div>
       <div class="main-tab" data-section="pins">📌 Pins</div>
+      <div class="main-tab" data-section="events">🎪 Events</div>
     </div>
   </div>
   <div class="header-stats">
@@ -636,6 +646,17 @@
 <!-- ══════════════════════════════════════════ MODALS ══ -->
 
 <!-- Add Order Modal -->
+<!-- Invoice Modal -->
+<div class="modal-overlay" id="invoiceModal" style="align-items:flex-start;padding-top:40px;">
+  <div class="modal" style="width:560px;max-height:80vh;overflow-y:auto;background:#fff;color:#111;border-radius:8px;">
+    <div id="invoiceContent"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;padding:16px 24px;border-top:1px solid #e5e7eb;background:#fff;">
+      <button onclick="window.print()" style="background:#1a1d27;color:#fff;border:none;border-radius:6px;padding:8px 18px;cursor:pointer;font-weight:600;">🖨 Print / Save PDF</button>
+      <button onclick="document.getElementById('invoiceModal').classList.remove('open')" style="background:#f3f4f6;color:#111;border:none;border-radius:6px;padding:8px 18px;cursor:pointer;">Close</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="addOrderModal">
   <div class="modal">
     <h2 id="aoTitle">Log New Order</h2>
@@ -936,6 +957,77 @@
     </div>
   </main>
 </div><!-- /section-pins -->
+
+<!-- ── EVENTS SECTION ── -->
+<div class="section" id="section-events">
+  <div class="jt-stat-bar" id="evStatBar">
+    <div class="jtat"><div class="jtat-num green" id="evTotalRev">$0</div><div class="jtat-label">Total Revenue</div></div>
+    <div class="jtat"><div class="jtat-num" style="color:var(--accent)" id="evTotalProfit">$0</div><div class="jtat-label">Total Profit</div></div>
+    <div class="jtat"><div class="jtat-num" style="color:var(--yellow)" id="evTotalEvents">0</div><div class="jtat-label">Events</div></div>
+    <div class="jtat"><div class="jtat-num" style="color:var(--accent2)" id="evBestEvent">—</div><div class="jtat-label">Best Event</div></div>
+    <div class="jtat"><div class="jtat-num" style="color:var(--text2)" id="evTotalCost">$0</div><div class="jtat-label">Total Booth Cost</div></div>
+  </div>
+  <main>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px">
+      <div>
+        <div style="font-size:1rem;font-weight:800">Convention &amp; Event Tracker</div>
+        <div style="font-size:0.78rem;color:var(--text2);margin-top:3px">Track shows, card fests, and pop-ups — revenue auto-pulled from your sales logs</div>
+      </div>
+      <button class="btn-primary" onclick="openEvModal()">+ Log Event</button>
+    </div>
+    <div class="grid-2" style="margin-bottom:20px">
+      <div class="card">
+        <div class="card-title">📊 Revenue by Event</div>
+        <div id="evRevenueChart"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">💰 Profit After Booth Cost</div>
+        <div id="evProfitChart"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>All Events</span>
+        <span style="font-size:0.72rem;color:var(--text2)">Revenue auto-matched from Riser, Jet Tag &amp; Pin sales on event date(s)</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Event</th><th>Date(s)</th><th>Location</th>
+            <th class="num">Booth Cost</th><th class="num">Risers Rev</th>
+            <th class="num">Tags Rev</th><th class="num">Pins Rev</th>
+            <th class="num">Total Rev</th><th class="num">Net Profit</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="evTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div><!-- /section-events -->
+
+<!-- Event Modal -->
+<div class="modal-overlay" id="evModal">
+  <div class="modal" style="width:500px">
+    <h2 id="evModalTitle">Log Event</h2>
+    <div class="field-row">
+      <div class="field"><label>Event Name</label><input type="text" id="evName" placeholder="e.g. CardFest Lynwood"></div>
+      <div class="field"><label>Location</label><input type="text" id="evLocation" placeholder="e.g. Lynwood, WA"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Start Date</label><input type="date" id="evStart"></div>
+      <div class="field"><label>End Date (if multi-day)</label><input type="date" id="evEnd"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Booth / Table Cost ($)</label><input type="number" id="evCost" value="0" step="0.01" min="0"></div>
+    </div>
+    <div class="field"><label>Notes</label><input type="text" id="evNotes" placeholder="Optional notes"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+      <button class="btn-ghost" onclick="closeEvModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveEvent()">Save Event</button>
+    </div>
+  </div>
+</div>
 
 <!-- Pin Sale Modal -->
 <div class="modal-overlay" id="pinSaleModal">
@@ -1311,7 +1403,8 @@ function renderOrderTable() {
     const roi = (profit / o.cogs * 100).toFixed(1);
     const roiColor = roi >= 80 ? 'var(--green)' : roi >= 70 ? 'var(--yellow)' : 'var(--text)';
     const actions =
-      `<button class="icon-btn" title="Edit order" onclick="openAddOrder('${o.id}')">✏️</button>
+      `<button class="icon-btn" title="Generate invoice" onclick="openInvoice('${o.id}')">🧾</button>
+       <button class="icon-btn" title="Edit order" onclick="openAddOrder('${o.id}')">✏️</button>
        <button class="icon-btn" title="Delete order" onclick="deleteOrder('${o.id}')">✕</button>`;
     return `<tr>
       <td style="white-space:nowrap">${fmtDate(o.date)}</td>
@@ -2178,6 +2271,7 @@ function exportBackup() {
     pinRestocks:  JSON.parse(localStorage.getItem(PIN_RESTOCK_KEY)  || '[]'),
   };
   downloadBlob(`vault-pine-backup-${TODAY}.json`, JSON.stringify(data, null, 2), 'application/json');
+  localStorage.setItem('vp_last_backup', Date.now());
   toast('Full backup downloaded (includes Jet Tags & Pins).');
 }
 
@@ -2863,6 +2957,205 @@ loadGoals();
 renderSalesAll();
 renderGoals();
 renderExpensesAll();
+initEvents();
+
+// ── EVENT TRACKER ──
+const EV_KEY = 'vp_events_v1';
+let editEvId = null;
+function getEvents() { return JSON.parse(localStorage.getItem(EV_KEY) || '[]'); }
+function saveEvents(arr) { localStorage.setItem(EV_KEY, JSON.stringify(arr)); }
+
+function evDateRange(ev) {
+  const dates = [];
+  const start = new Date(ev.start + 'T12:00:00');
+  const end = new Date((ev.end || ev.start) + 'T12:00:00');
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1))
+    dates.push(d.toISOString().slice(0, 10));
+  return dates;
+}
+
+function evCalcRevenue(ev) {
+  const dates = evDateRange(ev);
+  const riserRev = getOrders().filter(o => dates.includes(o.date)).reduce((s, o) => s + o.salePrice, 0);
+  const riserCogs = getOrders().filter(o => dates.includes(o.date)).reduce((s, o) => s + o.cogs, 0);
+  const jtRev = getJtSales().filter(s => dates.includes(s.date)).reduce((s, x) => s + x.revenue, 0);
+  const pinRev = getPinSales().filter(s => dates.includes(s.date)).reduce((s, x) => s + x.revenue, 0);
+  const totalRev = riserRev + jtRev + pinRev;
+  const netProfit = totalRev - riserCogs - (ev.boothCost || 0);
+  return { riserRev, jtRev, pinRev, totalRev, netProfit };
+}
+
+function renderEvAll() {
+  const events = getEvents().sort((a, b) => b.start.localeCompare(a.start));
+  let totalRev = 0, totalProfit = 0, totalCost = 0, bestName = '—', bestRev = 0;
+  const rows = events.map(ev => {
+    const r = evCalcRevenue(ev);
+    totalRev += r.totalRev; totalProfit += r.netProfit; totalCost += (ev.boothCost || 0);
+    if (r.totalRev > bestRev) { bestRev = r.totalRev; bestName = ev.name; }
+    const dateStr = ev.end && ev.end !== ev.start ? `${fmtDate(ev.start)} – ${fmtDate(ev.end)}` : fmtDate(ev.start);
+    const profColor = r.netProfit >= 0 ? 'var(--green)' : 'var(--red)';
+    return `<tr>
+      <td><strong>${esc(ev.name)}</strong>${ev.notes ? `<div style="font-size:.72rem;color:var(--text2)">${esc(ev.notes)}</div>` : ''}</td>
+      <td style="font-size:.78rem;white-space:nowrap">${dateStr}</td>
+      <td style="font-size:.78rem;color:var(--text2)">${esc(ev.location || '—')}</td>
+      <td class="num" style="color:var(--red)">${fmt$(ev.boothCost || 0)}</td>
+      <td class="num" style="color:var(--text2)">${fmt$(r.riserRev)}</td>
+      <td class="num" style="color:var(--text2)">${fmt$(r.jtRev)}</td>
+      <td class="num" style="color:var(--text2)">${fmt$(r.pinRev)}</td>
+      <td class="num green">${fmt$(r.totalRev)}</td>
+      <td class="num" style="color:${profColor};font-weight:700">${fmt$(r.netProfit)}</td>
+      <td><button class="icon-btn" onclick="deleteEvent('${ev.id}')">✕</button></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('evTbody').innerHTML = rows || '<tr><td colspan="10" style="color:var(--text2);text-align:center;padding:20px">No events logged yet — click "+ Log Event" to add one</td></tr>';
+  document.getElementById('evTotalRev').textContent = fmt$(totalRev);
+  document.getElementById('evTotalProfit').textContent = fmt$(totalProfit);
+  document.getElementById('evTotalEvents').textContent = events.length;
+  document.getElementById('evBestEvent').textContent = bestName.length > 14 ? bestName.slice(0,14)+'…' : bestName;
+  document.getElementById('evTotalCost').textContent = fmt$(totalCost);
+  // Charts
+  const topEvents = events.slice(0, 8);
+  const revChart = topEvents.map(ev => { const r = evCalcRevenue(ev); return { label: ev.name, value: r.totalRev }; });
+  const profChart = topEvents.map(ev => { const r = evCalcRevenue(ev); return { label: ev.name, value: r.netProfit }; });
+  renderBarChart('evRevenueChart', revChart, 'var(--green)');
+  renderBarChart('evProfitChart', profChart, 'var(--accent)');
+}
+
+function renderBarChart(containerId, data, color) {
+  const el = document.getElementById(containerId);
+  if (!el || !data.length) { el.innerHTML = '<div style="color:var(--text2);font-size:.78rem;padding:12px">No data yet</div>'; return; }
+  const max = Math.max(...data.map(d => Math.abs(d.value)), 1);
+  el.innerHTML = data.map(d => {
+    const pct = Math.abs(d.value) / max * 100;
+    const c = d.value < 0 ? 'var(--red)' : color;
+    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+      <div style="font-size:.7rem;color:var(--text2);width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0">${esc(d.label)}</div>
+      <div style="flex:1;background:var(--surface2);border-radius:3px;overflow:hidden;height:14px;">
+        <div style="width:${pct}%;background:${c};height:100%;border-radius:3px;transition:width .4s"></div>
+      </div>
+      <div style="font-size:.7rem;font-weight:700;color:${c};min-width:50px;text-align:right">${fmt$(d.value)}</div>
+    </div>`;
+  }).join('');
+}
+
+function openEvModal(id) {
+  editEvId = id || null;
+  const ev = id ? getEvents().find(e => e.id === id) : null;
+  document.getElementById('evModalTitle').textContent = ev ? 'Edit Event' : 'Log Event';
+  document.getElementById('evName').value = ev ? ev.name : '';
+  document.getElementById('evLocation').value = ev ? (ev.location || '') : '';
+  document.getElementById('evStart').value = ev ? ev.start : TODAY;
+  document.getElementById('evEnd').value = ev ? (ev.end || '') : '';
+  document.getElementById('evCost').value = ev ? (ev.boothCost || 0) : 0;
+  document.getElementById('evNotes').value = ev ? (ev.notes || '') : '';
+  document.getElementById('evModal').classList.add('open');
+}
+function closeEvModal() { document.getElementById('evModal').classList.remove('open'); }
+
+function saveEvent() {
+  const name = document.getElementById('evName').value.trim();
+  if (!name) { toast('Event name is required.'); return; }
+  const ev = {
+    id: editEvId || Math.random().toString(36).slice(2),
+    name,
+    location: document.getElementById('evLocation').value.trim(),
+    start: document.getElementById('evStart').value,
+    end: document.getElementById('evEnd').value || null,
+    boothCost: parseFloat(document.getElementById('evCost').value) || 0,
+    notes: document.getElementById('evNotes').value.trim(),
+  };
+  const arr = getEvents();
+  const idx = arr.findIndex(e => e.id === ev.id);
+  if (idx >= 0) arr[idx] = ev; else arr.push(ev);
+  saveEvents(arr); closeEvModal(); renderEvAll();
+  toast(editEvId ? 'Event updated.' : 'Event logged!');
+}
+function deleteEvent(id) {
+  if (!confirm('Delete this event?')) return;
+  saveEvents(getEvents().filter(e => e.id !== id)); renderEvAll();
+  toast('Event deleted.');
+}
+function initEvents() { renderEvAll(); }
+
+// ── INVOICE GENERATOR ──
+function openInvoice(id) {
+  const o = getOrders().find(x => x.id === id);
+  if (!o) return;
+  const profit = o.salePrice - o.cogs;
+  const roi = (profit / o.cogs * 100).toFixed(1);
+  const invNum = 'VPC-' + o.id.toUpperCase().replace('H','') + '-' + o.date.replace(/-/g,'');
+  document.getElementById('invoiceContent').innerHTML = `
+    <div style="padding:32px;font-family:'Segoe UI',system-ui,sans-serif;color:#111;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;">
+        <div>
+          <div style="font-size:1.4rem;font-weight:900;letter-spacing:-0.5px;">Vault &amp; Pine Collective</div>
+          <div style="font-size:0.8rem;color:#6b7280;margin-top:2px;">Card Display Risers · Pokémon Accessories</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:0.7rem;color:#6b7280;text-transform:uppercase;letter-spacing:1px;">Invoice</div>
+          <div style="font-size:1rem;font-weight:700;">${invNum}</div>
+          <div style="font-size:0.8rem;color:#6b7280;">${fmtDate(o.date)}</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+        <div>
+          <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:1px;color:#6b7280;margin-bottom:6px;">Bill To</div>
+          <div style="font-weight:700;font-size:1rem;">${esc(o.customer)}</div>
+          ${o.referredBy ? `<div style="font-size:0.78rem;color:#6b7280;">Referred by: ${esc(o.referredBy)}</div>` : ''}
+        </div>
+        <div>
+          <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:1px;color:#6b7280;margin-bottom:6px;">From</div>
+          <div style="font-weight:700;">Vault &amp; Pine Collective</div>
+          <div style="font-size:0.78rem;color:#6b7280;">mobiletechpnw@gmail.com</div>
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
+        <thead>
+          <tr style="border-bottom:2px solid #111;">
+            <th style="text-align:left;padding:8px 0;font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:#6b7280;">Description</th>
+            <th style="text-align:right;padding:8px 0;font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:#6b7280;">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #e5e7eb;">
+            <td style="padding:12px 0;">
+              <div style="font-weight:600;">${esc(o.product)}</div>
+              ${o.notes ? `<div style="font-size:0.78rem;color:#6b7280;margin-top:2px;">${esc(o.notes)}</div>` : ''}
+            </td>
+            <td style="text-align:right;padding:12px 0;font-weight:700;">${fmt$(o.salePrice)}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="display:flex;justify-content:flex-end;">
+        <div style="min-width:200px;">
+          <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:0.85rem;">
+            <span style="color:#6b7280;">Subtotal</span><span>${fmt$(o.salePrice)}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:1rem;font-weight:900;border-top:2px solid #111;margin-top:4px;">
+            <span>Total</span><span>${fmt$(o.salePrice)}</span>
+          </div>
+        </div>
+      </div>
+      ${o.notes ? `<div style="margin-top:24px;padding:12px;background:#f9fafb;border-radius:6px;font-size:0.8rem;color:#6b7280;"><strong>Notes:</strong> ${esc(o.notes)}</div>` : ''}
+      <div style="margin-top:32px;padding-top:16px;border-top:1px solid #e5e7eb;font-size:0.72rem;color:#9ca3af;text-align:center;">Thank you for your business! · Vault &amp; Pine Collective</div>
+    </div>`;
+  document.getElementById('invoiceModal').classList.add('open');
+}
+
+// Auto-backup reminder
+(function checkBackupReminder() {
+  const last = parseInt(localStorage.getItem('vp_last_backup') || '0');
+  const daysSince = (Date.now() - last) / (1000 * 60 * 60 * 24);
+  if (daysSince > 7) {
+    setTimeout(() => {
+      const banner = document.createElement('div');
+      banner.id = 'backup-banner';
+      banner.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#1a1d27;border:1px solid var(--yellow);border-radius:8px;padding:12px 20px;display:flex;align-items:center;gap:14px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.5);font-size:0.82rem;';
+      banner.innerHTML = `<span style="color:var(--yellow)">⚠️</span><span style="color:var(--text)">No backup in <strong>${Math.floor(daysSince)} days</strong> — your data is only saved locally.</span><button onclick="exportBackup();document.getElementById('backup-banner').remove()" style="background:var(--yellow);color:#000;border:none;border-radius:5px;padding:6px 14px;font-weight:700;cursor:pointer;font-size:0.78rem;">Download Backup</button><button onclick="document.getElementById('backup-banner').remove()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem;padding:0 4px;">✕</button>`;
+      document.body.appendChild(banner);
+    }, 1500);
+  }
+})();
 </script>
 </body>
 </html>

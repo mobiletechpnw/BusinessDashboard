@@ -93,6 +93,13 @@
   .card-arrow::after { content: '→'; transition: transform 0.2s; }
   .card:hover .card-arrow::after { transform: translateX(4px); }
 
+  @media (max-width: 640px) {
+    #widget-row { grid-template-columns: 1fr; }
+    .grid { grid-template-columns: 1fr; }
+    .hero-title { font-size: 1.8rem; }
+    header { padding: 0 16px; }
+  }
+
   /* ── Footer ── */
   footer {
     text-align: center; padding: 24px;
@@ -146,11 +153,74 @@
 
 </div>
 
+<!-- Deliveries & Revenue widgets -->
+<div style="max-width:1100px;margin:0 auto 40px;padding:0 24px;display:grid;grid-template-columns:1fr 1fr;gap:20px;" id="widget-row">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;">
+    <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent);margin-bottom:14px;">📦 Upcoming Deliveries</div>
+    <div id="delivery-list" style="font-size:0.82rem;color:var(--text2);">Loading...</div>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;">
+    <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--green);margin-bottom:14px;">💰 Revenue Snapshot</div>
+    <div id="revenue-snapshot" style="font-size:0.82rem;color:var(--text2);">Loading...</div>
+  </div>
+</div>
+
 <footer>Business Command Center &nbsp;·&nbsp; Built for you</footer>
 
 <script>
   const d = new Date();
   document.getElementById('hdate').textContent = d.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  // Upcoming Deliveries
+  (function() {
+    const orders = JSON.parse(localStorage.getItem('vp_orders_v2') || '[]');
+    const today = new Date(); today.setHours(0,0,0,0);
+    const upcoming = orders.filter(o => {
+      if (!o.notes) return false;
+      const m = o.notes.match(/(?:deliver|delivery|pickup|pick up)[^\d]*(\d{1,2}\/\d{1,2})/i);
+      if (!m) return false;
+      const [mo, dy] = m[1].split('/').map(Number);
+      const dt = new Date(today.getFullYear(), mo - 1, dy);
+      return dt >= today;
+    }).sort((a, b) => {
+      const parse = n => { const m = n.notes.match(/(\d{1,2})\/(\d{1,2})/); return m ? new Date(today.getFullYear(), m[1]-1, m[2]) : new Date('9999'); };
+      return parse(a) - parse(b);
+    }).slice(0, 6);
+    const el = document.getElementById('delivery-list');
+    if (!upcoming.length) { el.innerHTML = '<span style="color:var(--text2)">No upcoming deliveries found.</span>'; return; }
+    el.innerHTML = upcoming.map(o => {
+      const m = o.notes.match(/(\d{1,2}\/\d{1,2})/);
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);">
+        <div><div style="color:var(--text);font-weight:600">${o.customer}</div><div style="font-size:0.72rem;color:var(--text2)">${o.product}</div></div>
+        <div style="font-size:0.75rem;font-weight:700;color:var(--yellow);white-space:nowrap;margin-left:12px;">📅 ${m ? m[1] : ''}</div>
+      </div>`;
+    }).join('');
+  })();
+
+  // Revenue Snapshot
+  (function() {
+    const orders = JSON.parse(localStorage.getItem('vp_orders_v2') || '[]');
+    const jtSales = JSON.parse(localStorage.getItem('vp_jettags_v1') || '[]');
+    const pinSales = JSON.parse(localStorage.getItem('vp_pins_v1') || '[]');
+    const now = new Date();
+    const thisMonth = now.toISOString().slice(0, 7);
+    const riserRev = orders.reduce((s,o) => s + o.salePrice, 0);
+    const riserProfit = orders.reduce((s,o) => s + o.salePrice - o.cogs, 0);
+    const moRev = orders.filter(o => o.date.startsWith(thisMonth)).reduce((s,o) => s + o.salePrice, 0);
+    const jtRev = jtSales.reduce((s,x) => s + x.revenue, 0);
+    const pinRev = pinSales.reduce((s,x) => s + x.revenue, 0);
+    const totalRev = riserRev + jtRev + pinRev;
+    const fmt = n => '$' + n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    const el = document.getElementById('revenue-snapshot');
+    if (!orders.length) { el.innerHTML = '<span>No data — <a href="vault-pine-collective.html" style="color:var(--accent)">open dashboard</a> and restore your backup.</span>'; return; }
+    el.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div style="background:var(--surface2);border-radius:8px;padding:12px;"><div style="font-size:1.1rem;font-weight:800;color:var(--green)">${fmt(totalRev)}</div><div style="font-size:0.65rem;color:var(--text2);margin-top:2px;text-transform:uppercase;letter-spacing:.5px">All-Time Revenue</div></div>
+        <div style="background:var(--surface2);border-radius:8px;padding:12px;"><div style="font-size:1.1rem;font-weight:800;color:var(--accent)">${fmt(riserProfit)}</div><div style="font-size:0.65rem;color:var(--text2);margin-top:2px;text-transform:uppercase;letter-spacing:.5px">Riser Profit</div></div>
+        <div style="background:var(--surface2);border-radius:8px;padding:12px;"><div style="font-size:1.1rem;font-weight:800;color:var(--accent2)">${fmt(moRev)}</div><div style="font-size:0.65rem;color:var(--text2);margin-top:2px;text-transform:uppercase;letter-spacing:.5px">This Month</div></div>
+        <div style="background:var(--surface2);border-radius:8px;padding:12px;"><div style="font-size:1.1rem;font-weight:800;color:var(--yellow)">${orders.length}</div><div style="font-size:0.65rem;color:var(--text2);margin-top:2px;text-transform:uppercase;letter-spacing:.5px">Total Orders</div></div>
+      </div>`;
+  })();
 </script>
 
 </body>
