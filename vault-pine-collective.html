@@ -1,0 +1,1958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vault &amp; Pine Collective</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a; --border: #2e3350;
+    --accent: #6c8cff; --accent2: #a78bfa; --green: #34d399; --yellow: #fbbf24;
+    --red: #f87171; --orange: #fb923c; --text: #e2e8f0; --text2: #8892b0; --radius: 10px;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+
+  /* ── Master Header ── */
+  header {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0 32px; display: flex; align-items: stretch;
+    justify-content: space-between; position: sticky; top: 0; z-index: 200;
+    min-height: 58px;
+  }
+  .header-brand {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .brand-logo {
+    font-size: 1.2rem; font-weight: 800; letter-spacing: -0.4px; white-space: nowrap;
+  }
+  .brand-logo .pine { color: var(--green); }
+  .brand-logo .vault { color: var(--accent); }
+  .brand-sep { color: var(--border); font-weight: 300; font-size: 1.3rem; }
+  .header-date { font-size: 0.75rem; color: var(--text2); }
+
+  /* ── Main nav (Sales / Goals) ── */
+  .main-nav {
+    display: flex; align-items: stretch; gap: 0; margin-left: 28px;
+  }
+  .main-tab {
+    display: flex; align-items: center; padding: 0 22px;
+    font-size: 0.84rem; font-weight: 700; color: var(--text2);
+    cursor: pointer; border-bottom: 3px solid transparent;
+    transition: all 0.15s; user-select: none; letter-spacing: 0.2px;
+  }
+  .main-tab:hover { color: var(--text); }
+  .main-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── Header quick-stats ── */
+  .header-stats { display: flex; align-items: center; gap: 24px; }
+  .hstat { text-align: right; }
+  .hstat-num { font-size: 1.1rem; font-weight: 800; }
+  .hstat-label { font-size: 0.65rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ── KPI bar (Sales) ── */
+  .kpi-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
+  .kpi { background: var(--surface); padding: 16px 22px; }
+  .kpi-val { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; }
+  .kpi-label { font-size: 0.68rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px; }
+  .kpi-sub { font-size: 0.7rem; margin-top: 4px; }
+
+  /* ── Goals stat bar ── */
+  .goals-stat-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
+  .gstat { background: var(--surface); padding: 14px 22px; }
+  .gstat-num { font-size: 1.4rem; font-weight: 800; color: var(--accent); }
+  .gstat-label { font-size: 0.68rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+  /* ── Sales sub-tab bar ── */
+  .tab-bar {
+    display: flex; gap: 0; border-bottom: 1px solid var(--border);
+    padding: 0 32px; background: var(--surface);
+    position: sticky; top: 58px; z-index: 150;
+  }
+  .tab { padding: 13px 18px; font-size: 0.83rem; font-weight: 600; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; user-select: none; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── Panels ── */
+  main { max-width: 1300px; margin: 0 auto; padding: 28px 24px; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── Section title ── */
+  .section-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text2); margin-bottom: 14px; }
+
+  /* ── Cards ── */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .card-title { font-size: 0.85rem; font-weight: 700; color: var(--text2); margin-bottom: 16px; }
+
+  /* ── Grid layouts ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+  /* ── Chart ── */
+  .chart-wrap { width: 100%; overflow-x: auto; }
+  svg.chart { display: block; }
+
+  /* ── Table ── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  th { text-align: left; padding: 10px 12px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); border-bottom: 1px solid var(--border); white-space: nowrap; cursor: pointer; user-select: none; }
+  th:hover { color: var(--accent); }
+  td { padding: 10px 12px; border-bottom: 1px solid #1e2138; vertical-align: top; }
+  tr:hover td { background: var(--surface2); }
+  tr:last-child td { border-bottom: none; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .green { color: var(--green); }
+  .yellow { color: var(--yellow); }
+  .red { color: var(--red); }
+
+  /* ── Badges ── */
+  .badge { display: inline-block; font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .badge-green { background: #0d3320; color: var(--green); }
+  .badge-yellow { background: #3b2e12; color: var(--yellow); }
+  .badge-blue { background: #12213b; color: var(--accent); }
+  .badge-purple { background: #251235; color: var(--accent2); }
+  .badge-red { background: #3b1212; color: var(--red); }
+  .badge-high { background: #3b1212; color: var(--red); }
+  .badge-medium { background: #3b2e12; color: var(--yellow); }
+  .badge-low { background: #123b20; color: var(--green); }
+  .badge-none { background: var(--surface2); color: var(--text2); }
+
+  /* ── Search / filter ── */
+  .toolbar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+  .search-input { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 8px 14px; font-size: 0.82rem; outline: none; width: 240px; }
+  .search-input:focus { border-color: var(--accent); }
+  .filter-chip { background: var(--surface2); border: 1px solid var(--border); color: var(--text2); padding: 6px 13px; border-radius: 99px; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
+  .filter-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* ── Insight cards ── */
+  .insight-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
+  .insight-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; border-left: 3px solid var(--accent); }
+  .insight-card.warn { border-left-color: var(--yellow); }
+  .insight-card.good { border-left-color: var(--green); }
+  .insight-card.action { border-left-color: var(--orange); }
+  .insight-type { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); margin-bottom: 6px; }
+  .insight-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
+  .insight-body { font-size: 0.82rem; color: var(--text2); line-height: 1.6; }
+  .insight-body strong { color: var(--text); }
+
+  /* ── Pipeline ── */
+  .pipeline-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #1e2138; }
+  .pipeline-item:last-child { border-bottom: none; }
+  .pipeline-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--yellow); flex-shrink: 0; }
+  .pipeline-dot.urgent { background: var(--red); }
+  .pipeline-dot.ok { background: var(--green); }
+  .pipeline-date { font-size: 0.75rem; font-weight: 700; color: var(--text2); width: 70px; flex-shrink: 0; }
+  .pipeline-name { font-size: 0.85rem; font-weight: 600; flex: 1; }
+  .pipeline-note { font-size: 0.75rem; color: var(--text2); }
+
+  /* ── Projection legend ── */
+  .proj-legend { display: flex; gap: 20px; margin-bottom: 16px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* ── Goals grid ── */
+  .goals-top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 12px; flex-wrap: wrap; }
+  .goals-top-bar-left { display: flex; gap: 8px; align-items: center; }
+  .filter-group { display: flex; gap: 6px; }
+  .filter-btn { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); padding: 7px 14px; font-size: 0.78rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+  .filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .sort-select { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 7px 12px; font-size: 0.78rem; cursor: pointer; outline: none; }
+
+  .goals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+  .goal-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: border-color 0.2s; }
+  .goal-card:hover { border-color: var(--accent); }
+  .goal-card.completed { opacity: 0.6; }
+  .goal-header { padding: 16px 18px 12px; border-bottom: 1px solid var(--border); }
+  .goal-title-row { display: flex; align-items: flex-start; gap: 10px; }
+  .goal-check { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border); cursor: pointer; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .goal-check.done { background: var(--green); border-color: var(--green); }
+  .goal-check.done::after { content: '✓'; color: #000; font-size: 11px; font-weight: 700; }
+  .goal-title { font-size: 1rem; font-weight: 700; flex: 1; line-height: 1.35; cursor: pointer; }
+  .goal-title.done { text-decoration: line-through; color: var(--text2); }
+  .goal-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s; }
+  .goal-card:hover .goal-actions { opacity: 1; }
+  .icon-btn { background: none; border: none; color: var(--text2); padding: 4px 6px; font-size: 0.85rem; border-radius: 5px; cursor: pointer; }
+  .icon-btn:hover { background: var(--surface2); color: var(--text); }
+  .goal-meta { display: flex; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+  .due-date { font-size: 0.72rem; color: var(--text2); }
+  .due-date.overdue { color: var(--red); }
+  .due-date.soon { color: var(--yellow); }
+  .progress-bar-wrap { margin-top: 10px; }
+  .progress-bar-bg { background: var(--surface2); border-radius: 99px; height: 5px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; border-radius: 99px; background: var(--accent); transition: width 0.3s; }
+
+  .obj-list { padding: 10px 18px 14px; }
+  .obj-item { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; border-bottom: 1px solid #1e2138; }
+  .obj-item:last-child { border-bottom: none; }
+  .obj-check { width: 16px; height: 16px; border-radius: 4px; border: 2px solid var(--border); cursor: pointer; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .obj-check.done { background: var(--accent); border-color: var(--accent); }
+  .obj-check.done::after { content: '✓'; color: #fff; font-size: 9px; font-weight: 700; }
+  .obj-text { font-size: 0.85rem; flex: 1; line-height: 1.4; }
+  .obj-text.done { text-decoration: line-through; color: var(--text2); }
+  .obj-actions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.12s; }
+  .obj-item:hover .obj-actions { opacity: 1; }
+  .obj-due { font-size: 0.68rem; color: var(--text2); white-space: nowrap; }
+  .obj-due.overdue { color: var(--red); }
+  .add-obj-row { padding: 0 18px 14px; }
+  .add-obj-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; color: var(--text); padding: 8px 12px; font-size: 0.82rem; outline: none; transition: border-color 0.15s; }
+  .add-obj-input:focus { border-color: var(--accent); }
+  .add-obj-input::placeholder { color: var(--text2); }
+
+  /* ── Expense section ── */
+  .exp-stat-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
+  .estat { background: var(--surface); padding: 14px 22px; }
+  .estat-num { font-size: 1.4rem; font-weight: 800; }
+  .estat-label { font-size: 0.68rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+  .exp-tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 32px; background: var(--surface); position: sticky; top: 58px; z-index: 150; }
+  .exp-tab { padding: 13px 18px; font-size: 0.83rem; font-weight: 600; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; user-select: none; }
+  .exp-tab:hover { color: var(--text); }
+  .exp-tab.active { color: var(--red); border-bottom-color: var(--red); }
+  .exp-panel { display: none; }
+  .exp-panel.active { display: block; }
+  .exp-cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+
+  /* ── Empty state ── */
+  .empty { grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--text2); }
+  .empty .icon { font-size: 3rem; margin-bottom: 14px; }
+  .empty h3 { font-size: 1.1rem; color: var(--text); margin-bottom: 8px; }
+  .empty p { font-size: 0.85rem; }
+
+  /* ── Modals ── */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 500; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 26px; width: 500px; max-width: 95vw; }
+  .modal h2 { font-size: 1rem; margin-bottom: 20px; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 0.72rem; color: var(--text2); margin-bottom: 5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+  .field input, .field textarea, .field select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; color: var(--text); padding: 9px 12px; font-size: 0.85rem; outline: none; font-family: inherit; }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); }
+  .field select option { background: var(--surface); }
+  .field textarea { resize: vertical; min-height: 70px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+  /* ── Buttons ── */
+  button { cursor: pointer; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; padding: 9px 16px; transition: all 0.15s; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #7d9bff; }
+  .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Toast ── */
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--accent); color: var(--text); padding: 11px 18px; border-radius: 9px; font-size: 0.83rem; z-index: 600; transform: translateY(80px); opacity: 0; transition: all 0.25s; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ── Data tools (backup / restore / export) ── */
+  .data-tools { position: fixed; bottom: 18px; left: 18px; display: flex; gap: 6px; z-index: 400; }
+  .dt-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text2); font-size: 0.72rem; font-weight: 600; padding: 7px 11px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.35); }
+  .dt-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  @media (max-width: 700px) {
+    header { padding: 0 16px; flex-wrap: wrap; min-height: auto; }
+    .main-nav { margin-left: 0; }
+    .kpi-bar, .goals-stat-bar { grid-template-columns: repeat(2, 1fr); }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .tab-bar { padding: 0 12px; overflow-x: auto; }
+    main { padding: 16px; }
+    .goals-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════ MASTER HEADER ══ -->
+<header>
+  <div class="header-brand">
+    <div class="brand-logo">
+      <span class="vault">Vault</span> <span style="color:var(--border)">&amp;</span> <span class="pine">Pine</span>
+      <span style="color:var(--text2);font-weight:400;font-size:.9rem;margin-left:4px">Collective</span>
+    </div>
+    <div class="main-nav">
+      <div class="main-tab active" data-section="sales">Sales</div>
+      <div class="main-tab" data-section="goals">Goals &amp; Objectives</div>
+      <div class="main-tab" data-section="expenses">Expenses</div>
+    </div>
+  </div>
+  <div class="header-stats">
+    <div class="hstat">
+      <div class="hstat-num green" id="hs-revenue">—</div>
+      <div class="hstat-label">Revenue</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-num" style="color:var(--accent)" id="hs-profit">—</div>
+      <div class="hstat-label">Profit</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-num" style="color:var(--accent2)" id="hs-goalspct">0%</div>
+      <div class="hstat-label">Goals Done</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-num" style="color:var(--red)" id="hs-expenses">$0</div>
+      <div class="hstat-label">Mo. Expenses</div>
+    </div>
+    <div class="header-date" id="headerDate"></div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════ SALES SECTION ══ -->
+<div class="section active" id="section-sales">
+
+  <div class="kpi-bar">
+    <div class="kpi">
+      <div class="kpi-val green" id="kpiRevenue">—</div>
+      <div class="kpi-label">Total Revenue</div>
+      <div class="kpi-sub" id="kpiRevSub" style="color:var(--text2)"></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-val" style="color:var(--accent)" id="kpiProfit">—</div>
+      <div class="kpi-label">Total Profit</div>
+      <div class="kpi-sub" id="kpiProfitSub" style="color:var(--text2)"></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-val" style="color:var(--yellow)" id="kpiRoi">—</div>
+      <div class="kpi-label">Avg ROI</div>
+      <div class="kpi-sub" style="color:var(--text2)">Competitor: $130/set</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-val" id="kpiOrders">—</div>
+      <div class="kpi-label">Orders</div>
+      <div class="kpi-sub" id="kpiOrdersSub" style="color:var(--text2)"></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-val" id="kpiCustomers">—</div>
+      <div class="kpi-label">Unique Customers</div>
+      <div class="kpi-sub" id="kpiCustSub" style="color:var(--text2)"></div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <div class="tab active" data-tab="overview">Overview</div>
+    <div class="tab" data-tab="orders">Orders</div>
+    <div class="tab" data-tab="customers">Customers</div>
+    <div class="tab" data-tab="projections">Projections</div>
+    <div class="tab" data-tab="insights">Insights</div>
+  </div>
+
+  <main>
+    <!-- Overview -->
+    <div class="panel active" id="panel-overview">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:20px">
+        <button class="btn-primary" onclick="openAddOrder()">+ Log New Order</button>
+      </div>
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-title">Monthly Revenue &amp; Profit</div>
+        <div class="chart-wrap" id="monthlyChartWrap"></div>
+      </div>
+      <div class="grid-2" style="margin-bottom:20px">
+        <div class="card">
+          <div class="card-title">Upcoming Deliveries</div>
+          <div id="pipelineList"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">This Month Snapshot</div>
+          <div id="thisMonthSnap"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders -->
+    <div class="panel" id="panel-orders">
+      <div class="toolbar">
+        <input class="search-input" id="orderSearch" placeholder="Search customer, product, referral…" oninput="renderOrderTable()">
+        <div id="orderMonthFilters" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table id="orderTable">
+            <thead>
+              <tr>
+                <th onclick="sortTable('date')">Date ↕</th>
+                <th onclick="sortTable('customer')">Customer ↕</th>
+                <th onclick="sortTable('product')">Product</th>
+                <th class="num" onclick="sortTable('salePrice')">Sale ↕</th>
+                <th class="num" onclick="sortTable('cogs')">COGS ↕</th>
+                <th class="num" onclick="sortTable('profit')">Profit ↕</th>
+                <th class="num" onclick="sortTable('roi')">ROI ↕</th>
+                <th>Referred By</th>
+                <th>Notes</th>
+                <th style="text-align:right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="orderTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customers -->
+    <div class="panel" id="panel-customers">
+      <div class="grid-2" style="margin-bottom:20px">
+        <div class="card">
+          <div class="card-title">Top Customers by Revenue</div>
+          <div id="topCustChart"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Referral Sources</div>
+          <div id="referralChart"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Customer Details</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th class="num">Orders</th>
+                <th class="num">Total Revenue</th>
+                <th class="num">Total Profit</th>
+                <th class="num">Avg Order</th>
+                <th>Referred By</th>
+                <th>Last Order</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="custTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Projections -->
+    <div class="panel" id="panel-projections">
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-title">Revenue Projection — Next 6 Months</div>
+        <div class="proj-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#34d399"></div><span>Actual</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--text2);opacity:.5"></div><span>Conservative (8 sets/mo)</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div><span>Moderate (12 sets/mo)</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div><span>Growth (16 sets/mo)</span></div>
+        </div>
+        <div class="chart-wrap" id="projChartWrap"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Scenario Breakdown</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Scenario</th>
+                <th class="num">Sets/Month</th>
+                <th class="num">Avg Price</th>
+                <th class="num">Monthly Revenue</th>
+                <th class="num">Monthly Profit</th>
+                <th class="num">6-Mo Revenue</th>
+                <th class="num">6-Mo Profit</th>
+                <th class="num">Annual Revenue</th>
+              </tr>
+            </thead>
+            <tbody id="scenarioTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Insights -->
+    <div class="panel" id="panel-insights">
+      <div class="insight-grid" id="insightGrid"></div>
+    </div>
+  </main>
+</div><!-- /section-sales -->
+
+<!-- ══════════════════════════════════════════ GOALS SECTION ══ -->
+<div class="section" id="section-goals">
+
+  <div class="goals-stat-bar">
+    <div class="gstat"><div class="gstat-num" id="statGoals">0</div><div class="gstat-label">Goals</div></div>
+    <div class="gstat"><div class="gstat-num" id="statObj">0</div><div class="gstat-label">Objectives</div></div>
+    <div class="gstat"><div class="gstat-num" id="statDone">0</div><div class="gstat-label">Complete</div></div>
+    <div class="gstat"><div class="gstat-num" id="statPct">0%</div><div class="gstat-label">Progress</div></div>
+  </div>
+
+  <main>
+    <div class="goals-top-bar">
+      <div class="goals-top-bar-left">
+        <div class="filter-group" id="filterGroup">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="active">Active</button>
+          <button class="filter-btn" data-filter="completed">Completed</button>
+          <button class="filter-btn" data-filter="high">High Priority</button>
+        </div>
+        <select class="sort-select" id="sortSelect">
+          <option value="created">Sort: Date Created</option>
+          <option value="priority">Sort: Priority</option>
+          <option value="due">Sort: Due Date</option>
+          <option value="progress">Sort: Progress</option>
+          <option value="title">Sort: Title</option>
+        </select>
+      </div>
+      <button class="btn-primary" onclick="openGoalModal()">+ Add Goal</button>
+    </div>
+    <div class="goals-grid" id="goalsGrid"></div>
+  </main>
+</div><!-- /section-goals -->
+
+<!-- ══════════════════════════════════════════ EXPENSES SECTION ══ -->
+<div class="section" id="section-expenses">
+
+  <div class="exp-stat-bar">
+    <div class="estat">
+      <div class="estat-num" style="color:var(--red)" id="eskpiSpend">$0.00</div>
+      <div class="estat-label">This Month Spend</div>
+    </div>
+    <div class="estat">
+      <div class="estat-num" style="color:var(--accent)" id="eskpiFixed">$0.00</div>
+      <div class="estat-label">Fixed Costs</div>
+    </div>
+    <div class="estat">
+      <div class="estat-num" style="color:var(--yellow)" id="eskpiVar">$0.00</div>
+      <div class="estat-label">Variable Costs</div>
+    </div>
+    <div class="estat">
+      <div class="estat-num" id="eskpiNet">$0.00</div>
+      <div class="estat-label">Net Profit (After Exp.)</div>
+    </div>
+  </div>
+
+  <div class="exp-tab-bar">
+    <div class="exp-tab active" data-etab="overview">Overview</div>
+    <div class="exp-tab" data-etab="all">All Expenses</div>
+    <div class="exp-tab" data-etab="categories">By Category</div>
+    <div class="exp-tab" data-etab="vsrevenue">vs Revenue</div>
+  </div>
+
+  <main>
+
+    <!-- Overview -->
+    <div class="exp-panel active" id="exppanel-overview">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:20px">
+        <button class="btn-primary" style="background:var(--red)" onclick="openExpModal()">+ Add Expense</button>
+      </div>
+      <div class="grid-2" style="margin-bottom:20px">
+        <div class="card">
+          <div class="card-title">Spending by Category</div>
+          <div id="expCatBars"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Revenue vs Expenses by Month</div>
+          <div class="chart-wrap" id="expMonthlyChart"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+          <span>Recent Expenses</span>
+          <button class="btn-primary" style="background:var(--red);padding:6px 13px;font-size:.78rem" onclick="openExpModal()">+ Add</button>
+        </div>
+        <div id="expRecentList"></div>
+      </div>
+    </div>
+
+    <!-- All Expenses -->
+    <div class="exp-panel" id="exppanel-all">
+      <div class="toolbar">
+        <input class="search-input" id="expSearch" placeholder="Search description, category…" oninput="renderExpTable()">
+        <div id="expMonthFilters" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+        <button class="btn-primary" style="background:var(--red);margin-left:auto" onclick="openExpModal()">+ Add Expense</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th onclick="sortExpTable('date')">Date ↕</th>
+                <th onclick="sortExpTable('description')">Description ↕</th>
+                <th onclick="sortExpTable('category')">Category ↕</th>
+                <th onclick="sortExpTable('type')">Type ↕</th>
+                <th class="num" onclick="sortExpTable('amount')">Amount ↕</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="expTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- By Category -->
+    <div class="exp-panel" id="exppanel-categories">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:20px">
+        <button class="btn-primary" style="background:var(--red)" onclick="openExpModal()">+ Add Expense</button>
+      </div>
+      <div class="exp-cat-grid" id="expCatGrid"></div>
+    </div>
+
+    <!-- vs Revenue -->
+    <div class="exp-panel" id="exppanel-vsrevenue">
+      <div class="card">
+        <div class="card-title">Monthly P&amp;L: Revenue → Gross Profit → Net Profit</div>
+        <div class="table-wrap" id="expVsRevTable"></div>
+      </div>
+    </div>
+
+  </main>
+</div><!-- /section-expenses -->
+
+<!-- ══════════════════════════════════════════ MODALS ══ -->
+
+<!-- Add Order Modal -->
+<div class="modal-overlay" id="addOrderModal">
+  <div class="modal">
+    <h2 id="aoTitle">Log New Order</h2>
+    <div class="field-row">
+      <div class="field"><label>Date</label><input type="date" id="aoDate"></div>
+      <div class="field"><label>Customer Name</label><input type="text" id="aoCustomer" placeholder="e.g. Mike - CardStore"></div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Product / Description</label>
+        <select id="aoProduct">
+          <option>18 Large Risers + 9 End Cap Pairs</option>
+          <option>Large Risers Only</option>
+          <option>Medium Risers</option>
+          <option>Small Risers</option>
+          <option>End Caps Only</option>
+          <option>Rental (1-day)</option>
+          <option>Custom</option>
+        </select>
+      </div>
+      <div class="field"><label>Qty / Sets</label><input type="number" id="aoQty" value="1" min="1"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Sale Price ($)</label><input type="number" id="aoSale" placeholder="90.00" step="0.01"></div>
+      <div class="field"><label>COGS ($)</label><input type="number" id="aoCogs" placeholder="21.33" step="0.01" value="21.33"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Referred By</label><input type="text" id="aoRef" placeholder="Mike / Me / Instagram"></div>
+      <div class="field"><label>Notes</label><input type="text" id="aoNotes" placeholder="Delivery date, special requests…"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeAddOrder()">Cancel</button>
+      <button class="btn-primary" id="aoSaveBtn" onclick="saveNewOrder()">Save Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- Goal Modal -->
+<div class="modal-overlay" id="goalModal">
+  <div class="modal" style="width:480px">
+    <h2 id="goalModalTitle">New Goal</h2>
+    <div class="field"><label>Goal Title</label><input type="text" id="gTitle" placeholder="e.g. Launch personal portfolio site" /></div>
+    <div class="field"><label>Description (optional)</label><textarea id="gDesc" placeholder="What does success look like?"></textarea></div>
+    <div class="field">
+      <label>Priority</label>
+      <select id="gPriority">
+        <option value="none">None</option>
+        <option value="low">Low</option>
+        <option value="medium">Medium</option>
+        <option value="high">High</option>
+      </select>
+    </div>
+    <div class="field"><label>Target Date (optional)</label><input type="date" id="gDue" /></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeGoalModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveGoal()">Save Goal</button>
+    </div>
+  </div>
+</div>
+
+<!-- Objective Modal -->
+<div class="modal-overlay" id="objModal">
+  <div class="modal" style="width:440px">
+    <h2 id="objModalTitle">Add Objective</h2>
+    <div class="field"><label>Objective</label><input type="text" id="oText" placeholder="e.g. Write 3 case studies" /></div>
+    <div class="field"><label>Due Date (optional)</label><input type="date" id="oDue" /></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeObjModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveObj()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Expense Modal -->
+<div class="modal-overlay" id="expModal">
+  <div class="modal" style="width:480px">
+    <h2 id="expModalTitle">Add Expense</h2>
+    <div class="field-row">
+      <div class="field"><label>Date</label><input type="date" id="expDate"></div>
+      <div class="field">
+        <label>Type</label>
+        <select id="expType">
+          <option value="variable">Variable</option>
+          <option value="fixed">Fixed</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Category</label>
+      <select id="expCat">
+        <option>Filament / Materials</option>
+        <option>Equipment / Printer</option>
+        <option>Shipping Supplies</option>
+        <option>Platform / Fees</option>
+        <option>Marketing</option>
+        <option>Utilities</option>
+        <option>Rent / Storage</option>
+        <option>Software / Tools</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="field"><label>Description</label><input type="text" id="expDesc" placeholder="e.g. Overture PLA White 1kg — 2 rolls"></div>
+    <div class="field"><label>Amount ($)</label><input type="number" id="expAmount" placeholder="0.00" step="0.01" min="0"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeExpModal()">Cancel</button>
+      <button class="btn-primary" style="background:var(--red)" onclick="saveExpense()">Save Expense</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ DATA TOOLS ══ -->
+<div class="data-tools">
+  <button class="dt-btn" onclick="exportBackup()" title="Download a full backup (orders, goals, expenses) as JSON">⬇ Backup</button>
+  <button class="dt-btn" onclick="document.getElementById('importFile').click()" title="Restore from a backup file">⬆ Restore</button>
+  <button class="dt-btn" onclick="exportOrdersCSV()" title="Export all orders to a CSV spreadsheet">↧ CSV</button>
+  <button class="dt-btn" onclick="resetOrdersToDefault()" title="Restore the original 47 built-in orders (keeps orders you added)">↺ Reset 47</button>
+  <input type="file" id="importFile" accept="application/json,.json" style="display:none" onchange="importBackup(this.files[0])">
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  SHARED UTILITIES
+// ══════════════════════════════════════════════════════════════
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmt$(n) { return '$' + Number(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function fmtDate(d) { if (!d) return ''; const [y,m,day] = d.split('-'); return `${m}/${day}/${y.slice(2)}`; }
+function monthKey(d) { return d.slice(0, 7); }
+function monthLabel(mk) {
+  const [y, m] = mk.split('-');
+  return ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m] + ' ' + y.slice(2);
+}
+// ── Dynamic "today" — keeps the dashboard accurate every day ──
+const NOW = new Date();
+const TODAY = `${NOW.getFullYear()}-${String(NOW.getMonth()+1).padStart(2,'0')}-${String(NOW.getDate()).padStart(2,'0')}`;
+const THIS_MONTH = TODAY.slice(0, 7);
+function addMonthKey(mk, n) {
+  const [y, m] = mk.split('-').map(Number);
+  const d = new Date(y, m - 1 + n, 1);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+const LAST_MONTH = addMonthKey(THIS_MONTH, -1);
+function todayDate() { return new Date(TODAY + 'T00:00:00'); }
+function monthShort(mk) { return monthLabel(mk).split(' ')[0]; }
+
+function dueDateClass(d) {
+  if (!d) return '';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const due = new Date(d + 'T00:00:00');
+  const diff = Math.round((due - today) / 86400000);
+  if (diff < 0) return 'overdue';
+  if (diff <= 3) return 'soon';
+  return '';
+}
+function dueDateStr(d) {
+  if (!d) return '';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const due = new Date(d + 'T00:00:00');
+  const diff = Math.round((due - today) / 86400000);
+  if (diff < 0) return `Overdue by ${-diff}d`;
+  if (diff === 0) return 'Due today';
+  if (diff <= 7) return `Due in ${diff}d`;
+  return fmtDate(d);
+}
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  MAIN NAV
+// ══════════════════════════════════════════════════════════════
+document.querySelectorAll('.main-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.main-tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('section-' + t.dataset.section).classList.add('active');
+  });
+});
+
+// ══════════════════════════════════════════════════════════════
+//  SALES — DATA
+// ══════════════════════════════════════════════════════════════
+const HISTORICAL = [
+  { id:'h1',  date:'2025-12-27', customer:'Jay',                       product:'Large Risers (10)',            sets:0, salePrice:40,   cogs:10.50,  referredBy:'1st Buyer',          notes:'' },
+  { id:'h2',  date:'2025-12-28', customer:'Kevin',                     product:'Large Risers (12)',            sets:0, salePrice:48,   cogs:12.60,  referredBy:'Jay',                notes:'' },
+  { id:'h3',  date:'2026-01-03', customer:'Kaiden',                    product:'Large + Small + End Caps',    sets:0, salePrice:80,   cogs:27.34,  referredBy:'Me',                 notes:'' },
+  { id:'h4',  date:'2026-01-25', customer:'Mike',                      product:'Large + Med + Small + Caps',  sets:0, salePrice:60,   cogs:18.32,  referredBy:'Me',                 notes:'' },
+  { id:'h5',  date:'2026-01-31', customer:'Jay',                       product:'Large + Small + End Caps',    sets:0, salePrice:40,   cogs:12.24,  referredBy:'Me',                 notes:'Repeat buyer' },
+  { id:'h6',  date:'2026-02-08', customer:'Ali',                       product:'Large Risers + Caps',         sets:1, salePrice:36,   cogs:10.26,  referredBy:'Me',                 notes:'' },
+  { id:'h7',  date:'2026-02-09', customer:'Ali',                       product:'Large Risers + Caps (27)',    sets:1, salePrice:108,  cogs:30.78,  referredBy:'Me',                 notes:'Repeat' },
+  { id:'h8',  date:'2026-02-08', customer:'Mike',                      product:'Large + Med + Caps',          sets:1, salePrice:50,   cogs:13.65,  referredBy:'Me',                 notes:'' },
+  { id:'h9',  date:'2026-02-09', customer:'VIC - TCGVIC (Zion)',       product:'18 Med Risers + 8 Caps',      sets:1, salePrice:100,  cogs:21.36,  referredBy:'Me',                 notes:'White color' },
+  { id:'h10', date:'2026-02-08', customer:'Mons + Mana',               product:'21 Large + 7 Small',          sets:1, salePrice:100,  cogs:27.30,  referredBy:'Me',                 notes:'' },
+  { id:'h11', date:'2026-02-15', customer:'Max',                       product:'3 sets: Large + Caps',        sets:3, salePrice:225,  cogs:67.50,  referredBy:'Me',                 notes:'3 sets @ $75 each' },
+  { id:'h12', date:'2026-02-21', customer:'Richard',                   product:'18 Large + 6 Caps',           sets:1, salePrice:80,   cogs:22.50,  referredBy:'Me',                 notes:'' },
+  { id:'h13', date:'2026-03-07', customer:'Damian',                    product:'18 Large + 6 Caps',           sets:1, salePrice:85,   cogs:22.50,  referredBy:'Me',                 notes:'' },
+  { id:'h14', date:'2026-03-14', customer:'Sam',                       product:'18 Large + 9 Caps',           sets:1, salePrice:100,  cogs:23.31,  referredBy:'Me',                 notes:'' },
+  { id:'h15', date:'2026-03-14', customer:'Izeah - Baichu',            product:'18 Large + 9 Caps',           sets:1, salePrice:85,   cogs:23.31,  referredBy:'Mike',               notes:'' },
+  { id:'h16', date:'2026-03-14', customer:'Jonathan (jlin730)',        product:'18 Large + 9 Caps',           sets:1, salePrice:80,   cogs:23.31,  referredBy:'Richard & Jay',      notes:'Instagram: @jlin730' },
+  { id:'h17', date:'2026-03-21', customer:'Baichu',                    product:'18 Large + 9 Caps',           sets:1, salePrice:85,   cogs:23.31,  referredBy:'Mike',               notes:'' },
+  { id:'h18', date:'2026-03-21', customer:'Baichu',                    product:'18 Large + 9 Caps (2nd)',     sets:1, salePrice:85,   cogs:23.31,  referredBy:'Mike',               notes:'Repeat same day' },
+  { id:'h19', date:'2026-03-21', customer:"Nahk - Let's Rips",         product:'18 Large + 9 Caps + Rental',  sets:1, salePrice:113,  cogs:23.31,  referredBy:'Me',                 notes:'$85 set + $40 rental – $12 shipping' },
+  { id:'h20', date:'2026-03-28', customer:'Diego',                     product:'18 Large + 9 Caps',           sets:1, salePrice:85,   cogs:21.33,  referredBy:'Damian',             notes:'' },
+  { id:'h21', date:'2026-03-28', customer:'TCG Dodge',                 product:'18 Large + 9 Caps',           sets:1, salePrice:85,   cogs:21.33,  referredBy:'',                   notes:'' },
+  { id:'h22', date:'2026-03-29', customer:'Sanjil',                    product:'18 Large + 9 Caps',           sets:1, salePrice:85,   cogs:18.90,  referredBy:'',                   notes:'' },
+  { id:'h23', date:'2026-04-05', customer:'Tyler - tyscardcorner1',    product:'18 Large + 9 Caps',           sets:1, salePrice:85,   cogs:21.33,  referredBy:'Mike',               notes:'' },
+  { id:'h24', date:'2026-04-05', customer:'Tyler - tyscardcorner1',    product:'18 Large + 9 Caps (2nd)',     sets:1, salePrice:85,   cogs:21.33,  referredBy:'Mike',               notes:'Repeat same day' },
+  { id:'h25', date:'2026-04-05', customer:'tcgnes',                    product:'18 Large + 9 Caps',           sets:1, salePrice:80,   cogs:21.33,  referredBy:'',                   notes:'' },
+  { id:'h26', date:'2026-04-06', customer:'Benze - Big Belly TCG',     product:'18 Large + 9 Caps',           sets:1, salePrice:86,   cogs:21.33,  referredBy:'',                   notes:'Shipped 4 lbs 3 oz' },
+  { id:'h27', date:'2026-04-12', customer:'Chris - Pokemon Go',        product:'18 Large + 9 Caps',           sets:1, salePrice:100,  cogs:21.33,  referredBy:'Mike',               notes:'Tournament player' },
+  { id:'h28', date:'2026-04-12', customer:'Sanjil',                    product:'18 Large + 9 Caps (2nd)',     sets:1, salePrice:85,   cogs:21.33,  referredBy:'',                   notes:'Repeat' },
+  { id:'h29', date:'2026-04-18', customer:'Damian',                    product:'18 Large + 9 Caps (2nd)',     sets:1, salePrice:85,   cogs:21.33,  referredBy:'',                   notes:'Repeat' },
+  { id:'h30', date:'2026-04-18', customer:'Ruben - Holy Collectz',     product:'18 Large + 9 Caps',           sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'' },
+  { id:'h31', date:'2026-04-19', customer:'Richard',                   product:'18 Large + 9 Caps',           sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Repeat' },
+  { id:'h32', date:'2026-04-19', customer:'Richard',                   product:'18 Large + 9 Caps (2nd)',     sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'' },
+  { id:'h33', date:'2026-04-28', customer:'Jdrops',                    product:'18 Large + 9 Caps',           sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Ships to FL' },
+  { id:'h34', date:'2026-04-28', customer:'Jdrops',                    product:'18 Large + 9 Caps (2nd)',     sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Ships to FL' },
+  { id:'h35', date:'2026-04-30', customer:'Jeff Nelson',               product:'18 Large + 9 Caps',           sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Prepaid $180 for 2 sets' },
+  { id:'h36', date:'2026-04-30', customer:'Jeff Nelson',               product:'18 Large + 9 Caps (2nd)',     sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Prepaid' },
+  { id:'h37', date:'2026-05-10', customer:'binbreon.tcg',              product:'18 Large + 9 Caps',           sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Delivery 5/16' },
+  { id:'h38', date:'2026-05-11', customer:'Big Belly (Benze)',         product:'18 Large + 9 Caps',           sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Delivery 5/17; repeat' },
+  { id:'h39', date:'2026-05-28', customer:'Luke - iyekul_collectibles',product:'18 Large + 9 Caps',           sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Delivery 5/30' },
+  { id:'h40', date:'2026-05-29', customer:'Raymond - Sleepy PokeShop', product:'18 Large + 9 Caps',           sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Deliver 6/6 — Emerald+Cardfest' },
+  { id:'h41', date:'2026-05-29', customer:'Raymond - Sleepy PokeShop', product:'18 Large + 9 Caps (2nd)',     sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Deliver 6/6' },
+  { id:'h42', date:'2026-05-29', customer:'boxheadtc - Joe Mendez',    product:'18 Large + 9 Caps',           sets:1, salePrice:100,  cogs:21.33,  referredBy:'',                   notes:'Pickup 6/6' },
+  { id:'h43', date:'2026-05-31', customer:'Argcardz',                  product:'18 Large + 9 Caps',           sets:1, salePrice:100,  cogs:21.33,  referredBy:'',                   notes:'Pick up 5/31' },
+  { id:'h44', date:'2026-05-31', customer:'pipstle.tcg',               product:'18 Large + 9 Caps',           sets:1, salePrice:100,  cogs:21.33,  referredBy:'',                   notes:'Pick up 5/31' },
+  { id:'h45', date:'2026-06-02', customer:'Yash - Silver Clash TCG',   product:'18 Large + 9 Caps',           sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Deliver 6/20' },
+  { id:'h46', date:'2026-06-02', customer:'Yash - Silver Clash TCG',   product:'18 Large + 9 Caps (2nd)',     sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Deliver 6/20' },
+  { id:'h47', date:'2026-06-02', customer:'Yash - Silver Clash TCG',   product:'18 Large + 9 Caps (3rd)',     sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Deliver 6/20' },
+];
+
+const PIPELINE = [
+  { date:'2026-06-06', customer:'Raymond - Sleepy PokeShop', note:'2 sets — Emerald+Cardfest Show' },
+  { date:'2026-06-06', customer:'boxheadtc - Joe Mendez',    note:'1 set — pickup' },
+  { date:'2026-06-20', customer:'Yash - Silver Clash TCG',   note:'3 sets — must deliver' },
+];
+
+const LS_ORDERS    = 'vp_orders_v2';      // unified, fully-editable order store
+const LS_ORDERS_V1 = 'riser_orders_v1';   // legacy custom-orders store (pre-migration)
+let sortCol = 'date', sortDir = -1, orderMonthFilter = 'all';
+
+// One-time seed: load the built-in HISTORICAL baseline + any previously-logged
+// custom orders into the unified store. After this, ALL orders are editable.
+function initOrders() {
+  if (localStorage.getItem(LS_ORDERS)) return;
+  const legacy = JSON.parse(localStorage.getItem(LS_ORDERS_V1) || '[]');
+  const seeded = [...HISTORICAL.map(o => ({ ...o })), ...legacy];
+  localStorage.setItem(LS_ORDERS, JSON.stringify(seeded));
+}
+function rawOrders() { return JSON.parse(localStorage.getItem(LS_ORDERS) || '[]'); }
+function getOrders() { return rawOrders().sort((a, b) => a.date.localeCompare(b.date)); }
+function saveOrder(o) {
+  const arr = rawOrders();
+  arr.push(o); localStorage.setItem(LS_ORDERS, JSON.stringify(arr));
+}
+// Restore the built-in 47-order baseline (re-adds/repairs them) while KEEPING
+// any orders you logged yourself. Used by the "Reset 47" data tool.
+function resetOrdersToDefault() {
+  if (!confirm('Restore the original 47 built-in orders to their default values?\n\nThis undoes any edits or deletions to those 47. Orders YOU added are kept untouched.')) return;
+  const histIds = new Set(HISTORICAL.map(o => o.id));
+  const custom  = rawOrders().filter(o => !histIds.has(o.id));
+  localStorage.setItem(LS_ORDERS, JSON.stringify([...HISTORICAL.map(o => ({ ...o })), ...custom]));
+  renderSalesAll();
+  toast('Built-in 47 orders restored.');
+}
+
+function byMonth(orders) {
+  const map = {};
+  orders.forEach(o => {
+    const mk = monthKey(o.date);
+    if (!map[mk]) map[mk] = { revenue:0, profit:0, cogs:0, count:0 };
+    map[mk].revenue += o.salePrice;
+    map[mk].profit  += o.salePrice - o.cogs;
+    map[mk].cogs    += o.cogs;
+    map[mk].count++;
+  });
+  return map;
+}
+
+function byCustomer(orders) {
+  const map = {};
+  orders.forEach(o => {
+    const name = o.customer.split(' - ')[0].split(' (')[0];
+    if (!map[name]) map[name] = { revenue:0, profit:0, orders:0, lastDate:'', referredBy: o.referredBy || '' };
+    map[name].revenue += o.salePrice;
+    map[name].profit  += o.salePrice - o.cogs;
+    map[name].orders++;
+    if (o.date > map[name].lastDate) map[name].lastDate = o.date;
+    if (!map[name].referredBy && o.referredBy) map[name].referredBy = o.referredBy;
+  });
+  return map;
+}
+
+function daysSince(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const now = todayDate();
+  return Math.round((now - d) / 86400000);
+}
+
+// ── Sales KPIs ──
+function renderKPIs() {
+  const orders = getOrders();
+  const totalRev  = orders.reduce((s, o) => s + o.salePrice, 0);
+  const totalProf = orders.reduce((s, o) => s + o.salePrice - o.cogs, 0);
+  const totalCogs = orders.reduce((s, o) => s + o.cogs, 0);
+  const avgRoi    = (totalProf / totalCogs * 100).toFixed(1);
+  const custMap   = byCustomer(orders);
+  const custCount = Object.keys(custMap).length;
+  const thisMonth = THIS_MONTH;
+  const thisMoOrders = orders.filter(o => o.date.startsWith(thisMonth));
+  const thisMoRev = thisMoOrders.reduce((s, o) => s + o.salePrice, 0);
+
+  document.getElementById('kpiRevenue').textContent   = fmt$(totalRev);
+  document.getElementById('kpiProfit').textContent    = fmt$(totalProf);
+  document.getElementById('kpiRoi').textContent       = avgRoi + '%';
+  document.getElementById('kpiOrders').textContent    = orders.length;
+  document.getElementById('kpiCustomers').textContent = custCount;
+  document.getElementById('kpiRevSub').textContent    = `${fmt$(thisMoRev)} this month`;
+  document.getElementById('kpiProfitSub').textContent = `${((totalProf/totalRev)*100).toFixed(1)}% margin`;
+  document.getElementById('kpiOrdersSub').textContent = `${thisMoOrders.length} this month`;
+  document.getElementById('kpiCustSub').textContent   = `${custCount} unique`;
+
+  // header quick-stats
+  document.getElementById('hs-revenue').textContent = fmt$(totalRev);
+  document.getElementById('hs-profit').textContent  = fmt$(totalProf);
+}
+
+// ── Monthly Chart ──
+function renderMonthlyChart() {
+  const orders  = getOrders();
+  const monthly = byMonth(orders);
+  const months  = Object.keys(monthly).sort();
+  const maxRev  = Math.max(...months.map(m => monthly[m].revenue));
+  const W = Math.max(months.length * 90, 600), H = 220, pad = 44, barW = 32, gap = 58;
+  let bars = '', axes = '';
+  [0, 0.25, 0.5, 0.75, 1].forEach(pct => {
+    const y = pad + (H - pad * 2) * (1 - pct);
+    const val = Math.round(maxRev * pct);
+    axes += `<line x1="${pad}" x2="${W-10}" y1="${y}" y2="${y}" stroke="#2e3350" stroke-width="1"/>
+             <text x="${pad-6}" y="${y+4}" fill="#8892b0" font-size="9" text-anchor="end">$${val>=1000?(val/1000).toFixed(0)+'k':val}</text>`;
+  });
+  months.forEach((mk, i) => {
+    const x = pad + i * (barW * 2 + gap);
+    const m = monthly[mk];
+    const rH = Math.max(2, (m.revenue / maxRev) * (H - pad * 2));
+    const pH = Math.max(2, (m.profit  / maxRev) * (H - pad * 2));
+    const ry = H - pad - rH, py = H - pad - pH;
+    bars += `
+      <rect x="${x}" y="${ry}" width="${barW}" height="${rH}" fill="#34d39955" rx="3"/>
+      <rect x="${x+barW+4}" y="${py}" width="${barW}" height="${pH}" fill="var(--accent)" opacity="0.8" rx="3"/>
+      <text x="${x+barW}" y="${H-pad+14}" fill="#8892b0" font-size="9" text-anchor="middle">${monthLabel(mk)}</text>
+      <text x="${x+barW/2}" y="${ry-3}" fill="#34d399" font-size="8.5" text-anchor="middle">$${m.revenue>=1000?(m.revenue/1000).toFixed(1)+'k':m.revenue}</text>
+      <text x="${x+barW+barW/2+4}" y="${py-3}" fill="var(--accent)" font-size="8.5" text-anchor="middle">$${m.profit>=1000?(m.profit/1000).toFixed(1)+'k':Math.round(m.profit)}</text>`;
+  });
+  const legend = `<text x="${W-160}" y="18" fill="#34d399" font-size="10" font-weight="600">■ Revenue</text>
+                  <text x="${W-80}" y="18" fill="var(--accent)" font-size="10" font-weight="600">■ Profit</text>`;
+  document.getElementById('monthlyChartWrap').innerHTML =
+    `<svg class="chart" viewBox="0 0 ${W} ${H}" style="min-width:${W}px;height:${H}px">${axes}${bars}${legend}</svg>`;
+}
+
+// ── Pipeline ──
+function renderPipeline() {
+  const today = todayDate();
+  const html = PIPELINE.map(p => {
+    const d = new Date(p.date + 'T00:00:00');
+    const diff = Math.round((d - today) / 86400000);
+    const cls = diff <= 0 ? 'urgent' : diff <= 5 ? '' : 'ok';
+    const label = diff === 0 ? 'Today' : diff < 0 ? `${-diff}d overdue` : `in ${diff}d`;
+    return `<div class="pipeline-item">
+      <div class="pipeline-dot ${cls}"></div>
+      <div class="pipeline-date">${fmtDate(p.date)}</div>
+      <div>
+        <div class="pipeline-name">${p.customer}</div>
+        <div class="pipeline-note">${p.note} — <span style="color:var(--yellow)">${label}</span></div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('pipelineList').innerHTML = html || '<div style="color:var(--text2);font-size:.82rem">No upcoming deliveries.</div>';
+}
+
+function renderThisMonthSnap() {
+  const orders = getOrders();
+  const mo  = orders.filter(o => o.date.startsWith(THIS_MONTH));
+  const lmo = orders.filter(o => o.date.startsWith(LAST_MONTH));
+  const rev  = mo.reduce((s,o) => s + o.salePrice, 0);
+  const prof = mo.reduce((s,o) => s + o.salePrice - o.cogs, 0);
+  const lrev = lmo.reduce((s,o) => s + o.salePrice, 0);
+  const pctChange = lrev > 0 ? ((rev - lrev) / lrev * 100).toFixed(0) : 0;
+  const changeColor = pctChange >= 0 ? 'var(--green)' : 'var(--red)';
+  const changeSign  = pctChange >= 0 ? '+' : '';
+  const moName    = monthShort(THIS_MONTH), lastName = monthShort(LAST_MONTH);
+  const dayOfMo   = NOW.getDate();
+  const daysInMo  = new Date(NOW.getFullYear(), NOW.getMonth()+1, 0).getDate();
+  const projected = dayOfMo > 0 ? rev / dayOfMo * daysInMo : 0;
+  document.getElementById('thisMonthSnap').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+      <div><div style="font-size:1.5rem;font-weight:800;color:var(--green)">${fmt$(rev)}</div><div style="font-size:.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-top:2px">Revenue (${moName})</div></div>
+      <div><div style="font-size:1.5rem;font-weight:800;color:var(--accent)">${fmt$(prof)}</div><div style="font-size:.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-top:2px">Profit (${moName})</div></div>
+    </div>
+    <div style="font-size:.83rem;color:var(--text2);margin-bottom:6px"><strong style="color:var(--text)">${mo.length} orders</strong> in ${moName} so far (day ${dayOfMo} of ${daysInMo})</div>
+    <div style="font-size:.83rem;color:${changeColor}">${changeSign}${pctChange}% vs ${lastName} (${fmt$(lrev)})</div>
+    <div style="font-size:.78rem;color:var(--text2);margin-top:10px">At current pace: <strong style="color:var(--yellow)">${fmt$(projected)}</strong> projected for ${moName}</div>`;
+}
+
+// ── Orders Table ──
+function renderOrderMonthFilters() {
+  const orders = getOrders();
+  const months = [...new Set(orders.map(o => monthKey(o.date)))].sort();
+  document.getElementById('orderMonthFilters').innerHTML = ['all', ...months].map(mk => {
+    const label = mk === 'all' ? 'All' : monthLabel(mk);
+    return `<div class="filter-chip ${orderMonthFilter===mk?'active':''}" onclick="setMonthFilter('${mk}')">${label}</div>`;
+  }).join('');
+}
+function setMonthFilter(mk) { orderMonthFilter = mk; renderOrderMonthFilters(); renderOrderTable(); }
+
+function renderOrderTable() {
+  const q = (document.getElementById('orderSearch').value || '').toLowerCase();
+  let orders = getOrders();
+  if (orderMonthFilter !== 'all') orders = orders.filter(o => o.date.startsWith(orderMonthFilter));
+  if (q) orders = orders.filter(o => [o.customer, o.product, o.referredBy, o.notes].join(' ').toLowerCase().includes(q));
+  orders.sort((a, b) => {
+    let av = a[sortCol], bv = b[sortCol];
+    if (typeof av === 'string') return av.localeCompare(bv) * sortDir;
+    return (av - bv) * sortDir;
+  });
+  const rows = orders.map(o => {
+    const profit = o.salePrice - o.cogs;
+    const roi = (profit / o.cogs * 100).toFixed(1);
+    const roiColor = roi >= 80 ? 'var(--green)' : roi >= 70 ? 'var(--yellow)' : 'var(--text)';
+    const actions =
+      `<button class="icon-btn" title="Edit order" onclick="openAddOrder('${o.id}')">✏️</button>
+       <button class="icon-btn" title="Delete order" onclick="deleteOrder('${o.id}')">✕</button>`;
+    return `<tr>
+      <td style="white-space:nowrap">${fmtDate(o.date)}</td>
+      <td><strong>${esc(o.customer)}</strong></td>
+      <td style="color:var(--text2);font-size:.78rem">${esc(o.product)}</td>
+      <td class="num green">${fmt$(o.salePrice)}</td>
+      <td class="num" style="color:var(--text2)">${fmt$(o.cogs)}</td>
+      <td class="num" style="color:var(--accent)">${fmt$(profit)}</td>
+      <td class="num" style="color:${roiColor}">${roi}%</td>
+      <td style="font-size:.78rem;color:var(--text2)">${esc(o.referredBy||'—')}</td>
+      <td style="font-size:.75rem;color:var(--text2);max-width:160px">${esc(o.notes||'')}</td>
+      <td style="text-align:right;white-space:nowrap">${actions}</td>
+    </tr>`;
+  }).join('');
+  const totalRev  = orders.reduce((s,o) => s + o.salePrice, 0);
+  const totalProf = orders.reduce((s,o) => s + o.salePrice - o.cogs, 0);
+  const totalCogs = orders.reduce((s,o) => s + o.cogs, 0);
+  document.getElementById('orderTbody').innerHTML = rows + `<tr style="background:var(--surface2);font-weight:700">
+    <td colspan="3" style="color:var(--text2)">Total — ${orders.length} orders</td>
+    <td class="num green">${fmt$(totalRev)}</td>
+    <td class="num" style="color:var(--text2)">${fmt$(totalCogs)}</td>
+    <td class="num" style="color:var(--accent)">${fmt$(totalProf)}</td>
+    <td class="num" style="color:var(--yellow)">${(totalProf/totalCogs*100).toFixed(1)}%</td>
+    <td colspan="3"></td>
+  </tr>`;
+}
+function sortTable(col) {
+  if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = -1; }
+  renderOrderTable();
+}
+
+// ── Customers ──
+function renderCustomers() {
+  const orders  = getOrders();
+  const custMap = byCustomer(orders);
+  const sorted  = Object.entries(custMap).sort((a,b) => b[1].revenue - a[1].revenue);
+  const top8    = sorted.slice(0, 8);
+  const maxRev  = top8[0][1].revenue;
+
+  document.getElementById('topCustChart').innerHTML = top8.map(([name, d]) => {
+    const pct = (d.revenue / maxRev * 100).toFixed(0);
+    return `<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px">
+        <span style="font-size:.82rem;font-weight:600">${esc(name)}</span>
+        <span style="font-size:.8rem;color:var(--green)">${fmt$(d.revenue)}</span>
+      </div>
+      <div style="background:var(--surface2);border-radius:99px;height:6px">
+        <div style="width:${pct}%;background:var(--accent);border-radius:99px;height:6px"></div>
+      </div>
+      <div style="font-size:.7rem;color:var(--text2);margin-top:2px">${d.orders} order${d.orders>1?'s':''} · ${fmt$(d.profit)} profit</div>
+    </div>`;
+  }).join('');
+
+  const refMap = {};
+  orders.forEach(o => {
+    const ref = o.referredBy || 'Unknown';
+    if (!refMap[ref]) refMap[ref] = 0;
+    refMap[ref] += o.salePrice;
+  });
+  const refSorted = Object.entries(refMap).sort((a,b) => b[1]-a[1]);
+  const maxRef = refSorted[0][1];
+  document.getElementById('referralChart').innerHTML = refSorted.map(([ref, rev]) => {
+    const pct = (rev / maxRef * 100).toFixed(0);
+    return `<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+        <span style="font-size:.82rem;font-weight:600">${esc(ref)}</span>
+        <span style="font-size:.8rem;color:var(--yellow)">${fmt$(rev)}</span>
+      </div>
+      <div style="background:var(--surface2);border-radius:99px;height:6px">
+        <div style="width:${pct}%;background:var(--yellow);border-radius:99px;height:6px;opacity:.8"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('custTbody').innerHTML = sorted.map(([name, d]) => {
+    const age = daysSince(d.lastDate);
+    const statusBadge = age <= 14 ? `<span class="badge badge-green">Active</span>`
+      : age <= 45 ? `<span class="badge badge-blue">Warm</span>`
+      : age <= 90 ? `<span class="badge badge-yellow">Cooling</span>`
+      : `<span class="badge badge-red">Win-back</span>`;
+    return `<tr>
+      <td><strong>${esc(name)}</strong></td>
+      <td class="num">${d.orders}</td>
+      <td class="num green">${fmt$(d.revenue)}</td>
+      <td class="num" style="color:var(--accent)">${fmt$(d.profit)}</td>
+      <td class="num" style="color:var(--text2)">${fmt$(d.revenue/d.orders)}</td>
+      <td style="font-size:.78rem;color:var(--text2)">${esc(d.referredBy||'—')}</td>
+      <td style="font-size:.78rem;color:var(--text2)">${fmtDate(d.lastDate)}</td>
+      <td>${statusBadge}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Projections ──
+function renderProjections() {
+  const orders  = getOrders();
+  const monthly = byMonth(orders);
+  const months  = Object.keys(monthly).sort();
+  const lastMonth = months[months.length - 1];
+  function addMonths(mk, n) {
+    const [y, m] = mk.split('-').map(Number);
+    const d = new Date(y, m - 1 + n, 1);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  }
+  const futureMonths = [1,2,3,4,5,6].map(n => addMonths(lastMonth, n));
+  const scenarios = [
+    { label:'Conservative', sets:8,  price:90, color:'#8892b066' },
+    { label:'Moderate',     sets:12, price:90, color:'var(--accent)' },
+    { label:'Growth',       sets:16, price:92, color:'var(--yellow)' },
+  ];
+  document.getElementById('scenarioTbody').innerHTML = scenarios.map(s => {
+    const moRev = s.sets * s.price, moProf = s.sets * (s.price - 21.33);
+    return `<tr>
+      <td><strong style="color:${s.color}">${s.label}</strong></td>
+      <td class="num">${s.sets}</td><td class="num">${fmt$(s.price)}</td>
+      <td class="num green">${fmt$(moRev)}</td><td class="num" style="color:var(--accent)">${fmt$(moProf)}</td>
+      <td class="num green">${fmt$(moRev*6)}</td><td class="num" style="color:var(--accent)">${fmt$(moProf*6)}</td>
+      <td class="num green">${fmt$(moRev*12)}</td>
+    </tr>`;
+  }).join('');
+
+  const allMonths = [...months, ...futureMonths];
+  const W = Math.max(allMonths.length * 80, 700), H = 230, pad = 50, gap = 60;
+  const allVals = [...months.map(mk => monthly[mk].revenue), ...scenarios.flatMap(s => futureMonths.map(() => s.sets * s.price))];
+  const maxVal = Math.max(...allVals) * 1.1;
+  const pxX = i => pad + i * gap;
+  const pxY = v => pad + (H - pad * 2) * (1 - v / maxVal);
+
+  let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" style="min-width:${W}px;height:${H}px">`;
+  [0, 0.25, 0.5, 0.75, 1].forEach(pct => {
+    const y = pxY(maxVal * pct), v = Math.round(maxVal * pct);
+    svg += `<line x1="${pad}" x2="${W-10}" y1="${y}" y2="${y}" stroke="#2e3350" stroke-width="1"/>
+            <text x="${pad-6}" y="${y+4}" fill="#8892b0" font-size="9" text-anchor="end">${v>=1000?(v/1000).toFixed(0)+'k':v}</text>`;
+  });
+  const divX = pxX(months.length - 0.5);
+  svg += `<line x1="${divX}" x2="${divX}" y1="${pad}" y2="${H-pad}" stroke="#3d4460" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="${divX+4}" y="${pad-4}" fill="#8892b0" font-size="9">Projected →</text>`;
+  const actPts = months.map((mk, i) => `${pxX(i)},${pxY(monthly[mk].revenue)}`).join(' ');
+  svg += `<polyline points="${actPts}" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linejoin="round"/>`;
+  months.forEach((mk, i) => { svg += `<circle cx="${pxX(i)}" cy="${pxY(monthly[mk].revenue)}" r="4" fill="#34d399"/>`; });
+  scenarios.forEach(s => {
+    const pts = futureMonths.map((mk, i) => `${pxX(months.length+i)},${pxY(s.sets*s.price)}`).join(' ');
+    svg += `<polyline points="${pxX(months.length-1)},${pxY(monthly[lastMonth].revenue)} ${pts}" fill="none" stroke="${s.color}" stroke-width="2" stroke-dasharray="5,3" stroke-linejoin="round"/>`;
+  });
+  allMonths.forEach((mk, i) => {
+    svg += `<text x="${pxX(i)}" y="${H-pad+14}" fill="${i>=months.length?'#556':'#8892b0'}" font-size="9" text-anchor="middle">${monthLabel(mk)}</text>`;
+  });
+  svg += '</svg>';
+  document.getElementById('projChartWrap').innerHTML = svg;
+}
+
+// ── Insights ──
+function renderInsights() {
+  const orders  = getOrders();
+  const custMap = byCustomer(orders);
+  const monthly = byMonth(orders);
+  const winback = Object.entries(custMap)
+    .filter(([, d]) => daysSince(d.lastDate) > 45 && d.lastDate < '2026-04-01')
+    .sort((a,b) => b[1].revenue - a[1].revenue).slice(0, 5);
+  const mikeReferrals = orders.filter(o => (o.referredBy || '').toLowerCase().includes('mike'));
+  const mikeRev  = mikeReferrals.reduce((s,o) => s + o.salePrice, 0);
+  const aprRev   = monthly['2026-04']?.revenue || 0;
+  const mayRev   = monthly['2026-05']?.revenue || 0;
+  const dip      = ((aprRev - mayRev) / aprRev * 100).toFixed(0);
+  const insights = [
+    { type:'opportunity', cls:'good',
+      title:'🟢 June already at $270 in 2 days',
+      body:`Yash (Silver Clash TCG) ordered <strong>3 sets</strong> on day one of June. At this pace, June projects to <strong>${fmt$(270/2*30)}</strong> — which would beat April's record of <strong>$1,236</strong>. Stay on delivery schedule.` },
+    { type:'win-back', cls:'warn',
+      title:`⚠️ ${winback.length} customers haven't re-ordered in 45+ days`,
+      body:`<strong>Win-back targets:</strong> ${winback.map(([n,d]) => `${n} (last: ${fmtDate(d.lastDate)}, spent ${fmt$(d.revenue)})`).join(', ')}. A quick follow-up could unlock $90–$270 per customer.` },
+    { type:'referral network', cls:'',
+      title:`📣 Mike is your #1 referral machine — ${mikeReferrals.length} orders (${fmt$(mikeRev)})`,
+      body:`Mike referred: Izeah-Baichu, Tyler (×2), Chris (Pokemon Go), and Baichu. That's <strong>${fmt$(mikeRev)}</strong> in revenue. Consider a formal referral perk.` },
+    { type:'pricing', cls:'',
+      title:'💰 You have $40 headroom under the competitor',
+      body:`Standard set is <strong>$90 (pre-order)</strong> and <strong>$100 (same-day)</strong>. Competitor charges <strong>$130</strong>. Test raising same-day to <strong>$110–$115</strong> for new customers — still $15–$20 under market.` },
+    { type:'rental expansion', cls:'action',
+      title:'🔑 Expand the rental model — only done once so far',
+      body:`The rental at $40/day (Nahk) was near-free profit on a $21.33 asset. Proactively offer rental as a trial for hesitant buyers. Target: 2 rentals/month = ~$80/month extra profit.` },
+    { type:'volume pricing', cls:'good',
+      title:'📦 Multi-set bulk orders are emerging — formalize a bundle',
+      body:`Max ordered 3 sets at $75; Yash ordered 3 at $90. Consider a <strong>3-set bundle at $260–$265</strong> — small savings for customer, 3× order volume for you.` },
+    { type:'may dip analysis', cls:'warn',
+      title:`📉 May dipped ${dip}% from April — understand why`,
+      body:`April: <strong>${fmt$(aprRev)} (14 orders)</strong>. May: <strong>${fmt$(mayRev)} (8 orders)</strong>. June's strong start suggests demand is still there.` },
+    { type:'social media', cls:'action',
+      title:'📱 Instagram channel not yet tracked — worth developing',
+      body:`Jonathan came in via Instagram (<strong>@jlin730</strong>). Your customers are TCG vendors active on social media. One post from a vendor showing your risers could bring 5–10 leads.` },
+    { type:'filament cost', cls:'good',
+      title:'✅ Filament cost has dropped ~15% since launch',
+      body:`Early rolls cost ~$15.25 (Dec 2025). Current Overture/Elegoo PLA runs ~$10.91–$11.35/roll, reducing per-set COGS from ~$27 to <strong>$21.33</strong>. Lock in bulk orders to protect this margin.` },
+  ];
+  document.getElementById('insightGrid').innerHTML = insights.map(ins => `
+    <div class="insight-card ${ins.cls}">
+      <div class="insight-type">${ins.type}</div>
+      <div class="insight-title">${ins.title}</div>
+      <div class="insight-body">${ins.body}</div>
+    </div>`).join('');
+}
+
+// ── Add / Edit Order ──
+let editOrderId = null;
+
+function setProductSelect(val) {
+  const sel = document.getElementById('aoProduct');
+  if (val && ![...sel.options].some(o => o.value === val)) {
+    sel.add(new Option(val, val));   // keep an unusual product value selectable
+  }
+  sel.value = val || sel.options[0].value;
+}
+
+function openAddOrder(id) {
+  editOrderId = id || null;
+  const titleEl = document.getElementById('aoTitle');
+  const saveEl  = document.getElementById('aoSaveBtn');
+  if (id) {
+    const o = rawOrders().find(x => x.id === id);
+    if (!o) { toast('Order not found.'); return; }
+    document.getElementById('aoDate').value     = o.date;
+    document.getElementById('aoCustomer').value = o.customer;
+    setProductSelect(o.product);
+    document.getElementById('aoQty').value      = o.sets || 1;
+    document.getElementById('aoSale').value     = o.salePrice;
+    document.getElementById('aoCogs').value     = o.cogs;
+    document.getElementById('aoRef').value      = o.referredBy || '';
+    document.getElementById('aoNotes').value    = o.notes || '';
+    titleEl.textContent = 'Edit Order';
+    saveEl.textContent  = 'Save Changes';
+  } else {
+    document.getElementById('aoDate').value     = TODAY;
+    document.getElementById('aoCustomer').value = '';
+    setProductSelect(null);
+    document.getElementById('aoQty').value      = 1;
+    document.getElementById('aoSale').value     = '';
+    document.getElementById('aoCogs').value     = 21.33;
+    document.getElementById('aoRef').value      = '';
+    document.getElementById('aoNotes').value    = '';
+    titleEl.textContent = 'Log New Order';
+    saveEl.textContent  = 'Save Order';
+  }
+  document.getElementById('addOrderModal').classList.add('open');
+  setTimeout(() => document.getElementById('aoCustomer').focus(), 50);
+}
+function closeAddOrder() { editOrderId = null; document.getElementById('addOrderModal').classList.remove('open'); }
+
+function saveNewOrder() {
+  const sale = parseFloat(document.getElementById('aoSale').value);
+  const cogs = parseFloat(document.getElementById('aoCogs').value);
+  const cust = document.getElementById('aoCustomer').value.trim();
+  const date = document.getElementById('aoDate').value;
+  if (!cust || !date || isNaN(sale)) { toast('Fill in Date, Customer, and Sale Price.'); return; }
+  const fields = {
+    date, customer: cust,
+    product: document.getElementById('aoProduct').value,
+    sets: parseInt(document.getElementById('aoQty').value) || 1,
+    salePrice: sale, cogs: isNaN(cogs) ? 21.33 : cogs,
+    referredBy: document.getElementById('aoRef').value.trim(),
+    notes: document.getElementById('aoNotes').value.trim()
+  };
+  const wasEditing = editOrderId;
+  if (editOrderId) {
+    const arr = rawOrders();
+    const o = arr.find(x => x.id === editOrderId);
+    if (o) { Object.assign(o, fields); localStorage.setItem(LS_ORDERS, JSON.stringify(arr)); }
+  } else {
+    saveOrder({ id: uid(), ...fields });
+  }
+  closeAddOrder(); renderSalesAll();
+  toast(wasEditing ? 'Order updated.' : `Order logged: ${fmt$(sale)} from ${cust}`);
+}
+
+function deleteOrder(id) {
+  if (!confirm('Delete this order? This cannot be undone.')) return;
+  localStorage.setItem(LS_ORDERS, JSON.stringify(rawOrders().filter(x => x.id !== id)));
+  renderSalesAll();
+  toast('Order deleted.');
+}
+
+// ── Sales sub-tabs ──
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('panel-' + t.dataset.tab).classList.add('active');
+  });
+});
+
+function renderSalesAll() {
+  renderKPIs();
+  renderMonthlyChart();
+  renderPipeline();
+  renderThisMonthSnap();
+  renderOrderMonthFilters();
+  renderOrderTable();
+  renderCustomers();
+  renderProjections();
+  renderInsights();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  GOALS
+// ══════════════════════════════════════════════════════════════
+const GOALS_KEY = 'goals_dashboard_v1';
+let goalsData = { goals: [] };
+let goalFilter = 'all', goalSort = 'created';
+let editGoalId = null, editObjId = null, editObjGoalId = null;
+
+function loadGoals() {
+  try { goalsData = JSON.parse(localStorage.getItem(GOALS_KEY)) || { goals: [] }; }
+  catch { goalsData = { goals: [] }; }
+}
+function saveGoals() { localStorage.setItem(GOALS_KEY, JSON.stringify(goalsData)); }
+
+function renderGoals() {
+  const grid = document.getElementById('goalsGrid');
+  let goals = [...goalsData.goals];
+  if (goalFilter === 'active') goals = goals.filter(g => !g.done);
+  else if (goalFilter === 'completed') goals = goals.filter(g => g.done);
+  else if (goalFilter === 'high') goals = goals.filter(g => g.priority === 'high');
+  const pOrd = { high:3, medium:2, low:1, none:0 };
+  goals.sort((a, b) => {
+    if (goalSort === 'priority') return (pOrd[b.priority]||0) - (pOrd[a.priority]||0);
+    if (goalSort === 'due') { if (!a.due&&!b.due) return 0; if (!a.due) return 1; if (!b.due) return -1; return a.due.localeCompare(b.due); }
+    if (goalSort === 'progress') return objProgress(b) - objProgress(a);
+    if (goalSort === 'title') return a.title.localeCompare(b.title);
+    return b.createdAt - a.createdAt;
+  });
+  grid.innerHTML = goals.length
+    ? goals.map(goalHTML).join('')
+    : `<div class="empty"><div class="icon">🎯</div><h3>No goals yet</h3><p>Add your first goal to get started.</p></div>`;
+  updateGoalStats();
+}
+
+function objProgress(g) {
+  if (!g.objectives || !g.objectives.length) return 0;
+  return g.objectives.filter(o => o.done).length / g.objectives.length;
+}
+
+function goalHTML(g) {
+  const objs = g.objectives || [];
+  const done = objs.filter(o => o.done).length;
+  const pct  = objs.length ? Math.round(done / objs.length * 100) : 0;
+  return `<div class="goal-card ${g.done?'completed':''}" id="goal-${g.id}">
+    <div class="goal-header">
+      <div class="goal-title-row">
+        <div class="goal-check ${g.done?'done':''}" onclick="toggleGoal('${g.id}')"></div>
+        <div class="goal-title ${g.done?'done':''}" onclick="toggleGoal('${g.id}')">${esc(g.title)}</div>
+        <div class="goal-actions">
+          <button class="icon-btn" title="Add objective" onclick="openObjModal('${g.id}')">＋</button>
+          <button class="icon-btn" title="Edit goal" onclick="openGoalModal('${g.id}')">✏️</button>
+          <button class="icon-btn" title="Delete goal" onclick="deleteGoal('${g.id}')">🗑</button>
+        </div>
+      </div>
+      ${g.desc ? `<div style="font-size:.78rem;color:var(--text2);margin-top:6px;margin-left:30px">${esc(g.desc)}</div>` : ''}
+      <div class="goal-meta" style="margin-left:30px">
+        <span class="badge badge-${g.priority||'none'}">${g.priority||'no priority'}</span>
+        ${g.due ? `<span class="due-date ${dueDateClass(g.due)}">📅 ${dueDateStr(g.due)}</span>` : ''}
+        ${objs.length ? `<span style="font-size:.72rem;color:var(--text2)">${done}/${objs.length} done</span>` : ''}
+      </div>
+      ${objs.length ? `<div class="progress-bar-wrap" style="margin-left:30px">
+        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+      </div>` : ''}
+    </div>
+    <div class="obj-list">${objs.map(o => objHTML(g.id, o)).join('')}</div>
+    <div class="add-obj-row">
+      <input class="add-obj-input" placeholder="+ Add objective, press Enter…" onkeydown="quickAddObj(event,'${g.id}')"/>
+    </div>
+  </div>`;
+}
+
+function objHTML(gid, o) {
+  return `<div class="obj-item" id="obj-${o.id}">
+    <div class="obj-check ${o.done?'done':''}" onclick="toggleObj('${gid}','${o.id}')"></div>
+    <div class="obj-text ${o.done?'done':''}">${esc(o.text)}</div>
+    ${o.due ? `<span class="obj-due ${dueDateClass(o.due)}">${fmtDate(o.due)}</span>` : ''}
+    <div class="obj-actions">
+      <button class="icon-btn" onclick="openObjModal('${gid}','${o.id}')">✏️</button>
+      <button class="icon-btn" onclick="deleteObj('${gid}','${o.id}')">✕</button>
+    </div>
+  </div>`;
+}
+
+function updateGoalStats() {
+  const allObj  = goalsData.goals.flatMap(g => g.objectives || []);
+  const doneObj = allObj.filter(o => o.done);
+  const pct = allObj.length ? Math.round(doneObj.length / allObj.length * 100) : 0;
+  document.getElementById('statGoals').textContent = goalsData.goals.length;
+  document.getElementById('statObj').textContent   = allObj.length;
+  document.getElementById('statDone').textContent  = doneObj.length;
+  document.getElementById('statPct').textContent   = pct + '%';
+  document.getElementById('hs-goalspct').textContent = pct + '%';
+}
+
+function openGoalModal(id) {
+  editGoalId = id || null;
+  document.getElementById('goalModalTitle').textContent = id ? 'Edit Goal' : 'New Goal';
+  if (id) {
+    const g = goalsData.goals.find(x => x.id === id);
+    document.getElementById('gTitle').value    = g.title;
+    document.getElementById('gDesc').value     = g.desc || '';
+    document.getElementById('gPriority').value = g.priority || 'none';
+    document.getElementById('gDue').value      = g.due || '';
+  } else {
+    document.getElementById('gTitle').value = '';
+    document.getElementById('gDesc').value  = '';
+    document.getElementById('gPriority').value = 'none';
+    document.getElementById('gDue').value  = '';
+  }
+  document.getElementById('goalModal').classList.add('open');
+  setTimeout(() => document.getElementById('gTitle').focus(), 50);
+}
+function closeGoalModal() { document.getElementById('goalModal').classList.remove('open'); }
+
+function saveGoal() {
+  const title = document.getElementById('gTitle').value.trim();
+  if (!title) { toast('Please enter a goal title.'); return; }
+  if (editGoalId) {
+    const g = goalsData.goals.find(x => x.id === editGoalId);
+    g.title = title;
+    g.desc  = document.getElementById('gDesc').value.trim();
+    g.priority = document.getElementById('gPriority').value;
+    g.due   = document.getElementById('gDue').value || null;
+  } else {
+    goalsData.goals.push({ id:uid(), title,
+      desc: document.getElementById('gDesc').value.trim(),
+      priority: document.getElementById('gPriority').value,
+      due: document.getElementById('gDue').value || null,
+      done: false, createdAt: Date.now(), objectives: []
+    });
+  }
+  saveGoals(); closeGoalModal(); renderGoals();
+  toast(editGoalId ? 'Goal updated.' : 'Goal added!');
+}
+
+function toggleGoal(id) {
+  const g = goalsData.goals.find(x => x.id === id);
+  g.done = !g.done; saveGoals(); renderGoals();
+}
+function deleteGoal(id) {
+  if (!confirm('Delete this goal and all its objectives?')) return;
+  goalsData.goals = goalsData.goals.filter(x => x.id !== id);
+  saveGoals(); renderGoals(); toast('Goal deleted.');
+}
+
+function openObjModal(gid, oid) {
+  editObjGoalId = gid; editObjId = oid || null;
+  document.getElementById('objModalTitle').textContent = oid ? 'Edit Objective' : 'Add Objective';
+  if (oid) {
+    const g = goalsData.goals.find(x => x.id === gid);
+    const o = g.objectives.find(x => x.id === oid);
+    document.getElementById('oText').value = o.text;
+    document.getElementById('oDue').value  = o.due || '';
+  } else {
+    document.getElementById('oText').value = '';
+    document.getElementById('oDue').value  = '';
+  }
+  document.getElementById('objModal').classList.add('open');
+  setTimeout(() => document.getElementById('oText').focus(), 50);
+}
+function closeObjModal() { document.getElementById('objModal').classList.remove('open'); }
+
+function saveObj() {
+  const text = document.getElementById('oText').value.trim();
+  if (!text) { toast('Please enter an objective.'); return; }
+  const g = goalsData.goals.find(x => x.id === editObjGoalId);
+  if (editObjId) {
+    const o = g.objectives.find(x => x.id === editObjId);
+    o.text = text; o.due = document.getElementById('oDue').value || null;
+  } else {
+    g.objectives.push({ id:uid(), text, due: document.getElementById('oDue').value || null, done: false });
+  }
+  saveGoals(); closeObjModal(); renderGoals();
+  toast(editObjId ? 'Objective updated.' : 'Objective added!');
+}
+
+function quickAddObj(e, gid) {
+  if (e.key !== 'Enter') return;
+  const text = e.target.value.trim();
+  if (!text) return;
+  const g = goalsData.goals.find(x => x.id === gid);
+  g.objectives.push({ id:uid(), text, due:null, done:false });
+  saveGoals(); renderGoals();
+  const inp = document.querySelector(`#goal-${gid} .add-obj-input`);
+  if (inp) inp.focus();
+}
+
+function toggleObj(gid, oid) {
+  const g = goalsData.goals.find(x => x.id === gid);
+  const o = g.objectives.find(x => x.id === oid);
+  o.done = !o.done; saveGoals(); renderGoals();
+}
+function deleteObj(gid, oid) {
+  const g = goalsData.goals.find(x => x.id === gid);
+  g.objectives = g.objectives.filter(x => x.id !== oid);
+  saveGoals(); renderGoals();
+}
+
+document.getElementById('filterGroup').addEventListener('click', e => {
+  const btn = e.target.closest('.filter-btn');
+  if (!btn) return;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  goalFilter = btn.dataset.filter;
+  renderGoals();
+});
+document.getElementById('sortSelect').addEventListener('change', e => {
+  goalSort = e.target.value; renderGoals();
+});
+
+// ══════════════════════════════════════════════════════════════
+//  KEYBOARD / MODAL CLOSE
+// ══════════════════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeGoalModal(); closeObjModal(); closeAddOrder(); closeExpModal(); }
+});
+document.getElementById('goalModal').addEventListener('click', e => { if (e.target===e.currentTarget) closeGoalModal(); });
+document.getElementById('objModal').addEventListener('click', e => { if (e.target===e.currentTarget) closeObjModal(); });
+document.getElementById('addOrderModal').addEventListener('click', e => { if (e.target===e.currentTarget) closeAddOrder(); });
+document.getElementById('gTitle').addEventListener('keydown', e => { if (e.key==='Enter') saveGoal(); });
+document.getElementById('oText').addEventListener('keydown', e => { if (e.key==='Enter') saveObj(); });
+
+// ══════════════════════════════════════════════════════════════
+//  EXPENSES
+// ══════════════════════════════════════════════════════════════
+const EXP_KEY = 'vp_expenses_v1';
+const EXP_CATS = [
+  { name:'Filament / Materials', color:'#fb923c', type:'variable' },
+  { name:'Equipment / Printer',  color:'#a78bfa', type:'variable' },
+  { name:'Shipping Supplies',    color:'#60a5fa', type:'variable' },
+  { name:'Platform / Fees',      color:'#fbbf24', type:'fixed'    },
+  { name:'Marketing',            color:'#f472b6', type:'variable' },
+  { name:'Utilities',            color:'#2dd4bf', type:'fixed'    },
+  { name:'Rent / Storage',       color:'#34d399', type:'fixed'    },
+  { name:'Software / Tools',     color:'#818cf8', type:'fixed'    },
+  { name:'Other',                color:'#8892b0', type:'variable' },
+];
+let editExpId = null;
+let expSortCol = 'date', expSortDir = -1, expMonthFilter = 'all', currentExpMonth = 'all';
+
+function getExpenses() {
+  try { return JSON.parse(localStorage.getItem(EXP_KEY)) || []; } catch { return []; }
+}
+function saveExpenses(arr) { localStorage.setItem(EXP_KEY, JSON.stringify(arr)); }
+function catColor(name) { return (EXP_CATS.find(c => c.name === name) || {}).color || '#8892b0'; }
+
+// ── KPIs ──
+function renderExpenseKPIs() {
+  const exps   = getExpenses();
+  const mk     = THIS_MONTH;
+  const thisMo = exps.filter(e => e.date.startsWith(mk));
+  const totalMo = thisMo.reduce((s,e) => s + e.amount, 0);
+  const fixedMo = thisMo.filter(e => e.type === 'fixed').reduce((s,e) => s + e.amount, 0);
+  const varMo   = thisMo.filter(e => e.type === 'variable').reduce((s,e) => s + e.amount, 0);
+  const moProfit = getOrders().filter(o => o.date.startsWith(mk)).reduce((s,o) => s + o.salePrice - o.cogs, 0);
+  const net = moProfit - totalMo;
+  document.getElementById('eskpiSpend').textContent = fmt$(totalMo);
+  document.getElementById('eskpiFixed').textContent = fmt$(fixedMo);
+  document.getElementById('eskpiVar').textContent   = fmt$(varMo);
+  document.getElementById('eskpiNet').textContent   = fmt$(net);
+  document.getElementById('eskpiNet').style.color   = net >= 0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('hs-expenses').textContent = fmt$(totalMo);
+}
+
+// ── Category bars (overview) ──
+function renderExpCategoryBars() {
+  const exps    = getExpenses();
+  const mk      = currentExpMonth;
+  const filtered = mk === 'all' ? exps : exps.filter(e => e.date.startsWith(mk));
+  const totals  = {};
+  filtered.forEach(e => { totals[e.category] = (totals[e.category] || 0) + e.amount; });
+  const sorted  = Object.entries(totals).sort((a,b) => b[1]-a[1]);
+  const maxVal  = sorted.length ? sorted[0][1] : 1;
+  document.getElementById('expCatBars').innerHTML = sorted.length
+    ? sorted.map(([cat, total]) => {
+        const color = catColor(cat);
+        const pct   = (total / maxVal * 100).toFixed(0);
+        return `<div style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+            <span style="font-size:.83rem;font-weight:600;display:flex;align-items:center;gap:7px">
+              <span style="width:9px;height:9px;border-radius:50%;background:${color};display:inline-block;flex-shrink:0"></span>
+              ${esc(cat)}
+            </span>
+            <span style="font-size:.82rem;color:${color};font-variant-numeric:tabular-nums">${fmt$(total)}</span>
+          </div>
+          <div style="background:var(--surface2);border-radius:99px;height:6px">
+            <div style="width:${pct}%;background:${color};border-radius:99px;height:6px;opacity:.85"></div>
+          </div>
+        </div>`;
+      }).join('')
+    : '<div style="color:var(--text2);font-size:.83rem">No expenses logged yet. Click "+ Add Expense" to get started.</div>';
+}
+
+// ── Revenue vs Expenses bar chart ──
+function renderExpMonthlyChart() {
+  const exps       = getExpenses();
+  const revMonthly = byMonth(getOrders());
+  const expMonthly = {};
+  exps.forEach(e => { const mk = monthKey(e.date); expMonthly[mk] = (expMonthly[mk]||0) + e.amount; });
+  const allMks = [...new Set([...Object.keys(revMonthly), ...Object.keys(expMonthly)])].sort();
+  if (!allMks.length) { document.getElementById('expMonthlyChart').innerHTML = '<div style="color:var(--text2);font-size:.83rem;padding:20px">No data yet.</div>'; return; }
+  const maxVal = Math.max(...allMks.map(mk => Math.max(revMonthly[mk]?.revenue||0, expMonthly[mk]||0)), 1);
+  const W = Math.max(allMks.length * 90, 500), H = 200, pad = 44, barW = 28, gap = 62;
+  let bars = '', axes = '';
+  [0, 0.25, 0.5, 0.75, 1].forEach(pct => {
+    const y = pad + (H-pad*2)*(1-pct), v = Math.round(maxVal*pct);
+    axes += `<line x1="${pad}" x2="${W-10}" y1="${y}" y2="${y}" stroke="#2e3350" stroke-width="1"/>
+             <text x="${pad-6}" y="${y+4}" fill="#8892b0" font-size="9" text-anchor="end">$${v>=1000?(v/1000).toFixed(0)+'k':v}</text>`;
+  });
+  allMks.forEach((mk, i) => {
+    const x   = pad + i*(barW*2+gap);
+    const rev = revMonthly[mk]?.revenue||0, exp = expMonthly[mk]||0;
+    const rH  = Math.max(2, (rev/maxVal)*(H-pad*2)), eH = Math.max(2, (exp/maxVal)*(H-pad*2));
+    const ry  = H-pad-rH, ey = H-pad-eH;
+    bars += `<rect x="${x}" y="${ry}" width="${barW}" height="${rH}" fill="#34d39944" rx="3"/>
+             <rect x="${x+barW+4}" y="${ey}" width="${barW}" height="${eH}" fill="#f8717166" rx="3"/>
+             <text x="${x+barW}" y="${H-pad+14}" fill="#8892b0" font-size="9" text-anchor="middle">${monthLabel(mk)}</text>`;
+    if (rev > 0) bars += `<text x="${x+barW/2}" y="${ry-3}" fill="#34d399" font-size="8" text-anchor="middle">$${rev>=1000?(rev/1000).toFixed(1)+'k':Math.round(rev)}</text>`;
+    if (exp > 0) bars += `<text x="${x+barW+barW/2+4}" y="${ey-3}" fill="#f87171" font-size="8" text-anchor="middle">$${exp>=1000?(exp/1000).toFixed(1)+'k':Math.round(exp)}</text>`;
+  });
+  const legend = `<text x="${W-180}" y="18" fill="#34d399" font-size="10" font-weight="600">■ Revenue</text>
+                  <text x="${W-100}" y="18" fill="#f87171" font-size="10" font-weight="600">■ Expenses</text>`;
+  document.getElementById('expMonthlyChart').innerHTML =
+    `<svg class="chart" viewBox="0 0 ${W} ${H}" style="min-width:${W}px;height:${H}px">${axes}${bars}${legend}</svg>`;
+}
+
+// ── Recent expenses list ──
+function renderRecentExpenses() {
+  const exps = getExpenses().sort((a,b) => b.date.localeCompare(a.date)).slice(0, 8);
+  document.getElementById('expRecentList').innerHTML = exps.length
+    ? exps.map(e => `<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #1e2138">
+        <span style="width:9px;height:9px;border-radius:50%;background:${catColor(e.category)};flex-shrink:0"></span>
+        <span style="flex:1;font-size:.83rem;font-weight:600">${esc(e.description)}</span>
+        <span style="font-size:.73rem;color:var(--text2)">${esc(e.category)}</span>
+        <span style="font-size:.83rem;color:var(--red);font-variant-numeric:tabular-nums;white-space:nowrap">${fmt$(e.amount)}</span>
+        <span style="font-size:.72rem;color:var(--text2);white-space:nowrap">${fmtDate(e.date)}</span>
+        <button class="icon-btn" onclick="openExpModal('${e.id}')">✏️</button>
+        <button class="icon-btn" onclick="deleteExpense('${e.id}')">✕</button>
+      </div>`).join('')
+    : '<div style="color:var(--text2);font-size:.83rem;padding:12px 0">No expenses logged yet.</div>';
+}
+
+// ── All expenses table ──
+function renderExpMonthFilters() {
+  const months = [...new Set(getExpenses().map(e => monthKey(e.date)))].sort();
+  document.getElementById('expMonthFilters').innerHTML = ['all', ...months].map(mk => {
+    const label = mk === 'all' ? 'All Time' : monthLabel(mk);
+    return `<div class="filter-chip ${expMonthFilter===mk?'active':''}" onclick="setExpMonthFilter('${mk}')">${label}</div>`;
+  }).join('');
+}
+function setExpMonthFilter(mk) {
+  expMonthFilter = mk; currentExpMonth = mk;
+  renderExpMonthFilters(); renderExpTable(); renderExpCategoryBars(); renderExpenseKPIs();
+}
+
+function renderExpTable() {
+  let exps = getExpenses();
+  if (expMonthFilter !== 'all') exps = exps.filter(e => e.date.startsWith(expMonthFilter));
+  const q = (document.getElementById('expSearch')?.value || '').toLowerCase();
+  if (q) exps = exps.filter(e => [e.description, e.category, e.type].join(' ').toLowerCase().includes(q));
+  exps.sort((a,b) => {
+    const av = a[expSortCol], bv = b[expSortCol];
+    return (typeof av === 'string' ? av.localeCompare(bv) : av - bv) * expSortDir;
+  });
+  const total = exps.reduce((s,e) => s + e.amount, 0);
+  const rows  = exps.map(e => {
+    const color = catColor(e.category);
+    return `<tr>
+      <td style="white-space:nowrap">${fmtDate(e.date)}</td>
+      <td><div style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0"></span><strong>${esc(e.description)}</strong></div></td>
+      <td><span style="font-size:.75rem;color:${color};font-weight:700">${esc(e.category)}</span></td>
+      <td><span class="badge ${e.type==='fixed'?'badge-blue':'badge-yellow'}">${e.type}</span></td>
+      <td class="num" style="color:var(--red)">${fmt$(e.amount)}</td>
+      <td style="text-align:right;white-space:nowrap">
+        <button class="icon-btn" onclick="openExpModal('${e.id}')">✏️</button>
+        <button class="icon-btn" onclick="deleteExpense('${e.id}')">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+  document.getElementById('expTbody').innerHTML = rows + (exps.length
+    ? `<tr style="background:var(--surface2);font-weight:700">
+        <td colspan="4" style="color:var(--text2)">Total — ${exps.length} expense${exps.length!==1?'s':''}</td>
+        <td class="num" style="color:var(--red)">${fmt$(total)}</td><td></td>
+      </tr>`
+    : '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:40px">No expenses yet. Click "+ Add Expense" to start.</td></tr>');
+}
+function sortExpTable(col) {
+  if (expSortCol === col) expSortDir *= -1; else { expSortCol = col; expSortDir = -1; }
+  renderExpTable();
+}
+
+// ── By Category ──
+function renderExpByCategory() {
+  const exps      = getExpenses();
+  const catTotals = {};
+  EXP_CATS.forEach(c => { catTotals[c.name] = { total:0, count:0, color:c.color, type:c.type }; });
+  exps.forEach(e => {
+    if (!catTotals[e.category]) catTotals[e.category] = { total:0, count:0, color:catColor(e.category), type:e.type };
+    catTotals[e.category].total += e.amount;
+    catTotals[e.category].count++;
+  });
+  const sorted     = Object.entries(catTotals).sort((a,b) => b[1].total - a[1].total);
+  const grandTotal = sorted.reduce((s,[,v]) => s + v.total, 0);
+  document.getElementById('expCatGrid').innerHTML = sorted.map(([cat, d]) => {
+    if (d.total === 0) return '';
+    const pct = grandTotal > 0 ? (d.total/grandTotal*100).toFixed(1) : 0;
+    return `<div class="card" style="border-left:3px solid ${d.color}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="width:10px;height:10px;border-radius:50%;background:${d.color};flex-shrink:0"></span>
+        <span style="font-size:.85rem;font-weight:700;flex:1">${esc(cat)}</span>
+        <span class="badge ${d.type==='fixed'?'badge-blue':'badge-yellow'}">${d.type}</span>
+      </div>
+      <div style="font-size:1.4rem;font-weight:800;color:${d.color}">${fmt$(d.total)}</div>
+      <div style="font-size:.72rem;color:var(--text2);margin-top:4px">${d.count} entry${d.count!==1?'s':''} · ${pct}% of total</div>
+      <div style="background:var(--surface2);border-radius:99px;height:4px;margin-top:10px">
+        <div style="width:${pct}%;background:${d.color};border-radius:99px;height:4px;opacity:.85"></div>
+      </div>
+    </div>`;
+  }).filter(Boolean).join('') || '<div style="color:var(--text2);grid-column:1/-1;padding:40px;text-align:center">No expenses logged yet.</div>';
+}
+
+// ── vs Revenue ──
+function renderExpVsRevenue() {
+  const exps       = getExpenses();
+  const revMonthly = byMonth(getOrders());
+  const expMonthly = {};
+  exps.forEach(e => { const mk = monthKey(e.date); expMonthly[mk] = (expMonthly[mk]||0) + e.amount; });
+  const allMks = [...new Set([...Object.keys(revMonthly), ...Object.keys(expMonthly)])].sort();
+  if (!allMks.length) { document.getElementById('expVsRevTable').innerHTML = '<div style="color:var(--text2);padding:20px">No data yet.</div>'; return; }
+  const rows = allMks.map(mk => {
+    const rev   = revMonthly[mk]?.revenue || 0;
+    const gross = revMonthly[mk]?.profit  || 0;
+    const exp   = expMonthly[mk] || 0;
+    const net   = gross - exp;
+    const margin = rev > 0 ? (net/rev*100).toFixed(1) : '—';
+    const netColor = net >= 0 ? 'var(--green)' : 'var(--red)';
+    return `<tr>
+      <td style="font-weight:600">${monthLabel(mk)}</td>
+      <td class="num green">${fmt$(rev)}</td>
+      <td class="num" style="color:var(--accent)">${fmt$(gross)}</td>
+      <td class="num" style="color:var(--red)">${exp > 0 ? fmt$(exp) : '—'}</td>
+      <td class="num" style="color:${netColor}">${fmt$(net)}</td>
+      <td class="num" style="color:${netColor}">${margin !== '—' ? margin + '%' : '—'}</td>
+    </tr>`;
+  }).join('');
+  // Totals row
+  const totRev   = allMks.reduce((s,mk) => s + (revMonthly[mk]?.revenue||0), 0);
+  const totGross = allMks.reduce((s,mk) => s + (revMonthly[mk]?.profit||0), 0);
+  const totExp   = allMks.reduce((s,mk) => s + (expMonthly[mk]||0), 0);
+  const totNet   = totGross - totExp;
+  document.getElementById('expVsRevTable').innerHTML = `<table>
+    <thead><tr>
+      <th>Month</th><th class="num">Revenue</th><th class="num">Gross Profit</th>
+      <th class="num">Expenses</th><th class="num">Net Profit</th><th class="num">Net Margin</th>
+    </tr></thead>
+    <tbody>${rows}
+    <tr style="background:var(--surface2);font-weight:700">
+      <td>All Time</td>
+      <td class="num green">${fmt$(totRev)}</td>
+      <td class="num" style="color:var(--accent)">${fmt$(totGross)}</td>
+      <td class="num" style="color:var(--red)">${fmt$(totExp)}</td>
+      <td class="num" style="color:${totNet>=0?'var(--green)':'var(--red)'}">${fmt$(totNet)}</td>
+      <td class="num" style="color:${totNet>=0?'var(--green)':'var(--red)'}">${totRev>0?(totNet/totRev*100).toFixed(1)+'%':'—'}</td>
+    </tr></tbody>
+  </table>`;
+}
+
+// ── Modal ──
+function openExpModal(id) {
+  editExpId = id || null;
+  document.getElementById('expModalTitle').textContent = id ? 'Edit Expense' : 'Add Expense';
+  if (id) {
+    const e = getExpenses().find(x => x.id === id);
+    document.getElementById('expDate').value   = e.date;
+    document.getElementById('expCat').value    = e.category;
+    document.getElementById('expDesc').value   = e.description;
+    document.getElementById('expAmount').value = e.amount;
+    document.getElementById('expType').value   = e.type;
+  } else {
+    document.getElementById('expDate').value   = TODAY;
+    document.getElementById('expCat').value    = 'Filament / Materials';
+    document.getElementById('expDesc').value   = '';
+    document.getElementById('expAmount').value = '';
+    document.getElementById('expType').value   = 'variable';
+  }
+  document.getElementById('expModal').classList.add('open');
+  setTimeout(() => document.getElementById('expDesc').focus(), 50);
+}
+function closeExpModal() { document.getElementById('expModal').classList.remove('open'); }
+
+function saveExpense() {
+  const amount = parseFloat(document.getElementById('expAmount').value);
+  const desc   = document.getElementById('expDesc').value.trim();
+  const date   = document.getElementById('expDate').value;
+  if (!desc || !date || isNaN(amount) || amount <= 0) { toast('Fill in Date, Description, and Amount.'); return; }
+  const arr = getExpenses();
+  if (editExpId) {
+    const e = arr.find(x => x.id === editExpId);
+    e.date = date; e.category = document.getElementById('expCat').value;
+    e.description = desc; e.amount = amount; e.type = document.getElementById('expType').value;
+  } else {
+    arr.push({ id:uid(), date, category: document.getElementById('expCat').value,
+      description: desc, amount, type: document.getElementById('expType').value });
+  }
+  saveExpenses(arr);
+  closeExpModal();
+  renderExpensesAll();
+  toast(editExpId ? 'Expense updated.' : 'Expense added!');
+}
+
+function deleteExpense(id) {
+  if (!confirm('Delete this expense?')) return;
+  saveExpenses(getExpenses().filter(e => e.id !== id));
+  renderExpensesAll();
+  toast('Expense deleted.');
+}
+
+function renderExpensesAll() {
+  renderExpenseKPIs();
+  renderExpCategoryBars();
+  renderExpMonthlyChart();
+  renderRecentExpenses();
+  renderExpMonthFilters();
+  renderExpTable();
+  renderExpByCategory();
+  renderExpVsRevenue();
+}
+
+// ── Expense sub-tabs ──
+document.querySelectorAll('.exp-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.exp-tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.exp-panel').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('exppanel-' + t.dataset.etab).classList.add('active');
+  });
+});
+document.getElementById('expModal').addEventListener('click', e => { if (e.target===e.currentTarget) closeExpModal(); });
+
+// ══════════════════════════════════════════════════════════════
+//  DATA TOOLS — backup / restore / CSV export
+// ══════════════════════════════════════════════════════════════
+function downloadBlob(filename, text, mime) {
+  const blob = new Blob([text], { type: mime || 'text/plain;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename; document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function exportBackup() {
+  const data = {
+    _app: 'Vault & Pine Collective',
+    _version: 1,
+    exportedAt: new Date().toISOString(),
+    orders:   JSON.parse(localStorage.getItem(LS_ORDERS) || '[]'),
+    goals:    JSON.parse(localStorage.getItem(GOALS_KEY) || '{"goals":[]}'),
+    expenses: JSON.parse(localStorage.getItem(EXP_KEY)   || '[]'),
+  };
+  downloadBlob(`vault-pine-backup-${TODAY}.json`, JSON.stringify(data, null, 2), 'application/json');
+  toast('Backup downloaded.');
+}
+
+function importBackup(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    let d;
+    try { d = JSON.parse(reader.result); } catch { toast('Could not read that file — not valid JSON.'); return; }
+    if (!d || (d.orders === undefined && d.goals === undefined && d.expenses === undefined)) {
+      toast('That file is not a Vault & Pine backup.'); return;
+    }
+    if (!confirm('Restore this backup? It replaces your currently saved orders, goals, and expenses (the built-in historical orders are kept).')) return;
+    if (d.orders   !== undefined) localStorage.setItem(LS_ORDERS, JSON.stringify(d.orders));
+    if (d.goals    !== undefined) localStorage.setItem(GOALS_KEY, JSON.stringify(d.goals));
+    if (d.expenses !== undefined) localStorage.setItem(EXP_KEY,   JSON.stringify(d.expenses));
+    loadGoals(); renderSalesAll(); renderGoals(); renderExpensesAll();
+    toast('Backup restored.');
+  };
+  reader.readAsText(file);
+  document.getElementById('importFile').value = '';
+}
+
+function csvCell(v) {
+  const s = String(v == null ? '' : v);
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+function exportOrdersCSV() {
+  const orders = getOrders();
+  const head = ['Date','Customer','Product','Sets','Sale Price','COGS','Profit','ROI %','Referred By','Notes'];
+  const lines = [head.join(',')];
+  orders.forEach(o => {
+    const profit = o.salePrice - o.cogs;
+    const roi = o.cogs ? (profit / o.cogs * 100).toFixed(1) : '';
+    lines.push([o.date, o.customer, o.product, o.sets, o.salePrice.toFixed(2),
+      o.cogs.toFixed(2), profit.toFixed(2), roi, o.referredBy || '', o.notes || ''
+    ].map(csvCell).join(','));
+  });
+  downloadBlob(`vault-pine-orders-${TODAY}.csv`, lines.join('\r\n'), 'text/csv');
+  toast('Orders exported to CSV.');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════════
+document.getElementById('headerDate').textContent =
+  NOW.toLocaleDateString('en-US', {weekday:'short', year:'numeric', month:'long', day:'numeric'});
+
+initOrders();
+loadGoals();
+renderSalesAll();
+renderGoals();
+renderExpensesAll();
+</script>
+</body>
+</html>
