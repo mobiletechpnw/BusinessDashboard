@@ -2166,14 +2166,18 @@ function downloadBlob(filename, text, mime) {
 function exportBackup() {
   const data = {
     _app: 'Vault & Pine Collective',
-    _version: 1,
+    _version: 2,
     exportedAt: new Date().toISOString(),
-    orders:   JSON.parse(localStorage.getItem(LS_ORDERS) || '[]'),
-    goals:    JSON.parse(localStorage.getItem(GOALS_KEY) || '{"goals":[]}'),
-    expenses: JSON.parse(localStorage.getItem(EXP_KEY)   || '[]'),
+    orders:       JSON.parse(localStorage.getItem(LS_ORDERS)       || '[]'),
+    goals:        JSON.parse(localStorage.getItem(GOALS_KEY)        || '{"goals":[]}'),
+    expenses:     JSON.parse(localStorage.getItem(EXP_KEY)          || '[]'),
+    jettags:      JSON.parse(localStorage.getItem(JT_KEY)           || '[]'),
+    jtRestocks:   JSON.parse(localStorage.getItem(JT_RESTOCK_KEY)   || '[]'),
+    pins:         JSON.parse(localStorage.getItem(PIN_KEY)          || '[]'),
+    pinRestocks:  JSON.parse(localStorage.getItem(PIN_RESTOCK_KEY)  || '[]'),
   };
   downloadBlob(`vault-pine-backup-${TODAY}.json`, JSON.stringify(data, null, 2), 'application/json');
-  toast('Backup downloaded.');
+  toast('Full backup downloaded (includes Jet Tags & Pins).');
 }
 
 function importBackup(file) {
@@ -2182,15 +2186,21 @@ function importBackup(file) {
   reader.onload = () => {
     let d;
     try { d = JSON.parse(reader.result); } catch { toast('Could not read that file — not valid JSON.'); return; }
-    if (!d || (d.orders === undefined && d.goals === undefined && d.expenses === undefined)) {
+    if (!d || (d.orders === undefined && d.goals === undefined && d.expenses === undefined && d.jettags === undefined && d.pins === undefined)) {
       toast('That file is not a Vault & Pine backup.'); return;
     }
-    if (!confirm('Restore this backup? It replaces your currently saved orders, goals, and expenses (the built-in historical orders are kept).')) return;
-    if (d.orders   !== undefined) localStorage.setItem(LS_ORDERS, JSON.stringify(d.orders));
-    if (d.goals    !== undefined) localStorage.setItem(GOALS_KEY, JSON.stringify(d.goals));
-    if (d.expenses !== undefined) localStorage.setItem(EXP_KEY,   JSON.stringify(d.expenses));
+    if (!confirm('Restore this backup? It replaces your currently saved data (orders, goals, expenses, Jet Tags, Pins).')) return;
+    if (d.orders      !== undefined) localStorage.setItem(LS_ORDERS,       JSON.stringify(d.orders));
+    if (d.goals       !== undefined) localStorage.setItem(GOALS_KEY,        JSON.stringify(d.goals));
+    if (d.expenses    !== undefined) localStorage.setItem(EXP_KEY,          JSON.stringify(d.expenses));
+    if (d.jettags     !== undefined) localStorage.setItem(JT_KEY,           JSON.stringify(d.jettags));
+    if (d.jtRestocks  !== undefined) localStorage.setItem(JT_RESTOCK_KEY,   JSON.stringify(d.jtRestocks));
+    if (d.pins        !== undefined) localStorage.setItem(PIN_KEY,          JSON.stringify(d.pins));
+    if (d.pinRestocks !== undefined) localStorage.setItem(PIN_RESTOCK_KEY,  JSON.stringify(d.pinRestocks));
     loadGoals(); renderSalesAll(); renderGoals(); renderExpensesAll();
-    toast('Backup restored.');
+    if (typeof renderJtAll === 'function') renderJtAll();
+    if (typeof renderPinsAll === 'function') renderPinsAll();
+    toast('Backup restored — all data including Jet Tags & Pins.');
   };
   reader.readAsText(file);
   document.getElementById('importFile').value = '';
