@@ -3023,7 +3023,11 @@ function importBackup(file) {
     loadGoals(); renderSalesAll(); renderGoals(); renderExpensesAll();
     if (typeof renderJtAll === 'function') renderJtAll();
     if (typeof renderPinAll === 'function') renderPinAll();
-    toast('Backup restored — all data including Jet Tags & Pins.');
+    toast('Restored ✓ — syncing to cloud…');
+    // Push everything to Supabase immediately after restore
+    if (window.VpcSync) {
+      window.VpcSync.pushAll().then(() => toast('✅ All data restored and saved to cloud.'));
+    }
   };
   reader.readAsText(file);
   document.getElementById('importFile').value = '';
