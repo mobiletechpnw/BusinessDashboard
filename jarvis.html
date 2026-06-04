@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>J.A.R.V.I.S.</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#010a18;--surface:rgba(0,30,70,0.6);--border:rgba(0,180,255,0.25);
+  --accent:#00b4ff;--accent2:#0affef;--accent3:#4d9fff;
+  --text:#c8e8ff;--text2:#5a8aaa;--red:#ff4060;--green:#00ffaa;--yellow:#ffd060;
+  --glow:0 0 12px rgba(0,180,255,0.5);
+}
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Share Tech Mono',monospace;
+  min-height:100vh;overflow:hidden;
+  background-image:
+    linear-gradient(rgba(0,180,255,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,180,255,0.03) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+
+/* ── SCANLINE ── */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);
+}
+
+/* ── LAYOUT ── */
+.hud{display:grid;grid-template-columns:220px 1fr 220px;grid-template-rows:60px 1fr 120px;height:100vh;gap:0;padding:10px;gap:8px;}
+
+/* ── TOP BAR ── */
+.top-bar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);padding:0 12px;
+  background:var(--surface);border:1px solid var(--border);border-radius:4px;
+}
+.brand{font-family:'Orbitron',monospace;font-size:0.75rem;font-weight:900;letter-spacing:3px;color:var(--accent);text-shadow:var(--glow);}
+.brand span{color:var(--accent2);}
+.objective{font-size:0.6rem;color:var(--text2);letter-spacing:1px;}
+.status-pills{display:flex;gap:8px;}
+.pill{font-size:0.55rem;padding:3px 10px;border:1px solid var(--accent);border-radius:2px;color:var(--accent);letter-spacing:1px;text-shadow:var(--glow);}
+.pill.green{border-color:var(--green);color:var(--green);text-shadow:0 0 8px rgba(0,255,170,0.5);}
+.clock-area{text-align:right;}
+#clock{font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:700;color:var(--accent2);text-shadow:0 0 15px rgba(10,255,239,0.7);letter-spacing:2px;}
+#dateline{font-size:0.55rem;color:var(--text2);letter-spacing:1px;}
+
+/* ── LEFT PANEL ── */
+.left-panel{display:flex;flex-direction:column;gap:8px;overflow:hidden;}
+.panel-box{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:12px;}
+.panel-title{font-size:0.58rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:6px;}
+
+/* Vitals */
+.vital{margin-bottom:8px;}
+.vital-row{display:flex;justify-content:space-between;font-size:0.6rem;margin-bottom:3px;}
+.vital-label{color:var(--text2);}
+.vital-val{color:var(--accent2);}
+.vital-bar{height:3px;background:rgba(0,180,255,0.1);border-radius:2px;overflow:hidden;}
+.vital-fill{height:100%;border-radius:2px;transition:width 1s;}
+.fill-blue{background:linear-gradient(90deg,var(--accent3),var(--accent2));box-shadow:0 0 6px rgba(0,180,255,0.6);}
+.fill-green{background:linear-gradient(90deg,#00aa77,var(--green));box-shadow:0 0 6px rgba(0,255,170,0.5);}
+.fill-yellow{background:linear-gradient(90deg,#cc8800,var(--yellow));}
+.fill-red{background:linear-gradient(90deg,#cc0022,var(--red));}
+
+/* Telemetry */
+.telemetry{flex:1;overflow:hidden;}
+#telem-log{font-size:0.55rem;color:var(--text2);line-height:1.7;overflow:hidden;max-height:180px;}
+#telem-log .t-entry{display:flex;gap:8px;}
+#telem-log .t-time{color:var(--accent3);min-width:50px;}
+#telem-log .t-msg{color:var(--text2);}
+#telem-log .t-ok{color:var(--green);}
+#telem-log .t-warn{color:var(--yellow);}
+
+/* ── CENTER ── */
+.center-panel{position:relative;display:flex;align-items:center;justify-content:center;}
+#radar-canvas{width:100%;height:100%;display:block;}
+
+/* Voice indicator */
+.voice-ring{
+  position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+  width:60px;height:60px;border-radius:50%;
+  border:2px solid var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all 0.3s;
+  box-shadow:0 0 20px rgba(0,180,255,0.3);
+  background:rgba(0,30,70,0.8);
+}
+.voice-ring:hover{box-shadow:0 0 30px rgba(0,180,255,0.6);}
+.voice-ring.listening{border-color:var(--red);box-shadow:0 0 30px rgba(255,64,96,0.7);animation:pulse-ring 1s infinite;}
+.voice-ring svg{width:22px;height:22px;fill:var(--accent);}
+.voice-ring.listening svg{fill:var(--red);}
+@keyframes pulse-ring{0%,100%{transform:translateX(-50%) scale(1);}50%{transform:translateX(-50%) scale(1.1);}}
+
+/* ── RIGHT PANEL ── */
+.right-panel{display:flex;flex-direction:column;gap:8px;overflow:hidden;}
+.radar-mini{aspect-ratio:1;position:relative;}
+#mini-radar{width:100%;height:100%;display:block;}
+
+.diagnostics{flex:1;overflow:hidden;}
+#diag-log{font-size:0.55rem;color:var(--text2);line-height:1.7;overflow:hidden;max-height:200px;}
+
+/* ── BOTTOM BAR ── */
+.bottom-bar{
+  grid-column:1/-1;background:var(--surface);border:1px solid var(--border);
+  border-radius:4px;padding:10px 16px;display:flex;flex-direction:column;gap:8px;
+}
+.bottom-top{display:flex;align-items:center;justify-content:space-between;}
+.roll-call-label{font-size:0.55rem;color:var(--text2);letter-spacing:2px;}
+#transcript-area{
+  font-family:'Orbitron',monospace;font-size:0.85rem;font-weight:700;
+  color:var(--accent2);letter-spacing:1px;text-shadow:0 0 10px rgba(10,255,239,0.5);
+  min-height:22px;
+}
+.tx-badge{font-size:0.6rem;color:var(--accent);border:1px solid var(--accent);padding:2px 8px;border-radius:2px;}
+.nav-buttons{display:flex;gap:8px;align-items:center;}
+.nav-btn{
+  font-family:'Share Tech Mono',monospace;font-size:0.6rem;
+  padding:5px 14px;border:1px solid var(--border);border-radius:3px;
+  background:rgba(0,30,70,0.5);color:var(--text2);cursor:pointer;
+  letter-spacing:1px;transition:all 0.2s;text-decoration:none;display:inline-block;
+}
+.nav-btn:hover,.nav-btn.active{border-color:var(--accent);color:var(--accent);box-shadow:var(--glow);background:rgba(0,80,160,0.3);}
+.nav-btn.active{color:var(--accent2);border-color:var(--accent2);}
+
+/* ── RESPONSE OVERLAY ── */
+#response-overlay{
+  position:fixed;bottom:150px;left:50%;transform:translateX(-50%);
+  background:rgba(0,15,40,0.95);border:1px solid var(--accent2);
+  border-radius:6px;padding:14px 24px;max-width:500px;width:90%;
+  font-size:0.8rem;color:var(--accent2);line-height:1.7;letter-spacing:0.5px;
+  text-align:center;display:none;z-index:500;
+  box-shadow:0 0 30px rgba(10,255,239,0.2);
+}
+#response-overlay.show{display:block;animation:fadeIn 0.3s;}
+@keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(10px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+
+/* Corner decorations */
+.corner{position:absolute;width:16px;height:16px;border-color:var(--accent);border-style:solid;opacity:0.6;}
+.corner.tl{top:6px;left:6px;border-width:2px 0 0 2px;}
+.corner.tr{top:6px;right:6px;border-width:2px 2px 0 0;}
+.corner.bl{bottom:6px;left:6px;border-width:0 0 2px 2px;}
+.corner.br{bottom:6px;right:6px;border-width:0 2px 2px 0;}
+</style>
+</head>
+<body>
+
+<div class="hud">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="brand">J.<span>A</span>.R.V.I.S.</div>
+      <div class="objective">OBJECTIVE · BUILD $50K MRR BUSINESS IN 3 MONTHS</div>
+    </div>
+    <div class="status-pills">
+      <div class="pill green">● ONLINE</div>
+      <div class="pill">● SECURE</div>
+      <div class="pill">● ENCRYPTED</div>
+      <div class="pill">● AUTO-LVL9</div>
+    </div>
+    <div class="clock-area">
+      <div id="clock">00:00:00.00</div>
+      <div id="dateline">LOADING DATE...</div>
+    </div>
+  </div>
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+
+    <div class="panel-box">
+      <div class="panel-title">{ SYSTEM VITALS }</div>
+      <div class="vital">
+        <div class="vital-row"><span class="vital-label">NEURAL CORE</span><span class="vital-val" id="v1">37.5%</span></div>
+        <div class="vital-bar"><div class="vital-fill fill-blue" id="v1b" style="width:37.5%"></div></div>
+      </div>
+      <div class="vital">
+        <div class="vital-row"><span class="vital-label">MEMORY</span><span class="vital-val" id="v2">75.8%</span></div>
+        <div class="vital-bar"><div class="vital-fill fill-green" id="v2b" style="width:75.8%"></div></div>
+      </div>
+      <div class="vital">
+        <div class="vital-row"><span class="vital-label">LATENCY</span><span class="vital-val" id="v3">0.31ms</span></div>
+        <div class="vital-bar"><div class="vital-fill fill-blue" id="v3b" style="width:20%"></div></div>
+      </div>
+      <div class="vital">
+        <div class="vital-row"><span class="vital-label">SIGNAL</span><span class="vital-val" id="v4">96.9%</span></div>
+        <div class="vital-bar"><div class="vital-fill fill-green" id="v4b" style="width:96.9%"></div></div>
+      </div>
+      <div class="vital">
+        <div class="vital-row"><span class="vital-label">THERMAL</span><span class="vital-val" id="v5">38.1°C</span></div>
+        <div class="vital-bar"><div class="vital-fill fill-yellow" id="v5b" style="width:45%"></div></div>
+      </div>
+      <div class="vital">
+        <div class="vital-row"><span class="vital-label">THROUGHPUT</span><span class="vital-val" id="v6">1.4GB/s</span></div>
+        <div class="vital-bar"><div class="vital-fill fill-blue" id="v6b" style="width:60%"></div></div>
+      </div>
+    </div>
+
+    <div class="panel-box telemetry">
+      <div class="panel-title">{ TELEMETRY }</div>
+      <div id="telem-log"></div>
+    </div>
+
+  </div>
+
+  <!-- CENTER RADAR -->
+  <div class="center-panel">
+    <canvas id="radar-canvas"></canvas>
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+    <div class="voice-ring" id="mic-btn" title="Click or say 'Hey Jarvis'">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3zm-1 3a1 1 0 0 1 2 0v8a1 1 0 0 1-2 0V4zm-6 8a7 7 0 0 0 14 0h-2a5 5 0 0 1-10 0H5zm7 9v-2h-2v2H8v2h8v-2h-2z"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+
+    <div class="panel-box radar-mini">
+      <div class="panel-title">PROXIMITY }</div>
+      <canvas id="mini-radar"></canvas>
+    </div>
+
+    <div class="panel-box" style="height:80px;">
+      <div class="panel-title">AUDIO I/O</div>
+      <canvas id="audio-canvas" style="width:100%;height:36px;display:block;"></canvas>
+      <div style="display:flex;justify-content:space-between;font-size:0.5rem;color:var(--text2);margin-top:4px;">
+        <span id="audio-label">40Hz · 24KIT</span><span>TX · RXM</span>
+      </div>
+    </div>
+
+    <div class="panel-box diagnostics">
+      <div class="panel-title">DIAGNOSTICS }</div>
+      <div id="diag-log"></div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div class="bottom-bar">
+    <div class="bottom-top">
+      <div>
+        <div class="roll-call-label">ROLL CALL · ACTIVE SPEAKER</div>
+        <div id="transcript-area">JARVIS COMMAND CENTER / MANAGER AGENT</div>
+      </div>
+      <div class="tx-badge">TX · 69K</div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <div style="font-size:0.58rem;color:var(--text2);">
+        COMMANDS: <span style="color:var(--accent2)">"HEY JARVIS"</span> · OPEN [SALES / GOALS / VAULT] · STATUS · TIME
+      </div>
+      <div class="nav-buttons">
+        <div class="nav-btn active" id="btn-jarvis">● JARVIS</div>
+        <a class="nav-btn" href="vault-pine-collective.html">+ VAULT</a>
+        <a class="nav-btn" href="sales-dashboard.html">+ SALES</a>
+        <a class="nav-btn" href="goals-dashboard.html">+ GOALS</a>
+        <a class="nav-btn" href="index.html">⌂ HOME</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Response Overlay -->
+<div id="response-overlay"></div>
+
+<script>
+// ── CLOCK ──
+function updateClock(){
+  const now=new Date();
+  const h=String(now.getHours()).padStart(2,'0');
+  const m=String(now.getMinutes()).padStart(2,'0');
+  const s=String(now.getSeconds()).padStart(2,'0');
+  const ms=String(Math.floor(now.getMilliseconds()/10)).padStart(2,'0');
+  document.getElementById('clock').textContent=`${h}:${m}:${s}.${ms}`;
+  document.getElementById('dateline').textContent=now.toLocaleDateString('en-US',{day:'2-digit',month:'short',year:'numeric'}).toUpperCase();
+}
+setInterval(updateClock,50);updateClock();
+
+// ── RADAR CANVAS ──
+const rc=document.getElementById('radar-canvas');
+const rctx=rc.getContext('2d');
+function resizeRadar(){rc.width=rc.offsetWidth;rc.height=rc.offsetHeight;}
+resizeRadar();window.addEventListener('resize',resizeRadar);
+
+const particles=[];
+for(let i=0;i<300;i++){
+  const angle=Math.random()*Math.PI*2;
+  const dist=Math.random();
+  particles.push({angle,dist,speed:(Math.random()*0.0003+0.0001),size:Math.random()*1.8+0.3,opacity:Math.random()});
+}
+
+let radarAngle=0;
+function drawRadar(){
+  const w=rc.width,h=rc.height;
+  const cx=w/2,cy=h/2;
+  const R=Math.min(w,h)*0.42;
+  rctx.clearRect(0,0,w,h);
+
+  // Grid rings
+  rctx.strokeStyle='rgba(0,180,255,0.08)';rctx.lineWidth=1;
+  [0.25,0.5,0.75,1].forEach(r=>{
+    rctx.beginPath();rctx.arc(cx,cy,R*r,0,Math.PI*2);rctx.stroke();
+  });
+  // Grid lines
+  for(let i=0;i<8;i++){
+    const a=i*Math.PI/4;
+    rctx.beginPath();rctx.moveTo(cx,cy);
+    rctx.lineTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);rctx.stroke();
+  }
+
+  // Particles
+  particles.forEach(p=>{
+    p.angle+=p.speed;
+    const px=cx+Math.cos(p.angle)*p.dist*R;
+    const py=cy+Math.sin(p.angle)*p.dist*R;
+    const distFromSweep=((p.angle-radarAngle)%(Math.PI*2)+Math.PI*2)%(Math.PI*2);
+    const fade=distFromSweep<1.5?1-distFromSweep/1.5:0;
+    const alpha=0.3+fade*0.7;
+    rctx.beginPath();rctx.arc(px,py,p.size,0,Math.PI*2);
+    rctx.fillStyle=`rgba(0,180,255,${alpha*p.opacity+0.1})`;rctx.fill();
+  });
+
+  // Center glow
+  const grad=rctx.createRadialGradient(cx,cy,0,cx,cy,R*0.3);
+  grad.addColorStop(0,'rgba(0,180,255,0.15)');grad.addColorStop(1,'transparent');
+  rctx.fillStyle=grad;rctx.beginPath();rctx.arc(cx,cy,R*0.3,0,Math.PI*2);rctx.fill();
+
+  // Sweep
+  const sweepGrad=rctx.createConicalGradient?null:null;
+  rctx.save();rctx.translate(cx,cy);rctx.rotate(radarAngle);
+  const sg=rctx.createLinearGradient(0,0,R,0);
+  sg.addColorStop(0,'rgba(0,255,180,0.5)');sg.addColorStop(1,'rgba(0,255,180,0)');
+  rctx.fillStyle=sg;rctx.beginPath();rctx.moveTo(0,0);
+  rctx.arc(0,0,R,-0.3,0);rctx.closePath();rctx.fill();
+  rctx.restore();
+  radarAngle+=0.015;
+
+  // Outer ring
+  rctx.beginPath();rctx.arc(cx,cy,R,0,Math.PI*2);
+  rctx.strokeStyle='rgba(0,180,255,0.4)';rctx.lineWidth=1.5;rctx.stroke();
+
+  requestAnimationFrame(drawRadar);
+}
+drawRadar();
+
+// ── MINI RADAR ──
+const mr=document.getElementById('mini-radar');
+const mctx=mr.getContext('2d');
+function resizeMini(){mr.width=mr.offsetWidth;mr.height=mr.offsetHeight;}
+resizeMini();
+const blips=Array.from({length:6},()=>({angle:Math.random()*Math.PI*2,dist:Math.random()*0.7+0.1,active:true}));
+let mAngle=0;
+function drawMini(){
+  const w=mr.width,h=mr.height;const cx=w/2,cy=h/2;const R=Math.min(w,h)*0.44;
+  mctx.clearRect(0,0,w,h);
+  mctx.strokeStyle='rgba(0,180,255,0.15)';mctx.lineWidth=1;
+  [0.33,0.66,1].forEach(r=>{mctx.beginPath();mctx.arc(cx,cy,R*r,0,Math.PI*2);mctx.stroke();});
+  mctx.beginPath();mctx.moveTo(cx-R,cy);mctx.lineTo(cx+R,cy);mctx.stroke();
+  mctx.beginPath();mctx.moveTo(cx,cy-R);mctx.lineTo(cx,cy+R);mctx.stroke();
+  mctx.save();mctx.translate(cx,cy);mctx.rotate(mAngle);
+  const sg=mctx.createLinearGradient(0,0,R,0);
+  sg.addColorStop(0,'rgba(0,255,180,0.4)');sg.addColorStop(1,'rgba(0,255,180,0)');
+  mctx.fillStyle=sg;mctx.beginPath();mctx.moveTo(0,0);mctx.arc(0,0,R,-0.4,0);mctx.closePath();mctx.fill();
+  mctx.restore();
+  blips.forEach(b=>{
+    const distFromSweep=((b.angle-mAngle)%(Math.PI*2)+Math.PI*2)%(Math.PI*2);
+    if(distFromSweep<0.3)b.brightness=1;
+    else b.brightness=Math.max(0,b.brightness-0.005);
+    if(b.brightness>0.05){
+      const bx=cx+Math.cos(b.angle)*b.dist*R;const by=cy+Math.sin(b.angle)*b.dist*R;
+      mctx.beginPath();mctx.arc(bx,by,2.5,0,Math.PI*2);
+      mctx.fillStyle=`rgba(0,255,180,${b.brightness})`;mctx.fill();
+    }
+  });
+  mAngle+=0.025;requestAnimationFrame(drawMini);
+}
+blips.forEach(b=>b.brightness=0);drawMini();
+
+// ── AUDIO WAVEFORM ──
+const ac=document.getElementById('audio-canvas');
+const actx=ac.getContext('2d');
+let audioPoints=Array.from({length:60},()=>0.5);
+let isListening=false;
+function drawAudio(){
+  ac.width=ac.offsetWidth;ac.height=ac.offsetHeight;
+  const w=ac.width,h=ac.height;
+  actx.clearRect(0,0,w,h);
+  const amp=isListening?0.7:0.15;
+  audioPoints=audioPoints.map((_,i)=>{
+    if(i===audioPoints.length-1)return 0.5+(Math.random()-0.5)*amp*2;
+    return audioPoints[i+1];
+  });
+  actx.beginPath();
+  audioPoints.forEach((p,i)=>{
+    const x=i/audioPoints.length*w;const y=p*h;
+    i===0?actx.moveTo(x,y):actx.lineTo(x,y);
+  });
+  actx.strokeStyle=isListening?'rgba(255,64,96,0.8)':'rgba(0,180,255,0.6)';
+  actx.lineWidth=1.5;actx.stroke();
+  requestAnimationFrame(drawAudio);
+}
+drawAudio();
+
+// ── TELEMETRY LOG ──
+const telemMsgs=[
+  'audio.stream sync complete','sensor.poll edge detect','sensor.poll quantized',
+  'sensor.poll buffer clear','memory.result quantized','core.heartbeat ok',
+  'tokenizer.run ok','whisper.decode edge detect','tokenizer.run lock expired',
+  'kv.sync ok','core.heartbeat ok','sensor.poll buffer clear','whisper.decode ok',
+  'memory.result ok','audio.stream sync complete','neural.core tick ok',
+];
+const diagMsgs=[
+  'DT audio.stream edge detect','DT kv.sync ok','ISF tokenizer.run lock expired',
+  'DT whisper.decode edge detect','DT core.heartbeat ok','DT sensor.poll buffer clear',
+  'DT memory.result quantized','DT whisper.decode ok','NT neural.core tick ok',
+];
+function addLog(containerId,msgs,maxLines){
+  const el=document.getElementById(containerId);
+  const now=new Date();
+  const t=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  const msg=msgs[Math.floor(Math.random()*msgs.length)];
+  const cls=msg.includes('ok')||msg.includes('complete')?'t-ok':msg.includes('warn')||msg.includes('expired')?'t-warn':'';
+  const div=document.createElement('div');div.className='t-entry';
+  div.innerHTML=`<span class="t-time">${t}</span><span class="t-msg ${cls}">${msg}</span>`;
+  el.insertBefore(div,el.firstChild);
+  while(el.children.length>maxLines)el.removeChild(el.lastChild);
+}
+setInterval(()=>addLog('telem-log',telemMsgs,10),1800);
+setInterval(()=>addLog('diag-log',diagMsgs,10),2500);
+
+// ── VITALS ANIMATION ──
+function animateVitals(){
+  const jitter=(val,range)=>(val+(Math.random()-0.5)*range).toFixed(1);
+  const v1=parseFloat(document.getElementById('v1').textContent)||37;
+  const nv1=Math.min(90,Math.max(10,v1+(Math.random()-0.5)*3));
+  document.getElementById('v1').textContent=nv1.toFixed(1)+'%';document.getElementById('v1b').style.width=nv1+'%';
+  const v2=parseFloat(document.getElementById('v2').textContent)||75;
+  const nv2=Math.min(99,Math.max(50,v2+(Math.random()-0.5)*2));
+  document.getElementById('v2').textContent=nv2.toFixed(1)+'%';document.getElementById('v2b').style.width=nv2+'%';
+  const v4=parseFloat(document.getElementById('v4').textContent)||96;
+  const nv4=Math.min(99.9,Math.max(85,v4+(Math.random()-0.5)*1));
+  document.getElementById('v4').textContent=nv4.toFixed(1)+'%';document.getElementById('v4b').style.width=nv4+'%';
+}
+setInterval(animateVitals,3000);
+
+// ── RESPONSE OVERLAY ──
+function showResponse(text,duration=4000){
+  const el=document.getElementById('response-overlay');
+  document.getElementById('transcript-area').textContent=text;
+  el.textContent=text;el.classList.add('show');
+  setTimeout(()=>{el.classList.remove('show');document.getElementById('transcript-area').textContent='JARVIS COMMAND CENTER / MANAGER AGENT';},duration);
+}
+
+// ── VOICE COMMANDS ──
+const commands={
+  'open sales':()=>{showResponse('Navigating to Sales Dashboard...');setTimeout(()=>location.href='sales-dashboard.html',1500);},
+  'open goals':()=>{showResponse('Navigating to Goals & Objectives...');setTimeout(()=>location.href='goals-dashboard.html',1500);},
+  'open vault':()=>{showResponse('Navigating to Vault & Pine Collective...');setTimeout(()=>location.href='vault-pine-collective.html',1500);},
+  'go home':()=>{showResponse('Returning to Command Center home...');setTimeout(()=>location.href='index.html',1500);},
+  'show status':()=>showResponse('All systems nominal. Neural core at optimal levels. Signal strength 96.9%. No anomalies detected.'),
+  'what time is it':()=>showResponse('Current time: '+new Date().toLocaleTimeString()),
+  'system status':()=>showResponse('JARVIS online. All subsystems operational. Encryption active. Uplink stable.'),
+  'hello jarvis':()=>showResponse('Hello. All systems are online and running at optimal capacity. How can I assist you?'),
+  'hey jarvis':()=>showResponse('Yes? I\'m listening. All systems ready.'),
+  'jarvis':()=>showResponse('Online. Standing by for your command.'),
+};
+
+let recognition=null;
+let listening=false;
+
+function setupSpeech(){
+  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SpeechRecognition){showResponse('Voice recognition not supported in this browser. Try Chrome.');return;}
+  recognition=new SpeechRecognition();
+  recognition.continuous=true;recognition.interimResults=true;recognition.lang='en-US';
+  recognition.onresult=e=>{
+    const transcript=Array.from(e.results).map(r=>r[0].transcript).join('').toLowerCase().trim();
+    document.getElementById('transcript-area').textContent=transcript.toUpperCase();
+    if(e.results[e.results.length-1].isFinal){
+      const matched=Object.keys(commands).find(k=>transcript.includes(k));
+      if(matched)commands[matched]();
+    }
+  };
+  recognition.onerror=e=>{if(e.error!=='no-speech')showResponse('Voice error: '+e.error);};
+  recognition.onend=()=>{if(listening)recognition.start();};
+}
+
+function toggleListening(){
+  if(!recognition)setupSpeech();
+  if(!recognition)return;
+  const btn=document.getElementById('mic-btn');
+  if(listening){
+    recognition.stop();listening=false;isListening=false;
+    btn.classList.remove('listening');
+    showResponse('Voice recognition paused.', 2000);
+  } else {
+    recognition.start();listening=true;isListening=true;
+    btn.classList.add('listening');
+    showResponse('Voice recognition active. Say "Hey Jarvis" to begin.', 3000);
+  }
+}
+
+document.getElementById('mic-btn').addEventListener('click',toggleListening);
+
+// Also listen for keyword via keyboard shortcut
+document.addEventListener('keydown',e=>{if(e.code==='Space'&&!e.target.matches('input,textarea'))toggleListening();});
+
+setupSpeech();
+</script>
+</body>
+</html>
