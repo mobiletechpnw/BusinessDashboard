@@ -26,7 +26,7 @@
   header {
     background: var(--surface); border-bottom: 1px solid var(--border);
     padding: 0 32px; display: flex; align-items: center;
-    justify-content: space-between; min-height: 60px;
+    justify-content: space-between; min-height: 58px;
     position: sticky; top: 0; z-index: 100;
   }
   .brand { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.4px; }
@@ -58,59 +58,104 @@
     line-height: 1.6;
   }
 
+  /* ── Section labels ── */
+  .section-block { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  .section-block:first-of-type { margin-top: 48px; }
+  .section-label {
+    font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.5px; color: var(--text2); margin-bottom: 14px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+
   /* ── Grid ── */
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px; max-width: 1100px; margin: 48px auto; padding: 0 24px;
-    flex: 1;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px; margin-bottom: 32px;
   }
+
+  /* ── JARVIS featured card ── */
+  .card-featured {
+    grid-column: 1 / -1;
+    flex-direction: row; align-items: center; gap: 24px;
+    background: linear-gradient(135deg, #131929 0%, #0f1117 100%);
+    border-color: rgba(0,180,255,0.35);
+    padding: 24px 28px;
+  }
+  .card-featured:hover { border-color: rgba(0,180,255,0.7); box-shadow: 0 8px 40px rgba(0,180,255,0.1); }
+  .card-featured .card-icon { width: 56px; height: 56px; font-size: 1.7rem; flex-shrink: 0; background: rgba(0,180,255,0.12); border-radius: 14px; }
+  .card-featured .card-body { flex: 1; }
+  .card-featured .card-title { font-size: 1.15rem; }
+  .card-featured .card-arrow { color: rgba(0,180,255,0.9); margin-top: 8px; }
 
   /* ── Cards ── */
   .card {
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 28px;
+    border-radius: var(--radius); padding: 24px;
     text-decoration: none; color: var(--text);
-    display: flex; flex-direction: column; gap: 14px;
-    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    display: flex; flex-direction: column; gap: 12px;
+    transition: border-color 0.2s, transform 0.18s, box-shadow 0.2s;
     cursor: pointer;
   }
   .card:hover {
     border-color: var(--accent); transform: translateY(-3px);
-    box-shadow: 0 8px 32px rgba(108,140,255,0.12);
+    box-shadow: 0 8px 32px rgba(108,140,255,0.1);
   }
   .card-icon {
-    width: 48px; height: 48px; border-radius: 12px;
+    width: 44px; height: 44px; border-radius: 11px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.4rem; flex-shrink: 0;
   }
-  .card-icon.blue  { background: rgba(108,140,255,0.12); }
+  .card-icon.blue   { background: rgba(108,140,255,0.12); }
   .card-icon.purple { background: rgba(167,139,250,0.12); }
-  .card-icon.green { background: rgba(52,211,153,0.12); }
-  .card-title {
-    font-size: 1.05rem; font-weight: 700; letter-spacing: -0.2px;
-  }
-  .card-desc { font-size: 0.83rem; color: var(--text2); line-height: 1.55; }
+  .card-icon.green  { background: rgba(52,211,153,0.12); }
+  .card-icon.yellow { background: rgba(251,191,36,0.12); }
+  .card-icon.orange { background: rgba(251,146,60,0.12); }
+  .card-title { font-size: 1rem; font-weight: 700; letter-spacing: -0.2px; }
+  .card-desc { font-size: 0.82rem; color: var(--text2); line-height: 1.55; flex: 1; }
   .card-arrow {
-    margin-top: auto; font-size: 0.78rem; font-weight: 600;
-    color: var(--accent); display: flex; align-items: center; gap: 6px;
+    font-size: 0.77rem; font-weight: 600; color: var(--accent);
+    display: flex; align-items: center; gap: 4px; margin-top: 4px;
+    transition: gap 0.2s;
   }
   .card-arrow::after { content: '→'; transition: transform 0.2s; }
   .card:hover .card-arrow::after { transform: translateX(4px); }
 
+  /* ── Widgets ── */
+  .widgets {
+    max-width: 1100px; margin: 0 auto 40px; padding: 0 24px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+  .widget {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px;
+  }
+  .widget-title {
+    font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.5px; margin-bottom: 14px;
+  }
+
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+  }
   @media (max-width: 640px) {
-    #widget-row { grid-template-columns: 1fr; }
     .grid { grid-template-columns: 1fr; }
+    .widgets { grid-template-columns: 1fr; }
+    .card-featured { flex-direction: column; }
     .hero-title { font-size: 1.8rem; }
     header { padding: 0 16px; }
+    .section-block { padding: 0 16px; }
   }
 
   /* ── Footer ── */
   footer {
-    text-align: center; padding: 24px;
+    text-align: center; padding: 28px 24px;
     font-size: 0.72rem; color: var(--text2);
     border-top: 1px solid var(--border);
+    margin-top: 16px;
   }
+  footer a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -126,72 +171,89 @@
   <p class="hero-sub">Track your sales, hit your goals, and manage your business — all in one place.</p>
 </div>
 
-<div class="grid">
-
-  <a class="card" href="vault-pine-collective.html">
-    <div class="card-icon blue">🌲</div>
-    <div class="card-title">Vault &amp; Pine Collective</div>
-    <div class="card-desc">Full business overview — combined sales and goals dashboard in one unified view.</div>
-    <div class="card-arrow">Open Dashboard</div>
-  </a>
-
-  <a class="card" href="sales-dashboard.html">
-    <div class="card-icon green">📈</div>
-    <div class="card-title">Sales Dashboard</div>
-    <div class="card-desc">Track revenue, monitor performance metrics, and stay on top of your sales pipeline.</div>
-    <div class="card-arrow">View Sales</div>
-  </a>
-
-  <a class="card" href="goals-dashboard.html">
-    <div class="card-icon purple">🎯</div>
-    <div class="card-title">Goals &amp; Objectives</div>
-    <div class="card-desc">Set targets, track progress, and stay focused on what matters most.</div>
-    <div class="card-arrow">View Goals</div>
-  </a>
-
-  <a class="card" href="jarvis.html" style="border-color:rgba(0,180,255,0.4);">
-    <div class="card-icon blue">🤖</div>
-    <div class="card-title">J.A.R.V.I.S.</div>
-    <div class="card-desc">AI command center with voice control. Navigate your dashboards hands-free with voice commands.</div>
-    <div class="card-arrow">Launch JARVIS</div>
-  </a>
-
-  <a class="card" href="content.html" style="border-color:rgba(251,191,36,0.4);">
-    <div class="card-icon" style="background:rgba(251,191,36,0.15);color:#fbbf24;">📱</div>
-    <div class="card-title">Content Planner</div>
-    <div class="card-desc">Plan your show announcements, product drops, and card spotlights. Calendar, queue, and templates.</div>
-    <div class="card-arrow" style="color:#fbbf24;">Open Planner →</div>
-  </a>
-
-  <a class="card" href="analytics.html" style="border-color:rgba(52,211,153,0.4);">
-    <div class="card-icon" style="background:rgba(52,211,153,0.15);color:#34d399;">📊</div>
-    <div class="card-title">Business Intelligence</div>
-    <div class="card-desc">Profit margins by product, show performance comparisons, monthly revenue & trend charts.</div>
-    <div class="card-arrow" style="color:#34d399;">View Analytics →</div>
-  </a>
-
-  <a class="card" href="production.html" style="border-color:rgba(251,146,60,0.4);">
-    <div class="card-icon" style="background:rgba(251,146,60,0.15);color:#fb923c;">🖨️</div>
-    <div class="card-title">Production Hub</div>
-    <div class="card-desc">Track active print jobs, monitor progress, and manage on-hand inventory with low-stock alerts.</div>
-    <div class="card-arrow" style="color:#fb923c;">Open Production →</div>
-  </a>
-
+<!-- ── Business Operations ── -->
+<div class="section-block">
+  <div class="section-label">Business Operations</div>
+  <div class="grid">
+    <a class="card" href="vault-pine-collective.html">
+      <div class="card-icon blue">🌲</div>
+      <div class="card-title">Vault &amp; Pine Collective</div>
+      <div class="card-desc">Full business overview — orders, jet tags, pins, expenses, events, and goals in one place.</div>
+      <div class="card-arrow">Open Dashboard</div>
+    </a>
+    <a class="card" href="sales-dashboard.html">
+      <div class="card-icon green">📈</div>
+      <div class="card-title">Sales Dashboard</div>
+      <div class="card-desc">Track revenue, monitor performance metrics, and stay on top of your sales pipeline.</div>
+      <div class="card-arrow">View Sales</div>
+    </a>
+    <a class="card" href="goals-dashboard.html">
+      <div class="card-icon purple">🎯</div>
+      <div class="card-title">Goals &amp; Objectives</div>
+      <div class="card-desc">Set targets, track progress, and stay focused on what matters most this quarter.</div>
+      <div class="card-arrow">View Goals</div>
+    </a>
+  </div>
 </div>
 
-<!-- Deliveries & Revenue widgets -->
-<div style="max-width:1100px;margin:0 auto 40px;padding:0 24px;display:grid;grid-template-columns:1fr 1fr;gap:20px;" id="widget-row">
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;">
-    <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent);margin-bottom:14px;">📦 Upcoming Deliveries</div>
+<!-- ── Intelligence & Planning ── -->
+<div class="section-block">
+  <div class="section-label">Intelligence &amp; Planning</div>
+  <div class="grid">
+    <a class="card" href="analytics.html" style="border-color:rgba(52,211,153,0.3);">
+      <div class="card-icon green">📊</div>
+      <div class="card-title">Business Intelligence</div>
+      <div class="card-desc">Profit margins by product, show performance comparisons, and monthly revenue trends.</div>
+      <div class="card-arrow" style="color:var(--green)">View Analytics</div>
+    </a>
+    <a class="card" href="production.html" style="border-color:rgba(251,146,60,0.3);">
+      <div class="card-icon orange">🖨️</div>
+      <div class="card-title">Production Hub</div>
+      <div class="card-desc">Track active print jobs, monitor progress, and manage on-hand inventory with low-stock alerts.</div>
+      <div class="card-arrow" style="color:var(--orange)">Open Production</div>
+    </a>
+    <a class="card" href="content.html" style="border-color:rgba(251,191,36,0.3);">
+      <div class="card-icon yellow">📱</div>
+      <div class="card-title">Content Planner</div>
+      <div class="card-desc">Plan show announcements, product drops, and card spotlights. Calendar, queue, and templates.</div>
+      <div class="card-arrow" style="color:var(--yellow)">Open Planner</div>
+    </a>
+  </div>
+</div>
+
+<!-- ── Command ── -->
+<div class="section-block">
+  <div class="section-label">Command</div>
+  <div class="grid">
+    <a class="card card-featured" href="jarvis.html">
+      <div class="card-icon">🤖</div>
+      <div class="card-body">
+        <div class="card-title">J.A.R.V.I.S.</div>
+        <div class="card-desc" style="color:var(--text2);font-size:0.82rem;margin-top:4px;">AI command center with voice control. Navigate all your dashboards hands-free — just say the word.</div>
+        <div class="card-arrow">Launch JARVIS</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- ── Widgets ── -->
+<div class="widgets" id="widget-row">
+  <div class="widget">
+    <div class="widget-title" style="color:var(--accent)">📦 Upcoming Deliveries</div>
     <div id="delivery-list" style="font-size:0.82rem;color:var(--text2);">Loading...</div>
   </div>
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;">
-    <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--green);margin-bottom:14px;">💰 Revenue Snapshot</div>
+  <div class="widget">
+    <div class="widget-title" style="color:var(--green)">💰 Revenue Snapshot</div>
     <div id="revenue-snapshot" style="font-size:0.82rem;color:var(--text2);">Loading...</div>
   </div>
 </div>
 
-<footer>Business Command Center &nbsp;·&nbsp; Built for you</footer>
+<footer>
+  <strong style="color:var(--text)">Business Command Center</strong> &nbsp;·&nbsp; Vault &amp; Pine Collective &nbsp;·&nbsp;
+  <a href="vault-pine-collective.html">Dashboard</a> &nbsp;·&nbsp;
+  <a href="analytics.html">Analytics</a> &nbsp;·&nbsp;
+  <a href="jarvis.html">JARVIS</a>
+</footer>
 
 <script>
   const d = new Date();
