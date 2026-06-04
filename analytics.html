@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f1117">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<script src="shared.js" defer></script>
+<title>Business Intelligence · VPC</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a; --border: #2e3350;
+    --accent: #6c8cff; --accent2: #a78bfa; --green: #34d399; --yellow: #fbbf24;
+    --red: #f87171; --orange: #fb923c; --text: #e2e8f0; --text2: #8892b0; --radius: 10px;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+
+  header {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0 32px; display: flex; align-items: center;
+    justify-content: space-between; min-height: 58px; position: sticky; top: 0; z-index: 200;
+  }
+  .brand { font-size: 1.05rem; font-weight: 800; }
+  .brand span { color: var(--accent); }
+  .home-link { font-size: 0.8rem; color: var(--text2); text-decoration: none; padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; transition: all 0.15s; }
+  .home-link:hover { color: var(--text); border-color: var(--accent); }
+
+  .tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 32px; background: var(--surface); position: sticky; top: 58px; z-index: 150; }
+  .tab { padding: 14px 20px; font-size: 0.84rem; font-weight: 600; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; user-select: none; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  main { max-width: 1300px; margin: 0 auto; padding: 28px 24px; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* KPI strip */
+  .kpi-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 28px; }
+  .kpi { background: var(--surface); padding: 18px 22px; }
+  .kpi-val { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px; }
+  .kpi-label { font-size: 0.65rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+  .kpi-sub { font-size: 0.72rem; margin-top: 4px; }
+
+  /* Cards */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; }
+  .card-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text2); margin-bottom: 16px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+  /* Cost config */
+  .cost-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .cost-row:last-child { border-bottom: none; }
+  .cost-label { font-size: 0.88rem; font-weight: 600; }
+  .cost-sub { font-size: 0.72rem; color: var(--text2); margin-top: 2px; }
+  .cost-input-wrap { display: flex; align-items: center; gap: 8px; }
+  .cost-input { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 6px 10px; width: 90px; font-size: 0.9rem; text-align: right; }
+  .cost-input:focus { outline: none; border-color: var(--accent); }
+  .save-costs-btn { background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 8px 18px; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: opacity 0.15s; margin-top: 16px; }
+  .save-costs-btn:hover { opacity: 0.85; }
+
+  /* Product margin table */
+  table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+  th { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+  th.num, td.num { text-align: right; }
+  td { padding: 12px 12px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+
+  /* Margin bar */
+  .margin-bar-wrap { background: var(--surface2); border-radius: 3px; height: 6px; width: 80px; display: inline-block; vertical-align: middle; margin-left: 8px; }
+  .margin-bar { height: 6px; border-radius: 3px; background: var(--green); }
+
+  /* Show cards */
+  .show-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .show-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .show-name { font-size: 1rem; font-weight: 800; margin-bottom: 4px; }
+  .show-meta { font-size: 0.75rem; color: var(--text2); margin-bottom: 14px; }
+  .show-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .show-stat { background: var(--surface2); border-radius: 6px; padding: 10px 12px; }
+  .show-stat-val { font-size: 1.1rem; font-weight: 800; }
+  .show-stat-label { font-size: 0.65rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.4px; margin-top: 2px; }
+  .show-net { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; }
+  .show-badge { font-size: 0.65rem; font-weight: 700; padding: 3px 8px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .badge-green { background: rgba(52,211,153,0.15); color: var(--green); }
+  .badge-yellow { background: rgba(251,191,36,0.15); color: var(--yellow); }
+  .badge-red { background: rgba(248,113,113,0.15); color: var(--red); }
+
+  /* Bar chart */
+  .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 180px; padding: 0 4px; }
+  .bar-col { display: flex; flex-direction: column; align-items: center; flex: 1; gap: 4px; }
+  .bar-wrap { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; flex: 1; gap: 2px; }
+  .bar { width: 100%; border-radius: 4px 4px 0 0; transition: opacity 0.15s; cursor: default; position: relative; }
+  .bar:hover { opacity: 0.8; }
+  .bar-label { font-size: 0.62rem; color: var(--text2); white-space: nowrap; }
+  .bar-val { font-size: 0.65rem; font-weight: 700; color: var(--text2); }
+
+  /* Legend */
+  .legend { display: flex; gap: 16px; margin-bottom: 16px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--text2); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+  /* Empty state */
+  .empty { text-align: center; padding: 48px 24px; color: var(--text2); font-size: 0.88rem; }
+  .empty .e-icon { font-size: 2.5rem; margin-bottom: 12px; }
+
+  /* Tooltip */
+  .tooltip-val { position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); background: #000; color: #fff; font-size: 0.65rem; padding: 3px 6px; border-radius: 4px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.15s; }
+  .bar:hover .tooltip-val { opacity: 1; }
+
+  @media (max-width: 680px) {
+    .kpi-strip { grid-template-columns: 1fr 1fr; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    header { padding: 0 16px; }
+    main { padding: 20px 16px; }
+    .tab-bar { padding: 0 16px; }
+    .tab { padding: 12px 14px; font-size: 0.78rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">📊 <span>Business</span> Intelligence</div>
+  <a class="home-link" href="index.html">⌂ Home</a>
+</header>
+
+<div class="tab-bar">
+  <div class="tab active" data-tab="margins" onclick="switchTab('margins')">💰 Margins</div>
+  <div class="tab" data-tab="shows" onclick="switchTab('shows')">🎪 Shows</div>
+  <div class="tab" data-tab="trends" onclick="switchTab('trends')">📈 Trends</div>
+</div>
+
+<main>
+
+<!-- ── MARGINS ── -->
+<div class="panel active" id="tab-margins">
+  <div id="kpi-margins" class="kpi-strip" style="margin-bottom:28px"></div>
+  <div class="grid-2" style="margin-bottom:24px">
+
+    <!-- Cost Config -->
+    <div class="card">
+      <div class="card-title">⚙️ Cost Per Unit (Edit to Recalculate)</div>
+      <div class="cost-row">
+        <div>
+          <div class="cost-label">🖨️ Riser (per unit)</div>
+          <div class="cost-sub">Filament + hardware cost per single riser</div>
+        </div>
+        <div class="cost-input-wrap">
+          <span style="color:var(--text2)">$</span>
+          <input class="cost-input" id="cost-riser" type="number" step="0.01" min="0" placeholder="2.50">
+        </div>
+      </div>
+      <div class="cost-row">
+        <div>
+          <div class="cost-label">🏷️ Jet Tag (per tag)</div>
+          <div class="cost-sub">Current calculated: ~$0.86/tag</div>
+        </div>
+        <div class="cost-input-wrap">
+          <span style="color:var(--text2)">$</span>
+          <input class="cost-input" id="cost-jettag" type="number" step="0.01" min="0" placeholder="0.86">
+        </div>
+      </div>
+      <div class="cost-row">
+        <div>
+          <div class="cost-label">📌 Pin (per pin)</div>
+          <div class="cost-sub">Current calculated: ~$0.95/pin</div>
+        </div>
+        <div class="cost-input-wrap">
+          <span style="color:var(--text2)">$</span>
+          <input class="cost-input" id="cost-pin" type="number" step="0.01" min="0" placeholder="0.95">
+        </div>
+      </div>
+      <button class="save-costs-btn" onclick="saveCosts()">Save & Recalculate</button>
+    </div>
+
+    <!-- Per-product summary -->
+    <div class="card">
+      <div class="card-title">📦 Revenue by Product Line</div>
+      <div id="product-line-chart" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <!-- Margin Table -->
+  <div class="card">
+    <div class="card-title">📋 Margin Breakdown by Product Type</div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th class="num">Units Sold</th>
+            <th class="num">Revenue</th>
+            <th class="num">Est. COGS</th>
+            <th class="num">Gross Profit</th>
+            <th class="num">Margin</th>
+          </tr>
+        </thead>
+        <tbody id="margin-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── SHOWS ── -->
+<div class="panel" id="tab-shows">
+  <div id="shows-summary" class="kpi-strip" style="margin-bottom:28px"></div>
+  <div class="show-grid" id="show-cards"></div>
+</div>
+
+<!-- ── TRENDS ── -->
+<div class="panel" id="tab-trends">
+  <div id="kpi-trends" class="kpi-strip" style="margin-bottom:28px"></div>
+  <div class="card" style="margin-bottom:24px">
+    <div class="card-title">📅 Monthly Revenue & Profit</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div> Revenue</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Profit</div>
+    </div>
+    <div id="monthly-chart" class="bar-chart"></div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">🏆 Top Customers by Revenue</div>
+      <div id="top-customers"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📦 Best-Selling Products</div>
+      <div id="top-products"></div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ── Data Keys ──
+const LS_ORDERS  = 'vp_orders_v2';
+const JT_KEY     = 'vp_jettags_v1';
+const PIN_KEY    = 'vp_pins_v1';
+const EV_KEY     = 'vp_events_v1';
+const COSTS_KEY  = 'vpc_costs_v1';
+
+const JT_COST_DEFAULT  = 0.862;
+const PIN_COST_DEFAULT = 0.95;
+
+// ── Helpers ──
+const $  = id => document.getElementById(id);
+const fmt = n  => '$' + (n || 0).toFixed(2);
+const fmtK = n => n >= 1000 ? '$' + (n/1000).toFixed(1) + 'k' : fmt(n);
+const pct  = (a, b) => b ? ((a / b) * 100).toFixed(1) + '%' : '—';
+const clr  = (margin) => margin >= 60 ? 'var(--green)' : margin >= 40 ? 'var(--yellow)' : 'var(--red)';
+
+function getRaw() {
+  return {
+    orders: JSON.parse(localStorage.getItem(LS_ORDERS) || '[]'),
+    jt:     JSON.parse(localStorage.getItem(JT_KEY)    || '[]'),
+    pins:   JSON.parse(localStorage.getItem(PIN_KEY)   || '[]'),
+    events: JSON.parse(localStorage.getItem(EV_KEY)    || '[]'),
+  };
+}
+
+function getCosts() {
+  const saved = JSON.parse(localStorage.getItem(COSTS_KEY) || '{}');
+  return {
+    riser:  saved.riser  ?? null,
+    jettag: saved.jettag ?? JT_COST_DEFAULT,
+    pin:    saved.pin    ?? PIN_COST_DEFAULT,
+  };
+}
+
+function saveCosts() {
+  const costs = {
+    riser:  parseFloat($('cost-riser').value)  || null,
+    jettag: parseFloat($('cost-jettag').value) || JT_COST_DEFAULT,
+    pin:    parseFloat($('cost-pin').value)    || PIN_COST_DEFAULT,
+  };
+  localStorage.setItem(COSTS_KEY, JSON.stringify(costs));
+  renderAll();
+  toast('Costs saved — margins recalculated!');
+}
+
+function loadCostInputs() {
+  const c = getCosts();
+  if (c.riser  !== null) $('cost-riser').value  = c.riser;
+  if (c.jettag)          $('cost-jettag').value = c.jettag.toFixed(3);
+  if (c.pin)             $('cost-pin').value    = c.pin.toFixed(3);
+}
+
+// ── Tab ──
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + id));
+}
+
+// ── KPI strip builder ──
+function kpiStrip(id, items) {
+  $(id).innerHTML = items.map(i => `
+    <div class="kpi">
+      <div class="kpi-val" style="color:${i.color||'var(--text)'}">${i.val}</div>
+      <div class="kpi-label">${i.label}</div>
+      ${i.sub ? `<div class="kpi-sub" style="color:var(--text2)">${i.sub}</div>` : ''}
+    </div>`).join('');
+}
+
+// ════════════════════════════════
+// MARGINS TAB
+// ════════════════════════════════
+function renderMargins() {
+  const { orders, jt, pins } = getRaw();
+  const costs = getCosts();
+
+  // Risers
+  let rRevenue = 0, rCOGS = 0, rUnits = 0;
+  orders.forEach(o => {
+    rRevenue += o.salePrice || 0;
+    // use saved cost override or actual cogs from order
+    const unitCogs = costs.riser !== null
+      ? (() => {
+          const m = (o.product || '').match(/\((\d+)\)/);
+          return costs.riser * (m ? parseInt(m[1]) : 1);
+        })()
+      : (o.cogs || 0);
+    rCOGS += unitCogs;
+    const m = (o.product || '').match(/\((\d+)\)/);
+    rUnits += m ? parseInt(m[1]) : 1;
+  });
+
+  // Jet Tags
+  let jtRevenue = 0, jtCOGS = 0, jtUnits = 0;
+  jt.forEach(s => {
+    jtRevenue += s.revenue || 0;
+    jtUnits   += s.qty || 0;
+    jtCOGS    += (s.qty || 0) * costs.jettag;
+  });
+
+  // Pins
+  let pinRevenue = 0, pinCOGS = 0, pinUnits = 0;
+  pins.forEach(s => {
+    pinRevenue += s.revenue || 0;
+    pinUnits   += s.qty || 0;
+    pinCOGS    += (s.qty || 0) * costs.pin;
+  });
+
+  const totalRevenue = rRevenue + jtRevenue + pinRevenue;
+  const totalCOGS    = rCOGS + jtCOGS + pinCOGS;
+  const totalProfit  = totalRevenue - totalCOGS;
+  const totalMargin  = totalRevenue ? (totalProfit / totalRevenue * 100) : 0;
+
+  kpiStrip('kpi-margins', [
+    { val: fmtK(totalRevenue), label: 'Total Revenue',   color: 'var(--accent)' },
+    { val: fmtK(totalCOGS),   label: 'Est. Total COGS',  color: 'var(--red)' },
+    { val: fmtK(totalProfit), label: 'Gross Profit',     color: 'var(--green)' },
+    { val: totalMargin.toFixed(1) + '%', label: 'Avg Margin', color: clr(totalMargin) },
+  ]);
+
+  // Revenue mix horizontal bar
+  const lines = [
+    { name: '🖨️ Risers',   rev: rRevenue,   profit: rRevenue - rCOGS,   units: rUnits,   color: 'var(--accent)' },
+    { name: '🏷️ Jet Tags', rev: jtRevenue,  profit: jtRevenue - jtCOGS, units: jtUnits,  color: 'var(--accent2)' },
+    { name: '📌 Pins',     rev: pinRevenue, profit: pinRevenue - pinCOGS, units: pinUnits, color: 'var(--orange)' },
+  ];
+  const maxRev = Math.max(...lines.map(l => l.rev), 1);
+  $('product-line-chart').innerHTML = lines.map(l => {
+    const w = (l.rev / maxRev * 100).toFixed(1);
+    const m = l.rev ? (l.profit / l.rev * 100) : 0;
+    return `
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:5px">
+          <span>${l.name}</span>
+          <span style="color:var(--text2)">${fmt(l.rev)} &nbsp;·&nbsp; <span style="color:${clr(m)}">${m.toFixed(0)}% margin</span></span>
+        </div>
+        <div style="background:var(--surface2);border-radius:4px;height:10px">
+          <div style="background:${l.color};width:${w}%;height:10px;border-radius:4px;transition:width 0.4s"></div>
+        </div>
+        <div style="font-size:0.7rem;color:var(--text2);margin-top:4px">${l.units} units · ${fmt(l.profit)} profit</div>
+      </div>`;
+  }).join('');
+
+  // Table
+  const rows = [
+    ...orders.map(o => {
+      const m = (o.product || '').match(/\((\d+)\)/);
+      const u = m ? parseInt(m[1]) : 1;
+      const c = costs.riser !== null ? costs.riser * u : (o.cogs || 0);
+      return { product: o.product || 'Riser Order', units: u, rev: o.salePrice || 0, cogs: c };
+    })
+  ];
+  // Group by product name
+  const grouped = {};
+  rows.forEach(r => {
+    if (!grouped[r.product]) grouped[r.product] = { units: 0, rev: 0, cogs: 0 };
+    grouped[r.product].units += r.units;
+    grouped[r.product].rev   += r.rev;
+    grouped[r.product].cogs  += r.cogs;
+  });
+  // Add jt/pin as aggregate rows
+  if (jtUnits > 0) grouped['🏷️ Jet Tags (all)'] = { units: jtUnits, rev: jtRevenue, cogs: jtCOGS };
+  if (pinUnits > 0) grouped['📌 Pins (all)']     = { units: pinUnits, rev: pinRevenue, cogs: pinCOGS };
+
+  const sorted = Object.entries(grouped).sort((a,b) => b[1].rev - a[1].rev);
+  $('margin-tbody').innerHTML = sorted.map(([name, d]) => {
+    const profit = d.rev - d.cogs;
+    const m = d.rev ? (profit / d.rev * 100) : 0;
+    const barW = Math.min(m, 100).toFixed(0);
+    return `<tr>
+      <td>${name}</td>
+      <td class="num">${d.units}</td>
+      <td class="num">${fmt(d.rev)}</td>
+      <td class="num" style="color:var(--red)">${fmt(d.cogs)}</td>
+      <td class="num" style="color:var(--green)">${fmt(profit)}</td>
+      <td class="num">
+        <span style="color:${clr(m)}">${m.toFixed(1)}%</span>
+        <span class="margin-bar-wrap"><span class="margin-bar" style="width:${barW}%;background:${clr(m)}"></span></span>
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:24px">No sales data yet</td></tr>';
+}
+
+// ════════════════════════════════
+// SHOWS TAB
+// ════════════════════════════════
+function renderShows() {
+  const { orders, jt, pins, events } = getRaw();
+  const costs = getCosts();
+
+  if (events.length === 0) {
+    $('show-cards').innerHTML = `<div class="empty"><div class="e-icon">🎪</div>No events logged yet.<br>Add events in the <a href="vault-pine-collective.html#events" style="color:var(--accent)">Events tab</a> to see show comparisons.</div>`;
+    kpiStrip('shows-summary', [
+      { val: '0', label: 'Events Logged' },
+      { val: '$0', label: 'Total Show Revenue' },
+      { val: '$0', label: 'Total Booth Costs' },
+      { val: '$0', label: 'Net After Booth' },
+    ]);
+    return;
+  }
+
+  // Match sales to events by date range
+  const sortedEvents = [...events].sort((a,b) => b.start.localeCompare(a.start));
+
+  function salesInRange(start, end) {
+    const s = start, e = end || start;
+    const ordRev = orders.filter(o => o.date >= s && o.date <= e).reduce((sum, o) => sum + (o.salePrice||0), 0);
+    const ordUnits = orders.filter(o => o.date >= s && o.date <= e).length;
+    const ordCogs  = orders.filter(o => o.date >= s && o.date <= e).reduce((sum, o) => sum + (o.cogs||0), 0);
+    const jtSales  = jt.filter(t => (t.date||'') >= s && (t.date||'') <= e);
+    const jtRev    = jtSales.reduce((sum,t) => sum + (t.revenue||0), 0);
+    const jtQty    = jtSales.reduce((sum,t) => sum + (t.qty||0), 0);
+    const pinSales = pins.filter(p => (p.date||'') >= s && (p.date||'') <= e);
+    const pinRev   = pinSales.reduce((sum,p) => sum + (p.revenue||0), 0);
+    const pinQty   = pinSales.reduce((sum,p) => sum + (p.qty||0), 0);
+    return { ordRev, ordUnits, ordCogs, jtRev, jtQty, pinRev, pinQty };
+  }
+
+  let totalRev = 0, totalBooth = 0;
+  const cards = sortedEvents.map(ev => {
+    const d = salesInRange(ev.start, ev.end || ev.start);
+    const rev   = d.ordRev + d.jtRev + d.pinRev;
+    const cogs  = d.ordCogs + d.jtQty * costs.jettag + d.pinQty * costs.pin;
+    const booth = ev.boothCost || 0;
+    const net   = rev - cogs - booth;
+    totalRev   += rev;
+    totalBooth += booth;
+
+    const netColor  = net >= 0 ? 'var(--green)' : 'var(--red)';
+    const badgeClass = net > 100 ? 'badge-green' : net >= 0 ? 'badge-yellow' : 'badge-red';
+    const badgeText  = net > 100 ? '✅ Profitable' : net >= 0 ? '⚠️ Break-even' : '❌ Loss';
+    const dateStr = ev.end && ev.end !== ev.start
+      ? `${ev.start} → ${ev.end}`
+      : ev.start;
+
+    return `
+      <div class="show-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div class="show-name">${ev.name}</div>
+            <div class="show-meta">${ev.location ? ev.location + ' · ' : ''}${dateStr}</div>
+          </div>
+          <span class="show-badge ${badgeClass}">${badgeText}</span>
+        </div>
+        <div class="show-stats">
+          <div class="show-stat">
+            <div class="show-stat-val" style="color:var(--accent)">${fmt(rev)}</div>
+            <div class="show-stat-label">Revenue</div>
+          </div>
+          <div class="show-stat">
+            <div class="show-stat-val" style="color:var(--green)">${fmt(rev - cogs)}</div>
+            <div class="show-stat-label">Gross Profit</div>
+          </div>
+          <div class="show-stat">
+            <div class="show-stat-val">${d.ordUnits} <span style="font-size:0.75rem;font-weight:400">risers</span></div>
+            <div class="show-stat-label">Riser Orders</div>
+          </div>
+          <div class="show-stat">
+            <div class="show-stat-val">${d.jtQty + d.pinQty} <span style="font-size:0.75rem;font-weight:400">items</span></div>
+            <div class="show-stat-label">Tags + Pins</div>
+          </div>
+        </div>
+        <div class="show-net">
+          <span style="color:var(--text2)">Booth cost: <strong style="color:var(--red)">${fmt(booth)}</strong></span>
+          <span>Net: <strong style="color:${netColor}">${fmt(net)}</strong></span>
+        </div>
+        ${ev.notes ? `<div style="font-size:0.75rem;color:var(--text2);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">📝 ${ev.notes}</div>` : ''}
+      </div>`;
+  });
+
+  $('show-cards').innerHTML = cards.join('') || `<div class="empty"><div class="e-icon">🎪</div>No data matched to events yet.</div>`;
+  const netAll = totalRev - totalBooth;
+  kpiStrip('shows-summary', [
+    { val: sortedEvents.length,   label: 'Events Tracked' },
+    { val: fmtK(totalRev),        label: 'Total Show Revenue',  color: 'var(--accent)' },
+    { val: fmtK(totalBooth),      label: 'Total Booth Costs',   color: 'var(--red)' },
+    { val: fmtK(netAll),          label: 'Net After Booth',     color: netAll >= 0 ? 'var(--green)' : 'var(--red)' },
+  ]);
+}
+
+// ════════════════════════════════
+// TRENDS TAB
+// ════════════════════════════════
+function renderTrends() {
+  const { orders, jt, pins } = getRaw();
+
+  // Build monthly map
+  const monthly = {};
+  const ensureMonth = mk => {
+    if (!monthly[mk]) monthly[mk] = { rev: 0, profit: 0 };
+  };
+  orders.forEach(o => {
+    const mk = (o.date || '').slice(0, 7);
+    if (!mk) return;
+    ensureMonth(mk);
+    monthly[mk].rev    += o.salePrice || 0;
+    monthly[mk].profit += (o.salePrice || 0) - (o.cogs || 0);
+  });
+  const costs = getCosts();
+  jt.forEach(s => {
+    const mk = (s.date || '').slice(0, 7);
+    if (!mk) return;
+    ensureMonth(mk);
+    monthly[mk].rev    += s.revenue || 0;
+    monthly[mk].profit += (s.revenue || 0) - (s.qty || 0) * costs.jettag;
+  });
+  pins.forEach(s => {
+    const mk = (s.date || '').slice(0, 7);
+    if (!mk) return;
+    ensureMonth(mk);
+    monthly[mk].rev    += s.revenue || 0;
+    monthly[mk].profit += (s.revenue || 0) - (s.qty || 0) * costs.pin;
+  });
+
+  const keys = Object.keys(monthly).sort();
+  const maxRev = Math.max(...Object.values(monthly).map(m => m.rev), 1);
+
+  const totalRevAll = Object.values(monthly).reduce((s,m) => s + m.rev, 0);
+  const totalProfAll = Object.values(monthly).reduce((s,m) => s + m.profit, 0);
+  const bestMonth = keys.reduce((best, k) => monthly[k].rev > (monthly[best]?.rev || 0) ? k : best, keys[0]);
+  const monthGrowth = (() => {
+    if (keys.length < 2) return null;
+    const last = monthly[keys[keys.length - 1]].rev;
+    const prev = monthly[keys[keys.length - 2]].rev;
+    return prev ? ((last - prev) / prev * 100).toFixed(0) : null;
+  })();
+
+  kpiStrip('kpi-trends', [
+    { val: fmtK(totalRevAll),    label: 'All-Time Revenue',  color: 'var(--accent)' },
+    { val: fmtK(totalProfAll),   label: 'All-Time Profit',   color: 'var(--green)' },
+    { val: bestMonth ? bestMonth : '—', label: 'Best Month', color: 'var(--yellow)' },
+    { val: monthGrowth !== null ? (monthGrowth >= 0 ? '+' : '') + monthGrowth + '%' : '—',
+      label: 'MoM Growth', color: monthGrowth >= 0 ? 'var(--green)' : 'var(--red)' },
+  ]);
+
+  if (keys.length === 0) {
+    $('monthly-chart').innerHTML = `<div class="empty" style="width:100%"><div class="e-icon">📈</div>No sales data yet.</div>`;
+  } else {
+    $('monthly-chart').innerHTML = keys.map(k => {
+      const m = monthly[k];
+      const revH   = Math.max((m.rev    / maxRev) * 160, 4);
+      const profH  = Math.max((m.profit / maxRev) * 160, 2);
+      const label  = k.slice(5); // MM
+      const months = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const lbl    = months[parseInt(label)] || label;
+      return `
+        <div class="bar-col">
+          <div class="bar-val">${fmtK(m.rev)}</div>
+          <div class="bar-wrap">
+            <div class="bar" style="height:${revH}px;background:var(--accent);opacity:0.7">
+              <span class="tooltip-val">${fmt(m.rev)}</span>
+            </div>
+            <div class="bar" style="height:${profH}px;background:var(--green);opacity:0.85">
+              <span class="tooltip-val">${fmt(m.profit)} profit</span>
+            </div>
+          </div>
+          <div class="bar-label">${lbl}</div>
+        </div>`;
+    }).join('');
+  }
+
+  // Top customers
+  const custMap = {};
+  orders.forEach(o => {
+    const n = (o.customer || 'Unknown').split(' - ')[0];
+    custMap[n] = (custMap[n] || 0) + (o.salePrice || 0);
+  });
+  const topCust = Object.entries(custMap).sort((a,b) => b[1]-a[1]).slice(0,8);
+  const maxCust = topCust[0]?.[1] || 1;
+  $('top-customers').innerHTML = topCust.length ? topCust.map(([n,r],i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="color:var(--text2);width:18px;font-size:0.75rem">${i+1}</span>
+      <div style="flex:1">
+        <div style="font-size:0.85rem;font-weight:600">${n}</div>
+        <div style="background:var(--surface2);border-radius:3px;height:4px;margin-top:4px">
+          <div style="background:var(--accent);width:${(r/maxCust*100).toFixed(0)}%;height:4px;border-radius:3px"></div>
+        </div>
+      </div>
+      <span style="font-size:0.82rem;font-weight:700;color:var(--accent)">${fmt(r)}</span>
+    </div>`).join('')
+  : '<div style="color:var(--text2);font-size:0.84rem;padding:16px 0">No orders yet.</div>';
+
+  // Top products (from orders)
+  const prodMap = {};
+  orders.forEach(o => { prodMap[o.product||'?'] = (prodMap[o.product||'?'] || 0) + (o.salePrice||0); });
+  const topProd = Object.entries(prodMap).sort((a,b) => b[1]-a[1]).slice(0,8);
+  const maxProd = topProd[0]?.[1] || 1;
+  $('top-products').innerHTML = topProd.length ? topProd.map(([n,r],i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="color:var(--text2);width:18px;font-size:0.75rem">${i+1}</span>
+      <div style="flex:1">
+        <div style="font-size:0.82rem;font-weight:600">${n}</div>
+        <div style="background:var(--surface2);border-radius:3px;height:4px;margin-top:4px">
+          <div style="background:var(--accent2);width:${(r/maxProd*100).toFixed(0)}%;height:4px;border-radius:3px"></div>
+        </div>
+      </div>
+      <span style="font-size:0.82rem;font-weight:700;color:var(--accent2)">${fmt(r)}</span>
+    </div>`).join('')
+  : '<div style="color:var(--text2);font-size:0.84rem;padding:16px 0">No products yet.</div>';
+}
+
+// ── Toast ──
+function toast(msg) {
+  let el = document.getElementById('_toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = '_toast';
+    el.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1e293b;border:1px solid #334155;color:#e2e8f0;padding:10px 18px;border-radius:8px;font-size:0.84rem;z-index:9999;transition:opacity 0.3s;opacity:0';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.opacity = '1';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.style.opacity = '0', 2800);
+}
+
+function renderAll() {
+  renderMargins();
+  renderShows();
+  renderTrends();
+}
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', () => {
+  loadCostInputs();
+  renderAll();
+});
+</script>
+</body>
+</html>

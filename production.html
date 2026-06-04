@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f1117">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<script src="shared.js" defer></script>
+<title>Production · VPC</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a; --border: #2e3350;
+    --accent: #6c8cff; --accent2: #a78bfa; --green: #34d399; --yellow: #fbbf24;
+    --red: #f87171; --orange: #fb923c; --text: #e2e8f0; --text2: #8892b0; --radius: 10px;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+
+  header {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0 32px; display: flex; align-items: center;
+    justify-content: space-between; min-height: 58px; position: sticky; top: 0; z-index: 200;
+  }
+  .brand { font-size: 1.05rem; font-weight: 800; }
+  .brand span { color: var(--orange); }
+  .home-link { font-size: 0.8rem; color: var(--text2); text-decoration: none; padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; transition: all 0.15s; }
+  .home-link:hover { color: var(--text); border-color: var(--accent); }
+
+  /* Alert banner */
+  .alert-banner { background: rgba(251,191,36,0.12); border-bottom: 1px solid rgba(251,191,36,0.3); padding: 10px 32px; display: flex; align-items: center; gap: 10px; font-size: 0.84rem; }
+  .alert-banner strong { color: var(--yellow); }
+  .alert-banner.hidden { display: none; }
+
+  .tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 32px; background: var(--surface); position: sticky; top: 58px; z-index: 150; }
+  .tab { padding: 14px 20px; font-size: 0.84rem; font-weight: 600; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; user-select: none; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  main { max-width: 1300px; margin: 0 auto; padding: 28px 24px; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* KPI strip */
+  .kpi-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 28px; }
+  .kpi { background: var(--surface); padding: 18px 22px; }
+  .kpi-val { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px; }
+  .kpi-label { font-size: 0.65rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+  /* Buttons */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 7px; font-size: 0.83rem; font-weight: 700; cursor: pointer; border: none; transition: opacity 0.15s; }
+  .btn:hover { opacity: 0.85; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-green { background: var(--green); color: #0f1117; }
+  .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-red { background: rgba(248,113,113,0.15); color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
+  .btn-sm { padding: 4px 10px; font-size: 0.75rem; }
+
+  /* Section header */
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .section-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text2); }
+
+  /* Print job cards */
+  .queue-list { display: flex; flex-direction: column; gap: 10px; }
+  .job-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; display: flex; align-items: center; gap: 16px; transition: border-color 0.15s; }
+  .job-card.status-printing { border-left: 3px solid var(--green); }
+  .job-card.status-queued   { border-left: 3px solid var(--accent); }
+  .job-card.status-done     { border-left: 3px solid var(--border); opacity: 0.65; }
+  .job-card.status-failed   { border-left: 3px solid var(--red); }
+  .job-icon { font-size: 1.8rem; flex-shrink: 0; }
+  .job-info { flex: 1; min-width: 0; }
+  .job-name { font-size: 0.95rem; font-weight: 700; }
+  .job-meta { font-size: 0.75rem; color: var(--text2); margin-top: 3px; display: flex; flex-wrap: wrap; gap: 12px; }
+  .job-actions { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; }
+  .status-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 99px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; }
+  .badge-printing { background: rgba(52,211,153,0.15); color: var(--green); }
+  .badge-queued   { background: rgba(108,140,255,0.15); color: var(--accent); }
+  .badge-done     { background: rgba(100,100,120,0.15); color: var(--text2); }
+  .badge-failed   { background: rgba(248,113,113,0.15); color: var(--red); }
+
+  /* Progress bar on printing jobs */
+  .job-progress { margin-top: 8px; }
+  .job-prog-bar { background: var(--surface2); border-radius: 3px; height: 4px; }
+  .job-prog-fill { height: 4px; border-radius: 3px; background: var(--green); transition: width 0.5s; }
+  .job-prog-label { font-size: 0.68rem; color: var(--text2); margin-top: 3px; }
+
+  /* Inventory grid */
+  .inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+  .inv-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
+  .inv-card.low-stock { border-color: rgba(251,191,36,0.5); }
+  .inv-card.out-stock { border-color: rgba(248,113,113,0.5); }
+  .inv-product { font-size: 0.92rem; font-weight: 800; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+  .inv-count-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .inv-adj { background: var(--surface2); border: 1px solid var(--border); color: var(--text); width: 28px; height: 28px; border-radius: 6px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .inv-adj:hover { border-color: var(--accent); color: var(--accent); }
+  .inv-count { font-size: 1.8rem; font-weight: 900; min-width: 50px; text-align: center; }
+  .inv-unit { font-size: 0.72rem; color: var(--text2); align-self: flex-end; padding-bottom: 4px; }
+  .inv-thresh-row { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--text2); margin-bottom: 10px; }
+  .thresh-input { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 5px; padding: 3px 8px; width: 60px; font-size: 0.78rem; text-align: center; }
+  .thresh-input:focus { outline: none; border-color: var(--accent); }
+  .inv-bar { background: var(--surface2); border-radius: 3px; height: 6px; }
+  .inv-bar-fill { height: 6px; border-radius: 3px; transition: width 0.4s; }
+  .inv-status { font-size: 0.7rem; font-weight: 700; margin-top: 6px; }
+
+  /* Modal */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px; width: 480px; max-width: 95vw; max-height: 90vh; overflow-y: auto; }
+  .modal-title { font-size: 1rem; font-weight: 800; margin-bottom: 20px; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .field input, .field select, .field textarea {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px;
+    color: var(--text); padding: 9px 12px; font-size: 0.88rem;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--accent); }
+  .field textarea { resize: vertical; min-height: 60px; }
+  .field select option { background: var(--surface); }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+  .grid-2f { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  /* Empty */
+  .empty { text-align: center; padding: 48px 24px; color: var(--text2); font-size: 0.88rem; }
+  .empty .e-icon { font-size: 2.5rem; margin-bottom: 12px; }
+
+  @media (max-width: 680px) {
+    .kpi-strip { grid-template-columns: 1fr 1fr; }
+    header { padding: 0 16px; }
+    main { padding: 20px 16px; }
+    .tab-bar { padding: 0 16px; }
+    .tab { padding: 12px 14px; font-size: 0.78rem; }
+    .job-card { flex-wrap: wrap; }
+    .alert-banner { padding: 10px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">🖨️ <span>Production</span> Hub</div>
+  <a class="home-link" href="index.html">⌂ Home</a>
+</header>
+
+<!-- Low-stock alert banner -->
+<div class="alert-banner hidden" id="low-stock-banner">
+  ⚠️ <strong>Low Stock Alert:</strong> <span id="low-stock-text"></span>
+</div>
+
+<div class="tab-bar">
+  <div class="tab active" data-tab="queue" onclick="switchTab('queue')">🖨️ Print Queue</div>
+  <div class="tab" data-tab="inventory" onclick="switchTab('inventory')">📦 Inventory</div>
+</div>
+
+<main>
+
+<!-- ── PRINT QUEUE ── -->
+<div class="panel active" id="tab-queue">
+  <div id="kpi-queue" class="kpi-strip"></div>
+
+  <div class="section-header">
+    <div class="section-title">Active & Queued Jobs</div>
+    <button class="btn btn-primary" onclick="openJobModal()">＋ Add Print Job</button>
+  </div>
+  <div class="queue-list" id="active-queue"></div>
+
+  <div class="section-header" style="margin-top:28px">
+    <div class="section-title">Completed / History</div>
+    <button class="btn btn-ghost btn-sm" onclick="toggleHistory()">Show / Hide</button>
+  </div>
+  <div class="queue-list" id="done-queue" style="display:none"></div>
+</div>
+
+<!-- ── INVENTORY ── -->
+<div class="panel" id="tab-inventory">
+  <div id="kpi-inv" class="kpi-strip"></div>
+
+  <div class="section-header">
+    <div class="section-title">On-Hand Stock</div>
+    <button class="btn btn-ghost btn-sm" onclick="openAddInvModal()">＋ Add Product</button>
+  </div>
+  <div class="inv-grid" id="inv-grid"></div>
+</div>
+
+</main>
+
+<!-- ── Add Print Job Modal ── -->
+<div class="modal-overlay" id="job-modal">
+  <div class="modal">
+    <div class="modal-title" id="job-modal-title">Add Print Job</div>
+    <div class="field">
+      <label>Item Type</label>
+      <select id="job-item">
+        <option value="Large Riser">🖨️ Large Riser</option>
+        <option value="Medium Riser">🖨️ Medium Riser</option>
+        <option value="Small Riser">🖨️ Small Riser</option>
+        <option value="End Caps">🖨️ End Caps</option>
+        <option value="Custom Order">🖨️ Custom Order</option>
+      </select>
+    </div>
+    <div class="grid-2f">
+      <div class="field">
+        <label>Quantity</label>
+        <input type="number" id="job-qty" min="1" value="1" placeholder="e.g. 10">
+      </div>
+      <div class="field">
+        <label>Est. Print Hours</label>
+        <input type="number" id="job-hours" min="0.5" step="0.5" value="4" placeholder="e.g. 4">
+      </div>
+    </div>
+    <div class="grid-2f">
+      <div class="field">
+        <label>Filament Color</label>
+        <input type="text" id="job-filament" placeholder="e.g. Matte Black">
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <select id="job-status">
+          <option value="queued">Queued</option>
+          <option value="printing">Printing Now</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Started At (optional)</label>
+      <input type="datetime-local" id="job-started">
+    </div>
+    <div class="field">
+      <label>Notes</label>
+      <textarea id="job-notes" placeholder="Customer name, special request, etc."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeJobModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveJob()">Save Job</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Add Inventory Product Modal ── -->
+<div class="modal-overlay" id="inv-modal">
+  <div class="modal">
+    <div class="modal-title">Add Inventory Item</div>
+    <div class="field">
+      <label>Product Name</label>
+      <input type="text" id="inv-name" placeholder="e.g. Display Riser Set, Custom Pin...">
+    </div>
+    <div class="field">
+      <label>Emoji Icon</label>
+      <input type="text" id="inv-icon" placeholder="e.g. 🖨️" maxlength="4" style="font-size:1.3rem">
+    </div>
+    <div class="grid-2f">
+      <div class="field">
+        <label>Current Stock</label>
+        <input type="number" id="inv-stock" min="0" value="0">
+      </div>
+      <div class="field">
+        <label>Low-Stock Threshold</label>
+        <input type="number" id="inv-threshold" min="0" value="5">
+      </div>
+    </div>
+    <div class="field">
+      <label>Unit Label</label>
+      <input type="text" id="inv-unit" placeholder="units / sets / pieces" value="units">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeInvModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveInvItem()">Add Item</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Storage Keys ──
+const QUEUE_KEY = 'vpc_print_queue_v1';
+const INV_KEY   = 'vpc_inventory_v1';
+
+// ── Default inventory (pre-populated) ──
+const DEFAULT_INVENTORY = [
+  { id: 'risers',   name: 'Display Risers',  icon: '🖨️', stock: 0, threshold: 5,  unit: 'sets' },
+  { id: 'jettags',  name: 'Jet Tags',         icon: '🏷️', stock: 0, threshold: 20, unit: 'units' },
+  { id: 'pins',     name: 'Pins',             icon: '📌', stock: 0, threshold: 20, unit: 'units' },
+];
+
+// ── Helpers ──
+const $ = id => document.getElementById(id);
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+
+function getQueue()    { return JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]'); }
+function saveQueue(a)  { localStorage.setItem(QUEUE_KEY, JSON.stringify(a)); }
+function getInv()      {
+  const saved = JSON.parse(localStorage.getItem(INV_KEY) || 'null');
+  if (!saved) { localStorage.setItem(INV_KEY, JSON.stringify(DEFAULT_INVENTORY)); return DEFAULT_INVENTORY; }
+  return saved;
+}
+function saveInv(a) { localStorage.setItem(INV_KEY, JSON.stringify(a)); }
+
+// ── Tab ──
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + id));
+}
+
+// ── KPI strip ──
+function kpiStrip(id, items) {
+  $(id).innerHTML = items.map(i => `
+    <div class="kpi">
+      <div class="kpi-val" style="color:${i.color||'var(--text)'}">${i.val}</div>
+      <div class="kpi-label">${i.label}</div>
+    </div>`).join('');
+}
+
+// ════════════════════════════════
+// PRINT QUEUE
+// ════════════════════════════════
+let editJobId = null;
+
+function openJobModal(id) {
+  editJobId = id || null;
+  $('job-modal-title').textContent = id ? 'Edit Print Job' : 'Add Print Job';
+  if (id) {
+    const job = getQueue().find(j => j.id === id);
+    if (job) {
+      $('job-item').value     = job.item || 'Large Riser';
+      $('job-qty').value      = job.qty || 1;
+      $('job-hours').value    = job.estHours || 4;
+      $('job-filament').value = job.filament || '';
+      $('job-status').value   = job.status || 'queued';
+      $('job-started').value  = job.startedAt ? job.startedAt.slice(0,16) : '';
+      $('job-notes').value    = job.notes || '';
+    }
+  } else {
+    $('job-item').value     = 'Large Riser';
+    $('job-qty').value      = 1;
+    $('job-hours').value    = 4;
+    $('job-filament').value = '';
+    $('job-status').value   = 'queued';
+    $('job-started').value  = '';
+    $('job-notes').value    = '';
+  }
+  $('job-modal').classList.add('open');
+}
+
+function closeJobModal() { $('job-modal').classList.remove('open'); }
+
+function saveJob() {
+  const item     = $('job-item').value;
+  const qty      = parseInt($('job-qty').value) || 1;
+  const estHours = parseFloat($('job-hours').value) || 4;
+  const filament = $('job-filament').value.trim();
+  const status   = $('job-status').value;
+  const started  = $('job-started').value ? new Date($('job-started').value).toISOString() : null;
+  const notes    = $('job-notes').value.trim();
+
+  const q = getQueue();
+  if (editJobId) {
+    const idx = q.findIndex(j => j.id === editJobId);
+    if (idx >= 0) q[idx] = { ...q[idx], item, qty, estHours, filament, status, startedAt: started || q[idx].startedAt, notes };
+  } else {
+    q.push({ id: uid(), item, qty, estHours, filament, status, startedAt: started || (status === 'printing' ? new Date().toISOString() : null), notes, createdAt: new Date().toISOString() });
+  }
+  saveQueue(q);
+  closeJobModal();
+  renderQueue();
+  toast(editJobId ? 'Job updated.' : 'Print job added!');
+}
+
+function updateJobStatus(id, newStatus) {
+  const q = getQueue();
+  const idx = q.findIndex(j => j.id === id);
+  if (idx < 0) return;
+  q[idx].status = newStatus;
+  if (newStatus === 'printing' && !q[idx].startedAt) q[idx].startedAt = new Date().toISOString();
+  if (newStatus === 'done')     q[idx].completedAt = new Date().toISOString();
+  saveQueue(q);
+  renderQueue();
+}
+
+function deleteJob(id) {
+  if (!confirm('Remove this print job?')) return;
+  saveQueue(getQueue().filter(j => j.id !== id));
+  renderQueue();
+}
+
+function estimateProgress(job) {
+  if (!job.startedAt || !job.estHours) return 0;
+  const elapsed = (Date.now() - new Date(job.startedAt)) / 3600000;
+  return Math.min((elapsed / job.estHours) * 100, 99);
+}
+
+function formatRelTime(isoStr) {
+  if (!isoStr) return '—';
+  const diff = (Date.now() - new Date(isoStr)) / 60000; // minutes
+  if (diff < 60)  return Math.round(diff) + 'm ago';
+  if (diff < 1440) return (diff/60).toFixed(1) + 'h ago';
+  return (diff/1440).toFixed(1) + 'd ago';
+}
+
+function estDone(job) {
+  if (!job.startedAt || !job.estHours) return '—';
+  const done = new Date(new Date(job.startedAt).getTime() + job.estHours * 3600000);
+  const now = new Date();
+  if (done < now) return '⏱ Overdue';
+  const diff = (done - now) / 60000;
+  if (diff < 60) return '~' + Math.round(diff) + 'm left';
+  return '~' + (diff/60).toFixed(1) + 'h left';
+}
+
+const itemIcons = { 'Large Riser':'🖨️', 'Medium Riser':'🖨️', 'Small Riser':'🖨️', 'End Caps':'🔲', 'Custom Order':'⭐' };
+
+function jobCardHTML(job) {
+  const icon = itemIcons[job.item] || '🖨️';
+  const badgeMap = { printing: 'badge-printing', queued: 'badge-queued', done: 'badge-done', failed: 'badge-failed' };
+  const badgeLbl = { printing: '▶ Printing', queued: '⏸ Queued', done: '✓ Done', failed: '✗ Failed' };
+  const prog = job.status === 'printing' ? estimateProgress(job) : null;
+
+  const actions = [];
+  if (job.status === 'queued')    actions.push(`<button class="btn btn-green btn-sm" onclick="updateJobStatus('${job.id}','printing')">▶ Start</button>`);
+  if (job.status === 'printing')  actions.push(`<button class="btn btn-green btn-sm" onclick="updateJobStatus('${job.id}','done')">✓ Done</button>`);
+  if (job.status !== 'done')      actions.push(`<button class="btn btn-ghost btn-sm" onclick="openJobModal('${job.id}')">Edit</button>`);
+  if (job.status === 'printing')  actions.push(`<button class="btn btn-red btn-sm" onclick="updateJobStatus('${job.id}','failed')">✗ Failed</button>`);
+  actions.push(`<button class="btn btn-red btn-sm" onclick="deleteJob('${job.id}')">🗑</button>`);
+
+  return `
+    <div class="job-card status-${job.status}">
+      <div class="job-icon">${icon}</div>
+      <div class="job-info">
+        <div class="job-name">${job.item} × ${job.qty}</div>
+        <div class="job-meta">
+          ${job.filament ? `<span>🎨 ${job.filament}</span>` : ''}
+          <span>⏱ ${job.estHours}h est.</span>
+          ${job.status === 'printing' ? `<span>${estDone(job)}</span><span>Started ${formatRelTime(job.startedAt)}</span>` : ''}
+          ${job.status === 'done' && job.completedAt ? `<span>Done ${formatRelTime(job.completedAt)}</span>` : ''}
+          ${job.notes ? `<span>📝 ${job.notes}</span>` : ''}
+        </div>
+        ${prog !== null ? `
+          <div class="job-progress">
+            <div class="job-prog-bar"><div class="job-prog-fill" style="width:${prog.toFixed(0)}%"></div></div>
+            <div class="job-prog-label">${prog.toFixed(0)}% estimated progress</div>
+          </div>` : ''}
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0">
+        <span class="status-badge ${badgeMap[job.status]||'badge-queued'}">${badgeLbl[job.status]||job.status}</span>
+        <div class="job-actions">${actions.join('')}</div>
+      </div>
+    </div>`;
+}
+
+let histVisible = false;
+function toggleHistory() {
+  histVisible = !histVisible;
+  $('done-queue').style.display = histVisible ? 'flex' : 'none';
+  $('done-queue').style.flexDirection = 'column';
+  $('done-queue').style.gap = '10px';
+}
+
+function renderQueue() {
+  const q = getQueue();
+  const active = q.filter(j => j.status !== 'done' && j.status !== 'failed');
+  const done   = q.filter(j => j.status === 'done' || j.status === 'failed');
+  const printing = q.filter(j => j.status === 'printing').length;
+  const todayDone = done.filter(j => {
+    if (!j.completedAt) return false;
+    const d = new Date(j.completedAt);
+    const n = new Date();
+    return d.getFullYear()===n.getFullYear() && d.getMonth()===n.getMonth() && d.getDate()===n.getDate();
+  }).length;
+  const totalQty = active.reduce((s,j) => s + (j.qty||0), 0);
+
+  kpiStrip('kpi-queue', [
+    { val: active.length,   label: 'Jobs in Queue',     color: 'var(--accent)' },
+    { val: printing,        label: 'Printing Now',      color: 'var(--green)' },
+    { val: totalQty,        label: 'Units Pending',     color: 'var(--yellow)' },
+    { val: todayDone,       label: 'Completed Today',   color: 'var(--text2)' },
+  ]);
+
+  $('active-queue').innerHTML = active.length
+    ? active.sort((a,b) => {
+        const o = {printing:0, queued:1, failed:2};
+        return (o[a.status]||9) - (o[b.status]||9);
+      }).map(jobCardHTML).join('')
+    : `<div class="empty"><div class="e-icon">🖨️</div>No jobs in queue.<br>Add a print job to get started.</div>`;
+
+  $('done-queue').innerHTML = done.length
+    ? done.sort((a,b) => (b.completedAt||'').localeCompare(a.completedAt||'')).map(jobCardHTML).join('')
+    : `<div class="empty" style="padding:20px">No completed jobs yet.</div>`;
+}
+
+// ════════════════════════════════
+// INVENTORY
+// ════════════════════════════════
+let editInvId = null;
+
+function openAddInvModal() {
+  $('inv-name').value  = '';
+  $('inv-icon').value  = '📦';
+  $('inv-stock').value = 0;
+  $('inv-threshold').value = 5;
+  $('inv-unit').value  = 'units';
+  $('inv-modal').classList.add('open');
+}
+function closeInvModal() { $('inv-modal').classList.remove('open'); }
+
+function saveInvItem() {
+  const name  = $('inv-name').value.trim();
+  if (!name) { toast('Product name required.'); return; }
+  const inv = getInv();
+  inv.push({
+    id:        uid(),
+    name,
+    icon:      $('inv-icon').value.trim() || '📦',
+    stock:     parseInt($('inv-stock').value) || 0,
+    threshold: parseInt($('inv-threshold').value) || 5,
+    unit:      $('inv-unit').value.trim() || 'units',
+  });
+  saveInv(inv);
+  closeInvModal();
+  renderInventory();
+  toast('Item added!');
+}
+
+function adjustStock(id, delta) {
+  const inv = getInv();
+  const item = inv.find(i => i.id === id);
+  if (!item) return;
+  item.stock = Math.max(0, (item.stock || 0) + delta);
+  saveInv(inv);
+  renderInventory();
+}
+
+function setThreshold(id, val) {
+  const inv = getInv();
+  const item = inv.find(i => i.id === id);
+  if (!item) return;
+  item.threshold = Math.max(0, parseInt(val) || 0);
+  saveInv(inv);
+  renderInventory();
+}
+
+function removeInvItem(id) {
+  if (!confirm('Remove this inventory item?')) return;
+  saveInv(getInv().filter(i => i.id !== id));
+  renderInventory();
+}
+
+function renderInventory() {
+  const inv = getInv();
+  const lowItems = inv.filter(i => (i.stock||0) < (i.threshold||0) && (i.stock||0) > 0);
+  const outItems = inv.filter(i => (i.stock||0) === 0);
+
+  // Alert banner
+  const allAlerts = [...outItems.map(i => `<strong>${i.name}</strong> is OUT`), ...lowItems.map(i => `<strong>${i.name}</strong> is low (${i.stock} left)`)];
+  if (allAlerts.length > 0) {
+    $('low-stock-banner').classList.remove('hidden');
+    $('low-stock-text').innerHTML = allAlerts.join(' · ');
+  } else {
+    $('low-stock-banner').classList.add('hidden');
+  }
+
+  const totalUnits = inv.reduce((s,i) => s + (i.stock||0), 0);
+  const totalLow   = lowItems.length + outItems.length;
+  kpiStrip('kpi-inv', [
+    { val: inv.length,    label: 'Products Tracked', color: 'var(--accent)' },
+    { val: totalUnits,    label: 'Total Units On-Hand', color: 'var(--green)' },
+    { val: totalLow,      label: 'Low / Out of Stock', color: totalLow > 0 ? 'var(--yellow)' : 'var(--text2)' },
+    { val: outItems.length, label: 'Out of Stock', color: outItems.length > 0 ? 'var(--red)' : 'var(--text2)' },
+  ]);
+
+  if (inv.length === 0) {
+    $('inv-grid').innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="e-icon">📦</div>No inventory items yet. Click "Add Product" to start tracking stock.</div>`;
+    return;
+  }
+
+  $('inv-grid').innerHTML = inv.map(item => {
+    const stock = item.stock || 0;
+    const thresh = item.threshold || 1;
+    const isOut  = stock === 0;
+    const isLow  = stock > 0 && stock < thresh;
+    const barPct = Math.min((stock / Math.max(thresh * 1.5, 1)) * 100, 100).toFixed(0);
+    const barClr = isOut ? 'var(--red)' : isLow ? 'var(--yellow)' : 'var(--green)';
+    const cardCls = isOut ? 'out-stock' : isLow ? 'low-stock' : '';
+    const statusTxt = isOut ? `<span style="color:var(--red)">⚠️ OUT OF STOCK</span>` : isLow ? `<span style="color:var(--yellow)">⚠️ LOW — reorder soon</span>` : `<span style="color:var(--green)">✓ Stocked</span>`;
+
+    return `
+      <div class="inv-card ${cardCls}">
+        <div class="inv-product">
+          <span>${item.icon || '📦'} ${item.name}</span>
+          <button class="btn btn-red btn-sm" onclick="removeInvItem('${item.id}')" title="Remove">✕</button>
+        </div>
+        <div class="inv-count-row">
+          <button class="inv-adj" onclick="adjustStock('${item.id}', -1)">−</button>
+          <div class="inv-count" style="color:${barClr}">${stock}</div>
+          <button class="inv-adj" onclick="adjustStock('${item.id}', 1)">＋</button>
+          <div class="inv-unit">${item.unit || 'units'}</div>
+        </div>
+        <div class="inv-bar"><div class="inv-bar-fill" style="width:${barPct}%;background:${barClr}"></div></div>
+        <div class="inv-thresh-row" style="margin-top:8px">
+          Alert when below:
+          <input class="thresh-input" type="number" min="0" value="${thresh}"
+            onchange="setThreshold('${item.id}', this.value)">
+          <span>${item.unit || 'units'}</span>
+        </div>
+        <div class="inv-status">${statusTxt}</div>
+      </div>`;
+  }).join('');
+}
+
+// ── Toast ──
+function toast(msg) {
+  let el = document.getElementById('_toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = '_toast';
+    el.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1e293b;border:1px solid #334155;color:#e2e8f0;padding:10px 18px;border-radius:8px;font-size:0.84rem;z-index:9999;transition:opacity 0.3s;opacity:0';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.opacity = '1';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.style.opacity = '0', 2800);
+}
+
+// Auto-refresh printing progress every 60s
+setInterval(() => {
+  if (getQueue().some(j => j.status === 'printing')) renderQueue();
+}, 60000);
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderQueue();
+  renderInventory();
+});
+</script>
+</body>
+</html>
