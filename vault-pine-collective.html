@@ -646,17 +646,6 @@
 <!-- ══════════════════════════════════════════ MODALS ══ -->
 
 <!-- Add Order Modal -->
-<!-- Invoice Modal -->
-<div class="modal-overlay" id="invoiceModal" style="align-items:flex-start;padding-top:40px;">
-  <div class="modal" style="width:560px;max-height:80vh;overflow-y:auto;background:#fff;color:#111;border-radius:8px;">
-    <div id="invoiceContent"></div>
-    <div style="display:flex;gap:10px;justify-content:flex-end;padding:16px 24px;border-top:1px solid #e5e7eb;background:#fff;">
-      <button onclick="window.print()" style="background:#1a1d27;color:#fff;border:none;border-radius:6px;padding:8px 18px;cursor:pointer;font-weight:600;">🖨 Print / Save PDF</button>
-      <button onclick="document.getElementById('invoiceModal').classList.remove('open')" style="background:#f3f4f6;color:#111;border:none;border-radius:6px;padding:8px 18px;cursor:pointer;">Close</button>
-    </div>
-  </div>
-</div>
-
 <div class="modal-overlay" id="addOrderModal">
   <div class="modal">
     <h2 id="aoTitle">Log New Order</h2>
@@ -1403,8 +1392,7 @@ function renderOrderTable() {
     const roi = (profit / o.cogs * 100).toFixed(1);
     const roiColor = roi >= 80 ? 'var(--green)' : roi >= 70 ? 'var(--yellow)' : 'var(--text)';
     const actions =
-      `<button class="icon-btn" title="Generate invoice" onclick="openInvoice('${o.id}')">🧾</button>
-       <button class="icon-btn" title="Edit order" onclick="openAddOrder('${o.id}')">✏️</button>
+      `<button class="icon-btn" title="Edit order" onclick="openAddOrder('${o.id}')">✏️</button>
        <button class="icon-btn" title="Delete order" onclick="deleteOrder('${o.id}')">✕</button>`;
     return `<tr>
       <td style="white-space:nowrap">${fmtDate(o.date)}</td>
@@ -3076,71 +3064,6 @@ function deleteEvent(id) {
   toast('Event deleted.');
 }
 function initEvents() { renderEvAll(); }
-
-// ── INVOICE GENERATOR ──
-function openInvoice(id) {
-  const o = getOrders().find(x => x.id === id);
-  if (!o) return;
-  const profit = o.salePrice - o.cogs;
-  const roi = (profit / o.cogs * 100).toFixed(1);
-  const invNum = 'VPC-' + o.id.toUpperCase().replace('H','') + '-' + o.date.replace(/-/g,'');
-  document.getElementById('invoiceContent').innerHTML = `
-    <div style="padding:32px;font-family:'Segoe UI',system-ui,sans-serif;color:#111;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;">
-        <div>
-          <div style="font-size:1.4rem;font-weight:900;letter-spacing:-0.5px;">Vault &amp; Pine Collective</div>
-          <div style="font-size:0.8rem;color:#6b7280;margin-top:2px;">Card Display Risers · Pokémon Accessories</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:0.7rem;color:#6b7280;text-transform:uppercase;letter-spacing:1px;">Invoice</div>
-          <div style="font-size:1rem;font-weight:700;">${invNum}</div>
-          <div style="font-size:0.8rem;color:#6b7280;">${fmtDate(o.date)}</div>
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
-        <div>
-          <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:1px;color:#6b7280;margin-bottom:6px;">Bill To</div>
-          <div style="font-weight:700;font-size:1rem;">${esc(o.customer)}</div>
-          ${o.referredBy ? `<div style="font-size:0.78rem;color:#6b7280;">Referred by: ${esc(o.referredBy)}</div>` : ''}
-        </div>
-        <div>
-          <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:1px;color:#6b7280;margin-bottom:6px;">From</div>
-          <div style="font-weight:700;">Vault &amp; Pine Collective</div>
-          <div style="font-size:0.78rem;color:#6b7280;">mobiletechpnw@gmail.com</div>
-        </div>
-      </div>
-      <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
-        <thead>
-          <tr style="border-bottom:2px solid #111;">
-            <th style="text-align:left;padding:8px 0;font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:#6b7280;">Description</th>
-            <th style="text-align:right;padding:8px 0;font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;color:#6b7280;">Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr style="border-bottom:1px solid #e5e7eb;">
-            <td style="padding:12px 0;">
-              <div style="font-weight:600;">${esc(o.product)}</div>
-              ${o.notes ? `<div style="font-size:0.78rem;color:#6b7280;margin-top:2px;">${esc(o.notes)}</div>` : ''}
-            </td>
-            <td style="text-align:right;padding:12px 0;font-weight:700;">${fmt$(o.salePrice)}</td>
-          </tr>
-        </tbody>
-      </table>
-      <div style="display:flex;justify-content:flex-end;">
-        <div style="min-width:200px;">
-          <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:0.85rem;">
-            <span style="color:#6b7280;">Subtotal</span><span>${fmt$(o.salePrice)}</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:1rem;font-weight:900;border-top:2px solid #111;margin-top:4px;">
-            <span>Total</span><span>${fmt$(o.salePrice)}</span>
-          </div>
-        </div>
-      </div>
-      ${o.notes ? `<div style="margin-top:24px;padding:12px;background:#f9fafb;border-radius:6px;font-size:0.8rem;color:#6b7280;"><strong>Notes:</strong> ${esc(o.notes)}</div>` : ''}
-      <div style="margin-top:32px;padding-top:16px;border-top:1px solid #e5e7eb;font-size:0.72rem;color:#9ca3af;text-align:center;">Thank you for your business! · Vault &amp; Pine Collective</div>
-    </div>`;
-  document.getElementById('invoiceModal').classList.add('open');
-}
 
 // Auto-backup reminder
 (function checkBackupReminder() {
