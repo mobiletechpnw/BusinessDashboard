@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0f1117">
+<meta name="theme-color" content="#010a18">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
@@ -13,230 +13,255 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#010a18;--surface:rgba(0,30,70,0.6);--border:rgba(0,180,255,0.25);
-  --accent:#00b4ff;--accent2:#0affef;--accent3:#4d9fff;
-  --text:#c8e8ff;--text2:#5a8aaa;--red:#ff4060;--green:#00ffaa;--yellow:#ffd060;
+  --bg:#010a18;
+  --surface:rgba(0,30,70,0.6);
+  --border:rgba(0,180,255,0.25);
+  --accent:#00b4ff;
+  --accent2:#0affef;
+  --accent3:#4d9fff;
+  --text:#c8e8ff;
+  --text2:#5a8aaa;
+  --red:#ff4060;
+  --green:#00ffaa;
+  --yellow:#ffd060;
   --orange:#ff8c00;
   --glow:0 0 12px rgba(0,180,255,0.5);
 }
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
 
 body{
-  background:var(--bg);color:var(--text);
+  background:var(--bg);
+  color:var(--text);
   font-family:'Share Tech Mono',monospace;
-  min-height:100vh;overflow:hidden;
+  min-height:100vh;
+  overflow:hidden;
   background-image:
     linear-gradient(rgba(0,180,255,0.03) 1px,transparent 1px),
     linear-gradient(90deg,rgba(0,180,255,0.03) 1px,transparent 1px);
   background-size:40px 40px;
 }
 
-/* ── SCANLINE ── */
+/* Scanline overlay */
 body::after{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:999;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);
+  background:repeating-linear-gradient(
+    0deg,transparent,transparent 2px,
+    rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px
+  );
 }
 
 /* ── LAYOUT ── */
-.hud{display:grid;grid-template-columns:220px 1fr 220px;grid-template-rows:60px 1fr 140px;height:100vh;padding:10px;gap:8px;}
+.hud{
+  display:grid;
+  grid-template-columns:220px 1fr 220px;
+  grid-template-rows:60px 1fr 150px;
+  height:100vh;
+  padding:10px;
+  gap:8px;
+}
 
 /* ── TOP BAR ── */
-.top-bar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;
-  border-bottom:1px solid var(--border);padding:0 12px;
+.top-bar{
+  grid-column:1/-1;
+  display:flex;align-items:center;justify-content:space-between;
   background:var(--surface);border:1px solid var(--border);border-radius:4px;
+  padding:0 14px;
 }
 .brand{font-family:'Orbitron',monospace;font-size:0.75rem;font-weight:900;letter-spacing:3px;color:var(--accent);text-shadow:var(--glow);}
 .brand span{color:var(--accent2);}
-.objective{font-size:0.6rem;color:var(--text2);letter-spacing:1px;}
-.status-pills{display:flex;gap:8px;align-items:center;}
-.pill{font-size:0.55rem;padding:3px 10px;border:1px solid var(--accent);border-radius:2px;color:var(--accent);letter-spacing:1px;text-shadow:var(--glow);}
-.pill.green{border-color:var(--green);color:var(--green);text-shadow:0 0 8px rgba(0,255,170,0.5);}
-.pill.red{border-color:var(--red);color:var(--red);}
-.pill.orange{border-color:var(--orange);color:var(--orange);}
+.objective{font-size:0.58rem;color:var(--text2);letter-spacing:1px;margin-top:2px;}
+.status-pills{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.pill{font-size:0.52rem;padding:2px 8px;border:1px solid var(--accent);border-radius:2px;color:var(--accent);letter-spacing:1px;white-space:nowrap;}
+.pill.green{border-color:var(--green);color:var(--green);}
+.pill.red  {border-color:var(--red);color:var(--red);}
+.pill.amber{border-color:var(--orange);color:var(--orange);}
 .clock-area{text-align:right;}
-#clock{font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:700;color:var(--accent2);text-shadow:0 0 15px rgba(10,255,239,0.7);letter-spacing:2px;}
-#dateline{font-size:0.55rem;color:var(--text2);letter-spacing:1px;}
+#clock{font-family:'Orbitron',monospace;font-size:1.05rem;font-weight:700;color:var(--accent2);text-shadow:0 0 15px rgba(10,255,239,0.7);letter-spacing:2px;}
+#dateline{font-size:0.52rem;color:var(--text2);letter-spacing:1px;}
 
 /* ── LEFT PANEL ── */
 .left-panel{display:flex;flex-direction:column;gap:8px;overflow:hidden;}
-.panel-box{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:12px;}
-.panel-title{font-size:0.58rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:6px;}
+.panel-box{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:12px;overflow:hidden;}
+.panel-title{font-size:0.56rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:5px;}
 
 /* Vitals */
-.vital{margin-bottom:8px;}
-.vital-row{display:flex;justify-content:space-between;font-size:0.6rem;margin-bottom:3px;}
+.vital{margin-bottom:7px;}
+.vital-row{display:flex;justify-content:space-between;font-size:0.58rem;margin-bottom:3px;}
 .vital-label{color:var(--text2);}
 .vital-val{color:var(--accent2);}
-.vital-bar{height:3px;background:rgba(0,180,255,0.1);border-radius:2px;overflow:hidden;}
+.vital-bar{height:3px;background:rgba(0,180,255,0.08);border-radius:2px;overflow:hidden;}
 .vital-fill{height:100%;border-radius:2px;transition:width 1s;}
-.fill-blue{background:linear-gradient(90deg,var(--accent3),var(--accent2));box-shadow:0 0 6px rgba(0,180,255,0.6);}
-.fill-green{background:linear-gradient(90deg,#00aa77,var(--green));box-shadow:0 0 6px rgba(0,255,170,0.5);}
+.fill-blue  {background:linear-gradient(90deg,var(--accent3),var(--accent2));box-shadow:0 0 5px rgba(0,180,255,0.5);}
+.fill-green {background:linear-gradient(90deg,#00aa77,var(--green));box-shadow:0 0 5px rgba(0,255,170,0.4);}
 .fill-yellow{background:linear-gradient(90deg,#cc8800,var(--yellow));}
-.fill-red{background:linear-gradient(90deg,#cc0022,var(--red));}
 
-/* Telemetry */
-.telemetry{flex:1;overflow:hidden;}
-#telem-log{font-size:0.55rem;color:var(--text2);line-height:1.7;overflow:hidden;max-height:180px;}
+/* Telem log */
+#telem-log{font-size:0.52rem;color:var(--text2);line-height:1.7;overflow:hidden;max-height:200px;}
 #telem-log .t-entry{display:flex;gap:8px;}
-#telem-log .t-time{color:var(--accent3);min-width:50px;}
-#telem-log .t-msg{color:var(--text2);}
-#telem-log .t-ok{color:var(--green);}
-#telem-log .t-warn{color:var(--yellow);}
+#telem-log .t-time{color:var(--accent3);min-width:48px;flex-shrink:0;}
+.t-ok  {color:var(--green);}
+.t-warn{color:var(--yellow);}
+.t-err {color:var(--red);}
 
 /* ── CENTER ── */
-.center-panel{position:relative;display:flex;align-items:center;justify-content:center;}
+.center-panel{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;}
 #radar-canvas{width:100%;height:100%;display:block;}
 
-/* Voice ring — state-driven */
+/* Corner decorations */
+.corner{position:absolute;width:14px;height:14px;border-color:var(--accent);border-style:solid;opacity:0.5;}
+.corner.tl{top:6px;left:6px;border-width:2px 0 0 2px;}
+.corner.tr{top:6px;right:6px;border-width:2px 2px 0 0;}
+.corner.bl{bottom:6px;left:6px;border-width:0 0 2px 2px;}
+.corner.br{bottom:6px;right:6px;border-width:0 2px 2px 0;}
+
+/* ── MIC RING — 5 visual states ── */
 .voice-ring{
-  position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
-  width:68px;height:68px;border-radius:50%;
+  position:absolute;bottom:18px;left:50%;transform:translateX(-50%);
+  width:66px;height:66px;border-radius:50%;
   border:2px solid var(--accent);
   display:flex;align-items:center;justify-content:center;flex-direction:column;
-  cursor:pointer;transition:all 0.3s;
-  box-shadow:0 0 20px rgba(0,180,255,0.3);
-  background:rgba(0,30,70,0.8);
+  cursor:pointer;
+  background:rgba(0,20,55,0.85);
   user-select:none;
+  transition:border-color 0.3s,box-shadow 0.3s;
 }
-.voice-ring:hover{box-shadow:0 0 30px rgba(0,180,255,0.6);}
-
-/* State styles */
 .voice-ring[data-state="idle"]{
-  border-color:rgba(0,180,255,0.4);
-  box-shadow:0 0 10px rgba(0,180,255,0.15);
-  animation:idle-breathe 3s ease-in-out infinite;
+  border-color:rgba(0,180,255,0.35);
+  box-shadow:0 0 10px rgba(0,180,255,0.1);
+  animation:breathe 3.5s ease-in-out infinite;
 }
 .voice-ring[data-state="listening"]{
   border-color:var(--accent2);
-  box-shadow:0 0 25px rgba(10,255,239,0.6);
-  animation:listening-pulse 1.4s ease-in-out infinite;
+  box-shadow:0 0 22px rgba(10,255,239,0.55);
+  animation:mic-pulse 1.5s ease-in-out infinite;
 }
-.voice-ring[data-state="wake"]{
+.voice-ring[data-state="voice-detected"]{
   border-color:var(--yellow);
-  box-shadow:0 0 30px rgba(255,208,96,0.7);
-  animation:wake-pulse 0.8s ease-in-out infinite;
+  box-shadow:0 0 28px rgba(255,208,96,0.7);
+  animation:vad-flash 0.5s ease-in-out infinite alternate;
 }
 .voice-ring[data-state="processing"]{
   border-color:var(--orange);
-  box-shadow:0 0 30px rgba(255,140,0,0.6);
-  animation:processing-spin 1s linear infinite;
+  box-shadow:0 0 28px rgba(255,140,0,0.6);
+  animation:proc-glow 0.9s ease-in-out infinite alternate;
 }
 .voice-ring[data-state="speaking"]{
   border-color:var(--green);
   box-shadow:0 0 30px rgba(0,255,170,0.7);
-  animation:speaking-wave 0.6s ease-in-out infinite alternate;
+  animation:speak-scale 0.55s ease-in-out infinite alternate;
+}
+.voice-ring[data-state="muted"]{
+  border-color:rgba(255,64,96,0.5);
+  box-shadow:0 0 8px rgba(255,64,96,0.2);
 }
 
-.voice-ring svg{width:22px;height:22px;fill:var(--accent);transition:fill 0.3s;}
-.voice-ring[data-state="listening"] svg{fill:var(--accent2);}
-.voice-ring[data-state="wake"] svg{fill:var(--yellow);}
-.voice-ring[data-state="processing"] svg{fill:var(--orange);}
-.voice-ring[data-state="speaking"] svg{fill:var(--green);}
-.voice-state-label{font-size:0.38rem;letter-spacing:1.5px;margin-top:3px;color:var(--text2);text-transform:uppercase;}
+.voice-ring svg{width:22px;height:22px;transition:fill 0.3s;}
+.voice-ring[data-state="idle"]            svg{fill:rgba(0,180,255,0.5);}
+.voice-ring[data-state="listening"]       svg{fill:var(--accent2);}
+.voice-ring[data-state="voice-detected"]  svg{fill:var(--yellow);}
+.voice-ring[data-state="processing"]      svg{fill:var(--orange);}
+.voice-ring[data-state="speaking"]        svg{fill:var(--green);}
+.voice-ring[data-state="muted"]           svg{fill:rgba(255,64,96,0.6);}
 
-@keyframes idle-breathe{0%,100%{box-shadow:0 0 8px rgba(0,180,255,0.1);}50%{box-shadow:0 0 18px rgba(0,180,255,0.3);}}
-@keyframes listening-pulse{0%,100%{transform:translateX(-50%) scale(1);box-shadow:0 0 20px rgba(10,255,239,0.4);}50%{transform:translateX(-50%) scale(1.06);box-shadow:0 0 35px rgba(10,255,239,0.7);}}
-@keyframes wake-pulse{0%,100%{transform:translateX(-50%) scale(1);}50%{transform:translateX(-50%) scale(1.12);}}
-@keyframes processing-spin{from{box-shadow:0 0 25px rgba(255,140,0,0.3),4px 0 0 rgba(255,140,0,0.5);}to{box-shadow:0 0 25px rgba(255,140,0,0.6),-4px 0 0 rgba(255,140,0,0.5);}}
-@keyframes speaking-wave{from{transform:translateX(-50%) scale(1.0);}to{transform:translateX(-50%) scale(1.08);}}
+.voice-ring .ring-label{font-size:0.36rem;letter-spacing:1.5px;margin-top:3px;color:var(--text2);text-transform:uppercase;transition:color 0.3s;}
+.voice-ring[data-state="listening"]      .ring-label{color:var(--accent2);}
+.voice-ring[data-state="voice-detected"] .ring-label{color:var(--yellow);}
+.voice-ring[data-state="processing"]     .ring-label{color:var(--orange);}
+.voice-ring[data-state="speaking"]       .ring-label{color:var(--green);}
+.voice-ring[data-state="muted"]          .ring-label{color:var(--red);}
+
+@keyframes breathe    {0%,100%{box-shadow:0 0 6px rgba(0,180,255,0.08);}50%{box-shadow:0 0 16px rgba(0,180,255,0.25);}}
+@keyframes mic-pulse  {0%,100%{transform:translateX(-50%) scale(1);}50%{transform:translateX(-50%) scale(1.05);}}
+@keyframes vad-flash  {from{transform:translateX(-50%) scale(1);}to{transform:translateX(-50%) scale(1.1);}}
+@keyframes proc-glow  {from{box-shadow:0 0 20px rgba(255,140,0,0.4);}to{box-shadow:0 0 36px rgba(255,140,0,0.75);}}
+@keyframes speak-scale{from{transform:translateX(-50%) scale(1.0);}to{transform:translateX(-50%) scale(1.07);}}
 
 /* ── RIGHT PANEL ── */
 .right-panel{display:flex;flex-direction:column;gap:8px;overflow:hidden;}
 .radar-mini{aspect-ratio:1;position:relative;}
 #mini-radar{width:100%;height:100%;display:block;}
 
-.diagnostics{flex:1;overflow:hidden;}
-#diag-log{font-size:0.55rem;color:var(--text2);line-height:1.7;overflow:hidden;max-height:200px;}
+/* VAD meter */
+.vad-box{padding:10px 12px;}
+.vad-bar-track{
+  width:100%;height:6px;background:rgba(0,180,255,0.08);
+  border-radius:3px;overflow:hidden;margin-bottom:6px;
+}
+.vad-bar-fill{height:100%;border-radius:3px;width:0%;transition:width 0.06s linear;}
+.vad-labels{display:flex;justify-content:space-between;font-size:0.48rem;color:var(--text2);}
+#vad-db{color:var(--accent2);}
 
-/* ── BOTTOM BAR — conversation ── */
+/* Audio waveform */
+.audio-box{padding:10px 12px;}
+#audio-canvas{width:100%;height:38px;display:block;}
+.audio-meta{display:flex;justify-content:space-between;font-size:0.48rem;color:var(--text2);margin-top:3px;}
+
+#diag-log{font-size:0.52rem;color:var(--text2);line-height:1.7;overflow:hidden;max-height:160px;}
+
+/* ── BOTTOM BAR ── */
 .bottom-bar{
-  grid-column:1/-1;background:var(--surface);border:1px solid var(--border);
-  border-radius:4px;padding:10px 16px;display:flex;flex-direction:column;gap:6px;
+  grid-column:1/-1;
+  background:var(--surface);border:1px solid var(--border);border-radius:4px;
+  padding:10px 16px;display:flex;flex-direction:column;gap:5px;
 }
 
-/* Live transcript */
-.transcript-row{display:flex;align-items:center;gap:12px;}
-.roll-call-label{font-size:0.55rem;color:var(--text2);letter-spacing:2px;white-space:nowrap;}
+/* Live transcript row */
+.transcript-row{display:flex;align-items:center;gap:10px;}
+.feed-label{font-size:0.52rem;color:var(--text2);letter-spacing:2px;white-space:nowrap;flex-shrink:0;}
 #transcript-area{
-  font-family:'Orbitron',monospace;font-size:0.78rem;font-weight:700;
-  color:var(--accent2);letter-spacing:1px;text-shadow:0 0 10px rgba(10,255,239,0.5);
-  min-height:20px;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+  font-family:'Orbitron',monospace;font-size:0.75rem;font-weight:700;
+  color:var(--accent2);letter-spacing:1px;
+  text-shadow:0 0 8px rgba(10,255,239,0.4);
+  flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+  min-height:18px;transition:color 0.3s;
 }
+#transcript-area.interim{color:rgba(10,255,239,0.5);}
 #state-badge{
-  font-size:0.55rem;padding:2px 8px;border-radius:2px;letter-spacing:1px;
-  border:1px solid var(--accent);color:var(--accent);white-space:nowrap;transition:all 0.3s;
+  font-size:0.52rem;padding:2px 8px;border-radius:2px;
+  letter-spacing:1px;border:1px solid var(--accent);
+  color:var(--accent);white-space:nowrap;transition:all 0.3s;flex-shrink:0;
 }
 
-/* Chat history */
+/* Chat log */
 #chat-log{
-  display:flex;flex-direction:column;gap:3px;max-height:56px;overflow:hidden;
+  display:flex;flex-direction:column;gap:2px;
+  max-height:52px;overflow:hidden;
 }
-.chat-line{font-size:0.6rem;line-height:1.4;display:flex;gap:8px;align-items:baseline;}
-.chat-who{white-space:nowrap;font-weight:700;letter-spacing:1px;min-width:54px;}
-.chat-who.user{color:var(--accent3);}
-.chat-who.jarvis{color:var(--green);}
-.chat-text{color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.chat-line{font-size:0.58rem;line-height:1.45;display:flex;gap:8px;align-items:baseline;}
+.chat-who{white-space:nowrap;font-weight:700;letter-spacing:1px;min-width:54px;flex-shrink:0;}
+.chat-you   {color:var(--accent3);}
+.chat-jarvis{color:var(--green);}
+.chat-text  {color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
-/* Nav */
+/* Nav row */
 .nav-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;}
-.hint-text{font-size:0.55rem;color:var(--text2);}
+.hint-text{font-size:0.52rem;color:var(--text2);}
 .hint-text span{color:var(--accent2);}
 .nav-buttons{display:flex;gap:6px;align-items:center;}
 .nav-btn{
-  font-family:'Share Tech Mono',monospace;font-size:0.6rem;
-  padding:4px 12px;border:1px solid var(--border);border-radius:3px;
+  font-family:'Share Tech Mono',monospace;font-size:0.58rem;
+  padding:4px 11px;border:1px solid var(--border);border-radius:3px;
   background:rgba(0,30,70,0.5);color:var(--text2);cursor:pointer;
   letter-spacing:1px;transition:all 0.2s;text-decoration:none;display:inline-block;
 }
-.nav-btn:hover,.nav-btn.active{border-color:var(--accent);color:var(--accent);box-shadow:var(--glow);background:rgba(0,80,160,0.3);}
+.nav-btn:hover,.nav-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(0,60,140,0.3);}
 .nav-btn.active{color:var(--accent2);border-color:var(--accent2);}
-
-/* Config button */
-#cfg-btn{
-  font-size:0.55rem;padding:3px 8px;border:1px solid var(--border);border-radius:3px;
-  background:none;color:var(--text2);cursor:pointer;letter-spacing:1px;
-}
+#cfg-btn{font-size:0.52rem;padding:3px 8px;border:1px solid var(--border);border-radius:3px;background:none;color:var(--text2);cursor:pointer;letter-spacing:1px;}
 #cfg-btn:hover{border-color:var(--accent);color:var(--accent);}
 
 /* ── CONFIG MODAL ── */
-#config-modal{
-  display:none;position:fixed;inset:0;background:rgba(0,5,15,0.9);z-index:800;
-  align-items:center;justify-content:center;
-}
+#config-modal{display:none;position:fixed;inset:0;background:rgba(0,5,15,0.92);z-index:800;align-items:center;justify-content:center;}
 #config-modal.open{display:flex;}
-.cfg-box{
-  background:rgba(0,20,50,0.98);border:1px solid var(--accent2);border-radius:6px;
-  padding:24px;width:480px;max-width:95vw;
-  box-shadow:0 0 40px rgba(10,255,239,0.2);
-}
-.cfg-title{font-family:'Orbitron',monospace;font-size:0.7rem;color:var(--accent2);letter-spacing:2px;margin-bottom:18px;}
+.cfg-box{background:rgba(0,15,40,0.98);border:1px solid var(--accent2);border-radius:6px;padding:24px;width:440px;max-width:95vw;box-shadow:0 0 40px rgba(10,255,239,0.15);}
+.cfg-title{font-family:'Orbitron',monospace;font-size:0.68rem;color:var(--accent2);letter-spacing:2px;margin-bottom:18px;}
 .cfg-field{margin-bottom:14px;}
-.cfg-field label{display:block;font-size:0.58rem;color:var(--text2);letter-spacing:1px;margin-bottom:5px;text-transform:uppercase;}
-.cfg-field input{
-  width:100%;background:rgba(0,30,70,0.6);border:1px solid var(--border);
-  border-radius:3px;color:var(--text);padding:7px 10px;font-size:0.75rem;
-  font-family:'Share Tech Mono',monospace;outline:none;
-}
+.cfg-field label{display:block;font-size:0.56rem;color:var(--text2);letter-spacing:1px;margin-bottom:5px;text-transform:uppercase;}
+.cfg-field input{width:100%;background:rgba(0,30,70,0.7);border:1px solid var(--border);border-radius:3px;color:var(--text);padding:7px 10px;font-size:0.72rem;font-family:'Share Tech Mono',monospace;outline:none;}
 .cfg-field input:focus{border-color:var(--accent2);}
-.cfg-field .hint{font-size:0.53rem;color:var(--text2);margin-top:4px;opacity:0.7;}
+.cfg-field .hint{font-size:0.5rem;color:var(--text2);margin-top:3px;opacity:0.65;}
 .cfg-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;}
-.cfg-btn-save{background:var(--accent2);color:#000;border:none;border-radius:3px;padding:6px 16px;font-size:0.65rem;font-family:'Share Tech Mono',monospace;cursor:pointer;letter-spacing:1px;font-weight:700;}
-.cfg-btn-cancel{background:none;color:var(--text2);border:1px solid var(--border);border-radius:3px;padding:6px 14px;font-size:0.65rem;font-family:'Share Tech Mono',monospace;cursor:pointer;letter-spacing:1px;}
-
-/* Corner decorations */
-.corner{position:absolute;width:16px;height:16px;border-color:var(--accent);border-style:solid;opacity:0.6;}
-.corner.tl{top:6px;left:6px;border-width:2px 0 0 2px;}
-.corner.tr{top:6px;right:6px;border-width:2px 2px 0 0;}
-.corner.bl{bottom:6px;left:6px;border-width:0 0 2px 2px;}
-.corner.br{bottom:6px;right:6px;border-width:0 2px 2px 0;}
-
-/* Processing dots */
-.dot-anim::after{
-  content:'';animation:dots 1.2s steps(4,end) infinite;
-}
-@keyframes dots{
-  0%{content:'';}25%{content:'.';}50%{content:'..';}75%{content:'...';}100%{content:'';}
-}
+.cfg-save{background:var(--accent2);color:#000;border:none;border-radius:3px;padding:6px 16px;font-size:0.62rem;font-family:'Share Tech Mono',monospace;cursor:pointer;letter-spacing:1px;font-weight:700;}
+.cfg-cancel{background:none;color:var(--text2);border:1px solid var(--border);border-radius:3px;padding:6px 14px;font-size:0.62rem;font-family:'Share Tech Mono',monospace;cursor:pointer;letter-spacing:1px;}
 </style>
 </head>
 <body>
@@ -250,25 +275,24 @@ body::after{
       <div class="objective">OBJECTIVE · BUILD $50K MRR BUSINESS IN 3 MONTHS</div>
     </div>
     <div class="status-pills">
-      <div class="pill green" id="status-online">● ONLINE</div>
-      <div class="pill" id="status-mic">● MIC INIT</div>
-      <div class="pill green">● ENCRYPTED</div>
-      <div class="pill" id="status-webhook">● WEBHOOK</div>
+      <div class="pill green">● ONLINE</div>
+      <div class="pill" id="pill-mic">● MIC INIT</div>
+      <div class="pill" id="pill-vad">● VAD OFF</div>
+      <div class="pill" id="pill-webhook">● NO WEBHOOK</div>
     </div>
     <div class="clock-area">
       <div id="clock">00:00:00.00</div>
-      <div id="dateline">LOADING DATE...</div>
+      <div id="dateline">LOADING...</div>
     </div>
   </div>
 
-  <!-- LEFT PANEL -->
+  <!-- LEFT PANEL — vitals + telemetry -->
   <div class="left-panel">
-
     <div class="panel-box">
       <div class="panel-title">{ SYSTEM VITALS }</div>
       <div class="vital">
         <div class="vital-row"><span class="vital-label">NEURAL CORE</span><span class="vital-val" id="v1">37.5%</span></div>
-        <div class="vital-bar"><div class="vital-fill fill-blue" id="v1b" style="width:37.5%"></div></div>
+        <div class="vital-bar"><div class="vital-fill fill-blue"  id="v1b" style="width:37.5%"></div></div>
       </div>
       <div class="vital">
         <div class="vital-row"><span class="vital-label">MEMORY</span><span class="vital-val" id="v2">75.8%</span></div>
@@ -276,7 +300,7 @@ body::after{
       </div>
       <div class="vital">
         <div class="vital-row"><span class="vital-label">LATENCY</span><span class="vital-val" id="v3">0.31ms</span></div>
-        <div class="vital-bar"><div class="vital-fill fill-blue" id="v3b" style="width:20%"></div></div>
+        <div class="vital-bar"><div class="vital-fill fill-blue"  id="v3b" style="width:20%"></div></div>
       </div>
       <div class="vital">
         <div class="vital-row"><span class="vital-label">SIGNAL</span><span class="vital-val" id="v4">96.9%</span></div>
@@ -288,73 +312,75 @@ body::after{
       </div>
       <div class="vital">
         <div class="vital-row"><span class="vital-label">THROUGHPUT</span><span class="vital-val" id="v6">1.4GB/s</span></div>
-        <div class="vital-bar"><div class="vital-fill fill-blue" id="v6b" style="width:60%"></div></div>
+        <div class="vital-bar"><div class="vital-fill fill-blue"  id="v6b" style="width:60%"></div></div>
       </div>
     </div>
-
-    <div class="panel-box telemetry">
+    <div class="panel-box" style="flex:1;overflow:hidden;">
       <div class="panel-title">{ TELEMETRY }</div>
       <div id="telem-log"></div>
     </div>
-
   </div>
 
-  <!-- CENTER RADAR -->
+  <!-- CENTER — radar + mic ring -->
   <div class="center-panel">
     <canvas id="radar-canvas"></canvas>
-    <div class="corner tl"></div>
-    <div class="corner tr"></div>
-    <div class="corner bl"></div>
-    <div class="corner br"></div>
-    <div class="voice-ring" id="mic-btn" data-state="idle" title="Always listening · Click to toggle">
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3zm-1 3a1 1 0 0 1 2 0v8a1 1 0 0 1-2 0V4zm-6 8a7 7 0 0 0 14 0h-2a5 5 0 0 1-10 0H5zm7 9v-2h-2v2H8v2h8v-2h-2z"/>
-      </svg>
-      <div class="voice-state-label" id="ring-label">IDLE</div>
+    <div class="corner tl"></div><div class="corner tr"></div>
+    <div class="corner bl"></div><div class="corner br"></div>
+    <div class="voice-ring" id="mic-btn" data-state="idle" title="Always listening · Click to mute/unmute · Space">
+      <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3zm-1 3a1 1 0 0 1 2 0v8a1 1 0 0 1-2 0V4zm-6 8a7 7 0 0 0 14 0h-2a5 5 0 0 1-10 0H5zm7 9v-2h-2v2H8v2h8v-2h-2z"/></svg>
+      <div class="ring-label" id="ring-label">IDLE</div>
     </div>
   </div>
 
-  <!-- RIGHT PANEL -->
+  <!-- RIGHT PANEL — mini radar, VAD meter, live waveform, diagnostics -->
   <div class="right-panel">
-
     <div class="panel-box radar-mini">
-      <div class="panel-title">PROXIMITY }</div>
+      <div class="panel-title">{ PROXIMITY }</div>
       <canvas id="mini-radar"></canvas>
     </div>
 
-    <div class="panel-box" style="height:80px;">
-      <div class="panel-title">AUDIO I/O</div>
-      <canvas id="audio-canvas" style="width:100%;height:36px;display:block;"></canvas>
-      <div style="display:flex;justify-content:space-between;font-size:0.5rem;color:var(--text2);margin-top:4px;">
-        <span id="audio-label">40Hz · 24KIT</span><span>TX · RXM</span>
+    <!-- Voice Activity Detection meter -->
+    <div class="panel-box vad-box">
+      <div class="panel-title">{ VOICE ACTIVITY }</div>
+      <div class="vad-bar-track">
+        <div class="vad-bar-fill" id="vad-fill" style="background:var(--accent)"></div>
+      </div>
+      <div class="vad-labels">
+        <span>AMPLITUDE</span>
+        <span id="vad-db">— dB</span>
       </div>
     </div>
 
-    <div class="panel-box diagnostics">
-      <div class="panel-title">DIAGNOSTICS }</div>
+    <!-- Live microphone waveform -->
+    <div class="panel-box audio-box">
+      <div class="panel-title">{ AUDIO I/O }</div>
+      <canvas id="audio-canvas"></canvas>
+      <div class="audio-meta">
+        <span id="audio-label">WAVEFORM</span><span id="sample-rate">— Hz</span>
+      </div>
+    </div>
+
+    <div class="panel-box" style="flex:1;overflow:hidden;">
+      <div class="panel-title">{ DIAGNOSTICS }</div>
       <div id="diag-log"></div>
     </div>
-
   </div>
 
-  <!-- BOTTOM BAR -->
+  <!-- BOTTOM BAR — live transcript + chat + nav -->
   <div class="bottom-bar">
-    <!-- Live transcript -->
     <div class="transcript-row">
-      <div class="roll-call-label">LIVE FEED ›</div>
-      <div id="transcript-area">JARVIS COMMAND CENTER — ALWAYS LISTENING</div>
-      <div id="state-badge">● INITIALIZING</div>
+      <div class="feed-label">LIVE ›</div>
+      <div id="transcript-area">JARVIS COMMAND CENTER — INITIALIZING</div>
+      <div id="state-badge">● INIT</div>
     </div>
-    <!-- Conversation history -->
     <div id="chat-log"></div>
-    <!-- Nav + hints -->
     <div class="nav-row">
       <div class="hint-text">
-        SAY <span>"HEY JARVIS"</span> THEN YOUR COMMAND &nbsp;·&nbsp; OR JUST SPEAK NATURALLY
+        SAY <span>"HEY JARVIS"</span> THEN YOUR COMMAND &nbsp;·&nbsp; SPACE = MUTE/UNMUTE
       </div>
       <div class="nav-buttons">
         <button id="cfg-btn" onclick="openConfig()">⚙ CONFIG</button>
-        <div class="nav-btn active" id="btn-jarvis">● JARVIS</div>
+        <div class="nav-btn active">● JARVIS</div>
         <a class="nav-btn" href="vault-pine-collective.html">+ VAULT</a>
         <a class="nav-btn" href="goals-dashboard.html">+ GOALS</a>
         <a class="nav-btn" href="analytics.html">+ ANALYTICS</a>
@@ -365,512 +391,460 @@ body::after{
 
 </div>
 
-<!-- Config Modal -->
+<!-- Config modal -->
 <div id="config-modal">
   <div class="cfg-box">
-    <div class="cfg-title">[ JARVIS CONFIGURATION ]</div>
+    <div class="cfg-title">[ JARVIS · CONFIGURATION ]</div>
     <div class="cfg-field">
       <label>N8N Webhook URL</label>
-      <input type="url" id="cfg-webhook" placeholder="https://your-n8n.cloud/webhook/jarvis">
-      <div class="hint">All unrecognized voice commands are routed here. Jarvis speaks the response.</div>
+      <input type="url" id="cfg-webhook" placeholder="https://your-n8n.cloud/webhook/jarvis-endpoint">
+      <div class="hint">Unrecognized voice commands are POSTed here as { message, source, timestamp }. The response text is spoken back.</div>
     </div>
     <div class="cfg-field">
-      <label>ElevenLabs API Key (optional)</label>
-      <input type="password" id="cfg-eleven" placeholder="sk-...">
-      <div class="hint">Leave blank to use browser TTS. With key, Jarvis uses the ElevenLabs voice model.</div>
-    </div>
-    <div class="cfg-field">
-      <label>ElevenLabs Voice ID (optional)</label>
-      <input type="text" id="cfg-eleven-voice" placeholder="21m00Tcm4TlvDq8ikWAM">
-      <div class="hint">Default: Rachel. Find voice IDs at elevenlabs.io/voice-library</div>
+      <label>VAD Sensitivity (1–30, lower = more sensitive)</label>
+      <input type="number" id="cfg-vad" min="1" max="30" placeholder="8">
+      <div class="hint">Amplitude threshold for voice activity detection. Raise if background noise triggers false activations.</div>
     </div>
     <div class="cfg-actions">
-      <button class="cfg-btn-cancel" onclick="closeConfig()">CANCEL</button>
-      <button class="cfg-btn-save" onclick="saveConfig()">SAVE & APPLY</button>
+      <button class="cfg-cancel" onclick="closeConfig()">CANCEL</button>
+      <button class="cfg-save"   onclick="saveConfig()">SAVE & APPLY</button>
     </div>
   </div>
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════════
+'use strict';
+// ══════════════════════════════════════════════════════════════
 //  CONFIGURATION
-// ══════════════════════════════════════════════════════════
-let CFG = {
-  webhookUrl:    localStorage.getItem('jarvis_webhook')       || '',
-  elevenKey:     localStorage.getItem('jarvis_eleven_key')    || '',
-  elevenVoiceId: localStorage.getItem('jarvis_eleven_voice')  || '21m00Tcm4TlvDq8ikWAM',
+// ══════════════════════════════════════════════════════════════
+const CFG = {
+  get webhookUrl()  { return localStorage.getItem('jarvis_webhook')   || ''; },
+  set webhookUrl(v) { localStorage.setItem('jarvis_webhook', v); },
+  get vadThreshold(){ return parseInt(localStorage.getItem('jarvis_vad') || '8', 10); },
+  set vadThreshold(v){ localStorage.setItem('jarvis_vad', String(v)); },
 };
 
 function openConfig() {
-  document.getElementById('cfg-webhook').value       = CFG.webhookUrl;
-  document.getElementById('cfg-eleven').value        = CFG.elevenKey;
-  document.getElementById('cfg-eleven-voice').value  = CFG.elevenVoiceId;
+  document.getElementById('cfg-webhook').value = CFG.webhookUrl;
+  document.getElementById('cfg-vad').value     = CFG.vadThreshold;
   document.getElementById('config-modal').classList.add('open');
 }
 function closeConfig() {
   document.getElementById('config-modal').classList.remove('open');
 }
 function saveConfig() {
-  CFG.webhookUrl    = document.getElementById('cfg-webhook').value.trim();
-  CFG.elevenKey     = document.getElementById('cfg-eleven').value.trim();
-  CFG.elevenVoiceId = document.getElementById('cfg-eleven-voice').value.trim() || '21m00Tcm4TlvDq8ikWAM';
-  localStorage.setItem('jarvis_webhook',       CFG.webhookUrl);
-  localStorage.setItem('jarvis_eleven_key',    CFG.elevenKey);
-  localStorage.setItem('jarvis_eleven_voice',  CFG.elevenVoiceId);
+  CFG.webhookUrl   = document.getElementById('cfg-webhook').value.trim();
+  CFG.vadThreshold = parseInt(document.getElementById('cfg-vad').value, 10) || 8;
   closeConfig();
-  updateWebhookPill();
-  addTelemEntry('config.update ok', true);
+  updatePills();
+  telem('config.update ok', 'ok');
 }
-function updateWebhookPill() {
-  const pill = document.getElementById('status-webhook');
-  if (CFG.webhookUrl) {
-    pill.textContent = '● WEBHOOK ACTIVE';
-    pill.className = 'pill green';
-  } else {
-    pill.textContent = '● NO WEBHOOK';
-    pill.className = 'pill';
-  }
-}
-updateWebhookPill();
 
-// ══════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 //  VOICE STATE MACHINE
-//  States: idle | listening | wake | processing | speaking | muted
-// ══════════════════════════════════════════════════════════
-const STATE_LABELS = {
-  idle:       'IDLE',
-  listening:  'LISTENING',
-  wake:       'AWAKE',
-  processing: 'PROCESSING',
-  speaking:   'SPEAKING',
-  muted:      'MUTED',
-};
-const STATE_BADGE_COLORS = {
-  idle:       {border:'var(--accent)',     color:'var(--accent)'},
-  listening:  {border:'var(--accent2)',    color:'var(--accent2)'},
-  wake:       {border:'var(--yellow)',     color:'var(--yellow)'},
-  processing: {border:'var(--orange)',     color:'var(--orange)'},
-  speaking:   {border:'var(--green)',      color:'var(--green)'},
-  muted:      {border:'var(--red)',        color:'var(--red)'},
+//  idle | listening | voice-detected | processing | speaking | muted
+// ══════════════════════════════════════════════════════════════
+const STATE_META = {
+  'idle':           { label:'IDLE',      badge:'● IDLE',        bc:'var(--accent)',  cc:'var(--accent)' },
+  'listening':      { label:'LISTENING', badge:'● LISTENING',   bc:'var(--accent2)', cc:'var(--accent2)' },
+  'voice-detected': { label:'VOICE',     badge:'● VOICE',       bc:'var(--yellow)',  cc:'var(--yellow)' },
+  'processing':     { label:'PROCESS',   badge:'● PROCESSING',  bc:'var(--orange)',  cc:'var(--orange)' },
+  'speaking':       { label:'SPEAKING',  badge:'● SPEAKING',    bc:'var(--green)',   cc:'var(--green)' },
+  'muted':          { label:'MUTED',     badge:'● MUTED',       bc:'var(--red)',     cc:'var(--red)' },
 };
 
-let jarvisState = 'idle';
-let wakeActive  = false;
-let wakeTimer   = null;
-let isListening = false; // for audio canvas amplitude
+let jarvisState  = 'idle';
 
 function setState(s) {
   jarvisState = s;
-  isListening = (s === 'listening' || s === 'wake');
+  const meta  = STATE_META[s] || STATE_META.idle;
   const btn   = document.getElementById('mic-btn');
   const badge = document.getElementById('state-badge');
-  const label = document.getElementById('ring-label');
-  btn.dataset.state = s;
-  label.textContent = STATE_LABELS[s] || s.toUpperCase();
-  const bc = STATE_BADGE_COLORS[s] || STATE_BADGE_COLORS.idle;
-  badge.style.borderColor = bc.border;
-  badge.style.color       = bc.color;
-  badge.textContent = '● ' + (STATE_LABELS[s] || s.toUpperCase());
-  // Mic pill
-  const micPill = document.getElementById('status-mic');
-  if (s === 'muted') {
-    micPill.textContent = '● MIC OFF'; micPill.className = 'pill red';
-  } else if (s === 'listening' || s === 'wake') {
-    micPill.textContent = '● MIC LIVE'; micPill.className = 'pill green';
-  } else {
-    micPill.textContent = '● MIC READY'; micPill.className = 'pill';
-  }
+  const lbl   = document.getElementById('ring-label');
+  btn.dataset.state      = s;
+  lbl.textContent        = meta.label;
+  badge.textContent      = meta.badge;
+  badge.style.borderColor= meta.bc;
+  badge.style.color      = meta.cc;
+  // Update mic pill
+  const mp = document.getElementById('pill-mic');
+  if      (s === 'muted')                       { mp.textContent='● MIC OFF';  mp.className='pill red';   }
+  else if (s === 'listening' || s === 'voice-detected') { mp.textContent='● MIC LIVE'; mp.className='pill green'; }
+  else                                          { mp.textContent='● MIC READY';mp.className='pill'; }
 }
 
-// ══════════════════════════════════════════════════════════
+function updatePills() {
+  const wp = document.getElementById('pill-webhook');
+  if (CFG.webhookUrl) { wp.textContent='● WEBHOOK ON'; wp.className='pill green'; }
+  else                { wp.textContent='● NO WEBHOOK'; wp.className='pill'; }
+}
+updatePills();
+
+// ══════════════════════════════════════════════════════════════
 //  CHAT LOG
-// ══════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 const MAX_CHAT = 4;
 let chatHistory = [];
 
 function addChat(who, text) {
   chatHistory.push({ who, text });
   if (chatHistory.length > MAX_CHAT) chatHistory.shift();
-  const el = document.getElementById('chat-log');
-  el.innerHTML = chatHistory.map(c => `
+  document.getElementById('chat-log').innerHTML = chatHistory.map(c => `
     <div class="chat-line">
-      <span class="chat-who ${c.who}">${c.who === 'user' ? 'YOU  ›' : 'JARVIS ›'}</span>
-      <span class="chat-text">${c.text.toUpperCase()}</span>
+      <span class="chat-who ${c.who === 'user' ? 'chat-you' : 'chat-jarvis'}">${c.who === 'user' ? 'YOU  ›' : 'JARVIS ›'}</span>
+      <span class="chat-text">${String(c.text).toUpperCase().slice(0,120)}</span>
     </div>`).join('');
 }
 
-// ══════════════════════════════════════════════════════════
-//  SPEECH SYNTHESIS — Web Speech API with ElevenLabs fallback
-// ══════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+//  TELEMETRY LOGGER
+// ══════════════════════════════════════════════════════════════
+function telem(msg, type = 'ok') {
+  const el  = document.getElementById('telem-log');
+  const now = new Date();
+  const ts  = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const cls = type === 'ok' ? 't-ok' : type === 'warn' ? 't-warn' : 't-err';
+  const d   = document.createElement('div'); d.className = 't-entry';
+  d.innerHTML = `<span class="t-time">${ts}</span><span class="${cls}">${msg}</span>`;
+  el.insertBefore(d, el.firstChild);
+  while (el.children.length > 14) el.removeChild(el.lastChild);
+}
+function pad(n) { return String(n).padStart(2,'0'); }
+
+// ══════════════════════════════════════════════════════════════
+//  TRANSCRIPT DISPLAY
+// ══════════════════════════════════════════════════════════════
+function setTranscript(text, interim = false) {
+  const el = document.getElementById('transcript-area');
+  el.textContent = text;
+  el.classList.toggle('interim', interim);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  BROWSER TTS  (Web Speech API only — clean, no external deps)
+// ══════════════════════════════════════════════════════════════
 let jarvisVoice = null;
 let voiceReady  = false;
 let speakQueue  = [];
 let isSpeaking  = false;
-let onSpeakDone = null; // callback after TTS finishes
+let afterSpeakCb= null;
 
-function loadVoices() {
+function initVoices() {
   const voices = window.speechSynthesis?.getVoices() || [];
   if (!voices.length) return;
-  const priority = [
-    v => v.name.includes('Daniel') && v.lang.includes('en'),
-    v => v.name.includes('Google UK English Male'),
-    v => v.name.includes('Microsoft George'),
-    v => v.name.includes('Microsoft Daniel'),
+  // Priority order: best British/deep male voice first
+  const tryList = [
+    v => v.name === 'Google UK English Male',
+    v => v.name.includes('Daniel')  && v.lang.startsWith('en'),
+    v => v.name.includes('George')  && v.lang.startsWith('en'),
     v => v.name.toLowerCase().includes('british'),
     v => v.lang === 'en-GB',
     v => v.name.includes('Google UK English Female'),
     v => v.lang.startsWith('en') && v.name.toLowerCase().includes('male'),
     v => v.lang.startsWith('en'),
   ];
-  for (const test of priority) {
-    const match = voices.find(test);
-    if (match) { jarvisVoice = match; break; }
+  for (const test of tryList) {
+    const m = voices.find(test);
+    if (m) { jarvisVoice = m; break; }
   }
   voiceReady = true;
-  if (speakQueue.length) { const t = speakQueue.shift(); _speakBrowser(t); }
+  telem(`voice.${jarvisVoice?.name || 'default'} ready`, 'ok');
+  if (speakQueue.length) { const t = speakQueue.shift(); _doSpeak(t); }
 }
 if (window.speechSynthesis) {
-  window.speechSynthesis.onvoiceschanged = loadVoices;
-  loadVoices();
+  window.speechSynthesis.onvoiceschanged = initVoices;
+  initVoices();
 }
 
-async function _speakElevenLabs(text) {
-  try {
-    setState('speaking');
-    addTelemEntry('elevenlabs.tts request', true);
-    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${CFG.elevenVoiceId}`, {
-      method: 'POST',
-      headers: {
-        'xi-api-key': CFG.elevenKey,
-        'Content-Type': 'application/json',
-        'Accept': 'audio/mpeg',
-      },
-      body: JSON.stringify({
-        text,
-        model_id: 'eleven_monolingual_v1',
-        voice_settings: { stability: 0.55, similarity_boost: 0.82, style: 0.25, use_speaker_boost: true }
-      })
-    });
-    if (!res.ok) throw new Error(`ElevenLabs ${res.status}`);
-    const blob   = await res.blob();
-    const url    = URL.createObjectURL(blob);
-    const audio  = new Audio(url);
-    audio.onended = () => {
-      URL.revokeObjectURL(url);
-      isSpeaking = false;
-      _afterSpeak();
-    };
-    audio.onerror = () => { isSpeaking = false; _afterSpeak(); };
-    isSpeaking = true;
-    audio.play();
-    addTelemEntry('elevenlabs.tts ok', true);
-  } catch(e) {
-    console.warn('[JARVIS] ElevenLabs error, falling back to browser TTS:', e.message);
-    addTelemEntry('elevenlabs.tts warn — fallback', false);
-    _speakBrowser(text);
-  }
-}
-
-function _speakBrowser(text) {
-  if (!window.speechSynthesis) { isSpeaking = false; _afterSpeak(); return; }
+function _doSpeak(text) {
+  if (!window.speechSynthesis) { isSpeaking = false; _onSpeakEnd(); return; }
   window.speechSynthesis.cancel();
-  const utt      = new SpeechSynthesisUtterance(text);
+  const utt = new SpeechSynthesisUtterance(text);
   if (jarvisVoice) utt.voice = jarvisVoice;
   utt.pitch  = 0.88;
-  utt.rate   = 0.92;
+  utt.rate   = 0.9;
   utt.volume = 1.0;
-  utt.onend  = () => { isSpeaking = false; _afterSpeak(); };
-  utt.onerror= () => { isSpeaking = false; _afterSpeak(); };
+  utt.onstart= () => setState('speaking');
+  utt.onend  = () => { isSpeaking = false; _onSpeakEnd(); };
+  utt.onerror= () => { isSpeaking = false; _onSpeakEnd(); };
   isSpeaking = true;
-  setState('speaking');
   window.speechSynthesis.speak(utt);
 }
 
-function _afterSpeak() {
-  if (onSpeakDone) { const cb = onSpeakDone; onSpeakDone = null; cb(); return; }
+function _onSpeakEnd() {
+  if (afterSpeakCb) { const cb = afterSpeakCb; afterSpeakCb = null; cb(); return; }
   // Auto-resume listening after speaking
   if (jarvisState !== 'muted') {
-    setTimeout(() => {
-      if (jarvisState !== 'muted') resumeListening();
-    }, 400);
+    setTimeout(() => { if (jarvisState !== 'muted') resumeListening(); }, 350);
   }
 }
 
+/**
+ * Speak text. Pauses recognition to prevent feedback.
+ * Optional afterCb fires after TTS completes (use for navigation).
+ */
 function jarvisSpeak(text, afterCb = null) {
-  // Pause recognition while speaking to prevent feedback
-  pauseRecognition();
-  if (isSpeaking) { window.speechSynthesis?.cancel(); isSpeaking = false; }
-  onSpeakDone = afterCb;
-  speakQueue = [];
-  if (CFG.elevenKey) {
-    _speakElevenLabs(text);
-  } else {
-    if (!voiceReady) { speakQueue.push(text); setState('speaking'); return; }
-    _speakBrowser(text);
-  }
+  pauseRecognition();  // stop hearing ourselves
+  window.speechSynthesis?.cancel();
+  isSpeaking   = false;
+  speakQueue   = [];
+  afterSpeakCb = afterCb;
+  if (!voiceReady) { speakQueue.push(text); setState('speaking'); return; }
+  _doSpeak(text);
 }
 
-// ══════════════════════════════════════════════════════════
-//  TRANSCRIPT DISPLAY
-// ══════════════════════════════════════════════════════════
-function setTranscript(text) {
-  document.getElementById('transcript-area').textContent = text;
-}
-
-// ══════════════════════════════════════════════════════════
-//  WEBHOOK — send to n8n, get response, speak it
-// ══════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+//  WEBHOOK — POST to n8n, speak the response
+// ══════════════════════════════════════════════════════════════
 async function sendToWebhook(userText) {
   if (!CFG.webhookUrl) {
-    jarvisSpeak("I'm afraid I don't have a webhook configured, sir. Pull up the config panel and drop in your n8n endpoint. I'll wait.");
-    addChat('jarvis', 'No webhook configured');
+    const r = "I'd love to help with that, sir, but I'm afraid no webhook has been configured. Pull up the config panel — the button's right there — and drop in your n8n endpoint.";
+    addChat('jarvis', r);
+    jarvisSpeak(r);
     return;
   }
   setState('processing');
   setTranscript('PROCESSING REQUEST…');
-  addTelemEntry('webhook.send ok', true);
+  telem('webhook.send…', 'ok');
   try {
     const res = await fetch(CFG.webhookUrl, {
       method:  'POST',
-      headers: {'Content-Type': 'application/json'},
-      body:    JSON.stringify({ message: userText, source: 'jarvis', timestamp: new Date().toISOString() }),
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({
+        message:   userText,
+        source:    'jarvis',
+        timestamp: new Date().toISOString(),
+      }),
     });
-    if (!res.ok) throw new Error(`Webhook ${res.status}`);
-    const data = await res.json();
-    // Accept 'response', 'output', 'message', 'text', or plain string
-    const reply = typeof data === 'string' ? data
-      : (data.response || data.output || data.message || data.text || data.reply || JSON.stringify(data));
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    // Accept any reasonable response shape
+    let reply;
+    const ct = res.headers.get('content-type') || '';
+    if (ct.includes('application/json')) {
+      const data = await res.json();
+      reply = typeof data === 'string' ? data
+        : (data.response || data.output || data.message || data.text || data.reply || JSON.stringify(data));
+    } else {
+      reply = (await res.text()).trim();
+    }
+
+    telem('webhook.response ok', 'ok');
     addChat('jarvis', reply);
-    setTranscript(reply.toUpperCase().slice(0, 80));
-    addTelemEntry('webhook.response ok', true);
+    setTranscript(reply.toUpperCase().slice(0, 90));
     jarvisSpeak(reply);
-  } catch(e) {
-    console.warn('[JARVIS] Webhook error:', e.message);
-    addTelemEntry('webhook.error — ' + e.message, false);
-    const errMsg = "Naturally, it isn't my fault, sir. The webhook appears to be unavailable. I'd investigate, but I suspect external inefficiencies are to blame.";
-    addChat('jarvis', errMsg);
-    jarvisSpeak(errMsg);
+  } catch(err) {
+    telem(`webhook.error — ${err.message}`, 'err');
+    const r = "Naturally, it isn't my fault, sir. The webhook appears to be unreachable. I suspect external inefficiencies are to blame — I shall investigate presently.";
+    addChat('jarvis', r);
+    jarvisSpeak(r);
   }
 }
 
-// ══════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 //  LOCAL COMMANDS
-// ══════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 const COMMANDS = [
   {
-    match: t => t.includes('open sales') || t.includes('go to sales'),
-    run: () => {
-      const r = 'Pulling up the Sales Dashboard, sir. One moment.';
+    match: t => /open\s+sales|go\s+to\s+sales|show\s+sales/.test(t),
+    run:   () => {
+      const r = 'Pulling up the Sales Dashboard, sir.';
       addChat('jarvis', r); jarvisSpeak(r, () => location.href = 'vault-pine-collective.html');
     }
   },
   {
-    match: t => t.includes('open goals') || t.includes('go to goals'),
-    run: () => {
-      const r = 'Navigating to Goals and Objectives. Stay focused, sir.';
+    match: t => /open\s+goals|go\s+to\s+goals/.test(t),
+    run:   () => {
+      const r = 'Navigating to Goals and Objectives, sir.';
       addChat('jarvis', r); jarvisSpeak(r, () => location.href = 'goals-dashboard.html');
     }
   },
   {
-    match: t => t.includes('open vault') || t.includes('vault pine') || t.includes('open dashboard'),
-    run: () => {
+    match: t => /open\s+(vault|dashboard)|vault\s+pine/.test(t),
+    run:   () => {
       const r = 'Opening the Vault and Pine Collective dashboard.';
       addChat('jarvis', r); jarvisSpeak(r, () => location.href = 'vault-pine-collective.html');
     }
   },
   {
-    match: t => t.includes('open analytics') || t.includes('show analytics'),
-    run: () => {
+    match: t => /open\s+analytics|show\s+analytics|open\s+intel/.test(t),
+    run:   () => {
       const r = 'Pulling up Business Intelligence.';
       addChat('jarvis', r); jarvisSpeak(r, () => location.href = 'analytics.html');
     }
   },
   {
-    match: t => t.includes('go home') || t.includes('home screen'),
-    run: () => {
+    match: t => /go\s+home|home\s+screen|command\s+center/.test(t),
+    run:   () => {
       const r = 'Returning to the Command Center.';
       addChat('jarvis', r); jarvisSpeak(r, () => location.href = 'index.html');
     }
   },
   {
-    match: t => t.includes('system status') || t.includes('show status'),
-    run: () => {
-      const r = 'All systems nominal. Neural core operating at optimal capacity. Signal strength ninety-seven percent. No anomalies detected. You are clear.';
+    match: t => /system\s+status|show\s+status|status\s+report/.test(t),
+    run:   () => {
+      const r = 'All systems nominal. Neural core at optimal capacity. Signal strength ninety-seven percent. No anomalies detected. You are clear, sir.';
       addChat('jarvis', r); jarvisSpeak(r);
     }
   },
   {
-    match: t => t.includes('what time') || t.includes("what's the time"),
-    run: () => {
+    match: t => /what\s+time|what.s\s+the\s+time/.test(t),
+    run:   () => {
       const t = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
       const r = `The current time is ${t}, sir.`;
       addChat('jarvis', r); jarvisSpeak(r);
     }
   },
   {
-    match: t => t.includes('how are we doing') || t.includes("how's business") || t.includes('business update'),
-    run: () => {
+    match: t => /how\s+are\s+we\s+doing|how.s\s+business|business\s+update|revenue\s+update/.test(t),
+    run:   () => {
       const orders = JSON.parse(localStorage.getItem('vp_orders_v2') || '[]');
-      const rev    = orders.reduce((s,o) => s + o.salePrice, 0);
-      const profit = orders.reduce((s,o) => s + o.salePrice - o.cogs, 0);
-      const r = `Based on current data, total revenue stands at ${rev > 0 ? '$' + rev.toFixed(0) : 'zero'}, with a net profit of ${profit > 0 ? '$' + profit.toFixed(0) : 'zero'} across ${orders.length} orders. ${profit > 500 ? "Respectable progress, sir." : "There is room for improvement, though I am certain that is already obvious."}`;
+      const rev    = orders.reduce((s,o) => s + (o.salePrice||0), 0);
+      const profit = orders.reduce((s,o) => s + (o.salePrice||0) - (o.cogs||0), 0);
+      const r = `Based on current data, total revenue is ${rev > 0 ? '$'+rev.toFixed(0) : 'zero'}, net profit ${profit > 0 ? '$'+profit.toFixed(0) : 'zero'} across ${orders.length} orders. ${profit > 500 ? 'Respectable progress, sir.' : 'There is certainly room for improvement — though I imagine that is already obvious to you.'}`;
       addChat('jarvis', r); jarvisSpeak(r);
     }
   },
   {
-    match: t => t.includes('how many orders') || t.includes('order count'),
-    run: () => {
+    match: t => /order\s+count|how\s+many\s+orders/.test(t),
+    run:   () => {
       const n = JSON.parse(localStorage.getItem('vp_orders_v2') || '[]').length;
-      const r = `You currently have ${n} order${n !== 1 ? 's' : ''} on record, sir.`;
+      const r = `You have ${n} order${n !== 1 ? 's' : ''} on record, sir.`;
       addChat('jarvis', r); jarvisSpeak(r);
     }
   },
   {
-    match: t => ['hello jarvis','hi jarvis','hey jarvis','good morning','good evening','good afternoon','good day'].some(p => t.includes(p)),
-    run: () => {
-      const greets = [
+    match: t => /^(hey\s+jarvis|hello\s+jarvis|hi\s+jarvis|good\s+morning|good\s+evening|good\s+afternoon|good\s+day)\.?$/.test(t),
+    run:   () => {
+      const opts = [
         "Yes, sir. Systems are online and at your disposal.",
-        "Good to hear from you. All systems operational. How can I assist?",
-        "At your service. What would you like to accomplish today?",
+        "At your service. What would you like to accomplish?",
         "Online and standing by. I do hope you have something productive in mind.",
+        "Good to hear from you. All systems operational. How can I assist?",
       ];
-      const r = greets[Math.floor(Math.random() * greets.length)];
+      const r = opts[Math.floor(Math.random() * opts.length)];
       addChat('jarvis', r); jarvisSpeak(r);
     }
   },
   {
-    match: t => t.includes('thank you') || t.includes('thanks jarvis'),
-    run: () => {
+    match: t => /thank\s+you|thanks\s+jarvis/.test(t),
+    run:   () => {
       const r = "You're most welcome, sir. A pleasure, as always.";
       addChat('jarvis', r); jarvisSpeak(r);
     }
   },
   {
-    match: t => t.includes('mute') || t.includes('stop listening') || t.includes('shut down'),
-    run: () => {
-      const r = 'Understood. Suspending voice systems. Click the microphone to resume.';
-      addChat('jarvis', r);
-      jarvisSpeak(r, () => muteJarvis());
+    match: t => /^(mute|stop\s+listening|shut\s+down|sleep)\.?$/.test(t),
+    run:   () => {
+      const r = 'Voice systems suspending. Click the microphone or press Space to resume, sir.';
+      addChat('jarvis', r); jarvisSpeak(r, () => muteJarvis());
     }
   },
 ];
 
-function handleTranscript(transcript) {
-  const t = transcript.toLowerCase().trim();
+// ══════════════════════════════════════════════════════════════
+//  TRANSCRIPT HANDLER  (final result from recognition)
+// ══════════════════════════════════════════════════════════════
+let wakeActive = false;
+let wakeTimer  = null;
+
+function handleFinal(transcript) {
+  const t = transcript.toLowerCase().trim().replace(/[.!?]$/, '');
   if (!t) return;
 
-  // Check for wake word — enter wake mode, ready for follow-up
-  const WAKE_WORDS = ['hey jarvis', 'jarvis', 'hello jarvis', 'hi jarvis'];
-  const isWakeOnly = WAKE_WORDS.some(w => t === w || t === w + '.');
-  if (isWakeOnly && !wakeActive) {
+  addChat('user', t);
+  setTranscript(t.toUpperCase());
+
+  // Pure wake-word with nothing after it — confirm and wait
+  const WAKE = ['hey jarvis','jarvis','hello jarvis','hi jarvis'];
+  if (WAKE.includes(t)) {
     wakeActive = true;
-    setState('wake');
     clearTimeout(wakeTimer);
     const r = "Yes, sir. I'm listening.";
-    addChat('user', t);
     addChat('jarvis', r);
-    setTranscript('AWAITING COMMAND…');
     jarvisSpeak(r);
-    // Wake mode expires after 8 seconds of silence
+    setTranscript('AWAITING YOUR COMMAND…');
     wakeTimer = setTimeout(() => {
-      if (wakeActive && jarvisState !== 'muted') {
-        wakeActive = false;
-        resumeListening();
-      }
+      if (wakeActive) { wakeActive = false; resumeListening(); }
     }, 8000);
     return;
   }
 
-  // Try local commands
-  const matched = COMMANDS.find(c => c.match(t));
-  if (matched) {
-    clearTimeout(wakeTimer);
-    wakeActive = false;
-    addChat('user', t);
-    matched.run();
-    return;
-  }
+  clearTimeout(wakeTimer);
+  wakeActive = false;
 
-  // If wake is active OR phrase is long enough to be intentional (3+ words), route to webhook
-  const wordCount = t.split(/\s+/).length;
-  if (wakeActive || wordCount >= 3) {
-    clearTimeout(wakeTimer);
-    wakeActive = false;
-    addChat('user', t);
+  // Try local command table first
+  const cmd = COMMANDS.find(c => c.match(t));
+  if (cmd) { cmd.run(); return; }
+
+  // If it's a substantial phrase (3+ words), route to webhook
+  if (t.split(/\s+/).length >= 3) {
     sendToWebhook(t);
     return;
   }
-
-  // Short unrecognized phrase — ignore silently (background noise / partial)
+  // Short unrecognised phrase — probably ambient noise, ignore silently
 }
 
-// ══════════════════════════════════════════════════════════
-//  SPEECH RECOGNITION — always-on
-// ══════════════════════════════════════════════════════════
-let recognition    = null;
-let recogRunning   = false;
-let recogPaused    = false; // paused while speaking
-let autoRestart    = true;  // false when muted
+// ══════════════════════════════════════════════════════════════
+//  SPEECH RECOGNITION — continuous, always-on
+// ══════════════════════════════════════════════════════════════
+let recognition  = null;
+let recogRunning = false;
+let recogPaused  = false;  // true while Jarvis is speaking
+let autoRestart  = true;   // false when muted
 
-function setupRecognition() {
+function initRecognition() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) {
-    jarvisSpeak('Voice recognition is not supported in this browser, sir. Chrome is recommended.');
+    telem('speech.api not supported', 'err');
+    setTranscript('VOICE RECOGNITION NOT SUPPORTED — USE CHROME');
     return false;
   }
   recognition = new SR();
-  recognition.continuous     = true;
-  recognition.interimResults = true;
-  recognition.lang           = 'en-US';
+  recognition.continuous      = true;
+  recognition.interimResults  = true;
+  recognition.lang            = 'en-US';
   recognition.maxAlternatives = 1;
 
   recognition.onstart = () => {
     recogRunning = true;
-    if (jarvisState !== 'speaking' && jarvisState !== 'processing' && jarvisState !== 'muted') {
-      setState('listening');
-    }
+    if (!['speaking','processing','muted'].includes(jarvisState)) setState('listening');
   };
 
   recognition.onresult = e => {
     let interim = '';
-    let finalText = '';
+    let finals  = '';
     for (let i = e.resultIndex; i < e.results.length; i++) {
       const text = e.results[i][0].transcript;
-      if (e.results[i].isFinal) finalText += text + ' ';
+      if (e.results[i].isFinal) finals += text + ' ';
       else interim += text;
     }
-    // Show interim in transcript
-    if (interim) setTranscript(interim.toUpperCase());
-    // Handle final
-    if (finalText.trim()) {
-      setTranscript(finalText.trim().toUpperCase());
-      handleTranscript(finalText.trim());
-    }
+    if (interim)       setTranscript(interim.toUpperCase(), true);
+    if (finals.trim()) handleFinal(finals.trim());
   };
 
   recognition.onerror = e => {
     recogRunning = false;
     if (e.error === 'not-allowed') {
-      setState('muted');
-      autoRestart = false;
-      addTelemEntry('mic.permission denied', false);
+      autoRestart = false; setState('muted');
+      telem('mic.permission denied', 'err');
       setTranscript('MIC PERMISSION DENIED — CHECK BROWSER SETTINGS');
-    } else if (e.error === 'no-speech') {
-      // Normal — just restart
+      document.getElementById('pill-mic').textContent = '● MIC BLOCKED';
+      document.getElementById('pill-mic').className   = 'pill red';
     } else if (e.error === 'network') {
-      addTelemEntry('recog.network error', false);
+      telem('recog.network error', 'warn');
     }
+    // no-speech is normal — don't log it
   };
 
   recognition.onend = () => {
     recogRunning = false;
-    // Auto-restart unless muted or paused for speaking
     if (autoRestart && !recogPaused && jarvisState !== 'muted') {
       setTimeout(() => {
         if (!recogRunning && autoRestart && !recogPaused && jarvisState !== 'muted') {
-          try { recognition.start(); } catch(e) {}
+          try { recognition.start(); } catch(_) {}
         }
-      }, 150);
+      }, 200);
     }
   };
 
@@ -878,54 +852,45 @@ function setupRecognition() {
 }
 
 function startListening() {
-  if (!recognition && !setupRecognition()) return;
-  autoRestart = true;
-  recogPaused = false;
-  if (!recogRunning) {
-    try { recognition.start(); } catch(e) {}
-  }
+  if (!recognition && !initRecognition()) return;
+  autoRestart = true; recogPaused = false;
+  if (!recogRunning) try { recognition.start(); } catch(_) {}
 }
 
 function pauseRecognition() {
-  // Called while Jarvis is speaking — halt recognition to prevent feedback
   recogPaused = true;
-  if (recogRunning) {
-    try { recognition?.stop(); } catch(e) {}
-  }
+  if (recogRunning) try { recognition?.stop(); } catch(_) {}
 }
 
 function resumeListening() {
   recogPaused = false;
   if (jarvisState !== 'muted') {
     setState('listening');
-    if (!recogRunning) {
-      try { recognition?.start(); } catch(e) {}
-    }
+    if (!recogRunning) try { recognition?.start(); } catch(_) {}
   }
 }
 
 function muteJarvis() {
-  autoRestart = false;
-  recogPaused = false;
-  if (recogRunning) try { recognition?.stop(); } catch(e) {}
+  autoRestart = false; recogPaused = false;
+  if (recogRunning) try { recognition?.stop(); } catch(_) {}
   setState('muted');
-  setTranscript('VOICE SYSTEMS SUSPENDED — CLICK MIC TO RESUME');
+  setTranscript('MUTED — CLICK MIC OR PRESS SPACE TO RESUME');
 }
 
-// Mic button — toggle mute
+// Mic button click — toggle mute
 document.getElementById('mic-btn').addEventListener('click', () => {
   if (jarvisState === 'muted') {
     autoRestart = true;
-    setState('listening');
     startListening();
     const r = "Voice systems back online, sir. I'm listening.";
     addChat('jarvis', r);
     jarvisSpeak(r);
   } else {
-    muteJarvis();
     window.speechSynthesis?.cancel();
     isSpeaking = false;
+    muteJarvis();
     addChat('jarvis', 'Voice suspended.');
+    telem('voice.muted by user', 'warn');
   }
 });
 
@@ -937,68 +902,179 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// ══════════════════════════════════════════════════════════
-//  CLOCK
-// ══════════════════════════════════════════════════════════
-function updateClock(){
-  const now=new Date();
-  const h=String(now.getHours()).padStart(2,'0');
-  const m=String(now.getMinutes()).padStart(2,'0');
-  const s=String(now.getSeconds()).padStart(2,'0');
-  const ms=String(Math.floor(now.getMilliseconds()/10)).padStart(2,'0');
-  document.getElementById('clock').textContent=`${h}:${m}:${s}.${ms}`;
-  document.getElementById('dateline').textContent=now.toLocaleDateString('en-US',{day:'2-digit',month:'short',year:'numeric'}).toUpperCase();
-}
-setInterval(updateClock,50);updateClock();
+// ══════════════════════════════════════════════════════════════
+//  WEB AUDIO API — real microphone → live waveform + VAD meter
+//  Pattern adapted from Interlocus.py (sounddevice + amplitude)
+// ══════════════════════════════════════════════════════════════
+let audioCtx     = null;
+let analyserNode = null;
+let micStream    = null;
+let freqData     = null;
+let timeData     = null;
+const SMOOTHING  = 0.8;  // analyser smoothingTimeConstant
+let vadSpeechFrames = 0;
 
-// ══════════════════════════════════════════════════════════
-//  RADAR CANVAS
-// ══════════════════════════════════════════════════════════
-const rc=document.getElementById('radar-canvas');
-const rctx=rc.getContext('2d');
-function resizeRadar(){rc.width=rc.offsetWidth;rc.height=rc.offsetHeight;}
-resizeRadar();window.addEventListener('resize',resizeRadar);
-
-const particles=[];
-for(let i=0;i<300;i++){
-  const angle=Math.random()*Math.PI*2;
-  const dist=Math.random();
-  particles.push({angle,dist,speed:(Math.random()*0.0003+0.0001),size:Math.random()*1.8+0.3,opacity:Math.random()});
-}
-
-let radarAngle=0;
-function drawRadar(){
-  const w=rc.width,h=rc.height;
-  const cx=w/2,cy=h/2;
-  const R=Math.min(w,h)*0.42;
-  rctx.clearRect(0,0,w,h);
-  rctx.strokeStyle='rgba(0,180,255,0.08)';rctx.lineWidth=1;
-  [0.25,0.5,0.75,1].forEach(r=>{
-    rctx.beginPath();rctx.arc(cx,cy,R*r,0,Math.PI*2);rctx.stroke();
-  });
-  for(let i=0;i<8;i++){
-    const a=i*Math.PI/4;
-    rctx.beginPath();rctx.moveTo(cx,cy);
-    rctx.lineTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);rctx.stroke();
+async function initAudio() {
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    audioCtx  = new (window.AudioContext || window.webkitAudioContext)();
+    const src = audioCtx.createMediaStreamSource(micStream);
+    analyserNode = audioCtx.createAnalyser();
+    analyserNode.fftSize              = 256;
+    analyserNode.smoothingTimeConstant= SMOOTHING;
+    src.connect(analyserNode);
+    freqData = new Uint8Array(analyserNode.frequencyBinCount);
+    timeData = new Uint8Array(analyserNode.fftSize);
+    document.getElementById('sample-rate').textContent = audioCtx.sampleRate.toLocaleString() + ' Hz';
+    telem('audio.context ok', 'ok');
+    updatePills();
+    document.getElementById('pill-vad').textContent = '● VAD ACTIVE';
+    document.getElementById('pill-vad').className   = 'pill green';
+    drawLiveAudio();
+  } catch(err) {
+    telem(`audio.context fail — ${err.message}`, 'warn');
+    document.getElementById('pill-vad').textContent = '● VAD UNAVAIL';
+    // Fall back to fake waveform
+    drawFakeAudio();
   }
+}
+
+// ── Live waveform from real mic data ──
+const acEl  = document.getElementById('audio-canvas');
+const acCtx = acEl.getContext('2d');
+
+function drawLiveAudio() {
+  acEl.width  = acEl.offsetWidth  || 180;
+  acEl.height = acEl.offsetHeight || 38;
+  const w = acEl.width, h = acEl.height;
+  acCtx.clearRect(0,0,w,h);
+
+  analyserNode.getByteTimeDomainData(timeData);
+  analyserNode.getByteFrequencyData(freqData);
+
+  // Compute RMS amplitude (0–1)
+  let sumSq = 0;
+  for (let i = 0; i < timeData.length; i++) {
+    const v = (timeData[i] - 128) / 128;
+    sumSq += v * v;
+  }
+  const rms    = Math.sqrt(sumSq / timeData.length);
+  const rmsDb  = rms > 0 ? 20 * Math.log10(rms) : -100;
+  const pct    = Math.min(100, Math.max(0, (rmsDb + 60) / 60 * 100));
+
+  // Update VAD meter
+  const fill = document.getElementById('vad-fill');
+  fill.style.width = pct.toFixed(1) + '%';
+  fill.style.background = pct > 70 ? 'var(--red)' : pct > 40 ? 'var(--yellow)' : 'var(--accent)';
+  document.getElementById('vad-db').textContent = rmsDb.toFixed(1) + ' dB';
+
+  // VAD — if amplitude crosses threshold, flag voice detected
+  const threshold = CFG.vadThreshold;  // 0–100 scale
+  if (pct > threshold && !['processing','speaking','muted'].includes(jarvisState)) {
+    vadSpeechFrames++;
+    if (vadSpeechFrames > 3) setState('voice-detected');  // needs 3 consecutive loud frames
+  } else {
+    vadSpeechFrames = 0;
+    if (jarvisState === 'voice-detected') setState('listening');
+  }
+
+  // Draw time-domain waveform
+  const stateColors = {
+    'speaking':       'rgba(0,255,170,0.85)',
+    'processing':     'rgba(255,140,0,0.85)',
+    'voice-detected': 'rgba(255,208,96,0.85)',
+    'listening':      'rgba(10,255,239,0.75)',
+    'muted':          'rgba(255,64,96,0.4)',
+  };
+  const wcolor = stateColors[jarvisState] || 'rgba(0,180,255,0.45)';
+
+  acCtx.beginPath();
+  const sliceW = w / timeData.length;
+  let x = 0;
+  for (let i = 0; i < timeData.length; i++) {
+    const v = timeData[i] / 128;
+    const y = (v * h) / 2;
+    i === 0 ? acCtx.moveTo(x, y) : acCtx.lineTo(x, y);
+    x += sliceW;
+  }
+  acCtx.strokeStyle = wcolor;
+  acCtx.lineWidth   = 1.5;
+  acCtx.stroke();
+
+  requestAnimationFrame(drawLiveAudio);
+}
+
+// ── Fallback fake waveform (when getUserMedia unavailable) ──
+let fakePoints = Array.from({length:60}, () => 0.5);
+function drawFakeAudio() {
+  acEl.width  = acEl.offsetWidth  || 180;
+  acEl.height = acEl.offsetHeight || 38;
+  const w = acEl.width, h = acEl.height;
+  acCtx.clearRect(0,0,w,h);
+  const amp = ['listening','voice-detected'].includes(jarvisState) ? 0.5 : 0.1;
+  fakePoints = fakePoints.map((_,i) => {
+    if (i === fakePoints.length-1) return 0.5 + (Math.random()-0.5) * amp * 2;
+    return fakePoints[i+1];
+  });
+  acCtx.beginPath();
+  fakePoints.forEach((p,i) => {
+    const x = i/fakePoints.length*w, y = p*h;
+    i === 0 ? acCtx.moveTo(x,y) : acCtx.lineTo(x,y);
+  });
+  acCtx.strokeStyle = 'rgba(0,180,255,0.4)';
+  acCtx.lineWidth   = 1.5;
+  acCtx.stroke();
+  requestAnimationFrame(drawFakeAudio);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  CLOCK
+// ══════════════════════════════════════════════════════════════
+function updateClock() {
+  const n = new Date();
+  document.getElementById('clock').textContent =
+    `${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}.${String(Math.floor(n.getMilliseconds()/10)).padStart(2,'0')}`;
+  document.getElementById('dateline').textContent =
+    n.toLocaleDateString('en-US',{day:'2-digit',month:'short',year:'numeric'}).toUpperCase();
+}
+setInterval(updateClock, 50); updateClock();
+
+// ══════════════════════════════════════════════════════════════
+//  RADAR (main + mini) — unchanged visual
+// ══════════════════════════════════════════════════════════════
+const rc = document.getElementById('radar-canvas');
+const rctx = rc.getContext('2d');
+function resizeRadar(){ rc.width = rc.offsetWidth; rc.height = rc.offsetHeight; }
+resizeRadar(); window.addEventListener('resize', resizeRadar);
+const particles = Array.from({length:300}, () => ({
+  angle: Math.random()*Math.PI*2,
+  dist:  Math.random(),
+  speed: Math.random()*0.0003+0.0001,
+  size:  Math.random()*1.8+0.3,
+  opacity: Math.random(),
+}));
+let radarAngle = 0;
+function drawRadar() {
+  const w=rc.width,h=rc.height,cx=w/2,cy=h/2,R=Math.min(w,h)*0.42;
+  rctx.clearRect(0,0,w,h);
+  rctx.strokeStyle='rgba(0,180,255,0.08)'; rctx.lineWidth=1;
+  [.25,.5,.75,1].forEach(r=>{rctx.beginPath();rctx.arc(cx,cy,R*r,0,Math.PI*2);rctx.stroke();});
+  for(let i=0;i<8;i++){const a=i*Math.PI/4;rctx.beginPath();rctx.moveTo(cx,cy);rctx.lineTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);rctx.stroke();}
   particles.forEach(p=>{
     p.angle+=p.speed;
-    const px=cx+Math.cos(p.angle)*p.dist*R;
-    const py=cy+Math.sin(p.angle)*p.dist*R;
-    const distFromSweep=((p.angle-radarAngle)%(Math.PI*2)+Math.PI*2)%(Math.PI*2);
-    const fade=distFromSweep<1.5?1-distFromSweep/1.5:0;
-    const alpha=0.3+fade*0.7;
+    const px=cx+Math.cos(p.angle)*p.dist*R,py=cy+Math.sin(p.angle)*p.dist*R;
+    const dsw=((p.angle-radarAngle)%(Math.PI*2)+Math.PI*2)%(Math.PI*2);
+    const fade=dsw<1.5?1-dsw/1.5:0;
     rctx.beginPath();rctx.arc(px,py,p.size,0,Math.PI*2);
-    rctx.fillStyle=`rgba(0,180,255,${alpha*p.opacity+0.1})`;rctx.fill();
+    rctx.fillStyle=`rgba(0,180,255,${(0.3+fade*0.7)*p.opacity+0.1})`;rctx.fill();
   });
-  const grad=rctx.createRadialGradient(cx,cy,0,cx,cy,R*0.3);
-  grad.addColorStop(0,'rgba(0,180,255,0.15)');grad.addColorStop(1,'transparent');
-  rctx.fillStyle=grad;rctx.beginPath();rctx.arc(cx,cy,R*0.3,0,Math.PI*2);rctx.fill();
+  const g=rctx.createRadialGradient(cx,cy,0,cx,cy,R*.3);
+  g.addColorStop(0,'rgba(0,180,255,0.15)');g.addColorStop(1,'transparent');
+  rctx.fillStyle=g;rctx.beginPath();rctx.arc(cx,cy,R*.3,0,Math.PI*2);rctx.fill();
   rctx.save();rctx.translate(cx,cy);rctx.rotate(radarAngle);
   const sg=rctx.createLinearGradient(0,0,R,0);
   sg.addColorStop(0,'rgba(0,255,180,0.5)');sg.addColorStop(1,'rgba(0,255,180,0)');
-  rctx.fillStyle=sg;rctx.beginPath();rctx.moveTo(0,0);
-  rctx.arc(0,0,R,-0.3,0);rctx.closePath();rctx.fill();
+  rctx.fillStyle=sg;rctx.beginPath();rctx.moveTo(0,0);rctx.arc(0,0,R,-.3,0);rctx.closePath();rctx.fill();
   rctx.restore();
   radarAngle+=0.015;
   rctx.beginPath();rctx.arc(cx,cy,R,0,Math.PI*2);
@@ -1007,135 +1083,96 @@ function drawRadar(){
 }
 drawRadar();
 
-// ── MINI RADAR ──
-const mr=document.getElementById('mini-radar');
-const mctx=mr.getContext('2d');
+const mr=document.getElementById('mini-radar'),mctx=mr.getContext('2d');
 function resizeMini(){mr.width=mr.offsetWidth;mr.height=mr.offsetHeight;}
 resizeMini();
-const blips=Array.from({length:6},()=>({angle:Math.random()*Math.PI*2,dist:Math.random()*0.7+0.1,brightness:0}));
+const blips=Array.from({length:6},()=>({angle:Math.random()*Math.PI*2,dist:Math.random()*.7+.1,brightness:0}));
 let mAngle=0;
 function drawMini(){
-  const w=mr.width,h=mr.height;const cx=w/2,cy=h/2;const R=Math.min(w,h)*0.44;
+  const w=mr.width,h=mr.height,cx=w/2,cy=h/2,R=Math.min(w,h)*.44;
   mctx.clearRect(0,0,w,h);
   mctx.strokeStyle='rgba(0,180,255,0.15)';mctx.lineWidth=1;
-  [0.33,0.66,1].forEach(r=>{mctx.beginPath();mctx.arc(cx,cy,R*r,0,Math.PI*2);mctx.stroke();});
+  [.33,.66,1].forEach(r=>{mctx.beginPath();mctx.arc(cx,cy,R*r,0,Math.PI*2);mctx.stroke();});
   mctx.beginPath();mctx.moveTo(cx-R,cy);mctx.lineTo(cx+R,cy);mctx.stroke();
   mctx.beginPath();mctx.moveTo(cx,cy-R);mctx.lineTo(cx,cy+R);mctx.stroke();
   mctx.save();mctx.translate(cx,cy);mctx.rotate(mAngle);
   const sg=mctx.createLinearGradient(0,0,R,0);
   sg.addColorStop(0,'rgba(0,255,180,0.4)');sg.addColorStop(1,'rgba(0,255,180,0)');
-  mctx.fillStyle=sg;mctx.beginPath();mctx.moveTo(0,0);mctx.arc(0,0,R,-0.4,0);mctx.closePath();mctx.fill();
+  mctx.fillStyle=sg;mctx.beginPath();mctx.moveTo(0,0);mctx.arc(0,0,R,-.4,0);mctx.closePath();mctx.fill();
   mctx.restore();
   blips.forEach(b=>{
     const d=((b.angle-mAngle)%(Math.PI*2)+Math.PI*2)%(Math.PI*2);
-    if(d<0.3)b.brightness=1;else b.brightness=Math.max(0,b.brightness-0.005);
-    if(b.brightness>0.05){
-      const bx=cx+Math.cos(b.angle)*b.dist*R;const by=cy+Math.sin(b.angle)*b.dist*R;
+    if(d<.3)b.brightness=1;else b.brightness=Math.max(0,b.brightness-.005);
+    if(b.brightness>.05){
+      const bx=cx+Math.cos(b.angle)*b.dist*R,by=cy+Math.sin(b.angle)*b.dist*R;
       mctx.beginPath();mctx.arc(bx,by,2.5,0,Math.PI*2);
       mctx.fillStyle=`rgba(0,255,180,${b.brightness})`;mctx.fill();
     }
   });
-  mAngle+=0.025;requestAnimationFrame(drawMini);
+  mAngle+=.025;requestAnimationFrame(drawMini);
 }
-drawMini();
+blips.forEach(b=>b.brightness=0); drawMini();
 
-// ── AUDIO WAVEFORM ──
-const ac=document.getElementById('audio-canvas');
-const actx=ac.getContext('2d');
-let audioPoints=Array.from({length:60},()=>0.5);
-function drawAudio(){
-  ac.width=ac.offsetWidth;ac.height=ac.offsetHeight;
-  const w=ac.width,h=ac.height;
-  actx.clearRect(0,0,w,h);
-  const amp=isListening?0.7:0.12;
-  audioPoints=audioPoints.map((_,i)=>{
-    if(i===audioPoints.length-1)return 0.5+(Math.random()-0.5)*amp*2;
-    return audioPoints[i+1];
-  });
-  actx.beginPath();
-  audioPoints.forEach((p,i)=>{
-    const x=i/audioPoints.length*w;const y=p*h;
-    i===0?actx.moveTo(x,y):actx.lineTo(x,y);
-  });
-  const waveColor = jarvisState === 'speaking' ? 'rgba(0,255,170,0.8)'
-    : jarvisState === 'processing' ? 'rgba(255,140,0,0.8)'
-    : jarvisState === 'wake' ? 'rgba(255,208,96,0.8)'
-    : isListening ? 'rgba(10,255,239,0.7)' : 'rgba(0,180,255,0.4)';
-  actx.strokeStyle=waveColor;actx.lineWidth=1.5;actx.stroke();
-  requestAnimationFrame(drawAudio);
+// ══════════════════════════════════════════════════════════════
+//  BACKGROUND TELEMETRY TICKS
+// ══════════════════════════════════════════════════════════════
+const telemPool=['audio.stream sync ok','sensor.poll edge ok','memory.result ok',
+  'core.heartbeat ok','tokenizer.run ok','kv.sync ok','whisper.decode ok',
+  'neural.core tick ok','sensor.poll buffer clear','tokenizer.run lock expired'];
+const diagPool=['DT audio.stream ok','DT kv.sync ok','ISF lock expired',
+  'DT whisper.decode ok','DT core.heartbeat ok','NT neural.core tick ok'];
+
+function bgTelem(pool, el, max) {
+  const msg = pool[Math.floor(Math.random()*pool.length)];
+  const type = msg.includes('expired') ? 'warn' : 'ok';
+  const now  = new Date();
+  const ts   = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const cls  = type === 'ok' ? 't-ok' : 't-warn';
+  const d    = document.createElement('div'); d.className='t-entry';
+  d.innerHTML=`<span class="t-time">${ts}</span><span class="${cls}">${msg}</span>`;
+  el.insertBefore(d, el.firstChild);
+  while(el.children.length > max) el.removeChild(el.lastChild);
 }
-drawAudio();
+setInterval(()=>bgTelem(telemPool, document.getElementById('telem-log'), 14), 2000);
+setInterval(()=>bgTelem(diagPool,  document.getElementById('diag-log'),  10), 2800);
 
-// ── TELEMETRY LOG ──
-const telemMsgs=[
-  'audio.stream sync complete','sensor.poll edge detect','sensor.poll quantized',
-  'sensor.poll buffer clear','memory.result quantized','core.heartbeat ok',
-  'tokenizer.run ok','whisper.decode edge detect','tokenizer.run lock expired',
-  'kv.sync ok','core.heartbeat ok','sensor.poll buffer clear','whisper.decode ok',
-  'memory.result ok','audio.stream sync complete','neural.core tick ok',
-];
-const diagMsgs=[
-  'DT audio.stream edge detect','DT kv.sync ok','ISF tokenizer.run lock expired',
-  'DT whisper.decode edge detect','DT core.heartbeat ok','DT sensor.poll buffer clear',
-  'DT memory.result quantized','DT whisper.decode ok','NT neural.core tick ok',
-];
-
-function addTelemEntry(msg, ok = true) {
-  const el  = document.getElementById('telem-log');
-  const now = new Date();
-  const t   = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-  const cls = ok ? 't-ok' : 't-warn';
-  const div = document.createElement('div'); div.className = 't-entry';
-  div.innerHTML = `<span class="t-time">${t}</span><span class="t-msg ${cls}">${msg}</span>`;
-  el.insertBefore(div, el.firstChild);
-  while (el.children.length > 12) el.removeChild(el.lastChild);
-}
-
-function addLog(containerId, msgs, maxLines){
-  const el=document.getElementById(containerId);
-  const now=new Date();
-  const t=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-  const msg=msgs[Math.floor(Math.random()*msgs.length)];
-  const cls=msg.includes('ok')||msg.includes('complete')?'t-ok':msg.includes('warn')||msg.includes('expired')?'t-warn':'';
-  const div=document.createElement('div');div.className='t-entry';
-  div.innerHTML=`<span class="t-time">${t}</span><span class="t-msg ${cls}">${msg}</span>`;
-  el.insertBefore(div,el.firstChild);
-  while(el.children.length>maxLines)el.removeChild(el.lastChild);
-}
-setInterval(()=>addLog('telem-log',telemMsgs,12),1800);
-setInterval(()=>addLog('diag-log',diagMsgs,10),2500);
-
-// ── VITALS ANIMATION ──
+// Vitals drift
 function animateVitals(){
-  const v1=parseFloat(document.getElementById('v1').textContent)||37;
-  const nv1=Math.min(90,Math.max(10,v1+(Math.random()-0.5)*3));
-  document.getElementById('v1').textContent=nv1.toFixed(1)+'%';document.getElementById('v1b').style.width=nv1+'%';
-  const v2=parseFloat(document.getElementById('v2').textContent)||75;
-  const nv2=Math.min(99,Math.max(50,v2+(Math.random()-0.5)*2));
-  document.getElementById('v2').textContent=nv2.toFixed(1)+'%';document.getElementById('v2b').style.width=nv2+'%';
-  const v4=parseFloat(document.getElementById('v4').textContent)||96;
-  const nv4=Math.min(99.9,Math.max(85,v4+(Math.random()-0.5)*1));
-  document.getElementById('v4').textContent=nv4.toFixed(1)+'%';document.getElementById('v4b').style.width=nv4+'%';
+  const drift=(id,min,max,step,unit)=>{
+    const el=document.getElementById(id);
+    const bar=document.getElementById(id+'b');
+    const v=parseFloat(el.textContent)||((min+max)/2);
+    const nv=Math.min(max,Math.max(min,v+(Math.random()-.5)*step));
+    el.textContent=nv.toFixed(1)+unit;
+    if(bar)bar.style.width=((nv-min)/(max-min)*100)+'%';
+  };
+  drift('v1',10,90,3,'%');drift('v2',50,99,2,'%');drift('v4',85,99.9,1,'%');
 }
-setInterval(animateVitals,3000);
+setInterval(animateVitals,3200);
 
-// ══════════════════════════════════════════════════════════
-//  BOOT SEQUENCE — auto-start listening after greeting
-// ══════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+//  BOOT SEQUENCE
+// ══════════════════════════════════════════════════════════════
 setState('idle');
-addTelemEntry('jarvis.boot ok', true);
-addTelemEntry('voice.engine init', true);
-addTelemEntry('always-listen.mode active', true);
+telem('jarvis.boot sequence initiated', 'ok');
+telem('voice.engine loading', 'ok');
+telem('audio.context requesting mic', 'ok');
 
+// Request mic access + init audio pipeline
+initAudio().then(() => {
+  telem('audio.pipeline online', 'ok');
+});
+
+// Boot greeting — auto-starts recognition after it finishes
 setTimeout(() => {
-  const greeting = "Good day. J.A.R.V.I.S. is online. All systems operational. I'm listening for your commands — no button required.";
+  const greeting = "Good day. J.A.R.V.I.S. is online. Voice systems engaging. I'm always listening — no button required.";
   addChat('jarvis', greeting);
+  setTranscript(greeting.toUpperCase().slice(0,80));
   jarvisSpeak(greeting, () => {
-    // After greeting, start listening automatically
     startListening();
-    addTelemEntry('recog.auto-start ok', true);
+    telem('recog.always-on active', 'ok');
   });
-}, 1000);
+}, 900);
 </script>
 </body>
 </html>
