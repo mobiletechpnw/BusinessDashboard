@@ -126,6 +126,15 @@
   .badge-low { background: #123b20; color: var(--green); }
   .badge-none { background: var(--surface2); color: var(--text2); }
 
+  /* ── Payment / Fulfillment status badges ── */
+  .badge-paid       { background: #0d3320; color: var(--green); cursor: pointer; }
+  .badge-partial    { background: #3b2e12; color: var(--yellow); cursor: pointer; }
+  .badge-unpaid     { background: #3b1212; color: var(--red); cursor: pointer; }
+  .badge-completed  { background: #0d3320; color: var(--green); cursor: pointer; }
+  .badge-in_progress{ background: #12213b; color: var(--accent); cursor: pointer; }
+  .badge-paid:hover, .badge-partial:hover, .badge-unpaid:hover,
+  .badge-completed:hover, .badge-in_progress:hover { filter: brightness(1.25); }
+
   /* ── Search / filter ── */
   .toolbar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
   .search-input { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 8px 14px; font-size: 0.82rem; outline: none; width: 240px; }
@@ -432,6 +441,8 @@
                 <th class="num" onclick="sortTable('roi')">ROI ↕</th>
                 <th>Referred By</th>
                 <th>Notes</th>
+                <th onclick="sortTable('payStatus')" style="cursor:pointer">Payment ↕</th>
+                <th onclick="sortTable('fulfillStatus')" style="cursor:pointer">Status ↕</th>
                 <th style="text-align:right">Actions</th>
               </tr>
             </thead>
@@ -681,6 +692,23 @@
     <div class="field-row">
       <div class="field"><label>Referred By</label><input type="text" id="aoRef" placeholder="Mike / Me / Instagram"></div>
       <div class="field"><label>Notes</label><input type="text" id="aoNotes" placeholder="Delivery date, special requests…"></div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Payment Status</label>
+        <select id="aoPayStatus">
+          <option value="paid">✅ Paid</option>
+          <option value="partial">🟡 Partial</option>
+          <option value="unpaid">🔴 Unpaid</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Fulfillment Status</label>
+        <select id="aoFulfillStatus">
+          <option value="completed">✅ Completed</option>
+          <option value="in_progress">🔵 In Progress</option>
+        </select>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeAddOrder()">Cancel</button>
@@ -1393,10 +1421,16 @@ function renderOrderTable() {
     if (typeof av === 'string') return av.localeCompare(bv) * sortDir;
     return (av - bv) * sortDir;
   });
+  const PAY_LABELS = { paid: '✅ Paid', partial: '🟡 Partial', unpaid: '🔴 Unpaid' };
+  const FILL_LABELS = { completed: '✅ Done', in_progress: '🔵 In Progress' };
   const rows = orders.map(o => {
     const profit = o.salePrice - o.cogs;
     const roi = (profit / o.cogs * 100).toFixed(1);
     const roiColor = roi >= 80 ? 'var(--green)' : roi >= 70 ? 'var(--yellow)' : 'var(--text)';
+    const pay  = o.payStatus    || 'paid';
+    const fill = o.fulfillStatus|| 'completed';
+    const payBadge  = `<span class="badge badge-${pay}"  title="Click to cycle" onclick="togglePayStatus('${o.id}')">${PAY_LABELS[pay]||pay}</span>`;
+    const fillBadge = `<span class="badge badge-${fill}" title="Click to toggle" onclick="toggleFulfillStatus('${o.id}')">${FILL_LABELS[fill]||fill}</span>`;
     const actions =
       `<button class="icon-btn" title="Edit order" onclick="openAddOrder('${o.id}')">✏️</button>
        <button class="icon-btn" title="Delete order" onclick="deleteOrder('${o.id}')">✕</button>`;
@@ -1410,6 +1444,8 @@ function renderOrderTable() {
       <td class="num" style="color:${roiColor}">${roi}%</td>
       <td style="font-size:.78rem;color:var(--text2)">${esc(o.referredBy||'—')}</td>
       <td style="font-size:.75rem;color:var(--text2);max-width:160px">${esc(o.notes||'')}</td>
+      <td>${payBadge}</td>
+      <td>${fillBadge}</td>
       <td style="text-align:right;white-space:nowrap">${actions}</td>
     </tr>`;
   }).join('');
@@ -1422,7 +1458,7 @@ function renderOrderTable() {
     <td class="num" style="color:var(--text2)">${fmt$(totalCogs)}</td>
     <td class="num" style="color:var(--accent)">${fmt$(totalProf)}</td>
     <td class="num" style="color:var(--yellow)">${(totalProf/totalCogs*100).toFixed(1)}%</td>
-    <td colspan="3"></td>
+    <td colspan="5"></td>
   </tr>`;
 }
 function sortTable(col) {
@@ -1624,8 +1660,10 @@ function openAddOrder(id) {
     document.getElementById('aoQty').value      = o.sets || 1;
     document.getElementById('aoSale').value     = o.salePrice;
     document.getElementById('aoCogs').value     = o.cogs;
-    document.getElementById('aoRef').value      = o.referredBy || '';
-    document.getElementById('aoNotes').value    = o.notes || '';
+    document.getElementById('aoRef').value          = o.referredBy || '';
+    document.getElementById('aoNotes').value        = o.notes || '';
+    document.getElementById('aoPayStatus').value    = o.payStatus    || 'paid';
+    document.getElementById('aoFulfillStatus').value= o.fulfillStatus || 'completed';
     titleEl.textContent = 'Edit Order';
     saveEl.textContent  = 'Save Changes';
   } else {
@@ -1637,6 +1675,8 @@ function openAddOrder(id) {
     document.getElementById('aoCogs').value     = 21.33;
     document.getElementById('aoRef').value      = '';
     document.getElementById('aoNotes').value    = '';
+    document.getElementById('aoPayStatus').value    = 'paid';
+    document.getElementById('aoFulfillStatus').value= 'in_progress';
     titleEl.textContent = 'Log New Order';
     saveEl.textContent  = 'Save Order';
   }
@@ -1657,7 +1697,9 @@ function saveNewOrder() {
     sets: parseInt(document.getElementById('aoQty').value) || 1,
     salePrice: sale, cogs: isNaN(cogs) ? 21.33 : cogs,
     referredBy: document.getElementById('aoRef').value.trim(),
-    notes: document.getElementById('aoNotes').value.trim()
+    notes: document.getElementById('aoNotes').value.trim(),
+    payStatus:    document.getElementById('aoPayStatus').value,
+    fulfillStatus: document.getElementById('aoFulfillStatus').value
   };
   const wasEditing = editOrderId;
   if (editOrderId) {
@@ -1676,6 +1718,24 @@ function deleteOrder(id) {
   localStorage.setItem(LS_ORDERS, JSON.stringify(rawOrders().filter(x => x.id !== id)));
   renderSalesAll();
   toast('Order deleted.');
+}
+
+function togglePayStatus(id) {
+  const arr = rawOrders();
+  const o = arr.find(x => x.id === id);
+  if (!o) return;
+  const cycle = { paid: 'partial', partial: 'unpaid', unpaid: 'paid' };
+  o.payStatus = cycle[o.payStatus || 'paid'] || 'paid';
+  localStorage.setItem(LS_ORDERS, JSON.stringify(arr));
+  renderOrderTable();
+}
+function toggleFulfillStatus(id) {
+  const arr = rawOrders();
+  const o = arr.find(x => x.id === id);
+  if (!o) return;
+  o.fulfillStatus = (o.fulfillStatus === 'completed') ? 'in_progress' : 'completed';
+  localStorage.setItem(LS_ORDERS, JSON.stringify(arr));
+  renderOrderTable();
 }
 
 // ── Sales sub-tabs ──
