@@ -31,6 +31,9 @@ const SYNC_KEYS = [
   'vpc_print_queue_v1',
   'vpc_inventory_v1',
   'vpc_costs_v1',
+  'vpc_printer_credits_v1',
+  'riser_monthly_goal_v1',
+  'riser_filament_v1',
 ];
 
 const LAST_SYNC_KEY  = 'vpc_last_sync_at';

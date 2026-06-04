@@ -578,6 +578,22 @@
   </main>
 </div><!-- /section-sales -->
 
+<!-- Printer Credit Modal -->
+<div class="modal-overlay" id="printerCreditModal">
+  <div class="modal" style="width:420px">
+    <h2 id="pcModalTitle">Apply Credit</h2>
+    <div class="field-row">
+      <div class="field"><label>Date</label><input type="date" id="pcDate"></div>
+      <div class="field"><label>Amount ($)</label><input type="number" id="pcAmount" placeholder="0.00" step="0.01" min="0.01"></div>
+    </div>
+    <div class="field"><label>Notes (optional)</label><input type="text" id="pcNotes" placeholder="e.g. May profit allocation, lump sum…"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closePrinterCreditModal()">Cancel</button>
+      <button class="btn-primary" onclick="savePrinterCreditEntry()">Apply</button>
+    </div>
+  </div>
+</div>
+
 <!-- Filament Modal -->
 <div class="modal-overlay" id="addFilamentModal">
   <div class="modal">
@@ -1851,88 +1867,91 @@ const PRINTERS = [
   { id: 'p2', label: 'Printer 2', name: 'BambuLab H2S', purchaseDate: '2026-06-01', cost: 1635.41 },
 ];
 
-function daysBetween(d1, d2) {
-  return Math.round((new Date(d2 + 'T00:00:00') - new Date(d1 + 'T00:00:00')) / 86400000);
+const LS_PRINTER_CREDITS = 'vpc_printer_credits_v1';
+
+function getPrinterCredits(printerId) {
+  const all = JSON.parse(localStorage.getItem(LS_PRINTER_CREDITS) || '{}');
+  return (all[printerId] || []).sort((a, b) => a.date.localeCompare(b.date));
+}
+function savePrinterCredit(printerId, entry) {
+  const all = JSON.parse(localStorage.getItem(LS_PRINTER_CREDITS) || '{}');
+  if (!all[printerId]) all[printerId] = [];
+  all[printerId].push(entry);
+  localStorage.setItem(LS_PRINTER_CREDITS, JSON.stringify(all));
+}
+function deletePrinterCredit(printerId, entryId) {
+  const all = JSON.parse(localStorage.getItem(LS_PRINTER_CREDITS) || '{}');
+  if (all[printerId]) all[printerId] = all[printerId].filter(e => e.id !== entryId);
+  localStorage.setItem(LS_PRINTER_CREDITS, JSON.stringify(all));
 }
 
-function buildPayoffData(printer, orders) {
-  const eligible = orders
-    .filter(o => o.date >= printer.purchaseDate)
-    .sort((a, b) => a.date.localeCompare(b.date));
-  let running = 0, payoffDate = null, payoffCustomer = null;
-  const timeline = [];
-  eligible.forEach(o => {
-    running += (o.salePrice - o.cogs);
-    timeline.push({ date: o.date, customer: o.customer, running });
-    if (!payoffDate && running >= printer.cost) { payoffDate = o.date; payoffCustomer = o.customer; }
-  });
-  const isPaidOff = running >= printer.cost;
-  const netProfit = running - printer.cost;
-  const pct = Math.min(100, (running / printer.cost * 100));
-  const daysToPayoff = payoffDate ? daysBetween(printer.purchaseDate, payoffDate) : null;
-  const milestones = [0.25, 0.50, 0.75, 1.00].map(p => {
-    const target = printer.cost * p;
-    const hit = timeline.find(t => t.running >= target);
-    return { p, target, date: hit?.date, customer: hit?.customer };
-  });
-  const monthlyProfit = {};
-  eligible.forEach(o => {
-    const mk = o.date.slice(0,7);
-    if (!monthlyProfit[mk]) monthlyProfit[mk] = 0;
-    monthlyProfit[mk] += o.salePrice - o.cogs;
-  });
-  return { running, isPaidOff, netProfit, pct, daysToPayoff, payoffDate, payoffCustomer, milestones, monthlyProfit };
+// Modal state
+let _pcPrinterId = null;
+function openPrinterCreditModal(printerId) {
+  _pcPrinterId = printerId;
+  const p = PRINTERS.find(x => x.id === printerId);
+  document.getElementById('pcModalTitle').textContent = `Apply Credit — ${p.label}`;
+  document.getElementById('pcDate').value = TODAY;
+  document.getElementById('pcAmount').value = '';
+  document.getElementById('pcNotes').value = '';
+  document.getElementById('printerCreditModal').classList.add('open');
+  setTimeout(() => document.getElementById('pcAmount').focus(), 50);
+}
+function closePrinterCreditModal() {
+  document.getElementById('printerCreditModal').classList.remove('open');
+  _pcPrinterId = null;
+}
+function savePrinterCreditEntry() {
+  const amount = parseFloat(document.getElementById('pcAmount').value);
+  const date   = document.getElementById('pcDate').value;
+  const notes  = document.getElementById('pcNotes').value.trim();
+  if (!date || isNaN(amount) || amount <= 0) { toast('Enter a valid date and amount.'); return; }
+  savePrinterCredit(_pcPrinterId, { id: uid(), date, amount, notes });
+  closePrinterCreditModal();
+  renderPrinterPayoff();
+  toast(`${fmt$(amount)} applied to ${PRINTERS.find(p => p.id === _pcPrinterId)?.label || 'printer'}`);
 }
 
-function printerCardHTML(printer, d) {
+function printerCardHTML(printer) {
+  const credits   = getPrinterCredits(printer.id);
+  const applied   = credits.reduce((s, e) => s + e.amount, 0);
+  const remaining = Math.max(0, printer.cost - applied);
+  const pct       = Math.min(100, (applied / printer.cost * 100));
+  const isPaidOff = applied >= printer.cost;
   const accentCol = printer.id === 'p1' ? 'var(--accent)' : 'var(--accent2)';
-  const milestonePills = d.milestones.map(m => {
-    const reached = m.date !== undefined;
-    const col = m.p === 1 ? 'var(--green)' : accentCol;
-    return `<div style="text-align:center;flex:1;min-width:72px;padding:8px 4px">
-      <div style="font-size:1rem;font-weight:800;color:${reached ? col : 'var(--border)'}">${(m.p*100).toFixed(0)}%</div>
-      <div style="font-size:.68rem;color:${reached ? 'var(--text2)' : 'var(--border)'};margin-top:2px">${reached ? fmtDate(m.date) : '—'}</div>
-      <div style="font-size:.62rem;color:${reached ? 'var(--text2)' : 'var(--border)'};">${reached ? m.customer.split(/[\s\-]/)[0] : 'pending'}</div>
-    </div>`;
-  });
-  const pillsHTML = milestonePills.reduce((acc, p, i) =>
-    i < milestonePills.length - 1 ? acc + p + '<div style="width:1px;background:var(--border)"></div>' : acc + p, '');
-  const months = Object.keys(d.monthlyProfit).sort();
-  const maxMP = months.length ? Math.max(...months.map(m => d.monthlyProfit[m])) : 1;
-  const monthBars = months.map(mk => {
-    const h = Math.max(4, (d.monthlyProfit[mk] / maxMP) * 72);
-    const isBuyMonth = mk === printer.purchaseDate.slice(0,7);
-    return `<div style="display:flex;flex-direction:column;align-items:center;gap:3px">
-      <div style="font-size:.63rem;color:${accentCol}">${fmt$(d.monthlyProfit[mk])}</div>
-      <div style="width:26px;height:${h}px;background:${accentCol};border-radius:3px 3px 0 0;opacity:.8"></div>
-      <div style="font-size:.6rem;color:var(--text2)">${monthLabel(mk)}</div>
-      <div style="font-size:.58rem;color:var(--yellow)">${isBuyMonth ? '🖨' : ''}</div>
-    </div>`;
-  }).join('');
-  const statusBadge = d.isPaidOff
+
+  const statusBadge = isPaidOff
     ? `<div style="background:#0d3320;border:1px solid var(--green);border-radius:8px;padding:7px 14px;text-align:center;white-space:nowrap">
         <div style="font-size:.68rem;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px">✅ PAID OFF</div>
-        <div style="font-size:.72rem;color:var(--text2);margin-top:2px">${fmtDate(d.payoffDate)} · ${d.daysToPayoff}d</div>
        </div>`
     : `<div style="background:#3b2e12;border:1px solid var(--yellow);border-radius:8px;padding:7px 14px;text-align:center;white-space:nowrap">
         <div style="font-size:.68rem;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:.5px">In Progress</div>
-        <div style="font-size:.72rem;color:var(--text2);margin-top:2px">${fmt$(printer.cost - d.running)} left</div>
+        <div style="font-size:.72rem;color:var(--text2);margin-top:2px">${fmt$(remaining)} left</div>
        </div>`;
-  let projLine = '';
-  if (!d.isPaidOff) {
-    const remaining = printer.cost - d.running;
-    const totalDays = daysBetween(printer.purchaseDate, TODAY) || 1;
-    const dailyRate = d.running / Math.max(totalDays, 1);
-    const daysLeft = dailyRate > 0 ? Math.ceil(remaining / dailyRate) : null;
-    if (daysLeft) {
-      const projDate = new Date(TODAY + 'T00:00:00');
-      projDate.setDate(projDate.getDate() + daysLeft);
-      const projStr = projDate.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'2-digit' });
-      projLine = `<div style="font-size:.75rem;color:var(--text2);margin-top:6px">
-        At current pace — projected payoff: <strong style="color:var(--yellow)">${projStr}</strong> (~${daysLeft} more days)
-      </div>`;
-    }
-  }
+
+  // Milestone pills
+  const milestones = [0.25, 0.50, 0.75, 1.00].map(p => {
+    const target  = printer.cost * p;
+    const reached = applied >= target;
+    const hitEntry = credits.find((_, i) => credits.slice(0, i + 1).reduce((s, e) => s + e.amount, 0) >= target);
+    const col = p === 1 ? 'var(--green)' : accentCol;
+    return `<div style="text-align:center;flex:1;min-width:72px;padding:8px 4px">
+      <div style="font-size:1rem;font-weight:800;color:${reached ? col : 'var(--border)'}">${(p*100).toFixed(0)}%</div>
+      <div style="font-size:.68rem;color:${reached ? 'var(--text2)' : 'var(--border)'};margin-top:2px">${reached && hitEntry ? fmtDate(hitEntry.date) : '—'}</div>
+    </div>`;
+  });
+  const pillsHTML = milestones.reduce((acc, p, i) =>
+    i < milestones.length - 1 ? acc + p + '<div style="width:1px;background:var(--border)"></div>' : acc + p, '');
+
+  // Credit log rows (most recent first)
+  const logRows = [...credits].reverse().map(e => `
+    <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #1e2138">
+      <div style="font-size:.75rem;color:var(--text2);width:68px;flex-shrink:0">${fmtDate(e.date)}</div>
+      <div style="font-size:.82rem;font-weight:700;color:${accentCol};width:68px;flex-shrink:0">${fmt$(e.amount)}</div>
+      <div style="font-size:.78rem;color:var(--text2);flex:1">${esc(e.notes || '—')}</div>
+      <button class="icon-btn" title="Delete entry" onclick="deletePrinterCredit('${printer.id}','${e.id}');renderPrinterPayoff()">✕</button>
+    </div>`).join('');
+
   return `<div style="background:var(--surface2);border-radius:10px;padding:18px;border-left:3px solid ${accentCol}">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
       <div>
@@ -1941,47 +1960,55 @@ function printerCardHTML(printer, d) {
       </div>
       ${statusBadge}
     </div>
+
     <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">
-      <span style="font-size:.75rem;color:var(--text2)">Applied: <strong style="color:var(--text)">${fmt$(Math.min(d.running, printer.cost))}</strong> / ${fmt$(printer.cost)}</span>
-      <span style="font-size:.75rem;font-weight:700;color:${d.isPaidOff ? 'var(--green)' : accentCol}">${d.pct.toFixed(1)}%</span>
+      <span style="font-size:.75rem;color:var(--text2)">Applied: <strong style="color:var(--text)">${fmt$(applied)}</strong> / ${fmt$(printer.cost)}</span>
+      <span style="font-size:.75rem;font-weight:700;color:${isPaidOff ? 'var(--green)' : accentCol}">${pct.toFixed(1)}%</span>
     </div>
-    <div style="background:#0f1117;border-radius:99px;height:8px;overflow:hidden;margin-bottom:14px">
-      <div style="width:${d.pct}%;background:linear-gradient(90deg,${accentCol},var(--green));border-radius:99px;height:100%;transition:width .4s"></div>
+    <div style="background:#0f1117;border-radius:99px;height:8px;overflow:hidden;margin-bottom:16px">
+      <div style="width:${pct}%;background:linear-gradient(90deg,${accentCol},var(--green));border-radius:99px;height:100%;transition:width .4s"></div>
     </div>
-    ${projLine}
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;margin-top:${projLine ? '10px' : '0'}">
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
       <div style="background:#0f1117;border-radius:7px;padding:10px">
-        <div style="font-size:1.05rem;font-weight:800;color:var(--green)">${fmt$(d.running)}</div>
-        <div style="font-size:.62rem;color:var(--text2);margin-top:1px;text-transform:uppercase;letter-spacing:.4px">Profit Since Purchase</div>
+        <div style="font-size:1.05rem;font-weight:800;color:${accentCol}">${fmt$(applied)}</div>
+        <div style="font-size:.62rem;color:var(--text2);margin-top:1px;text-transform:uppercase;letter-spacing:.4px">Total Applied</div>
       </div>
       <div style="background:#0f1117;border-radius:7px;padding:10px">
-        <div style="font-size:1.05rem;font-weight:800;color:${d.isPaidOff ? accentCol : 'var(--red)'}">
-          ${d.isPaidOff ? '+' : '-'}${fmt$(Math.abs(d.netProfit))}
-        </div>
-        <div style="font-size:.62rem;color:var(--text2);margin-top:1px;text-transform:uppercase;letter-spacing:.4px">${d.isPaidOff ? 'Net Profit Beyond Cost' : 'Still Owed'}</div>
+        <div style="font-size:1.05rem;font-weight:800;color:${isPaidOff ? 'var(--green)' : 'var(--red)'}">${isPaidOff ? '+' + fmt$(applied - printer.cost) : fmt$(remaining)}</div>
+        <div style="font-size:.62rem;color:var(--text2);margin-top:1px;text-transform:uppercase;letter-spacing:.4px">${isPaidOff ? 'Over Cost' : 'Still Owed'}</div>
       </div>
       <div style="background:#0f1117;border-radius:7px;padding:10px">
-        <div style="font-size:1.05rem;font-weight:800;color:var(--yellow)">${d.daysToPayoff ? d.daysToPayoff + 'd' : '—'}</div>
-        <div style="font-size:.62rem;color:var(--text2);margin-top:1px;text-transform:uppercase;letter-spacing:.4px">Days to Pay Off</div>
+        <div style="font-size:1.05rem;font-weight:800;color:var(--yellow)">${credits.length}</div>
+        <div style="font-size:.62rem;color:var(--text2);margin-top:1px;text-transform:uppercase;letter-spacing:.4px">Credit Entries</div>
       </div>
     </div>
-    <div style="display:flex;border:1px solid var(--border);border-radius:7px;overflow:hidden;margin-bottom:14px">${pillsHTML}</div>
-    <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:8px">Monthly Profit</div>
-    <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap">${monthBars || '<span style="font-size:.78rem;color:var(--text2)">No orders yet</span>'}</div>
+
+    <div style="display:flex;border:1px solid var(--border);border-radius:7px;overflow:hidden;margin-bottom:16px">${pillsHTML}</div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2)">Credit Log</div>
+      <button class="btn-primary" style="padding:5px 12px;font-size:.75rem" onclick="openPrinterCreditModal('${printer.id}')">+ Apply Credit</button>
+    </div>
+    <div style="max-height:180px;overflow-y:auto">
+      ${logRows || '<div style="font-size:.78rem;color:var(--text2);padding:10px 0">No credits logged yet.</div>'}
+    </div>
   </div>`;
 }
 
 function renderPrinterPayoff() {
   const card = document.getElementById('printerPayoffCard');
   if (!card) return;
-  const orders = getOrders();
   const totalCost = PRINTERS.reduce((s, p) => s + p.cost, 0);
-  const paidOff = PRINTERS.filter(p => buildPayoffData(p, orders).isPaidOff).length;
-  const cardsHTML = PRINTERS.map(p => printerCardHTML(p, buildPayoffData(p, orders))).join('');
+  const paidOff = PRINTERS.filter(p => {
+    const credits = getPrinterCredits(p.id);
+    return credits.reduce((s, e) => s + e.amount, 0) >= p.cost;
+  }).length;
+  const cardsHTML = PRINTERS.map(p => printerCardHTML(p)).join('');
   card.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
       <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2)">🖨 Printer Payoff Tracker</div>
-      <div style="font-size:.78rem;color:var(--text2)">${paidOff}/${PRINTERS.length} printers paid off &nbsp;·&nbsp; Total hardware: <strong style="color:var(--text)">${fmt$(totalCost)}</strong></div>
+      <div style="font-size:.78rem;color:var(--text2)">${paidOff}/${PRINTERS.length} paid off &nbsp;·&nbsp; Total hardware: <strong style="color:var(--text)">${fmt$(totalCost)}</strong></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">${cardsHTML}</div>`;
 }
