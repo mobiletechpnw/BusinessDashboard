@@ -1193,6 +1193,7 @@
   <button class="dt-btn" onclick="document.getElementById('importFile').click()" title="Restore from a backup file">⬆ Restore</button>
   <button class="dt-btn" onclick="exportOrdersCSV()" title="Export all orders to a CSV spreadsheet">↧ CSV</button>
   <button class="dt-btn" onclick="resetOrdersToDefault()" title="Restore the original 47 built-in orders (keeps orders you added)">↺ Reset 47</button>
+  <button class="dt-btn" id="push-all-btn" onclick="forcePushAll()" title="Force-upload ALL local data to the cloud (use this if a new device is missing your data)">☁ Push to Cloud</button>
   <input type="file" id="importFile" accept="application/json,.json" style="display:none" onchange="importBackup(this.files[0])">
 </div>
 
@@ -3103,6 +3104,18 @@ function importBackup(file) {
   };
   reader.readAsText(file);
   document.getElementById('importFile').value = '';
+}
+
+async function forcePushAll() {
+  if (!window.VpcSync) { toast('Sync not available.'); return; }
+  const btn = document.getElementById('push-all-btn');
+  if (btn) { btn.textContent = '☁ Pushing…'; btn.disabled = true; }
+  try {
+    const { ok, failed } = await window.VpcSync.pushAll();
+    toast(failed === 0 ? `✅ All data pushed to cloud (${ok} keys).` : `⚠️ ${ok} pushed, ${failed} failed — check connection.`);
+  } finally {
+    if (btn) { btn.textContent = '☁ Push to Cloud'; btn.disabled = false; }
+  }
 }
 
 function csvCell(v) {

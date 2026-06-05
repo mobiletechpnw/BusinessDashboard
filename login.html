@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f1117">
+<title>Sign In — VPC</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:#0f1117;font-family:system-ui,-apple-system,sans-serif;color:#e2e8f0;}
+
+.card{background:#1a1d27;border:1px solid #2e3350;border-radius:18px;
+  padding:44px 40px;width:400px;max-width:95vw;}
+
+.logo{text-align:center;margin-bottom:32px;}
+.logo-icon{font-size:2.4rem;margin-bottom:10px;}
+.logo-title{font-size:1.25rem;font-weight:900;letter-spacing:-.4px;}
+.logo-title .v{color:#6c8cff;}.logo-title .p{color:#34d399;}
+.logo-sub{font-size:.8rem;color:#8892b0;margin-top:5px;}
+
+.tabs{display:flex;background:#0f1117;border-radius:9px;padding:3px;margin-bottom:28px;}
+.tab-btn{flex:1;padding:8px;font-size:.82rem;font-weight:700;border:none;border-radius:7px;
+  cursor:pointer;transition:all .15s;background:none;color:#8892b0;}
+.tab-btn.active{background:#6c8cff;color:#fff;}
+
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:.7rem;color:#8892b0;font-weight:700;
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;}
+.field input{width:100%;background:#0f1117;border:1px solid #2e3350;border-radius:9px;
+  color:#e2e8f0;padding:11px 14px;font-size:.92rem;outline:none;font-family:inherit;
+  transition:border-color .15s;}
+.field input:focus{border-color:#6c8cff;}
+
+.btn-submit{width:100%;background:#6c8cff;color:#fff;border:none;border-radius:9px;
+  padding:13px;font-size:.92rem;font-weight:700;cursor:pointer;transition:all .15s;
+  margin-top:6px;}
+.btn-submit:hover{background:#7d9bff;}
+.btn-submit:disabled{opacity:.55;cursor:not-allowed;}
+
+.error{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);
+  border-radius:8px;padding:10px 14px;font-size:.8rem;color:#f87171;
+  margin-bottom:16px;display:none;line-height:1.5;}
+.success{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);
+  border-radius:8px;padding:10px 14px;font-size:.8rem;color:#34d399;
+  margin-bottom:16px;display:none;line-height:1.5;}
+
+.hint{text-align:center;font-size:.73rem;color:#8892b0;margin-top:18px;line-height:1.6;}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">🌲</div>
+    <div class="logo-title"><span class="v">Vault</span> &amp; <span class="p">Pine</span></div>
+    <div class="logo-sub">Business Command Center</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-signin" onclick="setMode('signin')">Sign In</button>
+    <button class="tab-btn"        id="tab-signup" onclick="setMode('signup')">Sign Up</button>
+  </div>
+
+  <div class="error"   id="error-box"></div>
+  <div class="success" id="success-box"></div>
+
+  <div class="field">
+    <label>Email</label>
+    <input type="email" id="inp-email" placeholder="you@example.com" autocomplete="email">
+  </div>
+  <div class="field">
+    <label>Password</label>
+    <input type="password" id="inp-pass" placeholder="••••••••" autocomplete="current-password">
+  </div>
+
+  <button class="btn-submit" id="submit-btn" onclick="handleAuth()">Sign In</button>
+
+  <div class="hint" id="hint-text">Your data syncs automatically across all devices once signed in.</div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://cqvnspbdfmgwcutezmqe.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxdm5zcGJkZm1nd2N1dGV6bXFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NjI3MDUsImV4cCI6MjA5NjEzODcwNX0.0GGjc6i8VwgJgDUFNwcNzEy4r0_sAo57I5iMMPi7dII';
+const SESSION_KEY  = 'vpc_auth_session';
+
+let mode = 'signin';
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('tab-signin').classList.toggle('active', m === 'signin');
+  document.getElementById('tab-signup').classList.toggle('active', m === 'signup');
+  document.getElementById('submit-btn').textContent = m === 'signin' ? 'Sign In' : 'Create Account';
+  document.getElementById('inp-pass').autocomplete  = m === 'signin' ? 'current-password' : 'new-password';
+  hide('error-box'); hide('success-box');
+}
+
+function show(id, msg) { const el = document.getElementById(id); el.textContent = msg; el.style.display = ''; }
+function hide(id)       { document.getElementById(id).style.display = 'none'; }
+
+async function handleAuth() {
+  const email = document.getElementById('inp-email').value.trim();
+  const pass  = document.getElementById('inp-pass').value;
+  const btn   = document.getElementById('submit-btn');
+
+  if (!email || !pass) { show('error-box', 'Email and password are required.'); return; }
+  hide('error-box'); hide('success-box');
+  btn.disabled = true;
+  btn.textContent = mode === 'signin' ? 'Signing in…' : 'Creating account…';
+
+  try {
+    const endpoint = mode === 'signin'
+      ? `${SUPABASE_URL}/auth/v1/token?grant_type=password`
+      : `${SUPABASE_URL}/auth/v1/signup`;
+
+    const res  = await fetch(endpoint, {
+      method:  'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email, password: pass }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      show('error-box', data.error_description || data.msg || 'Authentication failed. Check your credentials.');
+      return;
+    }
+
+    if (mode === 'signup' && !data.access_token) {
+      show('success-box', '✅ Account created! Check your email to confirm, then sign in.');
+      setMode('signin');
+      return;
+    }
+
+    // Store session
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
+      access_token:  data.access_token,
+      refresh_token: data.refresh_token,
+      expires_at:    Date.now() + data.expires_in * 1000,
+      user:          data.user,
+    }));
+    // Pre-authorize PIN session so the PIN overlay doesn't appear after redirect
+    sessionStorage.setItem('vpc_authed', JSON.stringify({ ts: Date.now() }));
+
+    // Redirect
+    const params   = new URLSearchParams(window.location.search);
+    const redirect = params.get('redirect') || 'index.html';
+    window.location.href = redirect;
+
+  } catch {
+    show('error-box', 'Connection error — check your internet and try again.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
+  }
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter') handleAuth(); });
+
+// If already signed in redirect away
+try {
+  const s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+  if (s?.access_token && s.expires_at > Date.now() + 60_000) {
+    const params = new URLSearchParams(window.location.search);
+    window.location.href = params.get('redirect') || 'index.html';
+  }
+} catch {}
+</script>
+</body>
+</html>
