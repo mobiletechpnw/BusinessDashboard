@@ -151,6 +151,33 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
 .empty-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:6px;}
 .empty-sub{font-size:0.82rem;line-height:1.6;}
 
+/* CANVA SECTION */
+.canva-hero{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;}
+.canva-create-card{border-radius:var(--radius);padding:24px;cursor:pointer;transition:all .2s;text-align:center;text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.canva-create-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,.25);}
+.canva-create-card.post{background:linear-gradient(135deg,#7c3aed 0%,#4f46e5 100%);border:1px solid rgba(255,255,255,.1);}
+.canva-create-card.story{background:linear-gradient(135deg,#db2777 0%,#f472b6 100%);border:1px solid rgba(255,255,255,.1);}
+.canva-create-icon{font-size:2.4rem;}
+.canva-create-label{font-size:1rem;font-weight:800;color:#fff;letter-spacing:-.2px;}
+.canva-create-sub{font-size:0.72rem;color:rgba(255,255,255,.75);}
+.canva-section-title{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text2);margin-bottom:12px;}
+.canva-quick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:28px;}
+.canva-quick-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .2s;text-decoration:none;display:flex;gap:12px;align-items:flex-start;}
+.canva-quick-card:hover{border-color:var(--accent);transform:translateY(-1px);}
+.canva-quick-icon{font-size:1.5rem;flex-shrink:0;margin-top:2px;}
+.canva-quick-title{font-size:0.85rem;font-weight:700;margin-bottom:3px;}
+.canva-quick-sub{font-size:0.72rem;color:var(--text2);line-height:1.4;}
+.canva-quick-badges{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap;}
+.canva-link-input-wrap{display:flex;gap:8px;}
+.canva-link-input-wrap input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:9px 12px;font-size:0.83rem;outline:none;font-family:inherit;}
+.canva-link-input-wrap input:focus{border-color:var(--accent);}
+.canva-open-btn{background:var(--accent);color:#fff;border:none;border-radius:7px;padding:9px 14px;font-size:0.78rem;font-weight:700;cursor:pointer;white-space:nowrap;}
+.canva-open-btn:hover{background:#7d9bff;}
+.canva-logo{display:inline-flex;align-items:center;gap:5px;font-size:0.72rem;font-weight:700;color:var(--text2);margin-bottom:20px;}
+.canva-logo svg{width:18px;height:18px;}
+
+@media(max-width:700px){.canva-hero{grid-template-columns:1fr;}}
+
 @media(max-width:700px){
   .stat-bar{grid-template-columns:repeat(3,1fr);}
   .week-grid{grid-template-columns:repeat(4,1fr);}
@@ -170,6 +197,7 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
       <div class="h-tab active" data-tab="calendar">📅 Calendar</div>
       <div class="h-tab" data-tab="queue">📋 Queue</div>
       <div class="h-tab" data-tab="templates">⚡ Templates</div>
+      <div class="h-tab" data-tab="canva">🎨 Canva</div>
     </nav>
   </div>
   <div class="header-right">
@@ -208,6 +236,40 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
       <div id="status-filters" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
     </div>
     <div class="content-grid" id="queue-grid"></div>
+  </div>
+
+  <!-- ── CANVA ── -->
+  <div class="section" id="tab-canva">
+    <div class="canva-logo">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="32" height="32" rx="8" fill="#7D2AE8"/>
+        <path d="M16 8C11.582 8 8 11.582 8 16C8 20.418 11.582 24 16 24C20.418 24 24 20.418 24 16C24 11.582 20.418 8 16 8ZM16 21.333C13.055 21.333 10.667 18.945 10.667 16C10.667 13.055 13.055 10.667 16 10.667C18.945 10.667 21.333 13.055 21.333 16C21.333 18.945 18.945 21.333 16 21.333Z" fill="white"/>
+        <circle cx="16" cy="16" r="3" fill="white"/>
+      </svg>
+      Powered by Canva
+    </div>
+
+    <div class="canva-hero">
+      <a class="canva-create-card post" href="https://www.canva.com/create/instagram-posts/" target="_blank" rel="noopener">
+        <div class="canva-create-icon">📸</div>
+        <div class="canva-create-label">New IG Post</div>
+        <div class="canva-create-sub">1080 × 1080 px · Square format</div>
+      </a>
+      <a class="canva-create-card story" href="https://www.canva.com/create/instagram-stories/" target="_blank" rel="noopener">
+        <div class="canva-create-icon">⭕</div>
+        <div class="canva-create-label">New IG Story</div>
+        <div class="canva-create-sub">1080 × 1920 px · Vertical format</div>
+      </a>
+    </div>
+
+    <div class="canva-section-title">Quick-start designs for Vault &amp; Pine</div>
+    <div class="canva-quick-grid" id="canva-quick-grid"></div>
+
+    <div class="canva-section-title">Link a Canva design to a content item</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:8px;">
+      <div style="font-size:0.8rem;color:var(--text2);margin-bottom:10px;line-height:1.5;">Paste a Canva design URL into the <strong style="color:var(--text)">Canva Design URL</strong> field on any content item (via Edit) to link your design directly to that post.</div>
+      <div style="font-size:0.75rem;color:var(--text2);">You can also open content items and use the <strong style="color:var(--accent)">Open in Canva</strong> button to jump straight to an attached design.</div>
+    </div>
   </div>
 
   <!-- ── TEMPLATES ── -->
@@ -298,6 +360,13 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
     <div class="field">
       <label>Notes / Ideas</label>
       <input type="text" id="f-notes" placeholder="Props needed, shoot location, inspiration…">
+    </div>
+    <div class="field">
+      <label>Canva Design URL</label>
+      <div class="canva-link-input-wrap">
+        <input type="url" id="f-canva-url" placeholder="https://www.canva.com/design/…">
+        <button class="canva-open-btn" type="button" onclick="openCanvaUrl()">Open ↗</button>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeModal()">Cancel</button>
@@ -492,10 +561,14 @@ function renderQueue() {
   }
   el.innerHTML = items.map(c => {
     const plats = (c.platforms||[]).map(p=>`<span class="platform">${PLAT_ICONS[p]||''} ${p}</span>`).join('');
+    const canvaBtn = c.canvaUrl
+      ? `<a class="icon-btn" title="Open in Canva" href="${esc(c.canvaUrl)}" target="_blank" rel="noopener" style="text-decoration:none">🎨</a>`
+      : `<button class="icon-btn" title="Add Canva design" onclick="openModal('${c.id}')" style="opacity:.45">🎨</button>`;
     return `<div class="content-card">
       <div class="card-top">
         <div class="card-title">${esc(c.title)}</div>
         <div class="card-actions">
+          ${canvaBtn}
           <button class="icon-btn" title="Edit" onclick="openModal('${c.id}')">✏️</button>
           <button class="icon-btn" title="Mark posted" onclick="markPosted('${c.id}')" ${c.status==='posted'?'style="opacity:.4"':''}>✅</button>
           <button class="icon-btn" title="Delete" onclick="deleteContent('${c.id}')">✕</button>
@@ -553,8 +626,9 @@ function openModal(id) {
   document.getElementById('f-date').value      = c?.date     || '';
   document.getElementById('f-time').value      = c?.time     || '';
   document.getElementById('f-status').value    = c?.status   || 'draft';
-  document.getElementById('f-caption').value   = c?.caption  || '';
-  document.getElementById('f-notes').value     = c?.notes    || '';
+  document.getElementById('f-caption').value    = c?.caption   || '';
+  document.getElementById('f-notes').value      = c?.notes     || '';
+  document.getElementById('f-canva-url').value  = c?.canvaUrl  || '';
   const plats = c?.platforms || ['instagram'];
   document.querySelectorAll('.plat-btn').forEach(b => {
     b.classList.toggle('on', plats.includes(b.dataset.p));
@@ -592,6 +666,7 @@ function saveContent() {
     platforms,
     caption:  document.getElementById('f-caption').value,
     notes:    document.getElementById('f-notes').value.trim(),
+    canvaUrl: document.getElementById('f-canva-url').value.trim(),
   };
   const arr = getContent();
   const idx = arr.findIndex(x => x.id === item.id);
@@ -617,6 +692,38 @@ function markPosted(id) {
   renderAll();
 }
 
+// ── CANVA ──────────────────────────────────────────
+function openCanvaUrl() {
+  const url = document.getElementById('f-canva-url').value.trim();
+  if (url) window.open(url, '_blank', 'noopener');
+}
+
+const CANVA_QUICK = [
+  { icon:'📣', title:'Show Announcement Post', sub:'Bold post announcing an upcoming card show.',      type:'post',  href:'https://www.canva.com/create/instagram-posts/' },
+  { icon:'⏳', title:'Show Countdown Story',   sub:'Story countdown sticker for show week.',           type:'story', href:'https://www.canva.com/create/instagram-stories/' },
+  { icon:'📍', title:'Table Locator Story',    sub:'Show followers exactly where to find your table.', type:'story', href:'https://www.canva.com/create/instagram-stories/' },
+  { icon:'📦', title:'Sealed Product Drop',    sub:'Eye-catching story for new sealed stock.',         type:'story', href:'https://www.canva.com/create/instagram-stories/' },
+  { icon:'✨', title:'PC Showcase Post',       sub:'Spotlight a prized card from your collection.',    type:'post',  href:'https://www.canva.com/create/instagram-posts/' },
+  { icon:'🖨️', title:'Riser Product Demo',     sub:'Show off your 3D-printed display risers.',        type:'post',  href:'https://www.canva.com/create/instagram-posts/' },
+  { icon:'🏷️', title:'Jet Tag Drop Story',     sub:'Announce new Jet Tag characters in stock.',       type:'story', href:'https://www.canva.com/create/instagram-stories/' },
+  { icon:'📌', title:'Pin Drop Post',          sub:'Show new Pokémon pins available.',                type:'post',  href:'https://www.canva.com/create/instagram-posts/' },
+];
+
+function renderCanva() {
+  document.getElementById('canva-quick-grid').innerHTML = CANVA_QUICK.map(q => `
+    <a class="canva-quick-card" href="${q.href}" target="_blank" rel="noopener">
+      <div class="canva-quick-icon">${q.icon}</div>
+      <div>
+        <div class="canva-quick-title">${esc(q.title)}</div>
+        <div class="canva-quick-sub">${esc(q.sub)}</div>
+        <div class="canva-quick-badges">
+          <span class="badge ${q.type==='story'?'type-story':'type-post'}">${q.type}</span>
+          <span class="badge" style="background:rgba(125,42,232,.15);color:#7d2ae8">Canva</span>
+        </div>
+      </div>
+    </a>`).join('');
+}
+
 // ── TABS ───────────────────────────────────────────
 document.querySelectorAll('.h-tab').forEach(t => {
   t.addEventListener('click', () => {
@@ -639,6 +746,7 @@ function renderAll() {
   renderQueueFilters();
   renderQueue();
   renderTemplates();
+  renderCanva();
 }
 
 renderAll();

@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f1117">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="styles.css">
+<script src="shared.js" defer></script>
+<title>Events &amp; Tables — VPC</title>
+<style>
+body { min-height:100vh; }
+
+/* HEADER */
+header { background:var(--surface); border-bottom:1px solid var(--border); padding:0 28px; display:flex; align-items:center; justify-content:space-between; min-height:58px; position:sticky; top:0; z-index:100; gap:12px; flex-wrap:wrap; }
+.brand { font-size:1rem; font-weight:800; letter-spacing:-.3px; white-space:nowrap; }
+.brand span { color:var(--accent); }
+.header-right { display:flex; align-items:center; gap:10px; }
+.btn-primary { background:var(--accent); color:#fff; border:none; border-radius:7px; padding:8px 16px; font-size:.82rem; font-weight:700; cursor:pointer; transition:all .15s; white-space:nowrap; }
+.btn-primary:hover { background:#7d9bff; }
+.btn-ghost { background:none; border:1px solid var(--border); border-radius:7px; padding:7px 14px; font-size:.8rem; font-weight:600; color:var(--text2); cursor:pointer; transition:all .15s; white-space:nowrap; }
+.btn-ghost:hover { border-color:var(--accent); color:var(--accent); }
+.back-link { font-size:.75rem; color:var(--text2); text-decoration:none; padding:5px 10px; border:1px solid var(--border); border-radius:6px; transition:all .15s; white-space:nowrap; }
+.back-link:hover { color:var(--accent); border-color:var(--accent); }
+
+/* STAT BAR */
+.stat-bar { display:grid; grid-template-columns:repeat(5,1fr); gap:1px; background:var(--border); border-bottom:1px solid var(--border); }
+.stat-cell { background:var(--surface); padding:14px 20px; }
+.stat-val { font-size:1.3rem; font-weight:800; letter-spacing:-.4px; }
+.stat-lbl { font-size:.65rem; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; margin-top:2px; }
+
+/* MAIN */
+main { padding:24px 28px; }
+
+/* MATRIX SCROLL WRAPPER */
+.table-scroll { overflow-x:auto; border:1px solid var(--border); border-radius:var(--radius); }
+
+/* MATRIX */
+.matrix { border-collapse:collapse; width:100%; }
+.matrix th, .matrix td { border:1px solid var(--border); }
+
+/* ── HEADER ROW ── */
+.matrix thead th {
+  background:var(--surface);
+  padding:10px 14px;
+  font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--text2);
+  white-space:nowrap; text-align:center;
+  position:sticky; top:0; z-index:10;
+}
+.matrix thead th.th-corner {
+  text-align:left; min-width:220px;
+  position:sticky; left:0; z-index:20;
+  background:var(--surface);
+}
+.matrix thead th.th-total-col {
+  background:var(--surface2); color:var(--text); min-width:130px;
+}
+
+/* Vendor header cell */
+.matrix thead th.th-vendor { min-width:160px; }
+.th-vendor-name { font-size:.85rem; font-weight:700; color:var(--text); text-transform:none; letter-spacing:0; }
+.th-vendor-meta { font-size:.65rem; color:var(--text2); margin-top:2px; }
+.th-edit-btn { background:none; border:none; font-size:.7rem; color:var(--text2); cursor:pointer; padding:3px 5px; border-radius:4px; margin-top:4px; }
+.th-edit-btn:hover { background:var(--surface2); color:var(--text); }
+
+/* ── EVENT COLUMN ── */
+.matrix td.td-event {
+  background:var(--surface); position:sticky; left:0; z-index:5;
+  padding:12px 16px; min-width:220px; vertical-align:top;
+  border-right:2px solid var(--border);
+}
+.ev-name { font-size:.9rem; font-weight:700; line-height:1.3; }
+.ev-meta { font-size:.68rem; color:var(--text2); margin-top:3px; line-height:1.5; }
+.ev-edit-btn { background:none; border:none; font-size:.68rem; color:var(--text2); cursor:pointer; padding:2px 5px; border-radius:4px; margin-top:6px; }
+.ev-edit-btn:hover { background:var(--surface2); color:var(--text); }
+
+/* ── DATA CELLS ── */
+.matrix td.cell { padding:0; cursor:pointer; vertical-align:middle; transition:background .12s; }
+.cell-inner { padding:10px 12px; min-height:68px; display:flex; flex-direction:column; justify-content:center; gap:5px; }
+.cell-price-val { font-size:1rem; font-weight:800; letter-spacing:-.3px; }
+.cell-row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.status-pill { font-size:.6rem; font-weight:700; padding:2px 7px; border-radius:10px; text-transform:uppercase; letter-spacing:.3px; flex-shrink:0; }
+.pill-paid   { background:rgba(52,211,153,.18); color:var(--green); }
+.pill-unpaid { background:rgba(251,191,36,.18);  color:var(--yellow); }
+.quick-btn { font-size:.62rem; font-weight:700; padding:2px 8px; border-radius:5px; border:1px solid; background:none; cursor:pointer; transition:all .12s; white-space:nowrap; }
+.quick-btn-pay   { border-color:var(--green); color:var(--green); }
+.quick-btn-pay:hover   { background:rgba(52,211,153,.15); }
+.quick-btn-unpay { border-color:var(--text2); color:var(--text2); }
+.quick-btn-unpay:hover { background:var(--surface2); }
+
+/* Cell background tints */
+.cell.is-paid   .cell-inner { background:rgba(52,211,153,.05); }
+.cell.is-unpaid .cell-inner { background:rgba(251,191,36,.05); }
+.cell.is-empty  .cell-inner { background:transparent; }
+.cell.is-empty .cell-add { text-align:center; color:var(--text2); font-size:.75rem; opacity:.45; transition:opacity .15s; }
+.cell.is-empty:hover .cell-add { opacity:1; color:var(--accent); }
+
+/* ── TOTAL COLUMN (right side, per event) ── */
+.matrix td.td-event-total {
+  background:var(--surface2); padding:10px 14px;
+  font-weight:800; font-size:.9rem; text-align:right;
+  white-space:nowrap; vertical-align:middle;
+}
+
+/* ── FOOTER ROW ── */
+.matrix tfoot td {
+  background:var(--surface2); border-top:2px solid var(--border);
+  padding:12px 14px; font-weight:700;
+}
+.matrix tfoot td.td-event { font-size:.7rem; text-transform:uppercase; letter-spacing:.5px; color:var(--text2); vertical-align:middle; }
+.vt-amount { font-size:.95rem; font-weight:800; text-align:center; }
+.vt-sub { font-size:.65rem; margin-top:3px; text-align:center; font-weight:600; }
+.vt-due     { color:var(--yellow); }
+.vt-allpaid { color:var(--green); }
+.matrix tfoot td.td-grand { font-size:1.1rem; color:var(--accent); text-align:right; }
+.grand-sub { font-size:.68rem; font-weight:600; color:var(--yellow); margin-top:3px; text-align:right; }
+
+/* EMPTY STATE */
+.empty-state { text-align:center; padding:80px 20px; color:var(--text2); }
+.empty-icon { font-size:3rem; margin-bottom:14px; }
+.empty-title { font-size:1rem; font-weight:700; color:var(--text); margin-bottom:6px; }
+.empty-sub { font-size:.82rem; line-height:1.65; max-width:400px; margin:0 auto; }
+.empty-actions { display:flex; gap:10px; justify-content:center; margin-top:20px; flex-wrap:wrap; }
+
+/* MODAL */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.72); z-index:500; align-items:center; justify-content:center; }
+.modal-overlay.open { display:flex; }
+.modal { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:28px; width:460px; max-width:95vw; max-height:90vh; overflow-y:auto; }
+.modal h2 { font-size:1.1rem; font-weight:800; margin-bottom:20px; }
+.modal-ctx { font-size:.78rem; color:var(--text2); line-height:1.55; background:var(--surface2); border-radius:8px; padding:10px 12px; margin-bottom:18px; }
+.field { margin-bottom:16px; }
+.field label { display:block; font-size:.72rem; color:var(--text2); font-weight:700; text-transform:uppercase; letter-spacing:.4px; margin-bottom:6px; }
+.field input, .field select { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); padding:10px 12px; font-size:.88rem; outline:none; font-family:inherit; transition:border-color .15s; box-sizing:border-box; }
+.field input:focus, .field select:focus { border-color:var(--accent); }
+.modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:22px; align-items:center; }
+.btn-danger { background:none; border:1px solid #f87171; color:#f87171; border-radius:7px; padding:7px 14px; font-size:.8rem; font-weight:600; cursor:pointer; transition:all .15s; margin-right:auto; }
+.btn-danger:hover { background:rgba(248,113,113,.12); }
+
+/* Paid toggle button inside modal */
+.paid-big-toggle { width:100%; padding:12px 16px; border-radius:8px; font-size:.88rem; font-weight:700; cursor:pointer; transition:all .18s; border:1.5px solid; background:none; }
+.paid-big-toggle.is-paid   { border-color:var(--green); color:var(--green); background:rgba(52,211,153,.08); }
+.paid-big-toggle.is-paid:hover { background:rgba(52,211,153,.18); }
+.paid-big-toggle.is-unpaid { border-color:var(--yellow); color:var(--yellow); background:rgba(251,191,36,.08); }
+.paid-big-toggle.is-unpaid:hover { background:rgba(251,191,36,.18); }
+
+@media(max-width:700px) {
+  main { padding:14px; }
+  .stat-bar { grid-template-columns:repeat(3,1fr); }
+  header { padding:0 14px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">Events <span>&amp; Tables</span></div>
+  <div class="header-right">
+    <a href="index.html" class="back-link">⌂ Home</a>
+    <button class="btn-ghost" onclick="openVendorModal()">+ Vendor</button>
+    <button class="btn-primary" onclick="openEventModal()">+ Event</button>
+  </div>
+</header>
+
+<div class="stat-bar">
+  <div class="stat-cell"><div class="stat-val" id="st-events">0</div><div class="stat-lbl">Events</div></div>
+  <div class="stat-cell"><div class="stat-val" id="st-vendors">0</div><div class="stat-lbl">Vendors</div></div>
+  <div class="stat-cell"><div class="stat-val" style="color:var(--accent)" id="st-booked">0</div><div class="stat-lbl">Tables Booked</div></div>
+  <div class="stat-cell"><div class="stat-val" style="color:var(--green)" id="st-collected">$0</div><div class="stat-lbl">Collected</div></div>
+  <div class="stat-cell"><div class="stat-val" style="color:var(--yellow)" id="st-outstanding">$0</div><div class="stat-lbl">Outstanding</div></div>
+</div>
+
+<main>
+  <div id="matrix-wrap"></div>
+  <div class="empty-state" id="empty-state">
+    <div class="empty-icon">🗓️</div>
+    <div class="empty-title" id="empty-title">No data yet</div>
+    <div class="empty-sub" id="empty-sub">Add your events and vendors to start tracking table payments.</div>
+    <div class="empty-actions">
+      <button class="btn-ghost" onclick="openVendorModal()">+ Add Vendor</button>
+      <button class="btn-primary" onclick="openEventModal()">+ Add Event</button>
+    </div>
+  </div>
+</main>
+
+<!-- ── EVENT MODAL ── -->
+<div class="modal-overlay" id="event-modal">
+  <div class="modal">
+    <h2 id="ev-modal-title">New Event</h2>
+    <div class="field">
+      <label>Event Name</label>
+      <input type="text" id="ev-name" placeholder="e.g. Pacific Northwest Pokémon Show">
+    </div>
+    <div class="field">
+      <label>Date</label>
+      <input type="date" id="ev-date">
+    </div>
+    <div class="field">
+      <label>Location</label>
+      <input type="text" id="ev-location" placeholder="e.g. Seattle Convention Center">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-danger" id="ev-delete-btn" onclick="deleteEvent()" style="display:none">Delete Event</button>
+      <button class="btn-ghost" onclick="closeModal('event-modal')">Cancel</button>
+      <button class="btn-primary" onclick="saveEvent()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── VENDOR MODAL ── -->
+<div class="modal-overlay" id="vendor-modal">
+  <div class="modal">
+    <h2 id="vn-modal-title">New Vendor</h2>
+    <div class="field">
+      <label>Vendor / Promoter Name</label>
+      <input type="text" id="vn-name" placeholder="e.g. Pacific Card Shows">
+    </div>
+    <div class="field">
+      <label>Contact (optional)</label>
+      <input type="text" id="vn-contact" placeholder="e.g. email or phone">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-danger" id="vn-delete-btn" onclick="deleteVendor()" style="display:none">Delete Vendor</button>
+      <button class="btn-ghost" onclick="closeModal('vendor-modal')">Cancel</button>
+      <button class="btn-primary" onclick="saveVendor()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TABLE CELL MODAL ── -->
+<div class="modal-overlay" id="cell-modal">
+  <div class="modal">
+    <h2 id="cl-modal-title">Table Entry</h2>
+    <div class="modal-ctx" id="cl-ctx"></div>
+    <div class="field">
+      <label>Table Price ($)</label>
+      <input type="number" id="cl-price" min="0" step="0.01" placeholder="0.00">
+    </div>
+    <div class="field">
+      <label>Payment Status</label>
+      <button class="paid-big-toggle" id="cl-paid-toggle" onclick="flipCellPaid()"></button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-danger" id="cl-delete-btn" onclick="deleteCellEntry()" style="display:none">Remove</button>
+      <button class="btn-ghost" onclick="closeModal('cell-modal')">Cancel</button>
+      <button class="btn-primary" onclick="saveCellEntry()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STORAGE ─────────────────────────────────────────
+const EV_KEY  = 'vpc_events_v1';
+const VN_KEY  = 'vpc_vendors_v1';
+const TBL_KEY = 'vpc_tables_v1';
+const uid     = () => Math.random().toString(36).slice(2, 10);
+
+const getEvents  = () => JSON.parse(localStorage.getItem(EV_KEY)  || '[]');
+const getVendors = () => JSON.parse(localStorage.getItem(VN_KEY)  || '[]');
+const getTables  = () => JSON.parse(localStorage.getItem(TBL_KEY) || '[]');
+const setEvents  = v  => localStorage.setItem(EV_KEY,  JSON.stringify(v));
+const setVendors = v  => localStorage.setItem(VN_KEY,  JSON.stringify(v));
+const setTables  = v  => localStorage.setItem(TBL_KEY, JSON.stringify(v));
+
+// ── UTILS ────────────────────────────────────────────
+const esc      = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const fmtDate  = d => d ? new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+const fmtMoney = n => '$'+(+n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+// ── STATS ────────────────────────────────────────────
+function renderStats() {
+  const tbls  = getTables();
+  const paid  = tbls.filter(t => t.paid).reduce((s,t) => s + (+t.price||0), 0);
+  const owed  = tbls.filter(t => !t.paid).reduce((s,t) => s + (+t.price||0), 0);
+  document.getElementById('st-events').textContent      = getEvents().length;
+  document.getElementById('st-vendors').textContent     = getVendors().length;
+  document.getElementById('st-booked').textContent      = tbls.length;
+  document.getElementById('st-collected').textContent   = fmtMoney(paid);
+  document.getElementById('st-outstanding').textContent = fmtMoney(owed);
+}
+
+// ── MATRIX ───────────────────────────────────────────
+function renderMatrix() {
+  const events  = getEvents().sort((a,b) => (a.date||'9999').localeCompare(b.date||'9999'));
+  const vendors = getVendors();
+  const tables  = getTables();
+  const wrap    = document.getElementById('matrix-wrap');
+  const empty   = document.getElementById('empty-state');
+
+  if (!events.length || !vendors.length) {
+    wrap.innerHTML = '';
+    empty.style.display = '';
+    const noEv = !events.length, noVn = !vendors.length;
+    document.getElementById('empty-title').textContent =
+      noEv && noVn ? 'No data yet' : noEv ? 'No events added' : 'No vendors added';
+    document.getElementById('empty-sub').textContent =
+      noEv && noVn ? 'Add your events and vendors to start tracking table payments.'
+      : noEv ? 'Add at least one event to display the table grid.'
+      : 'Add at least one vendor to display the table grid.';
+    return;
+  }
+  empty.style.display = 'none';
+
+  // Build lookup: lookup[eventId][vendorId] = table
+  const lk = {};
+  tables.forEach(t => { (lk[t.eventId] = lk[t.eventId]||{})[t.vendorId] = t; });
+
+  let h = `<div class="table-scroll"><table class="matrix">`;
+
+  // ── THEAD ──
+  h += `<thead><tr>`;
+  h += `<th class="th-corner">Event</th>`;
+  vendors.forEach(v => {
+    h += `<th class="th-vendor">
+      <div class="th-vendor-name">${esc(v.name)}</div>
+      ${v.contact ? `<div class="th-vendor-meta">${esc(v.contact)}</div>` : ''}
+      <div><button class="th-edit-btn" onclick="openVendorModal('${v.id}')">✏️ Edit</button></div>
+    </th>`;
+  });
+  h += `<th class="th-total-col">Event Total</th>`;
+  h += `</tr></thead>`;
+
+  // ── TBODY ──
+  h += `<tbody>`;
+  events.forEach(ev => {
+    h += `<tr>`;
+    h += `<td class="td-event">
+      <div class="ev-name">${esc(ev.name)}</div>
+      <div class="ev-meta">
+        ${ev.date     ? `📅 ${fmtDate(ev.date)}<br>` : ''}
+        ${ev.location ? `📍 ${esc(ev.location)}` : ''}
+      </div>
+      <button class="ev-edit-btn" onclick="openEventModal('${ev.id}')">✏️ Edit</button>
+    </td>`;
+
+    let evTotal = 0;
+    vendors.forEach(v => {
+      const t = (lk[ev.id]||{})[v.id];
+      if (t) {
+        evTotal += +t.price || 0;
+        const stateClass = t.paid ? 'is-paid' : 'is-unpaid';
+        h += `<td class="cell ${stateClass}" onclick="openCellModal('${ev.id}','${v.id}')">
+          <div class="cell-inner">
+            <div class="cell-price-val">${fmtMoney(t.price)}</div>
+            <div class="cell-row">
+              <span class="status-pill ${t.paid?'pill-paid':'pill-unpaid'}">${t.paid ? '✓ Paid' : '● Unpaid'}</span>
+              <button class="quick-btn ${t.paid?'quick-btn-unpay':'quick-btn-pay'}"
+                onclick="event.stopPropagation(); quickToggle('${t.id}')"
+                title="${t.paid ? 'Mark as unpaid' : 'Mark as paid'}">
+                ${t.paid ? '↩ Unpaid' : '✓ Paid'}
+              </button>
+            </div>
+          </div>
+        </td>`;
+      } else {
+        h += `<td class="cell is-empty" onclick="openCellModal('${ev.id}','${v.id}')">
+          <div class="cell-inner">
+            <div class="cell-add">＋ Add table</div>
+          </div>
+        </td>`;
+      }
+    });
+
+    h += `<td class="td-event-total">${fmtMoney(evTotal)}</td>`;
+    h += `</tr>`;
+  });
+  h += `</tbody>`;
+
+  // ── TFOOT ──
+  h += `<tfoot><tr>`;
+  h += `<td class="td-event">Totals</td>`;
+  let grandTotal = 0, grandDue = 0;
+  vendors.forEach(v => {
+    const vt   = tables.filter(t => t.vendorId === v.id);
+    const tot  = vt.reduce((s,t) => s + (+t.price||0), 0);
+    const due  = vt.filter(t => !t.paid).reduce((s,t) => s + (+t.price||0), 0);
+    grandTotal += tot;
+    grandDue   += due;
+    h += `<td style="text-align:center">
+      <div class="vt-amount">${fmtMoney(tot)}</div>
+      <div class="vt-sub">
+        ${due > 0
+          ? `<span class="vt-due">${fmtMoney(due)} due</span>`
+          : tot > 0
+            ? `<span class="vt-allpaid">all paid ✓</span>`
+            : `<span style="color:var(--text2)">—</span>`}
+      </div>
+    </td>`;
+  });
+  h += `<td class="td-grand">
+    <div>${fmtMoney(grandTotal)}</div>
+    ${grandDue > 0 ? `<div class="grand-sub">${fmtMoney(grandDue)} due</div>` : ''}
+  </td>`;
+  h += `</tr></tfoot>`;
+  h += `</table></div>`;
+  wrap.innerHTML = h;
+}
+
+// ── QUICK TOGGLE ─────────────────────────────────────
+function quickToggle(tableId) {
+  const arr = getTables();
+  const t   = arr.find(x => x.id === tableId);
+  if (!t) return;
+  t.paid = !t.paid;
+  setTables(arr);
+  renderAll();
+}
+
+// ── MODALS ───────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+['event-modal','vendor-modal','cell-modal'].forEach(id =>
+  document.getElementById(id).addEventListener('click', e => {
+    if (e.target === document.getElementById(id)) closeModal(id);
+  })
+);
+
+// ── EVENT MODAL ──────────────────────────────────────
+let editEvId = null;
+function openEventModal(id) {
+  editEvId = id || null;
+  const ev = id ? getEvents().find(x => x.id === id) : null;
+  document.getElementById('ev-modal-title').textContent = ev ? 'Edit Event' : 'New Event';
+  document.getElementById('ev-name').value     = ev?.name     || '';
+  document.getElementById('ev-date').value     = ev?.date     || '';
+  document.getElementById('ev-location').value = ev?.location || '';
+  document.getElementById('ev-delete-btn').style.display = ev ? '' : 'none';
+  openModal('event-modal');
+  setTimeout(() => document.getElementById('ev-name').focus(), 80);
+}
+function saveEvent() {
+  const name = document.getElementById('ev-name').value.trim();
+  if (!name) { alert('Event name is required.'); return; }
+  const item = { id: editEvId || uid(), name, date: document.getElementById('ev-date').value, location: document.getElementById('ev-location').value.trim() };
+  const arr  = getEvents();
+  const idx  = arr.findIndex(x => x.id === item.id);
+  idx >= 0 ? arr[idx] = item : arr.push(item);
+  setEvents(arr);
+  closeModal('event-modal');
+  renderAll();
+}
+function deleteEvent() {
+  if (!confirm('Delete this event and all its table entries?')) return;
+  setEvents(getEvents().filter(x => x.id !== editEvId));
+  setTables(getTables().filter(t => t.eventId !== editEvId));
+  closeModal('event-modal');
+  renderAll();
+}
+
+// ── VENDOR MODAL ─────────────────────────────────────
+let editVnId = null;
+function openVendorModal(id) {
+  editVnId = id || null;
+  const v = id ? getVendors().find(x => x.id === id) : null;
+  document.getElementById('vn-modal-title').textContent = v ? 'Edit Vendor' : 'New Vendor';
+  document.getElementById('vn-name').value    = v?.name    || '';
+  document.getElementById('vn-contact').value = v?.contact || '';
+  document.getElementById('vn-delete-btn').style.display = v ? '' : 'none';
+  openModal('vendor-modal');
+  setTimeout(() => document.getElementById('vn-name').focus(), 80);
+}
+function saveVendor() {
+  const name = document.getElementById('vn-name').value.trim();
+  if (!name) { alert('Vendor name is required.'); return; }
+  const item = { id: editVnId || uid(), name, contact: document.getElementById('vn-contact').value.trim() };
+  const arr  = getVendors();
+  const idx  = arr.findIndex(x => x.id === item.id);
+  idx >= 0 ? arr[idx] = item : arr.push(item);
+  setVendors(arr);
+  closeModal('vendor-modal');
+  renderAll();
+}
+function deleteVendor() {
+  if (!confirm('Delete this vendor and all their table entries?')) return;
+  setVendors(getVendors().filter(x => x.id !== editVnId));
+  setTables(getTables().filter(t => t.vendorId !== editVnId));
+  closeModal('vendor-modal');
+  renderAll();
+}
+
+// ── CELL MODAL ───────────────────────────────────────
+let cellEvId = null, cellVnId = null, cellPaid = false;
+
+function openCellModal(evId, vnId) {
+  cellEvId = evId;
+  cellVnId = vnId;
+  const t  = getTables().find(x => x.eventId === evId && x.vendorId === vnId);
+  const ev = getEvents().find(x => x.id === evId);
+  const vn = getVendors().find(x => x.id === vnId);
+  cellPaid = t?.paid || false;
+  document.getElementById('cl-modal-title').textContent = t ? 'Edit Table Entry' : 'Add Table Entry';
+  document.getElementById('cl-ctx').innerHTML =
+    `<strong>${esc(ev?.name||'')}</strong>${ev?.date ? ` &nbsp;·&nbsp; ${fmtDate(ev.date)}` : ''}<br>` +
+    `Vendor: <strong>${esc(vn?.name||'')}</strong>`;
+  document.getElementById('cl-price').value = t ? t.price : '';
+  document.getElementById('cl-delete-btn').style.display = t ? '' : 'none';
+  updatePaidToggle();
+  openModal('cell-modal');
+  setTimeout(() => document.getElementById('cl-price').focus(), 80);
+}
+
+function updatePaidToggle() {
+  const btn = document.getElementById('cl-paid-toggle');
+  if (cellPaid) {
+    btn.textContent = '✓ Paid — tap to mark as Unpaid';
+    btn.className   = 'paid-big-toggle is-paid';
+  } else {
+    btn.textContent = '○ Unpaid — tap to mark as Paid';
+    btn.className   = 'paid-big-toggle is-unpaid';
+  }
+}
+
+function flipCellPaid() {
+  cellPaid = !cellPaid;
+  updatePaidToggle();
+}
+
+function saveCellEntry() {
+  const raw = document.getElementById('cl-price').value;
+  const price = parseFloat(raw);
+  if (raw === '' || isNaN(price) || price < 0) { alert('Enter a valid price (0 or more).'); return; }
+  const arr = getTables();
+  const idx = arr.findIndex(x => x.eventId === cellEvId && x.vendorId === cellVnId);
+  const item = {
+    id:       idx >= 0 ? arr[idx].id : uid(),
+    eventId:  cellEvId,
+    vendorId: cellVnId,
+    price,
+    paid:     cellPaid,
+  };
+  idx >= 0 ? arr[idx] = item : arr.push(item);
+  setTables(arr);
+  closeModal('cell-modal');
+  renderAll();
+}
+
+function deleteCellEntry() {
+  if (!confirm('Remove this table entry?')) return;
+  setTables(getTables().filter(t => !(t.eventId === cellEvId && t.vendorId === cellVnId)));
+  closeModal('cell-modal');
+  renderAll();
+}
+
+// ── RENDER ALL ───────────────────────────────────────
+function renderAll() { renderStats(); renderMatrix(); }
+renderAll();
+</script>
+</body>
+</html>
