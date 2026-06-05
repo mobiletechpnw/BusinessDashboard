@@ -34,6 +34,9 @@ const SYNC_KEYS = [
   'vpc_printer_credits_v1',
   'riser_monthly_goal_v1',
   'riser_filament_v1',
+  'vpc_events_v1',
+  'vpc_vendors_v1',
+  'vpc_tables_v1',
 ];
 
 const LAST_SYNC_KEY  = 'vpc_last_sync_at';
@@ -288,8 +291,13 @@ const VpcSync = {
 document.addEventListener('DOMContentLoaded', async () => {
   VpcSync.injectIndicator();
 
-  // Pull latest cloud data on every page load
-  await VpcSync.sync();
+  // Pull latest cloud data on every page load.
+  // If the pull updates any keys (new device or stale cache), re-render the page
+  // so the freshly-loaded data is visible without requiring a manual refresh.
+  const { pulled } = await VpcSync.sync();
+  if (pulled > 0 && typeof window.renderAll === 'function') {
+    window.renderAll();
+  }
 
   // Flush queue when coming back online
   window.addEventListener('online',  () => VpcSync.flushQueue());
