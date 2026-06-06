@@ -102,6 +102,22 @@
   .tooltip-val { position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); background: #000; color: #fff; font-size: 0.65rem; padding: 3px 6px; border-radius: 4px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.15s; }
   .bar:hover .tooltip-val { opacity: 1; }
 
+  /* P&L Statement */
+  .pnl-header { margin-bottom: 22px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .pnl-title   { font-size: 1.05rem; font-weight: 800; }
+  .pnl-sub     { font-size: 0.75rem; color: var(--text2); margin-top: 4px; }
+  .pnl-section { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--text2); padding: 14px 0 6px; }
+  .pnl-row     { display: flex; justify-content: space-between; align-items: center; padding: 7px 0 7px 18px; font-size: 0.88rem; }
+  .pnl-total   { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; font-size: 0.92rem; font-weight: 700; }
+  .pnl-qty     { font-size: 0.7rem; color: var(--text2); font-weight: 400; margin-left: 6px; }
+  .pnl-pct     { font-size: 0.75rem; font-weight: 600; margin-left: 8px; }
+  .pnl-sep     { border-top: 1px solid var(--border); margin: 4px 0; }
+  .pnl-sep-dbl { border-top: 3px double var(--border); margin: 8px 0; }
+  .pnl-net     { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; }
+  .pnl-net-lbl { font-size: 1.05rem; font-weight: 900; letter-spacing: -.3px; }
+  .pnl-net-val { font-size: 1.3rem; font-weight: 800; text-align: right; letter-spacing: -.5px; }
+  .pnl-net-pct { font-size: 0.72rem; color: var(--text2); text-align: right; margin-top: 3px; }
+
   footer {
     text-align: center; padding: 28px 24px; font-size: 0.72rem;
     color: var(--text2); border-top: 1px solid var(--border); margin-top: 16px;
@@ -131,6 +147,7 @@
   <div class="tab active" data-tab="margins" onclick="switchTab('margins')">💰 Margins</div>
   <div class="tab" data-tab="shows" onclick="switchTab('shows')">🎪 Shows</div>
   <div class="tab" data-tab="trends" onclick="switchTab('trends')">📈 Trends</div>
+  <div class="tab" data-tab="pnl" onclick="switchTab('pnl')">📊 P&amp;L</div>
 </div>
 
 <main>
@@ -230,6 +247,19 @@
       <div class="card-title">📦 Best-Selling Products</div>
       <div id="top-products"></div>
     </div>
+  </div>
+</div>
+
+<!-- ── P&L ── -->
+<div class="panel" id="tab-pnl">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap">
+    <label style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text2)">Period:</label>
+    <select id="pnl-period" onchange="renderPnl()" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:8px;font-size:.84rem;outline:none;font-family:inherit;cursor:pointer;transition:border-color .15s">
+      <option value="all">All Time</option>
+    </select>
+  </div>
+  <div class="card">
+    <div id="pnl-table"></div>
   </div>
 </div>
 
@@ -644,6 +674,130 @@ function renderTrends() {
   : '<div style="color:var(--text2);font-size:0.84rem;padding:16px 0">No products yet.</div>';
 }
 
+// ════════════════════════════════
+// P&L TAB
+// ════════════════════════════════
+const getExpenses2 = () => { try { return JSON.parse(localStorage.getItem('vp_expenses_v1') || '[]'); } catch { return []; } };
+const getVpcEvents = () => { try { return JSON.parse(localStorage.getItem('vpc_events_v1')  || '[]'); } catch { return []; } };
+const getVpcTables = () => { try { return JSON.parse(localStorage.getItem('vpc_tables_v1')  || '[]'); } catch { return []; } };
+
+function populatePnlPeriods() {
+  const { orders, jt, pins } = getRaw();
+  const exps = getExpenses2();
+  const months = new Set();
+  const addDate = d => { if (d) months.add(d.slice(0, 7)); };
+  orders.forEach(o => addDate(o.date));
+  jt.forEach(t => addDate(t.date));
+  pins.forEach(p => addDate(p.date));
+  exps.forEach(e => addDate(e.date));
+  const select = $('pnl-period');
+  const prev   = select.value;
+  const mlbls  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  while (select.options.length > 1) select.remove(1);
+  [...months].sort().reverse().forEach(m => {
+    const [y, mo] = m.split('-');
+    select.add(new Option(`${mlbls[parseInt(mo) - 1]} ${y}`, m));
+  });
+  if ([...months].includes(prev)) select.value = prev;
+}
+
+function renderPnl() {
+  populatePnlPeriods();
+  const period      = $('pnl-period').value;
+  const periodLabel = $('pnl-period').options[$('pnl-period').selectedIndex]?.text || 'All Time';
+  const { orders, jt, pins } = getRaw();
+  const costs      = getCosts();
+  const exps       = getExpenses2();
+  const vpcEvents  = getVpcEvents();
+  const vpcTables  = getVpcTables();
+
+  const inPeriod = d => !d ? false : (period === 'all' || d.startsWith(period));
+
+  // Revenue
+  const filtOrders  = orders.filter(o => inPeriod(o.date));
+  const filtJt      = jt.filter(t => inPeriod(t.date));
+  const filtPins    = pins.filter(p => inPeriod(p.date));
+  const rRevenue    = filtOrders.reduce((s, o) => s + (o.salePrice || 0), 0);
+  const jtRevenue   = filtJt.reduce((s, t) => s + (t.revenue || 0), 0);
+  const pinRevenue  = filtPins.reduce((s, p) => s + (p.revenue || 0), 0);
+  const jtUnits     = filtJt.reduce((s, t) => s + (t.qty || 0), 0);
+  const pinUnits    = filtPins.reduce((s, p) => s + (p.qty || 0), 0);
+  const rUnits      = filtOrders.reduce((s, o) => { const m = (o.product||'').match(/\((\d+)\)/); return s + (m ? parseInt(m[1]) : 1); }, 0);
+  const totalRevenue = rRevenue + jtRevenue + pinRevenue;
+
+  // COGS
+  const rCogs = filtOrders.reduce((s, o) => {
+    if (costs.riser !== null) { const m = (o.product||'').match(/\((\d+)\)/); return s + costs.riser * (m ? parseInt(m[1]) : 1); }
+    return s + (o.cogs || 0);
+  }, 0);
+  const jtCogs    = jtUnits * costs.jettag;
+  const pinCogs   = pinUnits * costs.pin;
+  const totalCogs = rCogs + jtCogs + pinCogs;
+  const grossProfit = totalRevenue - totalCogs;
+  const grossMargin = totalRevenue ? grossProfit / totalRevenue * 100 : 0;
+
+  // Operating Expenses
+  const filtExps  = exps.filter(e => inPeriod(e.date));
+  const expTotal  = filtExps.reduce((s, e) => s + (e.amount || 0), 0);
+  const expCount  = filtExps.length;
+  const evIds     = new Set(period === 'all'
+    ? vpcEvents.map(e => e.id)
+    : vpcEvents.filter(e => inPeriod(e.date)).map(e => e.id));
+  const filtTables  = vpcTables.filter(t => evIds.has(t.eventId));
+  const tableTotal  = filtTables.reduce((s, t) => s + (t.price || 0), 0);
+  const tableCount  = [...new Set(filtTables.map(t => t.eventId))].length;
+  const totalOpex   = expTotal + tableTotal;
+  const netIncome   = grossProfit - totalOpex;
+  const netMargin   = totalRevenue ? netIncome / totalRevenue * 100 : 0;
+
+  const neg = v => v > 0 ? `(${fmt(v)})` : fmt(v);
+  const accentNet = v => `style="color:${v >= 0 ? 'var(--green)' : 'var(--red)'}"`;
+
+  $('pnl-table').innerHTML = `
+    <div class="pnl-header">
+      <div class="pnl-title">Profit &amp; Loss Statement</div>
+      <div class="pnl-sub">${esc(periodLabel)}</div>
+    </div>
+
+    <div class="pnl-section">Revenue</div>
+    <div class="pnl-row"><span>🖨️ Riser Orders<span class="pnl-qty">${rUnits} units</span></span><span>${fmt(rRevenue)}</span></div>
+    <div class="pnl-row"><span>🏷️ Jet Tags<span class="pnl-qty">${jtUnits} units</span></span><span>${fmt(jtRevenue)}</span></div>
+    <div class="pnl-row"><span>📌 Pins<span class="pnl-qty">${pinUnits} units</span></span><span>${fmt(pinRevenue)}</span></div>
+    <div class="pnl-sep"></div>
+    <div class="pnl-total"><span>Total Revenue</span><span style="color:var(--accent)">${fmt(totalRevenue)}</span></div>
+
+    <div class="pnl-section">Cost of Goods Sold</div>
+    <div class="pnl-row"><span>Riser Materials</span><span style="color:var(--red)">${neg(rCogs)}</span></div>
+    <div class="pnl-row"><span>Jet Tag Materials</span><span style="color:var(--red)">${neg(jtCogs)}</span></div>
+    <div class="pnl-row"><span>Pin Materials</span><span style="color:var(--red)">${neg(pinCogs)}</span></div>
+    <div class="pnl-sep"></div>
+    <div class="pnl-total"><span>Total COGS</span><span style="color:var(--red)">${neg(totalCogs)}</span></div>
+
+    <div class="pnl-sep-dbl"></div>
+    <div class="pnl-total">
+      <span>Gross Profit<span class="pnl-pct" style="color:${clr(grossMargin)}">${grossMargin.toFixed(1)}%</span></span>
+      <span ${accentNet(grossProfit)}>${fmt(grossProfit)}</span>
+    </div>
+    <div class="pnl-sep-dbl"></div>
+
+    <div class="pnl-section">Operating Expenses</div>
+    <div class="pnl-row"><span>Business Expenses<span class="pnl-qty">${expCount} items</span></span><span style="color:var(--red)">${neg(expTotal)}</span></div>
+    <div class="pnl-row"><span>Table &amp; Booth Fees<span class="pnl-qty">${tableCount} events</span></span><span style="color:var(--red)">${neg(tableTotal)}</span></div>
+    <div class="pnl-sep"></div>
+    <div class="pnl-total"><span>Total Operating Expenses</span><span style="color:var(--red)">${neg(totalOpex)}</span></div>
+
+    <div class="pnl-sep-dbl"></div>
+    <div class="pnl-net">
+      <div class="pnl-net-lbl">Net Income</div>
+      <div>
+        <div class="pnl-net-val" ${accentNet(netIncome)}>${fmt(netIncome)}</div>
+        <div class="pnl-net-pct">Net Margin: <strong style="color:${clr(netMargin)}">${netMargin.toFixed(1)}%</strong></div>
+      </div>
+    </div>
+    <div class="pnl-sep-dbl"></div>
+  `;
+}
+
 // ── Toast ──
 function toast(msg) {
   let el = document.getElementById('_toast');
@@ -663,6 +817,7 @@ function renderAll() {
   renderMargins();
   renderShows();
   renderTrends();
+  renderPnl();
 }
 
 // ── Init ──
