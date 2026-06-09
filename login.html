@@ -110,7 +110,7 @@ function setMode(m) {
   hide('error-box'); hide('success-box');
 }
 
-function show(id, msg) { const el = document.getElementById(id); el.textContent = msg; el.style.display = ''; }
+function show(id, msg) { const el = document.getElementById(id); el.textContent = msg; el.style.display = 'block'; }
 function hide(id)       { document.getElementById(id).style.display = 'none'; }
 
 async function handleAuth() {
