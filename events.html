@@ -620,12 +620,17 @@ function switchEvTab(tab) {
 function renderROI() {
   const events  = getEvents().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   const tables  = getTables();
+  const vendors = getVendors();
   const orders  = JSON.parse(localStorage.getItem('vp_orders_v2') || '[]');
   const jt      = JSON.parse(localStorage.getItem('vp_jettags_v1') || '[]');
   const pins    = JSON.parse(localStorage.getItem('vp_pins_v1') || '[]');
   const costs   = JSON.parse(localStorage.getItem('vpc_costs_v1') || '{}');
   const jtCost  = costs.jettag ?? 0.862;
   const pinCost = costs.pin    ?? 0.95;
+
+  // ROI only counts Vault & Pine's own table; other vendors are friends' tables
+  const ownVendor   = vendors.find(v => /vault/i.test(v.name));
+  const ownVendorId = ownVendor ? ownVendor.id : null;
 
   const roiEmpty = document.getElementById('roi-empty');
   const roiCards = document.getElementById('roi-cards');
@@ -641,8 +646,8 @@ function renderROI() {
 
   let totalTableCost = 0, totalRevenue = 0, totalNet = 0;
   const cards = events.map(ev => {
-    // Table cost for this event
-    const evTables   = tables.filter(t => t.eventId === ev.id);
+    // Table cost: only Vault & Pine's own table, not friend tables
+    const evTables   = tables.filter(t => t.eventId === ev.id && (ownVendorId ? t.vendorId === ownVendorId : true));
     const tableCost  = evTables.reduce((s, t) => s + (+t.price || 0), 0);
     const tableCount = evTables.length;
 
