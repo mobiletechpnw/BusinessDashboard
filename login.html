@@ -154,8 +154,8 @@ async function handleAuth() {
     }
 
     if (mode === 'signup' && !data.access_token) {
-      show('success-box', '✅ Account created! Check your email to confirm, then sign in.');
       setMode('signin');
+      show('success-box', '✅ Account created! Check your email to confirm, then sign in.');
       return;
     }
 
