@@ -21,6 +21,7 @@ const SESSION_KEY      = 'vpc_auth_session';
 const SYNC_KEYS = [
   'vp_orders_v2',
   'vp_goals_v1',
+  'goals_dashboard_v1',
   'vp_expenses_v1',
   'vp_jettags_v1',
   'vp_jettags_restock_v1',
@@ -219,10 +220,17 @@ const VpcSync = {
     try {
       const rows = await sbFetchAll(SYNC_KEYS);
       let pulled = 0, skipped = 0;
+      const conflicts = [];
+
       rows.forEach(row => {
         const cloudTs = new Date(row.updated_at).getTime();
         const localTs = parseInt(localStorage.getItem(`${row.key}__ts`) || '0');
-        if (cloudTs >= localTs) {
+        // Conflict: cloud is newer than last sync, but local was also edited recently (within 60s)
+        const lastSync = parseInt(localStorage.getItem(LAST_SYNC_KEY) || '0');
+        const localRecentlyEdited = localTs > lastSync && (Date.now() - localTs) < 60_000;
+        if (cloudTs > localTs && localRecentlyEdited) {
+          conflicts.push({ key: row.key, cloudTs, localTs, value: row.value });
+        } else if (cloudTs >= localTs) {
           const val = row.value;
           localStorage.setItem(row.key, typeof val === 'string' ? val : JSON.stringify(val));
           localStorage.setItem(`${row.key}__ts`, cloudTs);
@@ -231,6 +239,15 @@ const VpcSync = {
           skipped++;
         }
       });
+
+      if (conflicts.length > 0) {
+        this._showConflictUI(conflicts, () => {
+          localStorage.setItem(LAST_SYNC_KEY, Date.now().toString());
+          this._emit('synced', `${pulled} synced, ${conflicts.length} conflict(s) resolved`);
+          if (pulled > 0 && typeof window.renderAll === 'function') window.renderAll();
+        });
+      }
+
       localStorage.setItem(LAST_SYNC_KEY, Date.now().toString());
       this._emit('synced', `Synced ${pulled} keys`);
       return { pulled, skipped };
@@ -241,6 +258,64 @@ const VpcSync = {
     } finally {
       this._pulling = false;
     }
+  },
+
+  _showConflictUI(conflicts, onDone) {
+    if (document.getElementById('vpc-conflict-modal')) return;
+    const modal = document.createElement('div');
+    modal.id = 'vpc-conflict-modal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:99990;display:flex;align-items:center;justify-content:center;';
+    const items = conflicts.map(c => {
+      const localDate = new Date(c.localTs).toLocaleString();
+      const cloudDate = new Date(c.cloudTs).toLocaleString();
+      const localSize = (localStorage.getItem(c.key) || '').length;
+      const cloudSize = JSON.stringify(c.value).length;
+      return `<div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:8px;padding:14px;margin-bottom:12px;">
+        <div style="font-size:0.82rem;font-weight:700;margin-bottom:8px;color:var(--yellow,#fbbf24)">⚠ Conflict: <code style="font-size:0.78rem;background:rgba(0,0,0,0.2);padding:2px 6px;border-radius:4px">${c.key}</code></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.75rem;">
+          <div style="background:rgba(0,0,0,0.2);border-radius:6px;padding:8px;">
+            <div style="color:#8892b0;margin-bottom:4px">Local Version</div>
+            <div>Modified: ${localDate}</div>
+            <div style="color:#8892b0">${localSize} chars</div>
+          </div>
+          <div style="background:rgba(0,0,0,0.2);border-radius:6px;padding:8px;">
+            <div style="color:#8892b0;margin-bottom:4px">Cloud Version</div>
+            <div>Modified: ${cloudDate}</div>
+            <div style="color:#8892b0">${cloudSize} chars</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    modal.innerHTML = `
+      <div style="background:var(--surface,#1a1d27);border:1px solid var(--border,#2e3350);border-radius:14px;padding:28px;width:560px;max-width:95vw;max-height:80vh;overflow-y:auto;">
+        <div style="font-size:1rem;font-weight:700;margin-bottom:6px;">Sync Conflict Detected</div>
+        <div style="font-size:0.78rem;color:#8892b0;margin-bottom:20px;">Both local and cloud data were modified. Choose which version to keep for each key.</div>
+        ${items}
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap;">
+          <button id="vpc-conf-local" style="background:var(--surface2,#22263a);border:1px solid var(--border,#2e3350);color:#e2e8f0;border-radius:7px;padding:8px 16px;font-size:0.82rem;font-weight:600;cursor:pointer;font-family:inherit;">Keep Local (my changes)</button>
+          <button id="vpc-conf-cloud" style="background:var(--accent,#6c8cff);border:none;color:#fff;border-radius:7px;padding:8px 16px;font-size:0.82rem;font-weight:600;cursor:pointer;font-family:inherit;">Use Cloud (discard local)</button>
+        </div>
+      </div>`;
+
+    document.body.appendChild(modal);
+
+    document.getElementById('vpc-conf-local').addEventListener('click', () => {
+      // Keep local — push local to cloud to resolve
+      conflicts.forEach(c => { VpcSync.push(c.key); });
+      modal.remove();
+      onDone();
+    });
+    document.getElementById('vpc-conf-cloud').addEventListener('click', () => {
+      // Use cloud — overwrite local
+      conflicts.forEach(c => {
+        const val = c.value;
+        localStorage.setItem(c.key, typeof val === 'string' ? val : JSON.stringify(val));
+        localStorage.setItem(`${c.key}__ts`, c.cloudTs);
+      });
+      modal.remove();
+      onDone();
+      if (typeof window.renderAll === 'function') window.renderAll();
+    });
   },
 
   async push(key) {

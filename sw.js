@@ -1,8 +1,9 @@
-const CACHE = 'vpc-v1';
+const CACHE = 'vpc-v4';
 const ASSETS = [
   '/', '/index.html', '/vault-pine-collective.html',
   '/sales-dashboard.html', '/goals-dashboard.html', '/jarvis.html',
-  '/shared.js', '/manifest.json'
+  '/expenses.html', '/events.html', '/review.html', '/analytics.html',
+  '/shared.js', '/supabase-sync.js', '/styles.css', '/manifest.json'
 ];
 
 self.addEventListener('install', e => {
@@ -26,4 +27,23 @@ self.addEventListener('fetch', e => {
       return cached || fresh;
     })
   );
+});
+
+// Push notification handler
+self.addEventListener('push', e => {
+  const data = e.data ? e.data.json() : { title: 'VPC Alert', body: 'You have a new notification.' };
+  e.waitUntil(
+    self.registration.showNotification(data.title || 'VPC Alert', {
+      body:  data.body  || '',
+      icon:  '/icon-192.png',
+      badge: '/icon-192.png',
+      data:  { url: data.url || '/' },
+    })
+  );
+});
+
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const url = e.notification.data?.url || '/';
+  e.waitUntil(clients.openWindow(url));
 });

@@ -734,6 +734,64 @@ const COMMANDS = [
     }
   },
   {
+    match: t => /open\s+expenses|go\s+to\s+expenses|show\s+expenses/.test(t),
+    run:   () => {
+      const r = 'Opening the Expenses tracker, sir.';
+      addChat('jarvis', r); jarvisSpeak(r, () => location.href = 'expenses.html');
+    }
+  },
+  {
+    match: t => /open\s+review|daily\s+review|morning\s+briefing|briefing/.test(t),
+    run:   () => {
+      const r = 'Pulling up your Daily Review, sir.';
+      addChat('jarvis', r); jarvisSpeak(r, () => location.href = 'review.html');
+    }
+  },
+  {
+    match: t => /what\s+are\s+my\s+goals|show\s+my\s+goals|goals\s+update/.test(t),
+    run:   () => {
+      try {
+        const g = JSON.parse(localStorage.getItem('goals_dashboard_v1') || '{"goals":[]}');
+        const active = (g.goals||[]).filter(x => !x.done);
+        const done   = (g.goals||[]).filter(x => x.done);
+        const today  = new Date(); today.setHours(0,0,0,0);
+        const overdue = active.filter(x => x.due && new Date(x.due+'T00:00:00') < today);
+        let r = `You have ${active.length} active goal${active.length!==1?'s':''} and ${done.length} completed.`;
+        if (overdue.length) r += ` Warning: ${overdue.length} goal${overdue.length!==1?'s are':' is'} overdue.`;
+        if (active.length) r += ` Your active goals are: ${active.slice(0,3).map(x=>x.title).join(', ')}.`;
+        addChat('jarvis', r); jarvisSpeak(r);
+      } catch(e) {
+        const r = "I'm having trouble accessing your goals data at the moment, sir.";
+        addChat('jarvis', r); jarvisSpeak(r);
+      }
+    }
+  },
+  {
+    match: t => /expense\s+summary|spending\s+update|how\s+much\s+(have\s+i\s+)?spent/.test(t),
+    run:   () => {
+      try {
+        const now = new Date();
+        const prefix = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+        const exps = JSON.parse(localStorage.getItem('vpc_personal_expenses_v1')||'[]');
+        const total = exps.filter(e=>(e.date||'').startsWith(prefix)).reduce((s,e)=>s+(e.amount||0),0);
+        const budget = JSON.parse(localStorage.getItem('vpc_expense_budget_v1')||'{"total":0}').total;
+        let r = `This month you have spent $${total.toFixed(0)} on personal expenses.`;
+        if (budget > 0) r += ` Your budget is $${budget}, leaving $${Math.max(0, budget-total).toFixed(0)} remaining.`;
+        addChat('jarvis', r); jarvisSpeak(r);
+      } catch(e) {
+        const r = "I cannot access your expense data right now, sir.";
+        addChat('jarvis', r); jarvisSpeak(r);
+      }
+    }
+  },
+  {
+    match: t => /open\s+production|production\s+hub/.test(t),
+    run:   () => {
+      const r = 'Opening the Production Hub, sir.';
+      addChat('jarvis', r); jarvisSpeak(r, () => location.href = 'production.html');
+    }
+  },
+  {
     match: t => /^(mute|stop\s+listening|shut\s+down|sleep)\.?$/.test(t),
     run:   () => {
       const r = 'Voice systems suspending. Click the microphone or press Space to resume, sir.';
