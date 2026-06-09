@@ -297,12 +297,18 @@
 
   @media (max-width: 700px) {
     header { padding: 0 12px; flex-wrap: wrap; min-height: auto; gap: 6px; }
-    .main-nav { margin-left: 0; overflow-x: auto; gap: 0; }
-    .main-tab { padding: 0 12px; font-size: 0.75rem; }
+    .main-nav { margin-left: 0; overflow-x: auto; gap: 0; flex-wrap: nowrap; scrollbar-width: none; }
+    .main-nav::-webkit-scrollbar { display: none; }
+    .main-tab { padding: 0 12px; font-size: 0.75rem; white-space: nowrap; min-height: 44px; }
     .kpi-bar, .goals-stat-bar { grid-template-columns: repeat(2, 1fr); }
-    .jt-stat-bar { grid-template-columns: repeat(2, 1fr); }
+    .jt-stat-bar, .pin-stat-bar, .exp-stat-bar { grid-template-columns: repeat(2, 1fr); }
     .grid-2, .grid-3 { grid-template-columns: 1fr; }
-    .tab-bar { padding: 0 8px; overflow-x: auto; white-space: nowrap; }
+    .tab-bar { padding: 0 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-wrap: nowrap; }
+    .tab-bar::-webkit-scrollbar { display: none; }
+    .tab { white-space: nowrap; padding: 12px 14px; font-size: 0.78rem; }
+    .exp-tab-bar { padding: 0 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-wrap: nowrap; }
+    .exp-tab-bar::-webkit-scrollbar { display: none; }
+    .exp-tab { white-space: nowrap; }
     main { padding: 12px; }
     .goals-grid { grid-template-columns: 1fr; }
     .header-stats { display: none; }
@@ -310,8 +316,20 @@
     table { font-size: 0.72rem; }
     .card { padding: 14px; }
     .toolbar { flex-direction: column; gap: 8px; }
-    .btn-primary, .btn-ghost { padding: 8px 14px; font-size: 0.78rem; }
+    .search-input { width: 100%; }
+    .btn-primary, .btn-ghost { padding: 8px 14px; font-size: 0.78rem; min-height: 44px; }
+    .goals-top-bar { flex-direction: column; align-items: flex-start; }
+    .filter-group { flex-wrap: wrap; }
+    .data-tools { bottom: 70px; }
     #backup-banner { width: 92%; flex-wrap: wrap; }
+  }
+  @media (max-width: 480px) {
+    .modal { position: fixed; bottom: 0; left: 0; right: 0; width: 100% !important; max-width: 100% !important; border-radius: 16px 16px 0 0; max-height: 85vh; }
+    .kpi-bar, .goals-stat-bar, .jt-stat-bar, .pin-stat-bar, .exp-stat-bar { grid-template-columns: 1fr 1fr; }
+    .field-row { grid-template-columns: 1fr; }
+    .data-tools { display: none; }
+    .modal-actions { flex-direction: column-reverse; }
+    .modal-actions button { width: 100%; }
   }
 </style>
 </head>

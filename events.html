@@ -148,7 +148,18 @@ main { padding:24px 28px; }
 @media(max-width:700px) {
   main { padding:14px; }
   .stat-bar { grid-template-columns:repeat(3,1fr); }
-  header { padding:0 14px; }
+  header { padding:0 14px; flex-wrap:wrap; min-height:auto; gap:6px; padding:10px 14px; }
+  .header-right { gap:6px; flex-wrap:wrap; }
+  .btn-primary, .btn-ghost { padding:7px 10px; font-size:0.75rem; min-height:40px; }
+  .back-link { padding:5px 8px; font-size:0.7rem; }
+}
+@media(max-width:480px) {
+  .stat-bar { grid-template-columns:1fr 1fr; }
+  main { padding:10px; }
+  .modal { position:fixed; bottom:0; left:0; right:0; width:100%!important; max-width:100%!important; border-radius:16px 16px 0 0; max-height:85vh; }
+  .modal-actions { flex-direction:column-reverse; align-items:stretch; }
+  .modal-actions button { width:100%; }
+  .header-right .btn-ghost { display:none; }
 }
 </style>
 </head>
@@ -547,5 +558,6 @@ function deleteCellEntry() {
 function renderAll() { renderStats(); renderMatrix(); }
 renderAll();
 </script>
+<button class="fab" onclick="openEventModal()" title="Add Event" style="bottom:calc(24px + env(safe-area-inset-bottom));right:24px;position:fixed;z-index:300;background:var(--accent);color:#fff;border:none;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:0 4px 20px rgba(108,140,255,0.5);">＋</button>
 </body>
 </html>

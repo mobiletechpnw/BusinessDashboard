@@ -348,8 +348,17 @@ function injectSearchBtn() {
     background:none;border:1px solid var(--border);border-radius:6px;
     padding:5px 10px;cursor:pointer;font-size:0.82rem;color:var(--text2);
     transition:all 0.2s;flex-shrink:0;display:flex;align-items:center;gap:6px;
+    min-height:36px;
   `;
-  btn.innerHTML = `<span>🔍</span><span style="font-size:0.72rem">Ctrl+K</span>`;
+  // Show label only on desktop
+  btn.innerHTML = `<span>🔍</span><span class="search-btn-label" style="font-size:0.72rem">Ctrl+K</span>`;
+  // Hide label on narrow screens
+  if (!document.getElementById('search-btn-responsive-style')) {
+    const s = document.createElement('style');
+    s.id = 'search-btn-responsive-style';
+    s.textContent = '@media(max-width:600px){.search-btn-label{display:none}}';
+    document.head.appendChild(s);
+  }
   btn.onmouseover = () => { btn.style.borderColor = 'var(--accent)'; btn.style.color = 'var(--accent)'; };
   btn.onmouseout  = () => { btn.style.borderColor = 'var(--border)';  btn.style.color = 'var(--text2)'; };
   const header = document.querySelector('header');

@@ -135,10 +135,23 @@
   .empty-msg { color: var(--text2); font-size: 0.82rem; padding: 12px 0; text-align: center; }
 
   @media (max-width: 700px) {
+    header { padding: 0 12px; min-height: 52px; }
+    main { padding: 14px 10px; }
     .review-grid { grid-template-columns: 1fr; }
     .section-full { grid-column: 1; }
     .kpi-row { grid-template-columns: 1fr 1fr; }
-    header, main { padding-left: 16px; padding-right: 16px; }
+    .review-header { flex-direction: column; align-items: flex-start; gap: 8px; margin-bottom: 16px; }
+    .review-title { font-size: 1.3rem; }
+    .narrate-btn { width: 100%; justify-content: center; }
+    .event-date { min-width: 60px; }
+    .progress-ring-wrap { gap: 12px; }
+    .progress-arc-pct { font-size: 1.6rem; }
+  }
+  @media (max-width: 480px) {
+    .kpi-row { grid-template-columns: 1fr 1fr; }
+    .kpi-mini { padding: 10px 10px; }
+    .kpi-mini-val { font-size: 1.1rem; }
+    .alert-item { flex-wrap: wrap; gap: 8px; }
   }
 </style>
 </head>

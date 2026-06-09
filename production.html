@@ -129,12 +129,26 @@
 
   @media (max-width: 680px) {
     .kpi-strip { grid-template-columns: 1fr 1fr; }
-    header { padding: 0 16px; }
-    main { padding: 20px 16px; }
-    .tab-bar { padding: 0 16px; }
-    .tab { padding: 12px 14px; font-size: 0.78rem; }
-    .job-card { flex-wrap: wrap; }
-    .alert-banner { padding: 10px 16px; }
+    header { padding: 0 16px; min-height: auto; flex-wrap: wrap; gap: 8px; padding: 10px 16px; }
+    main { padding: 16px; }
+    .tab-bar { padding: 0 8px; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
+    .tab-bar::-webkit-scrollbar { display: none; }
+    .tab { padding: 12px 14px; font-size: 0.78rem; white-space: nowrap; min-height: 44px; }
+    .job-card { flex-wrap: wrap; gap: 10px; }
+    .job-actions { width: 100%; justify-content: flex-end; }
+    .alert-banner { padding: 10px 16px; font-size: 0.78rem; }
+    .grid-2f { grid-template-columns: 1fr; }
+    .section-header { flex-wrap: wrap; gap: 8px; }
+    .btn, .btn-primary, .btn-ghost { min-height: 44px; font-size: 0.8rem; }
+    .inv-grid { grid-template-columns: 1fr 1fr; }
+    .inv-count { font-size: 1.4rem; }
+  }
+  @media (max-width: 420px) {
+    .kpi-strip { grid-template-columns: 1fr 1fr; }
+    .inv-grid { grid-template-columns: 1fr; }
+    .modal { position: fixed; bottom: 0; left: 0; right: 0; width: 100% !important; max-width: 100% !important; border-radius: 16px 16px 0 0; max-height: 85vh; }
+    .modal-actions { flex-direction: column-reverse; }
+    .modal-actions button { width: 100%; }
   }
 </style>
 </head>

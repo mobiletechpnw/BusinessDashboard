@@ -260,8 +260,80 @@ body::after{
 .cfg-field input:focus{border-color:var(--accent2);}
 .cfg-field .hint{font-size:0.5rem;color:var(--text2);margin-top:3px;opacity:0.65;}
 .cfg-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;}
-.cfg-save{background:var(--accent2);color:#000;border:none;border-radius:3px;padding:6px 16px;font-size:0.62rem;font-family:'Share Tech Mono',monospace;cursor:pointer;letter-spacing:1px;font-weight:700;}
-.cfg-cancel{background:none;color:var(--text2);border:1px solid var(--border);border-radius:3px;padding:6px 14px;font-size:0.62rem;font-family:'Share Tech Mono',monospace;cursor:pointer;letter-spacing:1px;}
+.cfg-save{background:var(--accent2);color:#000;border:none;border-radius:3px;padding:10px 16px;font-size:0.62rem;font-family:'Share Tech Mono',monospace;cursor:pointer;letter-spacing:1px;font-weight:700;min-height:44px;}
+.cfg-cancel{background:none;color:var(--text2);border:1px solid var(--border);border-radius:3px;padding:10px 14px;font-size:0.62rem;font-family:'Share Tech Mono',monospace;cursor:pointer;letter-spacing:1px;min-height:44px;}
+
+/* ── MOBILE LAYOUT ── */
+@media (max-width: 700px) {
+  body { overflow: auto; }
+
+  .hud {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    padding: 8px;
+    gap: 8px;
+  }
+
+  /* Top bar stays */
+  .top-bar { flex-shrink: 0; min-height: 52px; flex-wrap: wrap; gap: 6px; padding: 8px 12px; }
+  .brand { font-size: 0.65rem; }
+  .objective { display: none; }
+  .status-pills { flex-wrap: wrap; gap: 4px; }
+  .pill { font-size: 0.48rem; padding: 3px 6px; }
+  .clock-area { display: none; }
+
+  /* Hide side panels on mobile */
+  .left-panel, .right-panel { display: none; }
+
+  /* Center panel: radar + mic */
+  .center-panel {
+    height: 260px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  /* Voice ring larger for touch */
+  .voice-ring {
+    width: 80px;
+    height: 80px;
+    bottom: 14px;
+  }
+  .voice-ring svg { width: 28px; height: 28px; }
+
+  /* Bottom bar: expand to fill */
+  .bottom-bar {
+    flex: 1;
+    padding: 12px 14px;
+  }
+  #transcript-area { font-size: 0.68rem; }
+  .feed-label { display: none; }
+
+  #chat-log {
+    max-height: 120px;
+    overflow-y: auto;
+  }
+  .chat-line { font-size: 0.7rem; }
+
+  .nav-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .hint-text { font-size: 0.58rem; }
+  .nav-buttons { flex-wrap: wrap; gap: 6px; width: 100%; }
+  .nav-btn { font-size: 0.62rem; padding: 8px 12px; min-height: 40px; }
+
+  /* Config modal */
+  .cfg-box { padding: 18px 14px; }
+  .cfg-actions { flex-direction: column-reverse; }
+  .cfg-save, .cfg-cancel { width: 100%; justify-content: center; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .center-panel { height: 220px; }
+  .nav-buttons { justify-content: space-between; }
+  .nav-btn { flex: 1; text-align: center; min-width: 0; }
+}
 </style>
 </head>
 <body>

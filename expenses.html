@@ -143,13 +143,34 @@
   @media (max-width: 700px) {
     .kpi-strip { grid-template-columns: 1fr 1fr; }
     .grid-2 { grid-template-columns: 1fr; }
-    header, .toolbar { padding: 0 16px; }
-    main { padding: 20px 16px; }
+    header, .toolbar { padding: 0 12px; }
+    header { min-height: 52px; }
+    main { padding: 14px 10px; }
     .toolbar { flex-wrap: wrap; gap: 0; padding: 0; }
-    .month-nav { padding: 10px 16px; border-bottom: 1px solid var(--border); width: 100%; justify-content: center; }
-    .tabs { padding: 0 16px; }
-    .add-btn { display: none; }
-    .budget-bar-wrap { padding: 10px 16px; }
+    .month-nav { padding: 10px 14px; border-bottom: 1px solid var(--border); width: 100%; justify-content: center; }
+    .tabs { padding: 0 8px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab { white-space: nowrap; flex-shrink: 0; padding: 12px 14px; }
+    /* Hide all add buttons in toolbar/panel — FAB handles this */
+    .add-btn { display: none !important; }
+    .budget-bar-wrap { padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
+    .budget-bar-label { min-width: 0; text-align: left; }
+    /* Expense row: compact */
+    .expense-row { padding: 10px 8px; gap: 10px; }
+    .cat-icon { width: 30px; height: 30px; font-size: 0.9rem; flex-shrink: 0; }
+    .exp-amount { font-size: 0.88rem; }
+    /* Rec row */
+    .rec-row { padding: 10px 8px; }
+    /* Cat breakdown */
+    .cat-name { min-width: 90px; font-size: 0.78rem; }
+    .cat-amount { min-width: 54px; font-size: 0.78rem; }
+  }
+  @media (max-width: 480px) {
+    .kpi { padding: 12px 12px; }
+    .kpi-val { font-size: 1.2rem; }
+    .kpi-label { font-size: 0.58rem; }
+    .modal { border-radius: 16px 16px 0 0; }
+    .grid-2f { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -239,6 +260,8 @@
   </div>
 
 </main>
+
+<button class="fab" id="exp-fab" onclick="expFabAction()" title="Add Expense" aria-label="Add">＋</button>
 
 <footer>
   <a href="index.html">⌂ Home</a> &nbsp;·&nbsp; Personal Expenses &nbsp;·&nbsp; Vault &amp; Pine Collective
@@ -861,6 +884,13 @@ function toast(msg) {
   el.style.opacity = '1';
   clearTimeout(el._t);
   el._t = setTimeout(() => el.style.opacity = '0', 2600);
+}
+
+// ── FAB action (context-aware) ──
+function expFabAction() {
+  const activeTab = document.querySelector('.tab.active')?.dataset.tab;
+  if (activeTab === 'recurring') openRecModal();
+  else openModal();
 }
 
 // ── Init ──
