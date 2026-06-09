@@ -72,6 +72,15 @@ const SYNC_KEYS = [
   'jarvis_vad',
 ];
 
+// Initialize __ts for any SYNC_KEY that has data but no timestamp
+(function initTimestamps() {
+  SYNC_KEYS.forEach(k => {
+    if (localStorage.getItem(k) && !localStorage.getItem(`${k}__ts`)) {
+      try { localStorage.setItem(`${k}__ts`, Date.now().toString()); } catch(e) {}
+    }
+  });
+})();
+
 const LAST_SYNC_KEY  = 'vpc_last_sync_at';
 const PUSH_QUEUE_KEY = 'vpc_push_queue';
 

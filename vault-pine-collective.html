@@ -64,11 +64,24 @@
   .gstat-num { font-size: 1.4rem; font-weight: 800; color: var(--accent); }
   .gstat-label { font-size: 0.68rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
 
+  /* ── Cross-dashboard nav ── */
+  .dash-nav {
+    display: flex; gap: 0; background: var(--bg); border-bottom: 1px solid var(--border);
+    padding: 0 24px; position: sticky; top: 58px; z-index: 190; height: 40px; align-items: stretch;
+  }
+  .dash-nav-link {
+    display: flex; align-items: center; padding: 0 14px; font-size: 0.78rem; font-weight: 600;
+    color: var(--text2); text-decoration: none; border-bottom: 2px solid transparent;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .dash-nav-link:hover { color: var(--text); }
+  .dash-nav-link.active { color: var(--accent); border-bottom-color: var(--accent); }
+
   /* ── Sales sub-tab bar ── */
   .tab-bar {
     display: flex; gap: 0; border-bottom: 1px solid var(--border);
     padding: 0 32px; background: var(--surface);
-    position: sticky; top: 58px; z-index: 150;
+    position: sticky; top: 98px; z-index: 150;
   }
   .tab { padding: 13px 18px; font-size: 0.83rem; font-weight: 600; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; user-select: none; }
   .tab:hover { color: var(--text); }
@@ -216,7 +229,7 @@
   .estat { background: var(--surface); padding: 14px 22px; }
   .estat-num { font-size: 1.4rem; font-weight: 800; }
   .estat-label { font-size: 0.68rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
-  .exp-tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 32px; background: var(--surface); position: sticky; top: 58px; z-index: 150; }
+  .exp-tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 32px; background: var(--surface); position: sticky; top: 98px; z-index: 150; }
   .exp-tab { padding: 13px 18px; font-size: 0.83rem; font-weight: 600; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; user-select: none; }
   .exp-tab:hover { color: var(--text); }
   .exp-tab.active { color: var(--red); border-bottom-color: var(--red); }
@@ -372,6 +385,14 @@
     <a href="index.html" style="font-size:0.72rem;color:var(--text2);text-decoration:none;padding:5px 12px;border:1px solid var(--border);border-radius:6px;transition:all 0.15s;white-space:nowrap;" onmouseover="this.style.color='var(--accent)';this.style.borderColor='var(--accent)'" onmouseout="this.style.color='var(--text2)';this.style.borderColor='var(--border)'">⌂ Home</a>
   </div>
 </header>
+
+<nav class="dash-nav">
+  <a href="vault-pine-collective.html" class="dash-nav-link active">📊 Sales Hub</a>
+  <a href="analytics.html" class="dash-nav-link">📈 Analytics</a>
+  <a href="production.html" class="dash-nav-link">🖨️ Production</a>
+  <a href="content.html" class="dash-nav-link">📱 Content</a>
+  <a href="review.html" class="dash-nav-link">📋 Daily Review</a>
+</nav>
 
 <!-- ══════════════════════════════════════════ SALES SECTION ══ -->
 <div class="section active" id="section-sales">
@@ -1868,6 +1889,7 @@ function saveNewOrder() {
   } else {
     saveOrder({ id: uid(), ...fields });
   }
+  if (typeof auditLog === 'function') auditLog(wasEditing ? 'EDIT_ORDER' : 'ADD_ORDER', 'vp_orders_v2', `${document.getElementById('aoCustomer')?.value || ''}`);
   closeAddOrder(); renderSalesAll();
   toast(wasEditing ? 'Order updated.' : `Order logged: ${fmt$(sale)} from ${cust}`);
 }
@@ -1875,6 +1897,7 @@ function saveNewOrder() {
 function deleteOrder(id) {
   if (!confirm('Delete this order? This cannot be undone.')) return;
   localStorage.setItem(LS_ORDERS, JSON.stringify(rawOrders().filter(x => x.id !== id)));
+  if (typeof auditLog === 'function') auditLog('DELETE_ORDER', 'vp_orders_v2', `Order deleted`);
   renderSalesAll();
   toast('Order deleted.');
 }
@@ -3911,6 +3934,11 @@ function deleteEvent(id) {
   toast('Event deleted.');
 }
 function initEvents() { renderEvAll(); }
+
+// Expose for Supabase sync re-render
+if (typeof window.renderAll === 'undefined') {
+  window.renderAll = function() { try { renderSalesAll(); } catch(e) {} };
+}
 
 // Auto-backup reminder
 (function checkBackupReminder() {

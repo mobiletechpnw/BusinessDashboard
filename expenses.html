@@ -766,6 +766,7 @@ function saveExpense() {
   const idx = arr.findIndex(e => e.id === entry.id);
   if (idx >= 0) arr[idx] = entry; else arr.push(entry);
   saveExp(arr);
+  if (typeof auditLog === 'function') auditLog(editExpId ? 'EDIT_EXPENSE' : 'ADD_EXPENSE', 'vpc_personal_expenses_v1', `${document.getElementById('exp-desc')?.value || ''} $${document.getElementById('exp-amount')?.value || ''}`);
   closeModal();
   renderAll();
   toast(editExpId ? 'Expense updated.' : 'Expense logged!');
@@ -774,6 +775,7 @@ function saveExpense() {
 function deleteExp(id) {
   if (!confirm('Delete this expense?')) return;
   saveExp(getExp().filter(e => e.id !== id));
+  if (typeof auditLog === 'function') auditLog('DELETE_EXPENSE', 'vpc_personal_expenses_v1', 'Expense deleted');
   renderAll();
   toast('Deleted.');
 }
@@ -820,6 +822,7 @@ function saveRec() {
   const idx = arr.findIndex(r => r.id === rec.id);
   if (idx >= 0) arr[idx] = rec; else arr.push(rec);
   saveRec_(arr);
+  if (typeof auditLog === 'function') auditLog(editRecId ? 'EDIT_RECURRING' : 'ADD_RECURRING', 'vpc_recurring_expenses_v1', document.getElementById('rec-name')?.value || '');
   closeRecModal();
   renderAll();
   toast(editRecId ? 'Updated.' : 'Recurring expense added!');
@@ -853,6 +856,7 @@ function closeBudgetModal() { $('budget-modal').classList.remove('open'); }
 function saveBudget() {
   const t = parseFloat($('budget-total').value) || 0;
   saveBudget_({ total: t });
+  if (typeof auditLog === 'function') auditLog('SAVE_BUDGET', 'vpc_expense_budget_v1', 'Budget updated');
   closeBudgetModal();
   renderAll();
   toast('Budget saved!');

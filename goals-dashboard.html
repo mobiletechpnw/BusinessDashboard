@@ -541,7 +541,9 @@ function saveGoal() {
       objectives: []
     });
   }
-  save(); closeGoalModal(); render();
+  save();
+  if (typeof auditLog === 'function') auditLog(editGoalId ? 'EDIT_GOAL' : 'ADD_GOAL', 'goals_dashboard_v1', document.getElementById('gTitle')?.value || '');
+  closeGoalModal(); render();
   toast(editGoalId ? 'Goal updated.' : 'Goal added!');
 }
 
@@ -554,7 +556,9 @@ function toggleGoal(id) {
 function deleteGoal(id) {
   if (!confirm('Delete this goal and all its objectives?')) return;
   data.goals = data.goals.filter(x => x.id !== id);
-  save(); render(); toast('Goal deleted.');
+  save();
+  if (typeof auditLog === 'function') auditLog('DELETE_GOAL', 'goals_dashboard_v1', `Goal deleted`);
+  render(); toast('Goal deleted.');
 }
 
 // ── Objective CRUD ────────────────────────────────────────────────────
@@ -591,7 +595,9 @@ function saveObj() {
   } else {
     g.objectives.push({ id: uid(), text, due: document.getElementById('oDue').value || null, priority, done: false });
   }
-  save(); closeObjModal(); render(); toast(editObjId ? 'Objective updated.' : 'Objective added!');
+  save();
+  if (typeof auditLog === 'function') auditLog('SAVE_OBJECTIVE', 'goals_dashboard_v1', document.getElementById('oText')?.value || '');
+  closeObjModal(); render(); toast(editObjId ? 'Objective updated.' : 'Objective added!');
 }
 
 function quickAddObj(e, gid) {

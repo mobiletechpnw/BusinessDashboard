@@ -593,6 +593,7 @@ function saveCellEntry() {
   };
   idx >= 0 ? arr[idx] = item : arr.push(item);
   setTables(arr);
+  if (typeof auditLog === 'function') auditLog('SAVE_TABLE_ENTRY', 'vpc_tables_v1', 'Table booking updated');
   closeModal('cell-modal');
   renderAll();
 }

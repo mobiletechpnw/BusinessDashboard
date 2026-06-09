@@ -222,6 +222,14 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
   </div>
 </header>
 
+<nav class="dash-nav">
+  <a href="vault-pine-collective.html" class="dash-nav-link">📊 Sales Hub</a>
+  <a href="analytics.html" class="dash-nav-link">📈 Analytics</a>
+  <a href="production.html" class="dash-nav-link">🖨️ Production</a>
+  <a href="content.html" class="dash-nav-link active">📱 Content</a>
+  <a href="review.html" class="dash-nav-link">📋 Daily Review</a>
+</nav>
+
 <!-- STAT BAR -->
 <div class="stat-bar">
   <div class="stat-cell"><div class="stat-val" id="st-total">0</div><div class="stat-lbl">Total Planned</div></div>
@@ -688,6 +696,7 @@ function saveContent() {
   const idx = arr.findIndex(x => x.id === item.id);
   if (idx >= 0) arr[idx] = item; else arr.push(item);
   saveContentData(arr);
+  if (typeof auditLog === 'function') auditLog(editId ? 'EDIT_CONTENT' : 'ADD_CONTENT', 'vpc_content_v1', document.getElementById('f-title')?.value || '');
   closeModal();
   renderAll();
 }
@@ -764,6 +773,7 @@ function renderAll() {
   renderTemplates();
   renderCanva();
 }
+window.renderAll = renderAll;
 
 renderAll();
 </script>
