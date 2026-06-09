@@ -65,7 +65,7 @@
 
   .goals-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr));
     gap: 20px;
   }
 
@@ -149,6 +149,18 @@
   .obj-item:hover .obj-actions { opacity: 1; }
   .obj-due { font-size: 0.68rem; color: var(--text2); white-space: nowrap; }
   .obj-due.overdue { color: var(--red); }
+  .obj-priority { font-size: 0.6rem; font-weight: 700; padding: 1px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.3px; flex-shrink: 0; }
+  .obj-priority-high   { background: #3b1212; color: var(--red); }
+  .obj-priority-medium { background: #3b2e12; color: var(--yellow); }
+  .obj-priority-low    { background: #123b20; color: var(--green); }
+
+  /* Drag & drop */
+  .goal-card.drag-over { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(108,140,255,0.25); }
+  .goal-card[draggable] { cursor: grab; }
+  .goal-card[draggable]:active { cursor: grabbing; }
+  .drag-handle { color: var(--text2); font-size: 0.8rem; cursor: grab; padding: 2px 4px; border-radius: 3px; opacity: 0; transition: opacity 0.12s; flex-shrink: 0; }
+  .goal-card:hover .drag-handle { opacity: 1; }
+  .obj-item.drag-over { border-top: 2px solid var(--accent); }
 
   .add-obj-row { padding: 0 18px 14px; }
   .add-obj-input {
@@ -213,15 +225,25 @@
     font-size: 0.78rem; cursor: pointer; outline: none;
   }
 
-  @media (max-width: 600px) {
-    main { padding: 16px; }
-    .goals-grid { grid-template-columns: 1fr; }
-    header { padding: 14px 16px; flex-wrap: wrap; gap: 10px; }
-    .header-stats { gap: 12px; flex-wrap: wrap; }
-    .stat-num { font-size: 1.4rem; }
-    main { padding: 12px; }
-    .table-wrap { overflow-x: auto; }
-    table { font-size: 0.72rem; }
+  @media (max-width: 700px) {
+    main { padding: 12px 10px; }
+    header { padding: 0 12px; min-height: 52px; }
+    header h1 { font-size: 1.05rem; }
+    .header-stats { gap: 8px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+    .header-stats::-webkit-scrollbar { display: none; }
+    .stat-num { font-size: 1.1rem; }
+    .stat-label { font-size: 0.6rem; }
+    .top-bar { flex-direction: column; align-items: stretch; }
+    .top-bar-left { flex-wrap: wrap; }
+    .filter-group { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+    .filter-group::-webkit-scrollbar { display: none; }
+    .filter-btn { white-space: nowrap; flex-shrink: 0; min-height: 40px; }
+    .sort-select { width: 100%; }
+    /* Add goal button: hide from top-bar (FAB takes over) */
+    .top-bar > .btn-primary { display: none; }
+  }
+  @media (max-width: 480px) {
+    .modal { border-radius: 16px 16px 0 0; }
   }
 </style>
 </head>
@@ -301,9 +323,20 @@
       <label>Objective</label>
       <input type="text" id="oText" placeholder="e.g. Write 3 case studies" />
     </div>
-    <div class="field">
-      <label>Due Date (optional)</label>
-      <input type="date" id="oDue" />
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="field">
+        <label>Due Date (optional)</label>
+        <input type="date" id="oDue" />
+      </div>
+      <div class="field">
+        <label>Priority</label>
+        <select id="oPriority">
+          <option value="">None</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeObjModal()">Cancel</button>
@@ -313,6 +346,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
+<button class="fab" onclick="openGoalModal()" title="Add Goal" aria-label="Add Goal">＋</button>
 
 <script>
 // ── Data ────────────────────────────────────────────────────────────
@@ -375,9 +409,11 @@ function goalHTML(g) {
   const dueStr = dueDateStr(g.due);
   const dueClass = dueDateClass(g.due);
 
-  return `<div class="goal-card ${g.done ? 'completed' : ''}" id="goal-${g.id}">
+  return `<div class="goal-card ${g.done ? 'completed' : ''}" id="goal-${g.id}" draggable="true"
+    ondragstart="dragGoalStart(event,'${g.id}')" ondragover="dragGoalOver(event)" ondrop="dragGoalDrop(event,'${g.id}')" ondragleave="dragGoalLeave(event)" ondragend="dragGoalEnd()">
     <div class="goal-header">
       <div class="goal-title-row">
+        <span class="drag-handle" title="Drag to reorder">⠿</span>
         <div class="goal-check ${g.done ? 'done' : ''}" onclick="toggleGoal('${g.id}')"></div>
         <div class="goal-title ${g.done ? 'done' : ''}" onclick="toggleGoal('${g.id}')">${esc(g.title)}</div>
         <div class="goal-actions">
@@ -408,9 +444,12 @@ function goalHTML(g) {
 
 function objHTML(gid, o) {
   const dueClass = dueDateClass(o.due);
-  return `<div class="obj-item" id="obj-${o.id}">
+  const pri = o.priority;
+  return `<div class="obj-item" id="obj-${o.id}" draggable="true"
+    ondragstart="dragObjStart(event,'${gid}','${o.id}')" ondragover="dragObjOver(event)" ondrop="dragObjDrop(event,'${gid}','${o.id}')" ondragleave="dragObjLeave(event)" ondragend="dragObjEnd()">
     <div class="obj-check ${o.done ? 'done' : ''}" onclick="toggleObj('${gid}','${o.id}')"></div>
     <div class="obj-text ${o.done ? 'done' : ''}">${esc(o.text)}</div>
+    ${pri ? `<span class="obj-priority obj-priority-${pri}">${pri}</span>` : ''}
     ${o.due ? `<span class="obj-due ${dueClass}">${fmtDate(o.due)}</span>` : ''}
     <div class="obj-actions">
       <button class="icon-btn btn-icon" title="Edit" onclick="openObjModal('${gid}','${o.id}')">✏️</button>
@@ -528,9 +567,11 @@ function openObjModal(gid, oid) {
     const o = g.objectives.find(x => x.id === oid);
     document.getElementById('oText').value = o.text;
     document.getElementById('oDue').value = o.due || '';
+    document.getElementById('oPriority').value = o.priority || '';
   } else {
     document.getElementById('oText').value = '';
     document.getElementById('oDue').value = '';
+    document.getElementById('oPriority').value = '';
   }
   document.getElementById('objModal').classList.add('open');
   setTimeout(() => document.getElementById('oText').focus(), 50);
@@ -541,12 +582,14 @@ function saveObj() {
   const text = document.getElementById('oText').value.trim();
   if (!text) { toast('Please enter an objective.'); return; }
   const g = data.goals.find(x => x.id === editObjGoalId);
+  const priority = document.getElementById('oPriority').value || null;
   if (editObjId) {
     const o = g.objectives.find(x => x.id === editObjId);
     o.text = text;
     o.due = document.getElementById('oDue').value || null;
+    o.priority = priority;
   } else {
-    g.objectives.push({ id: uid(), text, due: document.getElementById('oDue').value || null, done: false });
+    g.objectives.push({ id: uid(), text, due: document.getElementById('oDue').value || null, priority, done: false });
   }
   save(); closeObjModal(); render(); toast(editObjId ? 'Objective updated.' : 'Objective added!');
 }
@@ -611,9 +654,61 @@ function toast(msg) {
   toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
 }
 
+// ── Drag & Drop — Goals ───────────────────────────────────────────────
+let dragGoalId = null;
+function dragGoalStart(e, id) {
+  dragGoalId = id;
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(() => { const c = document.getElementById('goal-'+id); if(c) c.style.opacity='0.45'; }, 0);
+}
+function dragGoalEnd() {
+  dragGoalId = null;
+  document.querySelectorAll('.goal-card').forEach(c => { c.style.opacity=''; c.classList.remove('drag-over'); });
+}
+function dragGoalOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+function dragGoalLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+function dragGoalDrop(e, targetId) {
+  e.preventDefault();
+  if (!dragGoalId || dragGoalId === targetId) return;
+  const from = data.goals.findIndex(g => g.id === dragGoalId);
+  const to   = data.goals.findIndex(g => g.id === targetId);
+  if (from < 0 || to < 0) return;
+  const [moved] = data.goals.splice(from, 1);
+  data.goals.splice(to, 0, moved);
+  save(); render();
+}
+
+// ── Drag & Drop — Objectives ─────────────────────────────────────────
+let dragObjInfo = null;
+function dragObjStart(e, gid, oid) {
+  dragObjInfo = { gid, oid };
+  e.dataTransfer.effectAllowed = 'move';
+  e.stopPropagation();
+  setTimeout(() => { const el = document.getElementById('obj-'+oid); if(el) el.style.opacity='0.45'; }, 0);
+}
+function dragObjEnd() {
+  dragObjInfo = null;
+  document.querySelectorAll('.obj-item').forEach(el => { el.style.opacity=''; el.classList.remove('drag-over'); });
+}
+function dragObjOver(e) { e.preventDefault(); e.stopPropagation(); e.currentTarget.classList.add('drag-over'); }
+function dragObjLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+function dragObjDrop(e, gid, targetOid) {
+  e.preventDefault(); e.stopPropagation();
+  if (!dragObjInfo || dragObjInfo.oid === targetOid || dragObjInfo.gid !== gid) return;
+  const g = data.goals.find(x => x.id === gid);
+  if (!g) return;
+  const from = g.objectives.findIndex(o => o.id === dragObjInfo.oid);
+  const to   = g.objectives.findIndex(o => o.id === targetOid);
+  if (from < 0 || to < 0) return;
+  const [moved] = g.objectives.splice(from, 1);
+  g.objectives.splice(to, 0, moved);
+  save(); render();
+}
+
 // ── Init ──────────────────────────────────────────────────────────────
 load();
 render();
+window.renderAll = () => { load(); render(); };
 </script>
 </body>
 </html>

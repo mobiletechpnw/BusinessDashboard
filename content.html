@@ -176,15 +176,31 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
 .canva-logo{display:inline-flex;align-items:center;gap:5px;font-size:0.72rem;font-weight:700;color:var(--text2);margin-bottom:20px;}
 .canva-logo svg{width:18px;height:18px;}
 
-@media(max-width:700px){.canva-hero{grid-template-columns:1fr;}}
-
 @media(max-width:700px){
+  .canva-hero{grid-template-columns:1fr;}
   .stat-bar{grid-template-columns:repeat(3,1fr);}
   .week-grid{grid-template-columns:repeat(4,1fr);}
   .field-row{grid-template-columns:1fr;}
   main{padding:14px;}
   .content-grid{grid-template-columns:1fr;}
-  header{padding:0 14px;}
+  header{padding:0 14px; flex-wrap:wrap; min-height:auto; gap:6px; padding:8px 14px;}
+  .header-tabs{overflow-x:auto; flex-wrap:nowrap; scrollbar-width:none; width:100%; border-bottom:1px solid var(--border); margin-left:-14px; margin-right:-14px; padding:0 14px;}
+  .header-tabs::-webkit-scrollbar{display:none;}
+  .h-tab{white-space:nowrap; min-height:44px; padding:0 14px; font-size:0.78rem;}
+  .header-right .btn-primary{display:none;}
+  .btn-ghost{min-height:40px;}
+  .toolbar{flex-wrap:wrap;}
+  .search-input{min-width:unset; width:100%;}
+  .templates-grid{grid-template-columns:1fr;}
+  .canva-quick-grid{grid-template-columns:1fr;}
+}
+@media(max-width:480px){
+  .stat-bar{grid-template-columns:1fr 1fr;}
+  .week-grid{grid-template-columns:repeat(3,1fr);}
+  .modal{position:fixed;bottom:0;left:0;right:0;width:100%!important;max-width:100%!important;border-radius:16px 16px 0 0;max-height:85vh;}
+  .modal-actions{flex-direction:column-reverse;}
+  .modal-actions button{width:100%;}
+  .day-col{min-height:100px;}
 }
 </style>
 </head>
@@ -751,5 +767,6 @@ function renderAll() {
 
 renderAll();
 </script>
+<button class="fab" onclick="openModal()" title="Add Content" style="bottom:calc(24px + env(safe-area-inset-bottom));right:24px;position:fixed;z-index:300;background:var(--accent);color:#fff;border:none;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:0 4px 20px rgba(108,140,255,0.5);">＋</button>
 </body>
 </html>

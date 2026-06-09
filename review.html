@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f1117">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="styles.css">
+<script src="shared.js" defer></script>
+<script src="supabase-sync.js" defer></script>
+<title>Daily Review · VPC</title>
+<style>
+  body { min-height: 100vh; display: flex; flex-direction: column; }
+
+  header {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0 32px; display: flex; align-items: center;
+    justify-content: space-between; min-height: 58px;
+    position: sticky; top: 0; z-index: 200;
+  }
+  .brand { font-size: 1.05rem; font-weight: 800; }
+  .brand span { color: var(--accent); }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 28px 24px; width: 100%; flex: 1; }
+
+  .review-header {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px; margin-bottom: 28px;
+  }
+  .review-title { font-size: 1.6rem; font-weight: 900; letter-spacing: -0.5px; }
+  .review-title span { color: var(--accent); }
+  .review-date { font-size: 0.8rem; color: var(--text2); }
+
+  .narrate-btn {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 16px; color: var(--text2);
+    font-size: 0.82rem; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; gap: 8px; transition: all 0.15s;
+    font-family: inherit;
+  }
+  .narrate-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .narrate-btn.active { border-color: var(--green); color: var(--green); background: rgba(52,211,153,0.08); }
+
+  .review-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .section-full { grid-column: 1 / -1; }
+
+  .panel {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px;
+  }
+  .panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .panel-title {
+    font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.8px; color: var(--text2);
+  }
+  .panel-link {
+    font-size: 0.72rem; color: var(--accent); text-decoration: none;
+    transition: opacity 0.15s;
+  }
+  .panel-link:hover { opacity: 0.7; }
+
+  /* Alerts */
+  .alert-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 8px;
+    margin-bottom: 8px; font-size: 0.82rem;
+  }
+  .alert-item:last-child { margin-bottom: 0; }
+  .alert-danger  { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.3); }
+  .alert-warning { background: rgba(251,191,36,0.08);  border: 1px solid rgba(251,191,36,0.3); }
+  .alert-ok      { background: rgba(52,211,153,0.08);  border: 1px solid rgba(52,211,153,0.3); }
+  .alert-icon { font-size: 1rem; flex-shrink: 0; }
+  .alert-text { flex: 1; }
+  .alert-action { font-size: 0.72rem; color: var(--accent); text-decoration: none; white-space: nowrap; }
+
+  /* KPI row */
+  .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+  .kpi-mini { background: var(--surface2); border-radius: 8px; padding: 12px 14px; }
+  .kpi-mini-val { font-size: 1.3rem; font-weight: 800; line-height: 1; }
+  .kpi-mini-label { font-size: 0.62rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+  /* Goal items */
+  .goal-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid var(--border);
+    font-size: 0.84rem;
+  }
+  .goal-item:last-child { border-bottom: none; }
+  .goal-check { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; }
+  .goal-check.done { background: var(--green); }
+  .goal-check.active { border: 2px solid var(--accent); }
+  .goal-check.overdue { border: 2px solid var(--red); }
+  .goal-name { flex: 1; }
+  .goal-due { font-size: 0.7rem; white-space: nowrap; }
+
+  /* Progress arc */
+  .progress-ring-wrap { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+  .progress-arc { flex-shrink: 0; }
+  .progress-arc-info { flex: 1; }
+  .progress-arc-pct { font-size: 2rem; font-weight: 900; line-height: 1; }
+  .progress-arc-label { font-size: 0.72rem; color: var(--text2); margin-top: 4px; }
+
+  /* Budget bar */
+  .budget-viz { margin-top: 12px; }
+  .budget-track { background: var(--surface2); border-radius: 4px; height: 10px; overflow: hidden; margin-bottom: 6px; }
+  .budget-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+  .budget-labels { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text2); }
+
+  /* Forecast */
+  .forecast-box { background: var(--surface2); border-radius: 8px; padding: 12px 14px; margin-top: 12px; }
+  .forecast-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); margin-bottom: 6px; }
+  .forecast-val { font-size: 1.1rem; font-weight: 800; }
+
+  /* Events */
+  .event-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.82rem;
+  }
+  .event-item:last-child { border-bottom: none; }
+  .event-date { font-size: 0.7rem; color: var(--text2); white-space: nowrap; min-width: 70px; }
+
+  /* Revenue */
+  .rev-stat { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
+  .rev-stat:last-child { border-bottom: none; }
+
+  .empty-msg { color: var(--text2); font-size: 0.82rem; padding: 12px 0; text-align: center; }
+
+  @media (max-width: 700px) {
+    header { padding: 0 12px; min-height: 52px; }
+    main { padding: 14px 10px; }
+    .review-grid { grid-template-columns: 1fr; }
+    .section-full { grid-column: 1; }
+    .kpi-row { grid-template-columns: 1fr 1fr; }
+    .review-header { flex-direction: column; align-items: flex-start; gap: 8px; margin-bottom: 16px; }
+    .review-title { font-size: 1.3rem; }
+    .narrate-btn { width: 100%; justify-content: center; }
+    .event-date { min-width: 60px; }
+    .progress-ring-wrap { gap: 12px; }
+    .progress-arc-pct { font-size: 1.6rem; }
+  }
+  @media (max-width: 480px) {
+    .kpi-row { grid-template-columns: 1fr 1fr; }
+    .kpi-mini { padding: 10px 10px; }
+    .kpi-mini-val { font-size: 1.1rem; }
+    .alert-item { flex-wrap: wrap; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">📋 Daily <span>Review</span></div>
+  <a class="home-link" href="index.html">⌂ Home</a>
+</header>
+
+<main>
+  <div class="review-header">
+    <div>
+      <div class="review-title">Morning <span>Briefing</span></div>
+      <div class="review-date" id="review-date"></div>
+    </div>
+    <button class="narrate-btn" id="narrate-btn" onclick="toggleNarrate()">
+      <span id="narrate-icon">🔊</span>
+      <span id="narrate-label">Narrate Summary</span>
+    </button>
+  </div>
+
+  <div class="review-grid">
+
+    <!-- ── ALERTS ── -->
+    <div class="panel section-full" id="alerts-panel">
+      <div class="panel-header">
+        <div class="panel-title">Alerts &amp; Action Items</div>
+        <a class="panel-link" href="review.html">Refresh</a>
+      </div>
+      <div id="alerts-list"></div>
+    </div>
+
+    <!-- ── GOALS SUMMARY ── -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Goals Status</div>
+        <a class="panel-link" href="goals-dashboard.html">View All →</a>
+      </div>
+      <div id="goals-summary"></div>
+    </div>
+
+    <!-- ── EXPENSES ── -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Expenses This Month</div>
+        <a class="panel-link" href="expenses.html">View All →</a>
+      </div>
+      <div id="expenses-summary"></div>
+    </div>
+
+    <!-- ── REVENUE ── -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Revenue Snapshot</div>
+        <a class="panel-link" href="vault-pine-collective.html">View Dashboard →</a>
+      </div>
+      <div id="revenue-summary"></div>
+    </div>
+
+    <!-- ── UPCOMING EVENTS ── -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Upcoming Events</div>
+        <a class="panel-link" href="events.html">View All →</a>
+      </div>
+      <div id="events-summary"></div>
+    </div>
+
+    <!-- ── OBJECTIVES DUE SOON ── -->
+    <div class="panel section-full">
+      <div class="panel-header">
+        <div class="panel-title">Objectives Due This Week</div>
+        <a class="panel-link" href="goals-dashboard.html">Manage →</a>
+      </div>
+      <div id="objectives-due"></div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+'use strict';
+
+// ── Helpers ──
+const fmt = n => '$' + Math.abs(n).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+const fmtDec = n => '$' + Math.abs(n).toFixed(2);
+const $ = id => document.getElementById(id);
+
+function fmtDate(d) {
+  if (!d) return '';
+  const dt = new Date(d + 'T00:00:00');
+  return dt.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+}
+
+function dueDiff(d) {
+  if (!d) return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const due = new Date(d + 'T00:00:00');
+  return Math.round((due - today) / 86400000);
+}
+
+// ── Date header ──
+(function() {
+  const now = new Date();
+  $('review-date').textContent = now.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+})();
+
+// ── ALERTS ──
+function renderAlerts() {
+  const el = $('alerts-list');
+  const alerts = [];
+  const today = new Date(); today.setHours(0,0,0,0);
+  const week  = new Date(today); week.setDate(week.getDate() + 7);
+  const now   = new Date();
+  const thisMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+
+  // Overdue goals
+  try {
+    const g = JSON.parse(localStorage.getItem('goals_dashboard_v1') || '{"goals":[]}');
+    const od = (g.goals||[]).filter(x => !x.done && x.due && new Date(x.due+'T00:00:00') < today);
+    if (od.length) alerts.push({ type:'danger', icon:'⚠', text:`${od.length} goal${od.length>1?'s':''} overdue — immediate attention needed`, url:'goals-dashboard.html', label:'View Goals' });
+    const soon = (g.goals||[]).filter(x => !x.done && x.due && new Date(x.due+'T00:00:00') <= week && new Date(x.due+'T00:00:00') >= today);
+    if (soon.length) alerts.push({ type:'warning', icon:'⏰', text:`${soon.length} goal${soon.length>1?'s':''} due within the next 7 days`, url:'goals-dashboard.html', label:'View Goals' });
+  } catch(e) {}
+
+  // Budget check
+  try {
+    const budget = JSON.parse(localStorage.getItem('vpc_expense_budget_v1')||'{"total":0}');
+    const exps = JSON.parse(localStorage.getItem('vpc_personal_expenses_v1')||'[]');
+    const total = exps.filter(e => (e.date||'').startsWith(thisMonth)).reduce((s,e)=>s+(e.amount||0),0);
+    if (budget.total > 0) {
+      const pct = total / budget.total * 100;
+      const dom = now.getDate(), dim = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+      const proj = (total / dom) * dim;
+      if (total > budget.total) alerts.push({ type:'danger', icon:'💸', text:`Budget exceeded — spent ${fmt(total)} vs ${fmt(budget.total)} limit`, url:'expenses.html', label:'View Expenses' });
+      else if (pct > 80) alerts.push({ type:'warning', icon:'💸', text:`Budget at ${Math.round(pct)}% — projected ${fmt(proj)} by month end`, url:'expenses.html', label:'View Expenses' });
+    }
+  } catch(e) {}
+
+  // Recurring bills due this week
+  try {
+    const recs = JSON.parse(localStorage.getItem('vpc_recurring_expenses_v1')||'[]');
+    const todayDay = now.getDate();
+    const dueThisWeek = recs.filter(r => r.day >= todayDay && r.day <= todayDay + 7);
+    if (dueThisWeek.length) {
+      const total = dueThisWeek.reduce((s,r)=>s+(r.amount||0),0);
+      alerts.push({ type:'warning', icon:'🔄', text:`${dueThisWeek.length} recurring bill${dueThisWeek.length>1?'s':''} due this week (${fmt(total)})`, url:'expenses.html', label:'View Recurring' });
+    }
+  } catch(e) {}
+
+  if (!alerts.length) alerts.push({ type:'ok', icon:'✅', text:'All clear — no urgent items today. Keep up the great work!', url:null });
+
+  el.innerHTML = alerts.map(a => `
+    <div class="alert-item alert-${a.type}">
+      <span class="alert-icon">${a.icon}</span>
+      <span class="alert-text">${a.text}</span>
+      ${a.url ? `<a class="alert-action" href="${a.url}">${a.label} →</a>` : ''}
+    </div>`).join('');
+  return alerts;
+}
+
+// ── GOALS SUMMARY ──
+function renderGoals() {
+  const el = $('goals-summary');
+  try {
+    const g = JSON.parse(localStorage.getItem('goals_dashboard_v1') || '{"goals":[]}');
+    const goals = g.goals || [];
+    if (!goals.length) { el.innerHTML = '<div class="empty-msg">No goals yet. <a href="goals-dashboard.html" style="color:var(--accent)">Add one →</a></div>'; return []; }
+
+    const today = new Date(); today.setHours(0,0,0,0);
+    const total = goals.length;
+    const done  = goals.filter(x => x.done).length;
+    const allObj = goals.flatMap(g => g.objectives||[]);
+    const doneObj = allObj.filter(o => o.done).length;
+    const pct = allObj.length ? Math.round(doneObj / allObj.length * 100) : (done ? Math.round(done/total*100) : 0);
+
+    // Progress arc SVG
+    const r = 36, cx = 44, cy = 44, circ = 2*Math.PI*r;
+    const arc = circ - (pct/100)*circ;
+    const arcColor = pct >= 75 ? 'var(--green)' : pct >= 40 ? 'var(--accent)' : 'var(--yellow)';
+
+    el.innerHTML = `
+      <div class="progress-ring-wrap">
+        <svg class="progress-arc" width="88" height="88" viewBox="0 0 88 88">
+          <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--surface2)" stroke-width="7"/>
+          <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${arcColor}" stroke-width="7"
+            stroke-dasharray="${circ}" stroke-dashoffset="${arc}"
+            stroke-linecap="round" transform="rotate(-90 ${cx} ${cy})" style="transition:stroke-dashoffset 0.6s"/>
+          <text x="${cx}" y="${cy+5}" text-anchor="middle" font-size="14" font-weight="800" fill="${arcColor}">${pct}%</text>
+        </svg>
+        <div class="progress-arc-info">
+          <div class="progress-arc-pct" style="color:${arcColor}">${done}/${total}</div>
+          <div class="progress-arc-label">Goals Complete</div>
+          <div style="font-size:0.72rem;color:var(--text2);margin-top:6px">${doneObj}/${allObj.length} objectives done</div>
+        </div>
+      </div>`;
+
+    // Show active goals (not done, sorted by urgency)
+    const active = goals.filter(x => !x.done).sort((a,b) => {
+      const da = a.due ? new Date(a.due+'T00:00:00') - today : 9e12;
+      const db = b.due ? new Date(b.due+'T00:00:00') - today : 9e12;
+      return da - db;
+    }).slice(0, 5);
+
+    el.innerHTML += active.map(g => {
+      const diff = dueDiff(g.due);
+      const dueColor = diff === null ? 'var(--text2)' : diff < 0 ? 'var(--red)' : diff <= 3 ? 'var(--yellow)' : 'var(--text2)';
+      const dueText = diff === null ? '' : diff < 0 ? `${-diff}d overdue` : diff === 0 ? 'Today' : `${diff}d left`;
+      return `<div class="goal-item">
+        <div class="goal-check ${diff !== null && diff < 0 ? 'overdue' : 'active'}"></div>
+        <div class="goal-name">${g.title}</div>
+        ${dueText ? `<span class="goal-due" style="color:${dueColor}">${dueText}</span>` : ''}
+      </div>`;
+    }).join('');
+
+    return goals;
+  } catch(e) { el.innerHTML = '<div class="empty-msg">Could not load goals data.</div>'; return []; }
+}
+
+// ── EXPENSES SUMMARY ──
+function renderExpenses() {
+  const el = $('expenses-summary');
+  try {
+    const now = new Date();
+    const prefix = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    const exps = JSON.parse(localStorage.getItem('vpc_personal_expenses_v1')||'[]');
+    const month = exps.filter(e => (e.date||'').startsWith(prefix));
+    const total = month.reduce((s,e)=>s+(e.amount||0),0);
+    const budget = JSON.parse(localStorage.getItem('vpc_expense_budget_v1')||'{"total":0}').total;
+
+    // Top categories
+    const cats = {};
+    month.forEach(e => { cats[e.category] = (cats[e.category]||0) + (e.amount||0); });
+    const topCats = Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,3);
+
+    // KPIs
+    el.innerHTML = `
+      <div class="kpi-row">
+        <div class="kpi-mini">
+          <div class="kpi-mini-val" style="color:var(--red)">${fmt(total)}</div>
+          <div class="kpi-mini-label">Spent</div>
+        </div>
+        <div class="kpi-mini">
+          <div class="kpi-mini-val" style="color:${budget>0&&total>budget?'var(--red)':'var(--green)'}">${budget>0?fmt(Math.abs(budget-total)):'—'}</div>
+          <div class="kpi-mini-label">${budget>0?(total>budget?'Over Budget':'Remaining'):'No Budget'}</div>
+        </div>
+        <div class="kpi-mini">
+          <div class="kpi-mini-val" style="color:var(--text)">${month.length}</div>
+          <div class="kpi-mini-label">Entries</div>
+        </div>
+      </div>`;
+
+    if (budget > 0) {
+      const pct = Math.min(total/budget*100, 100);
+      const color = pct < 70 ? 'var(--green)' : pct < 90 ? 'var(--yellow)' : 'var(--red)';
+      el.innerHTML += `
+        <div class="budget-viz">
+          <div class="budget-track"><div class="budget-fill" style="width:${pct.toFixed(1)}%;background:${color}"></div></div>
+          <div class="budget-labels"><span>$0</span><span>${Math.round(pct)}% used</span><span>${fmt(budget)}</span></div>
+        </div>`;
+    }
+
+    if (topCats.length) {
+      el.innerHTML += '<div style="margin-top:14px;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text2);margin-bottom:8px">Top Categories</div>';
+      el.innerHTML += topCats.map(([cat,amt]) => `
+        <div class="rev-stat">
+          <span>${cat}</span>
+          <span style="color:var(--red);font-weight:700">${fmtDec(amt)}</span>
+        </div>`).join('');
+    }
+
+    // Projection
+    const dom = now.getDate(), dim = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+    if (dom > 0 && month.length > 0) {
+      const proj = (total / dom) * dim;
+      const projColor = budget > 0 ? (proj > budget ? 'var(--red)' : 'var(--green)') : 'var(--text)';
+      el.innerHTML += `
+        <div class="forecast-box">
+          <div class="forecast-label">Month-End Projection</div>
+          <div class="forecast-val" style="color:${projColor}">${fmt(proj)}</div>
+          <div style="font-size:0.7rem;color:var(--text2);margin-top:3px">Based on ${dom} days of spending</div>
+        </div>`;
+    }
+
+    if (!month.length) el.innerHTML = '<div class="empty-msg">No expenses logged this month.</div>';
+    return total;
+  } catch(e) { el.innerHTML = '<div class="empty-msg">Could not load expense data.</div>'; return 0; }
+}
+
+// ── REVENUE SUMMARY ──
+function renderRevenue() {
+  const el = $('revenue-summary');
+  try {
+    const orders = JSON.parse(localStorage.getItem('vp_orders_v2')||'[]');
+    const jtSales = JSON.parse(localStorage.getItem('vp_jettags_v1')||'[]');
+    const pinSales = JSON.parse(localStorage.getItem('vp_pins_v1')||'[]');
+    const now = new Date();
+    const thisMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+
+    const totalRev = orders.reduce((s,o)=>s+(o.salePrice||0),0)
+      + jtSales.reduce((s,x)=>s+(x.revenue||0),0)
+      + pinSales.reduce((s,x)=>s+(x.revenue||0),0);
+    const monthRev = orders.filter(o=>(o.date||'').startsWith(thisMonth)).reduce((s,o)=>s+(o.salePrice||0),0);
+    const profit = orders.reduce((s,o)=>s+(o.salePrice||0)-(o.cogs||0),0);
+    const monthOrders = orders.filter(o=>(o.date||'').startsWith(thisMonth)).length;
+
+    if (!orders.length && !jtSales.length) {
+      el.innerHTML = '<div class="empty-msg">No sales data yet.</div>';
+      return { totalRev, monthRev };
+    }
+
+    el.innerHTML = [
+      ['All-Time Revenue', fmt(totalRev), 'var(--green)'],
+      ['This Month', fmt(monthRev), 'var(--accent)'],
+      ['Net Profit (Risers)', fmt(profit), profit>=0?'var(--green)':'var(--red)'],
+      ['Orders This Month', monthOrders, 'var(--text)'],
+    ].map(([label, val, color]) => `
+      <div class="rev-stat">
+        <span style="color:var(--text2)">${label}</span>
+        <span style="font-weight:700;color:${color}">${val}</span>
+      </div>`).join('');
+
+    return { totalRev, monthRev };
+  } catch(e) { el.innerHTML = '<div class="empty-msg">Could not load revenue data.</div>'; return {}; }
+}
+
+// ── EVENTS ──
+function renderEvents() {
+  const el = $('events-summary');
+  try {
+    const events = JSON.parse(localStorage.getItem('vp_events_v1')||localStorage.getItem('vpc_events_v1')||'[]');
+    const today = new Date(); today.setHours(0,0,0,0);
+    const upcoming = events.filter(e => {
+      const d = new Date((e.start||e.date||'')+'T00:00:00');
+      return d >= today;
+    }).sort((a,b) => (a.start||a.date||'').localeCompare(b.start||b.date||'')).slice(0, 5);
+
+    if (!upcoming.length) { el.innerHTML = '<div class="empty-msg">No upcoming events.</div>'; return []; }
+
+    el.innerHTML = upcoming.map(e => {
+      const diff = dueDiff(e.start || e.date);
+      const urgency = diff === 0 ? 'color:var(--yellow);font-weight:700' : diff < 0 ? 'color:var(--red)' : 'color:var(--text2)';
+      return `<div class="event-item">
+        <span class="event-date" style="${urgency}">${fmtDate(e.start||e.date)} ${diff===0?'(today)':diff===1?'(tomorrow)':''}</span>
+        <span style="flex:1">${e.name}</span>
+        ${e.boothCost ? `<span style="font-size:0.72rem;color:var(--text2)">${fmt(e.boothCost)}</span>` : ''}
+      </div>`;
+    }).join('');
+    return upcoming;
+  } catch(e) { el.innerHTML = '<div class="empty-msg">Could not load events.</div>'; return []; }
+}
+
+// ── OBJECTIVES DUE ──
+function renderObjectivesDue() {
+  const el = $('objectives-due');
+  try {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const week  = new Date(today); week.setDate(week.getDate()+7);
+    const g = JSON.parse(localStorage.getItem('goals_dashboard_v1')||'{"goals":[]}');
+    const due = [];
+    (g.goals||[]).forEach(goal => {
+      if (goal.done) return;
+      (goal.objectives||[]).filter(o => !o.done && o.due && new Date(o.due+'T00:00:00') <= week).forEach(o => {
+        due.push({ ...o, goalTitle: goal.title });
+      });
+    });
+    due.sort((a,b) => (a.due||'').localeCompare(b.due||''));
+
+    if (!due.length) { el.innerHTML = '<div class="empty-msg">No objectives due this week. 🎉</div>'; return; }
+
+    el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px">` +
+      due.map(o => {
+        const diff = dueDiff(o.due);
+        const color = diff < 0 ? 'var(--red)' : diff === 0 ? 'var(--yellow)' : 'var(--accent)';
+        return `<div style="background:var(--surface2);border-radius:8px;padding:12px 14px;border-left:3px solid ${color}">
+          <div style="font-size:0.82rem;font-weight:600">${o.text}</div>
+          <div style="font-size:0.7rem;color:var(--text2);margin-top:4px">${o.goalTitle} · <span style="color:${color}">${diff<0?-diff+'d overdue':diff===0?'Due today':diff+'d left'}</span></div>
+        </div>`;
+      }).join('') + '</div>';
+  } catch(e) { el.innerHTML = '<div class="empty-msg">Could not load objectives.</div>'; }
+}
+
+// ── NARRATE ──
+let isNarrating = false;
+function toggleNarrate() {
+  if (isNarrating) {
+    window.speechSynthesis?.cancel();
+    isNarrating = false;
+    $('narrate-btn').classList.remove('active');
+    $('narrate-icon').textContent = '🔊';
+    $('narrate-label').textContent = 'Narrate Summary';
+    return;
+  }
+  if (!window.speechSynthesis) { alert('Text-to-speech not supported in this browser.'); return; }
+  isNarrating = true;
+  $('narrate-btn').classList.add('active');
+  $('narrate-icon').textContent = '⏹';
+  $('narrate-label').textContent = 'Stop';
+
+  // Build narration text
+  const now = new Date();
+  let text = `Good ${now.getHours()<12?'morning':now.getHours()<17?'afternoon':'evening'}. Here is your daily briefing for ${now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}. `;
+
+  // Alerts
+  const alertEls = document.querySelectorAll('#alerts-list .alert-text');
+  alertEls.forEach(a => { text += a.textContent + '. '; });
+
+  // Goals
+  try {
+    const g = JSON.parse(localStorage.getItem('goals_dashboard_v1')||'{"goals":[]}');
+    const active = (g.goals||[]).filter(x=>!x.done);
+    const done = (g.goals||[]).filter(x=>x.done);
+    text += `You have ${active.length} active goal${active.length!==1?'s':''} and ${done.length} completed. `;
+  } catch(e) {}
+
+  // Expenses
+  try {
+    const mn = now;
+    const prefix = `${mn.getFullYear()}-${String(mn.getMonth()+1).padStart(2,'0')}`;
+    const total = JSON.parse(localStorage.getItem('vpc_personal_expenses_v1')||'[]')
+      .filter(e=>(e.date||'').startsWith(prefix)).reduce((s,e)=>s+(e.amount||0),0);
+    const budget = JSON.parse(localStorage.getItem('vpc_expense_budget_v1')||'{"total":0}').total;
+    text += `Personal expenses this month total $${total.toFixed(0)}`;
+    if (budget > 0) text += `, with $${Math.max(0, budget-total).toFixed(0)} remaining of your $${budget} budget`;
+    text += '. ';
+  } catch(e) {}
+
+  text += 'That concludes your morning briefing. Have a productive day.';
+
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.rate = 0.9; utt.pitch = 1.0; utt.volume = 1.0;
+  utt.onend = () => { isNarrating = false; $('narrate-btn').classList.remove('active'); $('narrate-icon').textContent='🔊'; $('narrate-label').textContent='Narrate Summary'; };
+  utt.onerror = () => { isNarrating = false; $('narrate-btn').classList.remove('active'); };
+  window.speechSynthesis.speak(utt);
+}
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', () => {
+  renderAlerts();
+  renderGoals();
+  renderExpenses();
+  renderRevenue();
+  renderEvents();
+  renderObjectivesDue();
+});
+window.renderAll = () => { renderAlerts(); renderGoals(); renderExpenses(); renderRevenue(); renderEvents(); renderObjectivesDue(); };
+</script>
+</body>
+</html>

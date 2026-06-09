@@ -143,13 +143,34 @@
   @media (max-width: 700px) {
     .kpi-strip { grid-template-columns: 1fr 1fr; }
     .grid-2 { grid-template-columns: 1fr; }
-    header, .toolbar { padding: 0 16px; }
-    main { padding: 20px 16px; }
+    header, .toolbar { padding: 0 12px; }
+    header { min-height: 52px; }
+    main { padding: 14px 10px; }
     .toolbar { flex-wrap: wrap; gap: 0; padding: 0; }
-    .month-nav { padding: 10px 16px; border-bottom: 1px solid var(--border); width: 100%; justify-content: center; }
-    .tabs { padding: 0 16px; }
-    .add-btn { display: none; }
-    .budget-bar-wrap { padding: 10px 16px; }
+    .month-nav { padding: 10px 14px; border-bottom: 1px solid var(--border); width: 100%; justify-content: center; }
+    .tabs { padding: 0 8px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab { white-space: nowrap; flex-shrink: 0; padding: 12px 14px; }
+    /* Hide all add buttons in toolbar/panel — FAB handles this */
+    .add-btn { display: none !important; }
+    .budget-bar-wrap { padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
+    .budget-bar-label { min-width: 0; text-align: left; }
+    /* Expense row: compact */
+    .expense-row { padding: 10px 8px; gap: 10px; }
+    .cat-icon { width: 30px; height: 30px; font-size: 0.9rem; flex-shrink: 0; }
+    .exp-amount { font-size: 0.88rem; }
+    /* Rec row */
+    .rec-row { padding: 10px 8px; }
+    /* Cat breakdown */
+    .cat-name { min-width: 90px; font-size: 0.78rem; }
+    .cat-amount { min-width: 54px; font-size: 0.78rem; }
+  }
+  @media (max-width: 480px) {
+    .kpi { padding: 12px 12px; }
+    .kpi-val { font-size: 1.2rem; }
+    .kpi-label { font-size: 0.58rem; }
+    .modal { border-radius: 16px 16px 0 0; }
+    .grid-2f { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -240,6 +261,8 @@
 
 </main>
 
+<button class="fab" id="exp-fab" onclick="expFabAction()" title="Add Expense" aria-label="Add">＋</button>
+
 <footer>
   <a href="index.html">⌂ Home</a> &nbsp;·&nbsp; Personal Expenses &nbsp;·&nbsp; Vault &amp; Pine Collective
 </footer>
@@ -297,22 +320,33 @@
         <input type="number" id="rec-amount" min="0" step="0.01" placeholder="0.00">
       </div>
       <div class="field">
+        <label>Frequency</label>
+        <select id="rec-freq">
+          <option value="monthly">Monthly</option>
+          <option value="weekly">Weekly</option>
+          <option value="biweekly">Bi-Weekly</option>
+          <option value="annual">Annual</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid-2f">
+      <div class="field">
         <label>Due Day of Month</label>
         <input type="number" id="rec-day" min="1" max="31" placeholder="1–31">
       </div>
-    </div>
-    <div class="field">
-      <label>Category</label>
-      <select id="rec-cat">
-        <option value="Housing">🏠 Housing</option>
-        <option value="Transport">🚗 Transport</option>
-        <option value="Food">🍔 Food</option>
-        <option value="Subscriptions">📱 Subscriptions</option>
-        <option value="Health">💊 Health</option>
-        <option value="Insurance">🛡️ Insurance</option>
-        <option value="Business">💼 Business</option>
-        <option value="Other">📦 Other</option>
-      </select>
+      <div class="field">
+        <label>Category</label>
+        <select id="rec-cat">
+          <option value="Housing">🏠 Housing</option>
+          <option value="Transport">🚗 Transport</option>
+          <option value="Food">🍔 Food</option>
+          <option value="Subscriptions">📱 Subscriptions</option>
+          <option value="Health">💊 Health</option>
+          <option value="Insurance">🛡️ Insurance</option>
+          <option value="Business">💼 Business</option>
+          <option value="Other">📦 Other</option>
+        </select>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeRecModal()">Cancel</button>
@@ -575,17 +609,25 @@ function renderBreakdown() {
   });
   const maxDay = Math.max(...allDays.map(d => d.amt), 1);
   const today = todayStr();
+  const todayIdx = allDays.findIndex(d => d.d === today);
+  // Compute daily average from days with data up to today, for forecast
+  const activeDays = allDays.slice(0, todayIdx + 1).filter(d => d.amt > 0);
+  const dailyAvgForecast = activeDays.length > 0 ? total / (todayIdx + 1) : 0;
 
-  $('daily-chart').innerHTML = allDays.map(({d, amt}) => {
-    const h = Math.max((amt / maxDay) * 88, amt > 0 ? 4 : 1);
+  $('daily-chart').innerHTML = allDays.map(({d, amt}, idx) => {
+    const isFuture = d > today;
+    const projAmt = isFuture ? dailyAvgForecast : 0;
+    const dispAmt = isFuture ? projAmt : amt;
+    const h = Math.max((dispAmt / maxDay) * 88, dispAmt > 0 ? 4 : 1);
     const isToday = d === today;
     const day = parseInt(d.slice(8));
+    const barColor = isFuture ? 'rgba(108,140,255,0.35)' : amt>0 ? (isToday?'var(--yellow)':'var(--red)') : 'var(--border)';
     return `
-      <div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:18px;gap:3px" title="${d}: ${fmt(amt)}">
+      <div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:18px;gap:3px" title="${d}: ${isFuture?'Proj. ':''}${fmt(dispAmt)}${isFuture?' (forecast)':''}">
         <div style="flex:1;display:flex;align-items:flex-end;width:100%">
-          <div style="width:100%;height:${h}px;background:${amt>0?(isToday?'var(--yellow)':'var(--red)'):'var(--border)'};border-radius:2px 2px 0 0;opacity:${amt>0?0.85:0.3}"></div>
+          <div style="width:100%;height:${h}px;background:${barColor};border-radius:2px 2px 0 0;opacity:${dispAmt>0?0.85:0.3}${isFuture?';border:1px dashed rgba(108,140,255,0.5)':''}"></div>
         </div>
-        <div style="font-size:0.55rem;color:${isToday?'var(--yellow)':'var(--text2)'};font-weight:${isToday?'700':'400'}">${day}</div>
+        <div style="font-size:0.55rem;color:${isToday?'var(--yellow)':isFuture?'rgba(108,140,255,0.6)':'var(--text2)'};font-weight:${isToday?'700':'400'}">${day}</div>
       </div>`;
   }).join('');
 }
@@ -610,7 +652,7 @@ function renderRecurring() {
     return;
   }
 
-  const total = recs.reduce((s,r) => s + (r.amount||0), 0);
+  const total = recs.reduce((s,r) => s + toMonthly(r), 0);
   const today = new Date();
 
   $('rec-list').innerHTML = recs.map(r => {
@@ -626,9 +668,9 @@ function renderRecurring() {
         <div class="cat-icon" style="background:${c.color}22;color:${c.color}">${c.icon}</div>
         <div class="rec-info">
           <div class="rec-name">${r.name}</div>
-          <div class="rec-meta">${r.category} · <span style="color:${isToday?'var(--yellow)':isPast?'var(--text2)':'var(--accent)'}">${dueLabel}</span></div>
+          <div class="rec-meta">${r.category} · ${freqLabel(r.frequency)} · <span style="color:${isToday?'var(--yellow)':isPast?'var(--text2)':'var(--accent)'}">${dueLabel}</span></div>
         </div>
-        <div class="rec-amount">${fmt(r.amount)}/mo</div>
+        <div class="rec-amount">${fmt(r.amount)}/${freqShort(r.frequency)}</div>
         <div class="rec-actions">
           <button class="act-btn" onclick="openRecModal('${r.id}')" title="Edit">✏️</button>
           <button class="act-btn del" onclick="deleteRec('${r.id}')" title="Remove">🗑</button>
@@ -638,12 +680,24 @@ function renderRecurring() {
   }).join('');
 
   $('rec-total-card').style.display = 'block';
-  $('rec-total').textContent = fmt(total) + '/mo';
+  $('rec-total').textContent = fmt(total) + '/mo equivalent';
 }
 
 function ordinal(n) {
   const s = ['th','st','nd','rd'], v = n%100;
   return s[(v-20)%10]||s[v]||s[0];
+}
+
+const FREQ_LABELS = { monthly:'Monthly', weekly:'Weekly', biweekly:'Bi-Weekly', annual:'Annual' };
+const FREQ_SHORT  = { monthly:'mo', weekly:'wk', biweekly:'2wk', annual:'yr' };
+function freqLabel(f) { return FREQ_LABELS[f] || 'Monthly'; }
+function freqShort(f) { return FREQ_SHORT[f] || 'mo'; }
+function toMonthly(r) {
+  const f = r.frequency || 'monthly', a = r.amount || 0;
+  if (f === 'weekly')   return a * 52 / 12;
+  if (f === 'biweekly') return a * 26 / 12;
+  if (f === 'annual')   return a / 12;
+  return a;
 }
 
 // ════════════════════════════════
@@ -735,10 +789,12 @@ function openRecModal(id) {
       $('rec-amount').value = r.amount || '';
       $('rec-day').value    = r.day || '';
       $('rec-cat').value    = r.category || 'Other';
+      $('rec-freq').value   = r.frequency || 'monthly';
     }
   } else {
     $('rec-name').value = ''; $('rec-amount').value = '';
     $('rec-day').value = ''; $('rec-cat').value = 'Other';
+    $('rec-freq').value = 'monthly';
   }
   $('rec-modal').classList.add('open');
   setTimeout(() => $('rec-name').focus(), 80);
@@ -753,11 +809,12 @@ function saveRec() {
   if (!amount || amount <= 0) { toast('Enter a valid amount.'); return; }
 
   const rec = {
-    id:       editRecId || uid(),
+    id:        editRecId || uid(),
     name,
     amount,
-    day:      parseInt($('rec-day').value) || 1,
-    category: $('rec-cat').value || 'Other',
+    day:       parseInt($('rec-day').value) || 1,
+    category:  $('rec-cat').value || 'Other',
+    frequency: $('rec-freq').value || 'monthly',
   };
   const arr = getRec();
   const idx = arr.findIndex(r => r.id === rec.id);
@@ -827,6 +884,13 @@ function toast(msg) {
   el.style.opacity = '1';
   clearTimeout(el._t);
   el._t = setTimeout(() => el.style.opacity = '0', 2600);
+}
+
+// ── FAB action (context-aware) ──
+function expFabAction() {
+  const activeTab = document.querySelector('.tab.active')?.dataset.tab;
+  if (activeTab === 'recurring') openRecModal();
+  else openModal();
 }
 
 // ── Init ──

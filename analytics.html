@@ -112,11 +112,24 @@
     .kpi-strip { grid-template-columns: 1fr 1fr; }
     .grid-2, .grid-3 { grid-template-columns: 1fr; }
     header { padding: 0 16px; }
-    main { padding: 20px 16px; }
-    .tab-bar { padding: 0 16px; }
-    .tab { padding: 12px 14px; font-size: 0.78rem; }
+    main { padding: 16px; }
+    .tab-bar { padding: 0 8px; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
+    .tab-bar::-webkit-scrollbar { display: none; }
+    .tab { padding: 12px 14px; font-size: 0.78rem; white-space: nowrap; min-height: 44px; }
     .bar-chart { gap: 3px; }
     .bar-col { min-width: 36px; }
+    .show-grid { grid-template-columns: 1fr; }
+    .cost-row { flex-wrap: wrap; gap: 8px; }
+    table { font-size: 0.76rem; }
+    th, td { padding: 8px 10px; }
+    .margin-bar-wrap { display: none; }
+    .card { padding: 16px; }
+  }
+  @media (max-width: 480px) {
+    .kpi-strip { grid-template-columns: 1fr 1fr; }
+    .modal { position: fixed; bottom: 0; left: 0; right: 0; width: 100% !important; max-width: 100% !important; border-radius: 16px 16px 0 0; max-height: 85vh; }
+    .cost-input { width: 80px; }
+    header { min-height: auto; padding: 10px 14px; }
   }
 </style>
 </head>

@@ -252,3 +252,155 @@ tr:last-child td { border-bottom: none; }
 main { max-width: 1300px; margin: 0 auto; padding: 28px 24px; }
 .panel { display: none; }
 .panel.active { display: block; }
+
+/* ════════════════════════════════════════════
+   MOBILE-FIRST RESPONSIVE SYSTEM
+   Breakpoints: 480px (sm) · 700px (md) · 1024px (lg)
+════════════════════════════════════════════ */
+
+/* ── Header responsive ── */
+@media (max-width: 700px) {
+  header {
+    padding: 0 14px;
+    min-height: 52px;
+    flex-wrap: nowrap;
+    gap: 6px;
+    overflow: hidden;
+  }
+  /* Hide text labels on injected header buttons on small screens */
+  #vpc-sync-label,
+  #vpc-sync-wrap > div:last-child > span:first-child { display: none; }
+  /* Compact sign-out button */
+  #vpc-sync-wrap { gap: 4px; }
+}
+
+/* ── Touch targets: minimum 44×44 px ── */
+@media (max-width: 700px) {
+  .tab       { padding: 12px 14px; font-size: 0.78rem; min-height: 44px; }
+  button     { min-height: 44px; }
+  a.home-link { min-height: 44px; display: inline-flex; align-items: center; }
+  .act-btn, .icon-btn { width: 36px; height: 36px; }
+  .page-btn  { padding: 8px 14px; min-height: 44px; }
+}
+
+/* ── Tab bars scroll horizontally on mobile ── */
+@media (max-width: 700px) {
+  .tab-bar {
+    padding: 0 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex-wrap: nowrap;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab { white-space: nowrap; flex-shrink: 0; }
+}
+
+/* ── Modals: full-width on mobile ── */
+@media (max-width: 480px) {
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .modal {
+    border-radius: 16px 16px 0 0;
+    width: 100%;
+    max-width: 100%;
+    max-height: 92vh;
+    padding: 20px 16px;
+  }
+  .modal-actions { flex-direction: column-reverse; }
+  .modal-actions button { width: 100%; justify-content: center; }
+  .field-row { grid-template-columns: 1fr; }
+}
+
+/* ── KPI strip collapses ── */
+@media (max-width: 480px) {
+  .kpi-strip { grid-template-columns: 1fr 1fr; }
+  .kpi { padding: 12px 14px; }
+  .kpi-val { font-size: 1.2rem; }
+}
+
+/* ── Main padding ── */
+@media (max-width: 700px) {
+  main { padding: 16px 14px; }
+}
+@media (max-width: 480px) {
+  main { padding: 12px 10px; }
+}
+
+/* ── Grid helpers collapse ── */
+@media (max-width: 480px) {
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+}
+
+/* ── Tables always have scroll wrapper ── */
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+@media (max-width: 700px) {
+  table { font-size: 0.78rem; }
+  th, td { padding: 8px 8px; }
+}
+
+/* ── Empty state ── */
+@media (max-width: 480px) {
+  .empty { padding: 36px 16px; }
+}
+
+/* ── Toast: full-width centered on mobile ── */
+@media (max-width: 480px) {
+  .toast {
+    left: 10px;
+    right: 10px;
+    bottom: 16px;
+    text-align: center;
+  }
+}
+
+/* ── Search overlay ── */
+@media (max-width: 600px) {
+  #search-overlay { padding-top: 0 !important; align-items: flex-end !important; }
+  #search-overlay > div { border-radius: 16px 16px 0 0 !important; width: 100% !important; max-width: 100% !important; }
+}
+
+/* ── Trend alerts ── */
+@media (max-width: 600px) {
+  #trend-alerts { left: 8px; right: 8px; max-width: none; top: 60px; }
+}
+
+/* ── Notification permission toast ── */
+@media (max-width: 600px) {
+  #vpc-sync-wrap div[style*="max-width:150px"] { max-width: 80px !important; }
+}
+
+/* ── Floating Action Button (FAB) for add actions on mobile ── */
+.fab {
+  position: fixed;
+  bottom: 24px;
+  right: 20px;
+  z-index: 500;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 1.5rem;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(108,140,255,0.45);
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.fab:active { transform: scale(0.93); }
+@media (max-width: 700px) {
+  .fab { display: flex; }
+}
+
+/* ── Safe-area insets for notched phones ── */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .fab    { bottom: calc(20px + env(safe-area-inset-bottom)); }
+  .toast  { bottom: calc(16px + env(safe-area-inset-bottom)); }
+  footer  { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+}
+

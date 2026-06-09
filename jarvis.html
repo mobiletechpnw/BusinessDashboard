@@ -260,8 +260,80 @@ body::after{
 .cfg-field input:focus{border-color:var(--accent2);}
 .cfg-field .hint{font-size:0.5rem;color:var(--text2);margin-top:3px;opacity:0.65;}
 .cfg-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;}
-.cfg-save{background:var(--accent2);color:#000;border:none;border-radius:3px;padding:6px 16px;font-size:0.62rem;font-family:'Share Tech Mono',monospace;cursor:pointer;letter-spacing:1px;font-weight:700;}
-.cfg-cancel{background:none;color:var(--text2);border:1px solid var(--border);border-radius:3px;padding:6px 14px;font-size:0.62rem;font-family:'Share Tech Mono',monospace;cursor:pointer;letter-spacing:1px;}
+.cfg-save{background:var(--accent2);color:#000;border:none;border-radius:3px;padding:10px 16px;font-size:0.62rem;font-family:'Share Tech Mono',monospace;cursor:pointer;letter-spacing:1px;font-weight:700;min-height:44px;}
+.cfg-cancel{background:none;color:var(--text2);border:1px solid var(--border);border-radius:3px;padding:10px 14px;font-size:0.62rem;font-family:'Share Tech Mono',monospace;cursor:pointer;letter-spacing:1px;min-height:44px;}
+
+/* ── MOBILE LAYOUT ── */
+@media (max-width: 700px) {
+  body { overflow: auto; }
+
+  .hud {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    padding: 8px;
+    gap: 8px;
+  }
+
+  /* Top bar stays */
+  .top-bar { flex-shrink: 0; min-height: 52px; flex-wrap: wrap; gap: 6px; padding: 8px 12px; }
+  .brand { font-size: 0.65rem; }
+  .objective { display: none; }
+  .status-pills { flex-wrap: wrap; gap: 4px; }
+  .pill { font-size: 0.48rem; padding: 3px 6px; }
+  .clock-area { display: none; }
+
+  /* Hide side panels on mobile */
+  .left-panel, .right-panel { display: none; }
+
+  /* Center panel: radar + mic */
+  .center-panel {
+    height: 260px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  /* Voice ring larger for touch */
+  .voice-ring {
+    width: 80px;
+    height: 80px;
+    bottom: 14px;
+  }
+  .voice-ring svg { width: 28px; height: 28px; }
+
+  /* Bottom bar: expand to fill */
+  .bottom-bar {
+    flex: 1;
+    padding: 12px 14px;
+  }
+  #transcript-area { font-size: 0.68rem; }
+  .feed-label { display: none; }
+
+  #chat-log {
+    max-height: 120px;
+    overflow-y: auto;
+  }
+  .chat-line { font-size: 0.7rem; }
+
+  .nav-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .hint-text { font-size: 0.58rem; }
+  .nav-buttons { flex-wrap: wrap; gap: 6px; width: 100%; }
+  .nav-btn { font-size: 0.62rem; padding: 8px 12px; min-height: 40px; }
+
+  /* Config modal */
+  .cfg-box { padding: 18px 14px; }
+  .cfg-actions { flex-direction: column-reverse; }
+  .cfg-save, .cfg-cancel { width: 100%; justify-content: center; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .center-panel { height: 220px; }
+  .nav-buttons { justify-content: space-between; }
+  .nav-btn { flex: 1; text-align: center; min-width: 0; }
+}
 </style>
 </head>
 <body>
@@ -731,6 +803,64 @@ const COMMANDS = [
     run:   () => {
       const r = "You're most welcome, sir. A pleasure, as always.";
       addChat('jarvis', r); jarvisSpeak(r);
+    }
+  },
+  {
+    match: t => /open\s+expenses|go\s+to\s+expenses|show\s+expenses/.test(t),
+    run:   () => {
+      const r = 'Opening the Expenses tracker, sir.';
+      addChat('jarvis', r); jarvisSpeak(r, () => location.href = 'expenses.html');
+    }
+  },
+  {
+    match: t => /open\s+review|daily\s+review|morning\s+briefing|briefing/.test(t),
+    run:   () => {
+      const r = 'Pulling up your Daily Review, sir.';
+      addChat('jarvis', r); jarvisSpeak(r, () => location.href = 'review.html');
+    }
+  },
+  {
+    match: t => /what\s+are\s+my\s+goals|show\s+my\s+goals|goals\s+update/.test(t),
+    run:   () => {
+      try {
+        const g = JSON.parse(localStorage.getItem('goals_dashboard_v1') || '{"goals":[]}');
+        const active = (g.goals||[]).filter(x => !x.done);
+        const done   = (g.goals||[]).filter(x => x.done);
+        const today  = new Date(); today.setHours(0,0,0,0);
+        const overdue = active.filter(x => x.due && new Date(x.due+'T00:00:00') < today);
+        let r = `You have ${active.length} active goal${active.length!==1?'s':''} and ${done.length} completed.`;
+        if (overdue.length) r += ` Warning: ${overdue.length} goal${overdue.length!==1?'s are':' is'} overdue.`;
+        if (active.length) r += ` Your active goals are: ${active.slice(0,3).map(x=>x.title).join(', ')}.`;
+        addChat('jarvis', r); jarvisSpeak(r);
+      } catch(e) {
+        const r = "I'm having trouble accessing your goals data at the moment, sir.";
+        addChat('jarvis', r); jarvisSpeak(r);
+      }
+    }
+  },
+  {
+    match: t => /expense\s+summary|spending\s+update|how\s+much\s+(have\s+i\s+)?spent/.test(t),
+    run:   () => {
+      try {
+        const now = new Date();
+        const prefix = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+        const exps = JSON.parse(localStorage.getItem('vpc_personal_expenses_v1')||'[]');
+        const total = exps.filter(e=>(e.date||'').startsWith(prefix)).reduce((s,e)=>s+(e.amount||0),0);
+        const budget = JSON.parse(localStorage.getItem('vpc_expense_budget_v1')||'{"total":0}').total;
+        let r = `This month you have spent $${total.toFixed(0)} on personal expenses.`;
+        if (budget > 0) r += ` Your budget is $${budget}, leaving $${Math.max(0, budget-total).toFixed(0)} remaining.`;
+        addChat('jarvis', r); jarvisSpeak(r);
+      } catch(e) {
+        const r = "I cannot access your expense data right now, sir.";
+        addChat('jarvis', r); jarvisSpeak(r);
+      }
+    }
+  },
+  {
+    match: t => /open\s+production|production\s+hub/.test(t),
+    run:   () => {
+      const r = 'Opening the Production Hub, sir.';
+      addChat('jarvis', r); jarvisSpeak(r, () => location.href = 'production.html');
     }
   },
   {
