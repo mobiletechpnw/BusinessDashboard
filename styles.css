@@ -252,3 +252,64 @@ tr:last-child td { border-bottom: none; }
 main { max-width: 1300px; margin: 0 auto; padding: 28px 24px; }
 .panel { display: none; }
 .panel.active { display: block; }
+
+/* ── Mobile Polish ── */
+@media (max-width: 700px) {
+  /* Minimum 44px tap targets */
+  button { min-height: 44px; }
+  .tab, .home-link, .page-btn {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .tab { justify-content: center; }
+
+  /* Full-screen modal slides up from bottom */
+  .modal-overlay { align-items: flex-end; }
+  .modal {
+    width: 100%;
+    max-width: 100vw;
+    max-height: 88vh;
+    border-radius: 20px 20px 0 0;
+    padding: 28px 20px 40px;
+  }
+
+  /* Tab bar horizontal scroll */
+  .tab-bar {
+    padding: 0 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab {
+    white-space: nowrap;
+    font-size: 0.78rem;
+    padding: 0 12px;
+  }
+
+  /* Header compact */
+  header {
+    padding: 0 14px;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 52px;
+  }
+
+  /* Main padding */
+  main { padding: 16px 14px; }
+
+  /* KPI strip 2 columns */
+  .kpi-strip { grid-template-columns: 1fr 1fr; }
+  .kpi { padding: 14px 16px; }
+  .kpi-val { font-size: 1.25rem; }
+
+  /* Grid single column */
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+
+  /* Toast bottom safe area */
+  .toast { bottom: 16px; right: 14px; left: 14px; text-align: center; }
+
+  /* Field row stack on mobile */
+  .field-row { grid-template-columns: 1fr; }
+}
