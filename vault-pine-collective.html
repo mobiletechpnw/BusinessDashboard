@@ -18,11 +18,11 @@
   header {
     background: var(--surface); border-bottom: 1px solid var(--border);
     padding: 0 32px; display: flex; align-items: stretch;
-    justify-content: space-between; position: sticky; top: 0; z-index: 200;
+    justify-content: flex-start; position: sticky; top: 0; z-index: 200;
     min-height: 58px;
   }
   .header-brand {
-    display: flex; align-items: center; gap: 14px;
+    display: flex; align-items: center; flex-shrink: 0;
   }
   .brand-logo {
     font-size: 1.2rem; font-weight: 800; letter-spacing: -0.4px; white-space: nowrap;
@@ -32,9 +32,9 @@
   .brand-sep { color: var(--border); font-weight: 300; font-size: 1.3rem; }
   .header-date { font-size: 0.75rem; color: var(--text2); }
 
-  /* ── Main nav (Sales / Goals) ── */
+  /* ── Main nav (Sales / Goals / etc) ── */
   .main-nav {
-    display: flex; align-items: stretch; gap: 0; margin-left: 28px;
+    display: flex; align-items: stretch; gap: 0; margin-left: 20px;
   }
   .main-tab {
     display: flex; align-items: center; padding: 0 22px;
@@ -46,7 +46,7 @@
   .main-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
   /* ── Header quick-stats ── */
-  .header-stats { display: flex; align-items: center; gap: 24px; }
+  .header-stats { display: flex; align-items: center; gap: 24px; margin-left: auto; }
   .hstat { text-align: right; }
   .hstat-num { font-size: 1.1rem; font-weight: 800; }
   .hstat-label { font-size: 0.65rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
@@ -309,22 +309,50 @@
   .dt-btn:hover { border-color: var(--accent); color: var(--accent); }
 
   @media (max-width: 700px) {
-    header { padding: 0 12px; flex-wrap: wrap; min-height: auto; gap: 6px; }
-    .main-nav { margin-left: 0; overflow-x: auto; gap: 0; flex-wrap: nowrap; scrollbar-width: none; }
+    /* Header: row 1 = brand + sync chip, row 2 = section nav */
+    header {
+      padding: 0 12px;
+      flex-wrap: wrap;
+      min-height: auto;
+      gap: 0;
+      justify-content: space-between;
+    }
+    .header-brand {
+      display: flex; align-items: center;
+      min-height: 52px;
+      padding: 6px 0;
+    }
+    .header-stats { display: none; }
+    /* Main nav becomes full-width second row */
+    .main-nav {
+      order: 10;
+      width: calc(100% + 24px);
+      margin: 0 -12px;
+      border-top: 1px solid var(--border);
+      overflow-x: auto;
+      scrollbar-width: none;
+      flex-wrap: nowrap;
+      padding: 0 4px;
+      height: 44px;
+      align-items: center;
+      gap: 0;
+    }
     .main-nav::-webkit-scrollbar { display: none; }
-    .main-tab { padding: 0 12px; font-size: 0.75rem; white-space: nowrap; min-height: 44px; }
+    .main-tab { padding: 0 14px; font-size: 0.78rem; white-space: nowrap; min-height: 44px; }
+    /* Shift sticky elements down for the 2-row header (52+44=96px) */
+    .dash-nav { top: 96px; }
+    .tab-bar { top: 136px; padding: 0 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-wrap: nowrap; }
+    .tab-bar::-webkit-scrollbar { display: none; }
+    .tab { white-space: nowrap; padding: 12px 14px; font-size: 0.78rem; }
+    .exp-tab-bar { top: 136px; padding: 0 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-wrap: nowrap; }
+    .exp-tab-bar::-webkit-scrollbar { display: none; }
+    .exp-tab { white-space: nowrap; }
     .kpi-bar, .goals-stat-bar { grid-template-columns: repeat(2, 1fr); }
     .jt-stat-bar, .pin-stat-bar, .exp-stat-bar { grid-template-columns: repeat(2, 1fr); }
     .grid-2, .grid-3 { grid-template-columns: 1fr; }
-    .tab-bar { padding: 0 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-wrap: nowrap; }
-    .tab-bar::-webkit-scrollbar { display: none; }
-    .tab { white-space: nowrap; padding: 12px 14px; font-size: 0.78rem; }
-    .exp-tab-bar { padding: 0 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-wrap: nowrap; }
-    .exp-tab-bar::-webkit-scrollbar { display: none; }
-    .exp-tab { white-space: nowrap; }
+    #filamentKpis { grid-template-columns: repeat(2, 1fr) !important; }
     main { padding: 12px; }
     .goals-grid { grid-template-columns: 1fr; }
-    .header-stats { display: none; }
     .table-wrap { overflow-x: auto; }
     table { font-size: 0.72rem; }
     .card { padding: 14px; }
@@ -333,14 +361,13 @@
     .btn-primary, .btn-ghost { padding: 8px 14px; font-size: 0.78rem; min-height: 44px; }
     .goals-top-bar { flex-direction: column; align-items: flex-start; }
     .filter-group { flex-wrap: wrap; }
-    .data-tools { bottom: 70px; }
+    .data-tools { display: none; }
     #backup-banner { width: 92%; flex-wrap: wrap; }
   }
   @media (max-width: 480px) {
     .modal { position: fixed; bottom: 0; left: 0; right: 0; width: 100% !important; max-width: 100% !important; border-radius: 16px 16px 0 0; max-height: 85vh; }
     .kpi-bar, .goals-stat-bar, .jt-stat-bar, .pin-stat-bar, .exp-stat-bar { grid-template-columns: 1fr 1fr; }
     .field-row { grid-template-columns: 1fr; }
-    .data-tools { display: none; }
     .modal-actions { flex-direction: column-reverse; }
     .modal-actions button { width: 100%; }
   }
@@ -355,14 +382,14 @@
       <span class="vault">Vault</span> <span style="color:var(--border)">&amp;</span> <span class="pine">Pine</span>
       <span style="color:var(--text2);font-weight:400;font-size:.9rem;margin-left:4px">Collective</span>
     </div>
-    <div class="main-nav">
-      <div class="main-tab active" data-section="sales">Sales</div>
-      <div class="main-tab" data-section="goals">Goals &amp; Objectives</div>
-      <div class="main-tab" data-section="expenses">Expenses</div>
-      <div class="main-tab" data-section="jettags">🏷 Jet Tags</div>
-      <div class="main-tab" data-section="pins">📌 Pins</div>
-      <div class="main-tab" data-section="events">🎪 Events</div>
-    </div>
+  </div>
+  <div class="main-nav">
+    <div class="main-tab active" data-section="sales">Sales</div>
+    <div class="main-tab" data-section="goals">Goals &amp; Objectives</div>
+    <div class="main-tab" data-section="expenses">Expenses</div>
+    <div class="main-tab" data-section="jettags">🏷 Jet Tags</div>
+    <div class="main-tab" data-section="pins">📌 Pins</div>
+    <div class="main-tab" data-section="events">🎪 Events</div>
   </div>
   <div class="header-stats">
     <div class="hstat">
@@ -1251,6 +1278,10 @@
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════ FAB ══ -->
+<!-- Context-aware FAB: shows the right "add" modal for the active section/tab -->
+<button class="fab" id="vpc-fab" onclick="vpcFabAction()" title="Quick add" aria-label="Add">＋</button>
+
 <!-- ══════════════════════════════════════════ DATA TOOLS ══ -->
 <div class="data-tools">
   <button class="dt-btn" onclick="exportBackup()" title="Download a full backup (orders, goals, expenses) as JSON">⬇ Backup</button>
@@ -1264,6 +1295,22 @@
 <div class="toast" id="toast"></div>
 
 <script>
+// ── Context-aware FAB ──
+function vpcFabAction() {
+  const activeSection = document.querySelector('.section.active');
+  const sectionId = activeSection ? activeSection.id : 'section-sales';
+  if (sectionId === 'section-goals') { openGoalModal(); return; }
+  if (sectionId === 'section-expenses') { openExpModal(); return; }
+  if (sectionId === 'section-jettags') { openJtSaleModal(); return; }
+  if (sectionId === 'section-pins') { openPinSaleModal(); return; }
+  if (sectionId === 'section-events') { openEvModal(); return; }
+  // Sales section — check which sub-tab is active
+  const activeTab = document.querySelector('#section-sales .tab.active');
+  const tabId = activeTab ? activeTab.dataset.tab : 'overview';
+  if (tabId === 'filament') { openAddFilament(); return; }
+  openAddOrder();
+}
+
 // ══════════════════════════════════════════════════════════════
 //  SHARED UTILITIES
 // ══════════════════════════════════════════════════════════════

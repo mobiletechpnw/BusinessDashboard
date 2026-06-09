@@ -151,7 +151,7 @@ button { cursor: pointer; border: none; border-radius: 8px; font-size: 0.85rem; 
   padding: 0 32px;
   background: var(--surface);
   position: sticky;
-  top: 58px;
+  top: 98px;   /* 58px header + 40px dash-nav */
   z-index: 150;
 }
 .tab {
@@ -286,6 +286,7 @@ main { max-width: 1300px; margin: 0 auto; padding: 28px 24px; }
 /* ── Tab bars scroll horizontally on mobile ── */
 @media (max-width: 700px) {
   .tab-bar {
+    top: 92px;  /* 52px header + 40px dash-nav */
     padding: 0 8px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
