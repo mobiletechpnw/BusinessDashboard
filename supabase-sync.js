@@ -17,30 +17,59 @@ const VPC_SUPABASE_URL = 'https://cqvnspbdfmgwcutezmqe.supabase.co';
 const VPC_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxdm5zcGJkZm1nd2N1dGV6bXFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NjI3MDUsImV4cCI6MjA5NjEzODcwNX0.0GGjc6i8VwgJgDUFNwcNzEy4r0_sAo57I5iMMPi7dII';
 const SESSION_KEY      = 'vpc_auth_session';
 
-// All localStorage keys synced to the cloud
+// All localStorage keys synced to the cloud.
+// Supabase table: app_data (key TEXT, value JSONB, user_id UUID, updated_at TIMESTAMPTZ)
+// Primary key: (key, user_id) — RLS ensures each user only sees their own rows.
 const SYNC_KEYS = [
+  // ── Sales & Orders ──────────────────────────────────────
   'vp_orders_v2',
-  'vp_goals_v1',
+
+  // ── Goals ───────────────────────────────────────────────
   'goals_dashboard_v1',
-  'vp_expenses_v1',
-  'vp_jettags_v1',
-  'vp_jettags_restock_v1',
-  'vp_pins_v1',
-  'vp_pins_restock_v1',
-  'vp_events_v1',
-  'vpc_content_v1',
+  'vp_goals_v1',              // legacy key — kept for backwards compatibility
+
+  // ── Expenses ────────────────────────────────────────────
   'vpc_personal_expenses_v1',
   'vpc_recurring_expenses_v1',
   'vpc_expense_budget_v1',
-  'vpc_print_queue_v1',
-  'vpc_inventory_v1',
-  'vpc_costs_v1',
-  'vpc_printer_credits_v1',
-  'riser_monthly_goal_v1',
-  'riser_filament_v1',
+  'vp_expenses_v1',           // legacy key — still read by analytics/review
+
+  // ── Events & Tables ─────────────────────────────────────
   'vpc_events_v1',
   'vpc_vendors_v1',
   'vpc_tables_v1',
+  'vp_events_v1',             // legacy key — still read by vault-pine page
+
+  // ── Products: JetTags ───────────────────────────────────
+  'vp_jettags_v1',
+  'vp_jettags_restock_v1',
+
+  // ── Products: Pins ──────────────────────────────────────
+  'vp_pins_v1',
+  'vp_pins_restock_v1',
+
+  // ── Content Planner ─────────────────────────────────────
+  'vpc_content_v1',
+
+  // ── Production / 3-D Printing ───────────────────────────
+  'vpc_print_queue_v1',
+  'vpc_inventory_v1',
+  'vpc_printer_credits_v1',
+  'riser_monthly_goal_v1',
+  'riser_filament_v1',
+  'vpc_costs_v1',
+
+  // ── Analytics cost config ────────────────────────────────
+  // vpc_costs_v1 already above
+
+  // ── Audit log ───────────────────────────────────────────
+  'vpc_audit_log',
+
+  // ── User preferences (sync across devices) ───────────────
+  'vpc_theme',
+  'vpc_pin_hash',
+  'jarvis_webhook',
+  'jarvis_vad',
 ];
 
 const LAST_SYNC_KEY  = 'vpc_last_sync_at';
