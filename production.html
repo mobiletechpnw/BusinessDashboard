@@ -159,6 +159,14 @@
   <a class="home-link" href="index.html">⌂ Home</a>
 </header>
 
+<nav class="dash-nav">
+  <a href="vault-pine-collective.html" class="dash-nav-link">📊 Sales Hub</a>
+  <a href="analytics.html" class="dash-nav-link">📈 Analytics</a>
+  <a href="production.html" class="dash-nav-link active">🖨️ Production</a>
+  <a href="content.html" class="dash-nav-link">📱 Content</a>
+  <a href="review.html" class="dash-nav-link">📋 Daily Review</a>
+</nav>
+
 <!-- Low-stock alert banner -->
 <div class="alert-banner hidden" id="low-stock-banner">
   ⚠️ <strong>Low Stock Alert:</strong> <span id="low-stock-text"></span>
@@ -381,6 +389,7 @@ function saveJob() {
     q.push({ id: uid(), item, qty, estHours, filament, status, startedAt: started || (status === 'printing' ? new Date().toISOString() : null), notes, createdAt: new Date().toISOString() });
   }
   saveQueue(q);
+  if (typeof auditLog === 'function') auditLog(editJobId ? 'EDIT_JOB' : 'ADD_JOB', 'vpc_print_queue_v1', `Job: ${document.getElementById('job-item')?.value || ''}`);
   closeJobModal();
   renderQueue();
   toast(editJobId ? 'Job updated.' : 'Print job added!');
@@ -535,6 +544,7 @@ function saveInvItem() {
     unit:      $('inv-unit').value.trim() || 'units',
   });
   saveInv(inv);
+  if (typeof auditLog === 'function') auditLog('SAVE_INVENTORY', 'vpc_inventory_v1', 'Inventory updated');
   closeInvModal();
   renderInventory();
   toast('Item added!');
@@ -651,6 +661,11 @@ function toast(msg) {
 setInterval(() => {
   if (getQueue().some(j => j.status === 'printing')) renderQueue();
 }, 60000);
+
+window.renderAll = function() {
+  renderQueue();
+  renderInventory();
+};
 
 document.addEventListener('DOMContentLoaded', () => {
   renderQueue();

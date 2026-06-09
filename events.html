@@ -195,6 +195,15 @@ main { padding:24px 28px; }
   </div>
 </header>
 
+<nav class="dash-nav">
+  <a href="vault-pine-collective.html" class="dash-nav-link">📊 Sales Hub</a>
+  <a href="analytics.html" class="dash-nav-link">📈 Analytics</a>
+  <a href="production.html" class="dash-nav-link">🖨️ Production</a>
+  <a href="content.html" class="dash-nav-link">📱 Content</a>
+  <a href="events.html" class="dash-nav-link active">🎪 Events</a>
+  <a href="review.html" class="dash-nav-link">📋 Daily Review</a>
+</nav>
+
 <div class="stat-bar">
   <div class="stat-cell"><div class="stat-val" id="st-events">0</div><div class="stat-lbl">Events</div></div>
   <div class="stat-cell"><div class="stat-val" id="st-vendors">0</div><div class="stat-lbl">Vendors</div></div>
@@ -487,6 +496,7 @@ function saveEvent() {
   const idx  = arr.findIndex(x => x.id === item.id);
   idx >= 0 ? arr[idx] = item : arr.push(item);
   setEvents(arr);
+  if (typeof auditLog === 'function') auditLog(editEvId ? 'EDIT_EVENT' : 'ADD_EVENT', 'vpc_events_v1', document.getElementById('ev-name')?.value || '');
   closeModal('event-modal');
   renderAll();
 }
@@ -494,6 +504,7 @@ function deleteEvent() {
   if (!confirm('Delete this event and all its table entries?')) return;
   setEvents(getEvents().filter(x => x.id !== editEvId));
   setTables(getTables().filter(t => t.eventId !== editEvId));
+  if (typeof auditLog === 'function') auditLog('DELETE_EVENT', 'vpc_events_v1', 'Event deleted');
   closeModal('event-modal');
   renderAll();
 }
@@ -518,6 +529,7 @@ function saveVendor() {
   const idx  = arr.findIndex(x => x.id === item.id);
   idx >= 0 ? arr[idx] = item : arr.push(item);
   setVendors(arr);
+  if (typeof auditLog === 'function') auditLog(editVnId ? 'EDIT_VENDOR' : 'ADD_VENDOR', 'vpc_vendors_v1', document.getElementById('vn-name')?.value || '');
   closeModal('vendor-modal');
   renderAll();
 }
@@ -718,6 +730,7 @@ function renderAll() {
   renderMatrix();
   if (currentEvTab === 'roi') renderROI();
 }
+window.renderAll = renderAll;
 renderAll();
 </script>
 <button class="fab" onclick="openEventModal()" title="Add Event" style="bottom:calc(24px + env(safe-area-inset-bottom));right:24px;position:fixed;z-index:300;background:var(--accent);color:#fff;border:none;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:0 4px 20px rgba(108,140,255,0.5);">＋</button>

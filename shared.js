@@ -651,6 +651,30 @@ function injectLightModeCSS() {
 
 // ── INIT ──────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  // ── Smart back-link tracking ──────────────────────────
+  const _curPage = location.pathname.split('/').pop() || 'index.html';
+  const _prevPage = sessionStorage.getItem('vpc_last_page');
+  if (_prevPage && _prevPage !== _curPage) {
+    sessionStorage.setItem('vpc_prev_page', _prevPage);
+    // Inject back-link into any .smart-back element on page
+    const backEl = document.querySelector('.smart-back');
+    if (backEl && _prevPage !== 'index.html') {
+      const labels = {
+        'review.html': '← Daily Review',
+        'expenses.html': '← Expenses',
+        'goals-dashboard.html': '← Goals',
+        'analytics.html': '← Analytics',
+        'vault-pine-collective.html': '← Dashboard',
+        'production.html': '← Production',
+        'content.html': '← Content',
+        'events.html': '← Events',
+      };
+      backEl.href = _prevPage;
+      backEl.textContent = labels[_prevPage] || '← Back';
+      backEl.classList.add('visible');
+    }
+  }
+  sessionStorage.setItem('vpc_last_page', _curPage);
   injectLightModeCSS();
   const saved = localStorage.getItem(THEME_KEY) || 'dark';
   applyTheme(saved);
