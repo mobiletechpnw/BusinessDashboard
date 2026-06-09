@@ -446,7 +446,10 @@
       </div>
       <div class="grid-2" style="margin-bottom:20px">
         <div class="card">
-          <div class="card-title">Upcoming Deliveries</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <div class="card-title" style="margin-bottom:0">Upcoming Deliveries</div>
+            <button onclick="openAddDelivery()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2);border-radius:6px;padding:3px 10px;font-size:.72rem;cursor:pointer">+ Add</button>
+          </div>
           <div id="pipelineList"></div>
         </div>
         <div class="card">
@@ -792,6 +795,28 @@
 <!-- ══════════════════════════════════════════ MODALS ══ -->
 
 <!-- Add Order Modal -->
+<div class="modal-overlay" id="delivery-modal" onclick="if(event.target===this)closeAddDelivery()">
+  <div class="modal" style="max-width:420px">
+    <h2>Add Upcoming Delivery</h2>
+    <div class="field">
+      <label>Delivery Date</label>
+      <input type="date" id="dlv-date">
+    </div>
+    <div class="field">
+      <label>Customer</label>
+      <input type="text" id="dlv-customer" placeholder="e.g. Mike — CardStore">
+    </div>
+    <div class="field">
+      <label>Note</label>
+      <input type="text" id="dlv-note" placeholder="e.g. 2 sets — Emerald show">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeAddDelivery()">Cancel</button>
+      <button class="btn-primary" onclick="saveDelivery()">Add Delivery</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="addOrderModal">
   <div class="modal">
     <h2 id="aoTitle">Log New Order</h2>
@@ -1357,11 +1382,23 @@ const HISTORICAL = [
   { id:'h47', date:'2026-06-02', customer:'Yash - Silver Clash TCG',   product:'18 Large + 9 Caps (3rd)',     sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Deliver 6/20' },
 ];
 
-const PIPELINE = [
-  { date:'2026-06-06', customer:'Raymond - Sleepy PokeShop', note:'2 sets — Emerald+Cardfest Show' },
-  { date:'2026-06-06', customer:'boxheadtc - Joe Mendez',    note:'1 set — pickup' },
-  { date:'2026-06-20', customer:'Yash - Silver Clash TCG',   note:'3 sets — must deliver' },
+const LS_PIPELINE = 'vpc_pipeline_v1';
+const PIPELINE_SEED = [
+  { id:'p1', date:'2026-06-06', customer:'Raymond - Sleepy PokeShop', note:'2 sets — Emerald+Cardfest Show' },
+  { id:'p2', date:'2026-06-06', customer:'boxheadtc - Joe Mendez',    note:'1 set — pickup' },
+  { id:'p3', date:'2026-06-20', customer:'Yash - Silver Clash TCG',   note:'3 sets — must deliver' },
 ];
+function getPipeline() {
+  const raw = localStorage.getItem(LS_PIPELINE);
+  if (raw) return JSON.parse(raw);
+  localStorage.setItem(LS_PIPELINE, JSON.stringify(PIPELINE_SEED));
+  return PIPELINE_SEED.map(p => ({ ...p }));
+}
+function savePipeline(arr) { localStorage.setItem(LS_PIPELINE, JSON.stringify(arr)); }
+function deleteDelivery(id) {
+  savePipeline(getPipeline().filter(p => p.id !== id));
+  renderPipeline();
+}
 
 const LS_ORDERS    = 'vp_orders_v2';      // unified, fully-editable order store
 const LS_ORDERS_V1 = 'riser_orders_v1';   // legacy custom-orders store (pre-migration)
@@ -1490,22 +1527,46 @@ function renderMonthlyChart() {
 
 // ── Pipeline ──
 function renderPipeline() {
-  const today = todayDate();
-  const html = PIPELINE.map(p => {
-    const d = new Date(p.date + 'T00:00:00');
+  const today    = todayDate();
+  const pipeline = getPipeline().sort((a, b) => a.date.localeCompare(b.date));
+  const html = pipeline.map(p => {
+    const d    = new Date(p.date + 'T00:00:00');
     const diff = Math.round((d - today) / 86400000);
-    const cls = diff <= 0 ? 'urgent' : diff <= 5 ? '' : 'ok';
+    const cls  = diff <= 0 ? 'urgent' : diff <= 5 ? '' : 'ok';
     const label = diff === 0 ? 'Today' : diff < 0 ? `${-diff}d overdue` : `in ${diff}d`;
-    return `<div class="pipeline-item">
+    return `<div class="pipeline-item" style="position:relative">
       <div class="pipeline-dot ${cls}"></div>
       <div class="pipeline-date">${fmtDate(p.date)}</div>
-      <div>
-        <div class="pipeline-name">${p.customer}</div>
-        <div class="pipeline-note">${p.note} — <span style="color:var(--yellow)">${label}</span></div>
+      <div style="flex:1;min-width:0">
+        <div class="pipeline-name">${esc(p.customer)}</div>
+        <div class="pipeline-note">${esc(p.note)} — <span style="color:var(--yellow)">${label}</span></div>
       </div>
+      <button onclick="deleteDelivery('${p.id}')" title="Remove" style="background:none;border:none;color:#556;font-size:.9rem;cursor:pointer;padding:2px 6px;flex-shrink:0;line-height:1" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='#556'">✕</button>
     </div>`;
   }).join('');
-  document.getElementById('pipelineList').innerHTML = html || '<div style="color:var(--text2);font-size:.82rem">No upcoming deliveries.</div>';
+  document.getElementById('pipelineList').innerHTML = html || '<div style="color:var(--text2);font-size:.82rem;padding:8px 0">No upcoming deliveries.</div>';
+}
+
+function openAddDelivery() {
+  const today = TODAY;
+  document.getElementById('delivery-modal').classList.add('open');
+  document.getElementById('dlv-date').value     = today;
+  document.getElementById('dlv-customer').value = '';
+  document.getElementById('dlv-note').value     = '';
+  setTimeout(() => document.getElementById('dlv-customer').focus(), 80);
+}
+function closeAddDelivery() { document.getElementById('delivery-modal').classList.remove('open'); }
+function saveDelivery() {
+  const date     = document.getElementById('dlv-date').value;
+  const customer = document.getElementById('dlv-customer').value.trim();
+  const note     = document.getElementById('dlv-note').value.trim();
+  if (!date || !customer) { alert('Date and customer are required.'); return; }
+  const arr = getPipeline();
+  arr.push({ id: 'p' + Date.now(), date, customer, note });
+  savePipeline(arr);
+  renderPipeline();
+  closeAddDelivery();
+  toast('Delivery added.');
 }
 
 function renderThisMonthSnap() {

@@ -59,9 +59,6 @@ const SYNC_KEYS = [
   'riser_filament_v1',
   'vpc_costs_v1',
 
-  // ── Analytics cost config ────────────────────────────────
-  // vpc_costs_v1 already above
-
   // ── Audit log ───────────────────────────────────────────
   'vpc_audit_log',
 
@@ -70,6 +67,9 @@ const SYNC_KEYS = [
   'vpc_pin_hash',
   'jarvis_webhook',
   'jarvis_vad',
+
+  // ── Upcoming Deliveries ──────────────────────────────────
+  'vpc_pipeline_v1',
 ];
 
 // Initialize __ts for any SYNC_KEY that has data but no timestamp
