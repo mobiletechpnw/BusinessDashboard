@@ -57,7 +57,7 @@ body{min-height:100vh;display:flex;align-items:center;justify-content:center;
     <div class="logo-sub">Business Command Center</div>
   </div>
 
-  <div class="tabs">
+  <div class="tabs" id="auth-tabs">
     <button class="tab-btn active" id="tab-signin" onclick="setMode('signin')">Sign In</button>
     <button class="tab-btn"        id="tab-signup" onclick="setMode('signup')">Sign Up</button>
   </div>
@@ -69,14 +69,20 @@ body{min-height:100vh;display:flex;align-items:center;justify-content:center;
     <label>Email</label>
     <input type="email" id="inp-email" placeholder="you@example.com" autocomplete="email">
   </div>
-  <div class="field">
+  <div class="field" id="pass-field">
     <label>Password</label>
     <input type="password" id="inp-pass" placeholder="••••••••" autocomplete="current-password">
+  </div>
+  <div style="text-align:right;margin:-10px 0 14px" id="forgot-wrap">
+    <button type="button" onclick="setMode('forgot')" style="background:none;border:none;color:#6c8cff;font-size:.73rem;cursor:pointer;padding:4px 0">Forgot password?</button>
   </div>
 
   <button class="btn-submit" id="submit-btn" onclick="handleAuth()">Sign In</button>
 
   <div class="hint" id="hint-text">Your data syncs automatically across all devices once signed in.</div>
+  <div style="text-align:center;margin-top:14px;display:none" id="back-link">
+    <button type="button" onclick="setMode('signin')" style="background:none;border:none;color:#8892b0;font-size:.73rem;cursor:pointer;padding:4px;text-decoration:underline;text-underline-offset:2px">← Back to Sign In</button>
+  </div>
 </div>
 
 <script>
@@ -88,14 +94,23 @@ let mode = 'signin';
 
 function setMode(m) {
   mode = m;
+  const isForgot = m === 'forgot';
+  document.getElementById('auth-tabs').style.display   = isForgot ? 'none' : '';
+  document.getElementById('pass-field').style.display  = isForgot ? 'none' : '';
+  document.getElementById('forgot-wrap').style.display = isForgot ? 'none' : '';
+  document.getElementById('back-link').style.display   = isForgot ? ''     : 'none';
   document.getElementById('tab-signin').classList.toggle('active', m === 'signin');
   document.getElementById('tab-signup').classList.toggle('active', m === 'signup');
-  document.getElementById('submit-btn').textContent = m === 'signin' ? 'Sign In' : 'Create Account';
-  document.getElementById('inp-pass').autocomplete  = m === 'signin' ? 'current-password' : 'new-password';
+  document.getElementById('submit-btn').textContent = isForgot ? 'Send Reset Email'
+    : m === 'signin' ? 'Sign In' : 'Create Account';
+  document.getElementById('hint-text').textContent = isForgot
+    ? "Enter your email and we'll send you a link to reset your password."
+    : 'Your data syncs automatically across all devices once signed in.';
+  if (!isForgot) document.getElementById('inp-pass').autocomplete = m === 'signin' ? 'current-password' : 'new-password';
   hide('error-box'); hide('success-box');
 }
 
-function show(id, msg) { const el = document.getElementById(id); el.textContent = msg; el.style.display = ''; }
+function show(id, msg) { const el = document.getElementById(id); el.textContent = msg; el.style.display = 'block'; }
 function hide(id)       { document.getElementById(id).style.display = 'none'; }
 
 async function handleAuth() {
@@ -103,12 +118,25 @@ async function handleAuth() {
   const pass  = document.getElementById('inp-pass').value;
   const btn   = document.getElementById('submit-btn');
 
-  if (!email || !pass) { show('error-box', 'Email and password are required.'); return; }
+  if (!email) { show('error-box', 'Email is required.'); return; }
+  if (mode !== 'forgot' && !pass) { show('error-box', 'Password is required.'); return; }
   hide('error-box'); hide('success-box');
   btn.disabled = true;
-  btn.textContent = mode === 'signin' ? 'Signing in…' : 'Creating account…';
+  btn.textContent = mode === 'signin' ? 'Signing in…' : mode === 'signup' ? 'Creating account…' : 'Sending…';
 
   try {
+    if (mode === 'forgot') {
+      const redirectTo = new URL('reset-password.html', window.location.href).href;
+      await fetch(`${SUPABASE_URL}/auth/v1/recover`, {
+        method:  'POST',
+        headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email, redirectTo }),
+      });
+      setMode('signin');
+      show('success-box', '✅ Check your email for a password reset link.');
+      return;
+    }
+
     const endpoint = mode === 'signin'
       ? `${SUPABASE_URL}/auth/v1/token?grant_type=password`
       : `${SUPABASE_URL}/auth/v1/signup`;
@@ -126,8 +154,8 @@ async function handleAuth() {
     }
 
     if (mode === 'signup' && !data.access_token) {
-      show('success-box', '✅ Account created! Check your email to confirm, then sign in.');
       setMode('signin');
+      show('success-box', '✅ Account created! Check your email to confirm, then sign in.');
       return;
     }
 
@@ -150,7 +178,7 @@ async function handleAuth() {
     show('error-box', 'Connection error — check your internet and try again.');
   } finally {
     btn.disabled = false;
-    btn.textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
+    btn.textContent = mode === 'forgot' ? 'Send Reset Email' : mode === 'signin' ? 'Sign In' : 'Create Account';
   }
 }
 

@@ -9,6 +9,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="styles.css">
 <script src="shared.js" defer></script>
+<script src="supabase-sync.js" defer></script>
 <title>Events &amp; Tables — VPC</title>
 <style>
 body { min-height:100vh; }
@@ -145,6 +146,24 @@ main { padding:24px 28px; }
 .paid-big-toggle.is-unpaid { border-color:var(--yellow); color:var(--yellow); background:rgba(251,191,36,.08); }
 .paid-big-toggle.is-unpaid:hover { background:rgba(251,191,36,.18); }
 
+/* TAB BAR */
+.ev-tab-bar { border-bottom:1px solid var(--border); background:var(--surface); display:flex; padding:0 28px; }
+.ev-tab { padding:12px 18px; font-size:.82rem; font-weight:600; color:var(--text2); cursor:pointer; border-bottom:2px solid transparent; transition:all .15s; user-select:none; white-space:nowrap; }
+.ev-tab:hover { color:var(--text); }
+.ev-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+/* ROI CARDS */
+.roi-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:16px; margin-top:4px; }
+.roi-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; }
+.roi-event-name { font-size:.95rem; font-weight:800; line-height:1.3; }
+.roi-event-meta { font-size:.72rem; color:var(--text2); margin-top:3px; margin-bottom:14px; }
+.roi-stats { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
+.roi-stat { background:var(--surface2); border-radius:6px; padding:10px 12px; }
+.roi-stat-val { font-size:1rem; font-weight:800; }
+.roi-stat-lbl { font-size:.62rem; color:var(--text2); text-transform:uppercase; letter-spacing:.3px; margin-top:2px; }
+.roi-net { padding-top:12px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+.roi-badge { font-size:.62rem; font-weight:700; padding:3px 8px; border-radius:99px; text-transform:uppercase; letter-spacing:.4px; }
+
 @media(max-width:700px) {
   main { padding:14px; }
   .stat-bar { grid-template-columns:repeat(3,1fr); }
@@ -152,6 +171,8 @@ main { padding:24px 28px; }
   .header-right { gap:6px; flex-wrap:wrap; }
   .btn-primary, .btn-ghost { padding:7px 10px; font-size:0.75rem; min-height:40px; }
   .back-link { padding:5px 8px; font-size:0.7rem; }
+  .ev-tab-bar { padding:0 10px; overflow-x:auto; scrollbar-width:none; }
+  .ev-tab-bar::-webkit-scrollbar { display:none; }
 }
 @media(max-width:480px) {
   .stat-bar { grid-template-columns:1fr 1fr; }
@@ -182,15 +203,32 @@ main { padding:24px 28px; }
   <div class="stat-cell"><div class="stat-val" style="color:var(--yellow)" id="st-outstanding">$0</div><div class="stat-lbl">Outstanding</div></div>
 </div>
 
+<div class="ev-tab-bar">
+  <div class="ev-tab active" data-tab="matrix" onclick="switchEvTab('matrix')">📋 Matrix</div>
+  <div class="ev-tab" data-tab="roi" onclick="switchEvTab('roi')">📈 ROI</div>
+</div>
+
 <main>
-  <div id="matrix-wrap"></div>
-  <div class="empty-state" id="empty-state">
-    <div class="empty-icon">🗓️</div>
-    <div class="empty-title" id="empty-title">No data yet</div>
-    <div class="empty-sub" id="empty-sub">Add your events and vendors to start tracking table payments.</div>
-    <div class="empty-actions">
-      <button class="btn-ghost" onclick="openVendorModal()">+ Add Vendor</button>
-      <button class="btn-primary" onclick="openEventModal()">+ Add Event</button>
+  <div id="panel-matrix">
+    <div id="matrix-wrap"></div>
+    <div class="empty-state" id="empty-state">
+      <div class="empty-icon">🗓️</div>
+      <div class="empty-title" id="empty-title">No data yet</div>
+      <div class="empty-sub" id="empty-sub">Add your events and vendors to start tracking table payments.</div>
+      <div class="empty-actions">
+        <button class="btn-ghost" onclick="openVendorModal()">+ Add Vendor</button>
+        <button class="btn-primary" onclick="openEventModal()">+ Add Event</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="panel-roi" style="display:none">
+    <div id="roi-kpis" class="kpi-strip" style="margin-bottom:20px;grid-template-columns:repeat(4,1fr)"></div>
+    <div class="roi-grid" id="roi-cards"></div>
+    <div class="empty-state" id="roi-empty" style="display:none">
+      <div class="empty-icon">📈</div>
+      <div class="empty-title">No events to analyze</div>
+      <div class="empty-sub">Add events and table entries to see ROI analysis per show.</div>
     </div>
   </div>
 </main>
@@ -554,8 +592,132 @@ function deleteCellEntry() {
   renderAll();
 }
 
+// ── TAB SWITCHING ─────────────────────────────────────
+let currentEvTab = 'matrix';
+
+function switchEvTab(tab) {
+  currentEvTab = tab;
+  document.querySelectorAll('.ev-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.getElementById('panel-matrix').style.display = tab === 'matrix' ? '' : 'none';
+  document.getElementById('panel-roi').style.display    = tab === 'roi'    ? '' : 'none';
+  if (tab === 'roi') renderROI();
+}
+
+// ── ROI TAB ───────────────────────────────────────────
+function renderROI() {
+  const events  = getEvents().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const tables  = getTables();
+  const orders  = JSON.parse(localStorage.getItem('vp_orders_v2') || '[]');
+  const jt      = JSON.parse(localStorage.getItem('vp_jettags_v1') || '[]');
+  const pins    = JSON.parse(localStorage.getItem('vp_pins_v1') || '[]');
+  const costs   = JSON.parse(localStorage.getItem('vpc_costs_v1') || '{}');
+  const jtCost  = costs.jettag ?? 0.862;
+  const pinCost = costs.pin    ?? 0.95;
+
+  const roiEmpty = document.getElementById('roi-empty');
+  const roiCards = document.getElementById('roi-cards');
+  const roiKpis  = document.getElementById('roi-kpis');
+
+  if (!events.length) {
+    roiEmpty.style.display = '';
+    roiCards.innerHTML     = '';
+    roiKpis.innerHTML      = '';
+    return;
+  }
+  roiEmpty.style.display = 'none';
+
+  let totalTableCost = 0, totalRevenue = 0, totalNet = 0;
+  const cards = events.map(ev => {
+    // Table cost for this event
+    const evTables   = tables.filter(t => t.eventId === ev.id);
+    const tableCost  = evTables.reduce((s, t) => s + (+t.price || 0), 0);
+    const tableCount = evTables.length;
+
+    // Sales matching event date
+    const d = ev.date || '';
+    const dayOrders = orders.filter(o => (o.date || '') === d);
+    const dayJt     = jt.filter(t => (t.date || '') === d);
+    const dayPins   = pins.filter(p => (p.date || '') === d);
+
+    const revenue = dayOrders.reduce((s, o) => s + (o.salePrice || 0), 0)
+      + dayJt.reduce((s, t) => s + (t.revenue || 0), 0)
+      + dayPins.reduce((s, p) => s + (p.revenue || 0), 0);
+
+    const jtUnits  = dayJt.reduce((s, t) => s + (t.qty || 0), 0);
+    const pinUnits = dayPins.reduce((s, p) => s + (p.qty || 0), 0);
+    const cogs     = dayOrders.reduce((s, o) => s + (o.cogs || 0), 0)
+      + jtUnits * jtCost + pinUnits * pinCost;
+    const grossProfit = revenue - cogs;
+    const netAfterTables = grossProfit - tableCost;
+    const roiPct  = tableCost > 0 ? (netAfterTables / tableCost * 100) : null;
+
+    totalTableCost += tableCost;
+    totalRevenue   += revenue;
+    totalNet       += netAfterTables;
+
+    const badgeCls  = roiPct === null ? '' : roiPct >= 100 ? 'badge-green' : roiPct >= 0 ? 'badge-yellow' : 'badge-red';
+    const badgeTxt  = roiPct === null ? '— no tables' : roiPct >= 100 ? '💰 Strong ROI' : roiPct >= 0 ? '📊 Break-even' : '❌ Loss';
+    const netColor  = netAfterTables >= 0 ? 'var(--green)' : 'var(--red)';
+    const roiTxt    = roiPct !== null ? `${roiPct >= 0 ? '+' : ''}${roiPct.toFixed(0)}%` : '—';
+
+    return `
+      <div class="roi-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div class="roi-event-name">${esc(ev.name)}</div>
+            <div class="roi-event-meta">
+              ${ev.date ? `📅 ${fmtDate(ev.date)}` : ''}
+              ${ev.location ? ` · 📍 ${esc(ev.location)}` : ''}
+            </div>
+          </div>
+          <span class="roi-badge ${badgeCls}">${badgeTxt}</span>
+        </div>
+        <div class="roi-stats">
+          <div class="roi-stat">
+            <div class="roi-stat-val" style="color:var(--red)">${fmtMoney(tableCost)}</div>
+            <div class="roi-stat-lbl">Table Cost${tableCount ? ` · ${tableCount} tables` : ''}</div>
+          </div>
+          <div class="roi-stat">
+            <div class="roi-stat-val" style="color:var(--accent)">${fmtMoney(revenue)}</div>
+            <div class="roi-stat-lbl">Sales Revenue</div>
+          </div>
+          <div class="roi-stat">
+            <div class="roi-stat-val" style="color:var(--green)">${fmtMoney(grossProfit)}</div>
+            <div class="roi-stat-lbl">Gross Profit</div>
+          </div>
+          <div class="roi-stat">
+            <div class="roi-stat-val" style="color:var(--yellow)">${roiTxt}</div>
+            <div class="roi-stat-lbl">ROI on Tables</div>
+          </div>
+        </div>
+        <div class="roi-net">
+          <span style="font-size:.78rem;color:var(--text2)">COGS: <strong>${fmtMoney(cogs)}</strong></span>
+          <span style="font-size:.88rem">Net: <strong style="color:${netColor}">${fmtMoney(netAfterTables)}</strong></span>
+        </div>
+      </div>`;
+  });
+
+  roiCards.innerHTML = cards.join('');
+
+  const totalRoi = totalTableCost > 0 ? ((totalNet / totalTableCost) * 100).toFixed(0) + '%' : '—';
+  roiKpis.innerHTML = [
+    { val: events.length, label: 'Events', color: 'var(--text)' },
+    { val: fmtMoney(totalTableCost), label: 'Table Investment', color: 'var(--red)' },
+    { val: fmtMoney(totalRevenue), label: 'Total Revenue', color: 'var(--accent)' },
+    { val: fmtMoney(totalNet), label: 'Net After Tables', color: totalNet >= 0 ? 'var(--green)' : 'var(--red)' },
+  ].map(k => `
+    <div class="kpi">
+      <div class="kpi-val" style="color:${k.color}">${k.val}</div>
+      <div class="kpi-label">${k.label}</div>
+    </div>`).join('');
+}
+
 // ── RENDER ALL ───────────────────────────────────────
-function renderAll() { renderStats(); renderMatrix(); }
+function renderAll() {
+  renderStats();
+  renderMatrix();
+  if (currentEvTab === 'roi') renderROI();
+}
 renderAll();
 </script>
 <button class="fab" onclick="openEventModal()" title="Add Event" style="bottom:calc(24px + env(safe-area-inset-bottom));right:24px;position:fixed;z-index:300;background:var(--accent);color:#fff;border:none;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:0 4px 20px rgba(108,140,255,0.5);">＋</button>

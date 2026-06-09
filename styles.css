@@ -403,4 +403,3 @@ main { max-width: 1300px; margin: 0 auto; padding: 28px 24px; }
   .toast  { bottom: calc(16px + env(safe-area-inset-bottom)); }
   footer  { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
 }
-
