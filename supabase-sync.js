@@ -203,13 +203,14 @@ async function sbFetch(path, opts = {}) {
 
 async function sbUpsert(key, value) {
   const session = await VpcAuth.getValid();
+  if (!session?.user?.id) throw new Error('No authenticated user — cannot upsert');
   return sbFetch('app_data', {
     method:  'POST',
     headers: { 'Prefer': 'resolution=merge-duplicates,return=representation' },
     body: JSON.stringify({
       key,
       value,
-      user_id:    session?.user?.id || null,
+      user_id:    session.user.id,
       updated_at: new Date().toISOString(),
     }),
   });

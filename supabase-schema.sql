@@ -1,12 +1,12 @@
 -- ══════════════════════════════════════════════════════════════════
 --  Vault & Pine Collective — Business Dashboard
---  Supabase Schema
---  Run this in the Supabase SQL Editor to create or recreate tables.
+--  Supabase Schema  (idempotent — safe to run multiple times)
+--  Run this in the Supabase SQL Editor (Dashboard → SQL Editor → New query).
 -- ══════════════════════════════════════════════════════════════════
 
 -- ── app_data: universal key-value store ──────────────────────────
 -- One row per (user_id, key). Stores all dashboard data as JSON blobs.
--- The app syncs every localStorage key listed in SYNC_KEYS to this table.
+-- The app syncs every localStorage key in SYNC_KEYS to this table.
 
 CREATE TABLE IF NOT EXISTS public.app_data (
   user_id    UUID        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -19,6 +19,14 @@ CREATE TABLE IF NOT EXISTS public.app_data (
 -- ── Row Level Security ────────────────────────────────────────────
 ALTER TABLE public.app_data ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies first so this script is safe to re-run
+DROP POLICY IF EXISTS "users_select_own" ON public.app_data;
+DROP POLICY IF EXISTS "users_insert_own" ON public.app_data;
+DROP POLICY IF EXISTS "users_update_own" ON public.app_data;
+DROP POLICY IF EXISTS "users_delete_own" ON public.app_data;
+-- Legacy policy names (in case an older run used different names)
+DROP POLICY IF EXISTS "own_data" ON public.app_data;
+
 -- Each user can only read, write, and delete their own rows.
 CREATE POLICY "users_select_own"
   ON public.app_data FOR SELECT
@@ -30,21 +38,40 @@ CREATE POLICY "users_insert_own"
 
 CREATE POLICY "users_update_own"
   ON public.app_data FOR UPDATE
-  USING (auth.uid() = user_id)
+  USING  (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "users_delete_own"
   ON public.app_data FOR DELETE
-  USING (auth.uid() = user_id);
+  USING  (auth.uid() = user_id);
 
 -- ── Index for faster key lookups ──────────────────────────────────
 CREATE INDEX IF NOT EXISTS app_data_user_key_idx ON public.app_data (user_id, key);
 
 -- ── Grant API access ──────────────────────────────────────────────
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.app_data TO authenticated;
-GRANT SELECT ON public.app_data TO anon;  -- anon gets blocked by RLS anyway
+GRANT SELECT ON public.app_data TO anon;  -- anon is blocked by RLS anyway
 
 
+-- ══════════════════════════════════════════════════════════════════
+--  MIGRATION — run this ONLY if you already have an older app_data
+--  table that was created WITHOUT the user_id column.
+-- ══════════════════════════════════════════════════════════════════
+--
+-- Step 1: Add the column (nullable so existing rows don't break)
+--   ALTER TABLE public.app_data
+--     ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
+--
+-- Step 2: Remove rows that have no user_id (they can't be assigned to anyone)
+--   DELETE FROM public.app_data WHERE user_id IS NULL;
+--
+-- Step 3: Drop the old single-column PK and add the composite PK
+--   ALTER TABLE public.app_data DROP CONSTRAINT IF EXISTS app_data_pkey;
+--   ALTER TABLE public.app_data ADD PRIMARY KEY (user_id, key);
+--
+-- Step 4: Make user_id NOT NULL now that nulls are gone
+--   ALTER TABLE public.app_data ALTER COLUMN user_id SET NOT NULL;
+--
 -- ══════════════════════════════════════════════════════════════════
 --  Keys stored in app_data (all stored under the authenticated user)
 -- ══════════════════════════════════════════════════════════════════
@@ -95,5 +122,8 @@ GRANT SELECT ON public.app_data TO anon;  -- anon gets blocked by RLS anyway
 --    vpc_pin_hash                 — SHA-256 of PIN (prefixed with vpc_salt_)
 --    jarvis_webhook               — JARVIS n8n/webhook URL
 --    jarvis_vad                   — voice activity detection threshold (0–100)
+--
+--  DELIVERIES
+--    vpc_pipeline_v1              — upcoming delivery pipeline entries
 --
 -- ══════════════════════════════════════════════════════════════════
