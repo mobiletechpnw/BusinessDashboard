@@ -76,6 +76,11 @@ main { padding:24px 28px; }
 .ev-meta { font-size:.68rem; color:var(--text2); margin-top:3px; line-height:1.5; }
 .ev-edit-btn { background:none; border:none; font-size:.68rem; color:var(--text2); cursor:pointer; padding:2px 5px; border-radius:4px; margin-top:6px; }
 .ev-edit-btn:hover { background:var(--surface2); color:var(--text); }
+.ev-approve-pill { display:inline-block; font-size:.6rem; font-weight:700; padding:3px 9px; border-radius:10px; text-transform:uppercase; letter-spacing:.3px; margin-top:7px; cursor:pointer; user-select:none; border:1px solid transparent; transition:all .12s; }
+.ev-approve-pill.is-approved { background:rgba(52,211,153,.18); color:var(--green); }
+.ev-approve-pill.is-approved:hover { border-color:var(--green); }
+.ev-approve-pill.is-pending { background:rgba(251,191,36,.18); color:var(--yellow); }
+.ev-approve-pill.is-pending:hover { border-color:var(--yellow); }
 
 /* ── DATA CELLS ── */
 .matrix td.cell { padding:0; cursor:pointer; vertical-align:middle; transition:background .12s; }
@@ -280,6 +285,10 @@ main { padding:24px 28px; }
       <label>Location</label>
       <input type="text" id="ev-location" placeholder="e.g. Seattle Convention Center">
     </div>
+    <div class="field">
+      <label>Approval Status</label>
+      <button class="paid-big-toggle" id="ev-approved-toggle" onclick="flipEvApproved()"></button>
+    </div>
     <div class="modal-actions">
       <button class="btn-danger" id="ev-delete-btn" onclick="deleteEvent()" style="display:none">Delete Event</button>
       <button class="btn-ghost" onclick="closeModal('event-modal')">Cancel</button>
@@ -434,6 +443,13 @@ function renderMatrix() {
         ${ev.date     ? `📅 ${fmtDate(ev.date)}<br>` : ''}
         ${ev.location ? `📍 ${esc(ev.location)}` : ''}
       </div>
+      <div>
+        <span class="ev-approve-pill ${ev.approved ? 'is-approved' : 'is-pending'}"
+          onclick="toggleEventApproved('${ev.id}')"
+          title="${ev.approved ? 'Tap to mark as unapproved' : 'Tap to mark as approved'}">
+          ${ev.approved ? '✓ Approved' : '○ Unapproved'}
+        </span>
+      </div>
       <button class="ev-edit-btn" onclick="openEventModal('${ev.id}')">✏️ Edit</button>
     </td>`;
 
@@ -522,22 +538,47 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 );
 
 // ── EVENT MODAL ──────────────────────────────────────
-let editEvId = null;
+let editEvId = null, evApproved = false;
 function openEventModal(id) {
   editEvId = id || null;
   const ev = id ? getEvents().find(x => x.id === id) : null;
+  evApproved = ev?.approved || false;
   document.getElementById('ev-modal-title').textContent = ev ? 'Edit Event' : 'New Event';
   document.getElementById('ev-name').value     = ev?.name     || '';
   document.getElementById('ev-date').value     = ev?.date     || '';
   document.getElementById('ev-location').value = ev?.location || '';
   document.getElementById('ev-delete-btn').style.display = ev ? '' : 'none';
+  updateEvApprovedToggle();
   openModal('event-modal');
   setTimeout(() => document.getElementById('ev-name').focus(), 80);
+}
+function updateEvApprovedToggle() {
+  const btn = document.getElementById('ev-approved-toggle');
+  if (evApproved) {
+    btn.textContent = '✓ Approved — tap to mark as Unapproved';
+    btn.className   = 'paid-big-toggle is-paid';
+  } else {
+    btn.textContent = '○ Unapproved — tap to mark as Approved';
+    btn.className   = 'paid-big-toggle is-unpaid';
+  }
+}
+function flipEvApproved() {
+  evApproved = !evApproved;
+  updateEvApprovedToggle();
+}
+function toggleEventApproved(id) {
+  const arr = getEvents();
+  const ev  = arr.find(x => x.id === id);
+  if (!ev) return;
+  ev.approved = !ev.approved;
+  setEvents(arr);
+  if (typeof auditLog === 'function') auditLog('TOGGLE_EVENT_APPROVAL', 'vpc_events_v1', `${ev.name}: ${ev.approved ? 'approved' : 'unapproved'}`);
+  renderAll();
 }
 function saveEvent() {
   const name = document.getElementById('ev-name').value.trim();
   if (!name) { alert('Event name is required.'); return; }
-  const item = { id: editEvId || uid(), name, date: document.getElementById('ev-date').value, location: document.getElementById('ev-location').value.trim() };
+  const item = { id: editEvId || uid(), name, date: document.getElementById('ev-date').value, location: document.getElementById('ev-location').value.trim(), approved: evApproved };
   const arr  = getEvents();
   const idx  = arr.findIndex(x => x.id === item.id);
   idx >= 0 ? arr[idx] = item : arr.push(item);
@@ -911,6 +952,7 @@ function renderROI() {
             <div class="roi-event-meta">
               ${ev.date ? `📅 ${fmtDate(ev.date)}` : ''}
               ${ev.location ? ` · 📍 ${esc(ev.location)}` : ''}
+              · <span style="color:${ev.approved ? 'var(--green)' : 'var(--yellow)'}">${ev.approved ? '✓ Approved' : '○ Unapproved'}</span>
             </div>
           </div>
           <span class="roi-badge ${badgeCls}">${badgeTxt}</span>
