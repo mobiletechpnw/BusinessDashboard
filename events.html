@@ -76,6 +76,11 @@ main { padding:24px 28px; }
 .ev-meta { font-size:.68rem; color:var(--text2); margin-top:3px; line-height:1.5; }
 .ev-edit-btn { background:none; border:none; font-size:.68rem; color:var(--text2); cursor:pointer; padding:2px 5px; border-radius:4px; margin-top:6px; }
 .ev-edit-btn:hover { background:var(--surface2); color:var(--text); }
+.ev-approve-pill { display:inline-block; font-size:.6rem; font-weight:700; padding:3px 9px; border-radius:10px; text-transform:uppercase; letter-spacing:.3px; margin-top:7px; cursor:pointer; user-select:none; border:1px solid transparent; transition:all .12s; }
+.ev-approve-pill.is-approved { background:rgba(52,211,153,.18); color:var(--green); }
+.ev-approve-pill.is-approved:hover { border-color:var(--green); }
+.ev-approve-pill.is-pending { background:rgba(251,191,36,.18); color:var(--yellow); }
+.ev-approve-pill.is-pending:hover { border-color:var(--yellow); }
 
 /* ── DATA CELLS ── */
 .matrix td.cell { padding:0; cursor:pointer; vertical-align:middle; transition:background .12s; }
@@ -145,6 +150,28 @@ main { padding:24px 28px; }
 .paid-big-toggle.is-paid:hover { background:rgba(52,211,153,.18); }
 .paid-big-toggle.is-unpaid { border-color:var(--yellow); color:var(--yellow); background:rgba(251,191,36,.08); }
 .paid-big-toggle.is-unpaid:hover { background:rgba(251,191,36,.18); }
+
+/* BILL MODAL */
+.bill-filter { display:flex; align-items:center; gap:8px; font-size:.78rem; color:var(--text2); margin-bottom:14px; cursor:pointer; user-select:none; }
+.bill-filter input { accent-color:var(--accent); width:16px; height:16px; cursor:pointer; }
+.bill-vendor-line { font-size:.82rem; color:var(--text2); margin:-12px 0 14px; }
+.bill-table { width:100%; border-collapse:collapse; font-size:.82rem; margin-bottom:14px; }
+.bill-table th { text-align:left; font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:var(--text2); padding:6px; border-bottom:1px solid var(--border); }
+.bill-table td { padding:9px 6px; border-bottom:1px solid var(--border); vertical-align:top; }
+.bill-table .num { text-align:right; white-space:nowrap; font-weight:700; }
+.bill-ev-name { font-weight:700; line-height:1.3; }
+.bill-ev-date { font-size:.68rem; color:var(--text2); margin-top:2px; }
+.bill-totals { background:var(--surface2); border-radius:8px; padding:12px 14px; font-size:.84rem; }
+.bill-totals .row { display:flex; justify-content:space-between; padding:3px 0; }
+.bill-totals .row.due { font-size:1rem; font-weight:800; color:var(--yellow); border-top:1px solid var(--border); margin-top:6px; padding-top:8px; }
+.bill-totals .row.due.zero { color:var(--green); }
+.bill-empty-msg { text-align:center; color:var(--text2); font-size:.82rem; padding:24px 0; }
+.bill-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:18px; }
+.bill-actions button { flex:1 1 auto; min-width:96px; }
+.th-bill-btn { background:none; border:none; font-size:.7rem; color:var(--text2); cursor:pointer; padding:3px 5px; border-radius:4px; margin-top:4px; }
+.th-bill-btn:hover { background:var(--surface2); color:var(--accent); }
+.vt-bill-btn { font-size:.62rem; font-weight:700; padding:3px 10px; border-radius:5px; border:1px solid var(--accent); color:var(--accent); background:none; cursor:pointer; margin-top:6px; transition:all .12s; }
+.vt-bill-btn:hover { background:rgba(108,140,255,.12); }
 
 /* TAB BAR */
 .ev-tab-bar { border-bottom:1px solid var(--border); background:var(--surface); display:flex; padding:0 28px; }
@@ -258,6 +285,10 @@ main { padding:24px 28px; }
       <label>Location</label>
       <input type="text" id="ev-location" placeholder="e.g. Seattle Convention Center">
     </div>
+    <div class="field">
+      <label>Approval Status</label>
+      <button class="paid-big-toggle" id="ev-approved-toggle" onclick="flipEvApproved()"></button>
+    </div>
     <div class="modal-actions">
       <button class="btn-danger" id="ev-delete-btn" onclick="deleteEvent()" style="display:none">Delete Event</button>
       <button class="btn-ghost" onclick="closeModal('event-modal')">Cancel</button>
@@ -282,6 +313,26 @@ main { padding:24px 28px; }
       <button class="btn-danger" id="vn-delete-btn" onclick="deleteVendor()" style="display:none">Delete Vendor</button>
       <button class="btn-ghost" onclick="closeModal('vendor-modal')">Cancel</button>
       <button class="btn-primary" onclick="saveVendor()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── VENDOR BILL MODAL ── -->
+<div class="modal-overlay" id="bill-modal">
+  <div class="modal" style="width:540px">
+    <h2 id="bill-title">Vendor Bill</h2>
+    <div class="bill-vendor-line" id="bill-vendor-line"></div>
+    <label class="bill-filter"><input type="checkbox" id="bill-unpaid-only" onchange="renderBill()"> Unpaid items only</label>
+    <div id="bill-body"></div>
+    <div class="bill-actions">
+      <button class="btn-ghost" onclick="copyBill()" id="bill-copy-btn">📋 Copy</button>
+      <button class="btn-ghost" onclick="textBill()" id="bill-sms-btn" style="display:none">💬 Text</button>
+      <button class="btn-ghost" onclick="emailBill()" id="bill-email-btn" style="display:none">✉️ Email</button>
+      <button class="btn-ghost" onclick="printBill()">🖨️ Print / PDF</button>
+      <button class="btn-primary" onclick="shareBill()">📤 Share</button>
+    </div>
+    <div class="modal-actions" style="margin-top:14px">
+      <button class="btn-ghost" onclick="closeModal('bill-modal')">Close</button>
     </div>
   </div>
 </div>
@@ -373,7 +424,10 @@ function renderMatrix() {
     h += `<th class="th-vendor">
       <div class="th-vendor-name">${esc(v.name)}</div>
       ${v.contact ? `<div class="th-vendor-meta">${esc(v.contact)}</div>` : ''}
-      <div><button class="th-edit-btn" onclick="openVendorModal('${v.id}')">✏️ Edit</button></div>
+      <div>
+        <button class="th-edit-btn" onclick="openVendorModal('${v.id}')">✏️ Edit</button>
+        <button class="th-bill-btn" onclick="openBillModal('${v.id}')">📄 Bill</button>
+      </div>
     </th>`;
   });
   h += `<th class="th-total-col">Event Total</th>`;
@@ -388,6 +442,13 @@ function renderMatrix() {
       <div class="ev-meta">
         ${ev.date     ? `📅 ${fmtDate(ev.date)}<br>` : ''}
         ${ev.location ? `📍 ${esc(ev.location)}` : ''}
+      </div>
+      <div>
+        <span class="ev-approve-pill ${ev.approved ? 'is-approved' : 'is-pending'}"
+          onclick="toggleEventApproved('${ev.id}')"
+          title="${ev.approved ? 'Tap to mark as unapproved' : 'Tap to mark as approved'}">
+          ${ev.approved ? '✓ Approved' : '○ Unapproved'}
+        </span>
       </div>
       <button class="ev-edit-btn" onclick="openEventModal('${ev.id}')">✏️ Edit</button>
     </td>`;
@@ -444,6 +505,7 @@ function renderMatrix() {
             ? `<span class="vt-allpaid">all paid ✓</span>`
             : `<span style="color:var(--text2)">—</span>`}
       </div>
+      ${tot > 0 ? `<button class="vt-bill-btn" onclick="openBillModal('${v.id}')">📄 Bill</button>` : ''}
     </td>`;
   });
   h += `<td class="td-grand">
@@ -469,29 +531,54 @@ function quickToggle(tableId) {
 function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-['event-modal','vendor-modal','cell-modal'].forEach(id =>
+['event-modal','vendor-modal','cell-modal','bill-modal'].forEach(id =>
   document.getElementById(id).addEventListener('click', e => {
     if (e.target === document.getElementById(id)) closeModal(id);
   })
 );
 
 // ── EVENT MODAL ──────────────────────────────────────
-let editEvId = null;
+let editEvId = null, evApproved = false;
 function openEventModal(id) {
   editEvId = id || null;
   const ev = id ? getEvents().find(x => x.id === id) : null;
+  evApproved = ev?.approved || false;
   document.getElementById('ev-modal-title').textContent = ev ? 'Edit Event' : 'New Event';
   document.getElementById('ev-name').value     = ev?.name     || '';
   document.getElementById('ev-date').value     = ev?.date     || '';
   document.getElementById('ev-location').value = ev?.location || '';
   document.getElementById('ev-delete-btn').style.display = ev ? '' : 'none';
+  updateEvApprovedToggle();
   openModal('event-modal');
   setTimeout(() => document.getElementById('ev-name').focus(), 80);
+}
+function updateEvApprovedToggle() {
+  const btn = document.getElementById('ev-approved-toggle');
+  if (evApproved) {
+    btn.textContent = '✓ Approved — tap to mark as Unapproved';
+    btn.className   = 'paid-big-toggle is-paid';
+  } else {
+    btn.textContent = '○ Unapproved — tap to mark as Approved';
+    btn.className   = 'paid-big-toggle is-unpaid';
+  }
+}
+function flipEvApproved() {
+  evApproved = !evApproved;
+  updateEvApprovedToggle();
+}
+function toggleEventApproved(id) {
+  const arr = getEvents();
+  const ev  = arr.find(x => x.id === id);
+  if (!ev) return;
+  ev.approved = !ev.approved;
+  setEvents(arr);
+  if (typeof auditLog === 'function') auditLog('TOGGLE_EVENT_APPROVAL', 'vpc_events_v1', `${ev.name}: ${ev.approved ? 'approved' : 'unapproved'}`);
+  renderAll();
 }
 function saveEvent() {
   const name = document.getElementById('ev-name').value.trim();
   if (!name) { alert('Event name is required.'); return; }
-  const item = { id: editEvId || uid(), name, date: document.getElementById('ev-date').value, location: document.getElementById('ev-location').value.trim() };
+  const item = { id: editEvId || uid(), name, date: document.getElementById('ev-date').value, location: document.getElementById('ev-location').value.trim(), approved: evApproved };
   const arr  = getEvents();
   const idx  = arr.findIndex(x => x.id === item.id);
   idx >= 0 ? arr[idx] = item : arr.push(item);
@@ -605,6 +692,185 @@ function deleteCellEntry() {
   renderAll();
 }
 
+// ── VENDOR BILL ──────────────────────────────────────
+const BIZ_NAME = 'Vault & Pine Collective';
+let billVnId = null;
+
+function openBillModal(vnId) {
+  billVnId = vnId;
+  document.getElementById('bill-unpaid-only').checked = false;
+  renderBill();
+  openModal('bill-modal');
+}
+
+function billData() {
+  const vn = getVendors().find(v => v.id === billVnId) || {};
+  const events = getEvents();
+  const unpaidOnly = document.getElementById('bill-unpaid-only').checked;
+  let lines = getTables()
+    .filter(t => t.vendorId === billVnId)
+    .map(t => {
+      const ev = events.find(e => e.id === t.eventId) || {};
+      return { event: ev.name || 'Event', date: ev.date || '', location: ev.location || '', price: +t.price || 0, paid: !!t.paid };
+    })
+    .sort((a,b) => (a.date||'9999').localeCompare(b.date||'9999'));
+  if (unpaidOnly) lines = lines.filter(l => !l.paid);
+  const total = lines.reduce((s,l) => s + l.price, 0);
+  const due   = lines.filter(l => !l.paid).reduce((s,l) => s + l.price, 0);
+  return { vn, lines, total, paidAmt: total - due, due, unpaidOnly };
+}
+
+function renderBill() {
+  const { vn, lines, total, paidAmt, due, unpaidOnly } = billData();
+  document.getElementById('bill-title').textContent = `Bill — ${vn.name || 'Vendor'}`;
+  document.getElementById('bill-vendor-line').textContent = vn.contact ? `Contact: ${vn.contact}` : '';
+
+  // Show Text/Email buttons only when contact looks like a phone / email
+  const contact = vn.contact || '';
+  const isEmail = contact.includes('@');
+  const isPhone = !isEmail && (contact.replace(/\D/g,'').length >= 7);
+  document.getElementById('bill-email-btn').style.display = isEmail ? '' : 'none';
+  document.getElementById('bill-sms-btn').style.display   = isPhone ? '' : 'none';
+
+  let h;
+  if (!lines.length) {
+    h = `<div class="bill-empty-msg">${unpaidOnly ? 'No unpaid items — this vendor is all settled ✓' : 'No table entries for this vendor yet.'}</div>`;
+  } else {
+    h = `<table class="bill-table"><thead><tr><th>Event</th><th style="text-align:right">Table</th><th style="text-align:center">Status</th></tr></thead><tbody>`;
+    lines.forEach(l => {
+      h += `<tr>
+        <td>
+          <div class="bill-ev-name">${esc(l.event)}</div>
+          <div class="bill-ev-date">${l.date ? fmtDate(l.date) : ''}${l.location ? ` · ${esc(l.location)}` : ''}</div>
+        </td>
+        <td class="num">${fmtMoney(l.price)}</td>
+        <td style="text-align:center"><span class="status-pill ${l.paid?'pill-paid':'pill-unpaid'}">${l.paid ? '✓ Paid' : '● Unpaid'}</span></td>
+      </tr>`;
+    });
+    h += `</tbody></table>`;
+    h += `<div class="bill-totals">
+      <div class="row"><span>Total tables</span><span>${fmtMoney(total)}</span></div>
+      <div class="row"><span>Paid so far</span><span style="color:var(--green)">${fmtMoney(paidAmt)}</span></div>
+      <div class="row due ${due === 0 ? 'zero' : ''}"><span>${due === 0 ? 'All paid ✓' : 'Balance due'}</span><span>${fmtMoney(due)}</span></div>
+    </div>`;
+  }
+  document.getElementById('bill-body').innerHTML = h;
+}
+
+function billText() {
+  const { vn, lines, total, paidAmt, due } = billData();
+  const today = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  let txt = `${BIZ_NAME} — Table Bill\n`;
+  txt += `For: ${vn.name || 'Vendor'}\nPrepared: ${today}\n\n`;
+  if (!lines.length) {
+    txt += 'No items.\n';
+  } else {
+    lines.forEach(l => {
+      txt += `• ${l.event}${l.date ? ` (${fmtDate(l.date)})` : ''} — ${fmtMoney(l.price)} — ${l.paid ? 'PAID' : 'UNPAID'}\n`;
+    });
+    txt += `\nTotal tables: ${fmtMoney(total)}\nPaid so far:  ${fmtMoney(paidAmt)}\nBALANCE DUE:  ${fmtMoney(due)}\n`;
+  }
+  txt += `\nThank you!\n— ${BIZ_NAME}`;
+  return txt;
+}
+
+function copyBill() {
+  const txt = billText();
+  const done = () => {
+    const btn = document.getElementById('bill-copy-btn');
+    const old = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = old; }, 1600);
+  };
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(txt).then(done).catch(() => fallbackCopy(txt, done));
+  } else {
+    fallbackCopy(txt, done);
+  }
+}
+
+function fallbackCopy(txt, done) {
+  const ta = document.createElement('textarea');
+  ta.value = txt;
+  ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); done(); } catch(e) { alert('Copy failed — select and copy manually.'); }
+  document.body.removeChild(ta);
+}
+
+function shareBill() {
+  const { vn } = billData();
+  const txt = billText();
+  if (navigator.share) {
+    navigator.share({ title: `Table bill — ${vn.name || 'Vendor'}`, text: txt }).catch(() => {});
+  } else {
+    copyBill();
+    alert('Sharing not supported on this device — the bill was copied to your clipboard instead.');
+  }
+}
+
+function emailBill() {
+  const { vn } = billData();
+  const subject = encodeURIComponent(`Table bill — ${BIZ_NAME}`);
+  const body = encodeURIComponent(billText());
+  window.location.href = `mailto:${encodeURIComponent(vn.contact || '')}?subject=${subject}&body=${body}`;
+}
+
+function textBill() {
+  const { vn } = billData();
+  const num = (vn.contact || '').replace(/[^\d+]/g, '');
+  const body = encodeURIComponent(billText());
+  window.location.href = `sms:${num}?&body=${body}`;
+}
+
+function printBill() {
+  const { vn, lines, total, paidAmt, due } = billData();
+  const today = new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  const rows = lines.map(l => `
+    <tr>
+      <td>${esc(l.event)}</td>
+      <td>${l.date ? fmtDate(l.date) : '—'}</td>
+      <td>${esc(l.location || '—')}</td>
+      <td class="r">${fmtMoney(l.price)}</td>
+      <td class="${l.paid ? 'ok' : 'owe'}">${l.paid ? 'Paid' : 'Unpaid'}</td>
+    </tr>`).join('');
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Bill — ${esc(vn.name||'Vendor')}</title>
+  <style>
+    body { font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif; color:#1a1a2e; margin:40px; }
+    h1 { font-size:1.3rem; margin:0; letter-spacing:-.3px; }
+    .sub { color:#666; font-size:.85rem; margin:4px 0 28px; }
+    .for { font-size:.95rem; margin-bottom:22px; }
+    table { width:100%; border-collapse:collapse; font-size:.88rem; }
+    th { text-align:left; font-size:.7rem; text-transform:uppercase; letter-spacing:.5px; color:#666; border-bottom:2px solid #1a1a2e; padding:8px 6px; }
+    td { padding:10px 6px; border-bottom:1px solid #ddd; }
+    .r { text-align:right; font-weight:600; white-space:nowrap; }
+    .ok { color:#0a8754; font-weight:600; }
+    .owe { color:#b45309; font-weight:700; }
+    .totals { margin-top:24px; margin-left:auto; width:260px; font-size:.92rem; }
+    .totals div { display:flex; justify-content:space-between; padding:5px 0; }
+    .totals .due { border-top:2px solid #1a1a2e; font-size:1.05rem; font-weight:800; margin-top:6px; padding-top:10px; }
+    .thanks { margin-top:48px; color:#666; font-size:.85rem; }
+    @media print { body { margin:20px; } }
+  </style></head><body>
+    <h1>${BIZ_NAME}</h1>
+    <div class="sub">Table Bill · Prepared ${today}</div>
+    <div class="for"><strong>Billed to:</strong> ${esc(vn.name||'Vendor')}${vn.contact ? ` &nbsp;·&nbsp; ${esc(vn.contact)}` : ''}</div>
+    <table><thead><tr><th>Event</th><th>Date</th><th>Location</th><th style="text-align:right">Table</th><th>Status</th></tr></thead>
+    <tbody>${rows || '<tr><td colspan="5">No items.</td></tr>'}</tbody></table>
+    <div class="totals">
+      <div><span>Total tables</span><span>${fmtMoney(total)}</span></div>
+      <div><span>Paid so far</span><span>${fmtMoney(paidAmt)}</span></div>
+      <div class="due"><span>Balance due</span><span>${fmtMoney(due)}</span></div>
+    </div>
+    <div class="thanks">Thank you! — ${BIZ_NAME}</div>
+  <script>window.onload = () => window.print();<\/script></body></html>`;
+  const w = window.open('', '_blank');
+  if (!w) { alert('Pop-up blocked — allow pop-ups for this site to print.'); return; }
+  w.document.write(html);
+  w.document.close();
+}
+
 // ── TAB SWITCHING ─────────────────────────────────────
 let currentEvTab = 'matrix';
 
@@ -686,6 +952,7 @@ function renderROI() {
             <div class="roi-event-meta">
               ${ev.date ? `📅 ${fmtDate(ev.date)}` : ''}
               ${ev.location ? ` · 📍 ${esc(ev.location)}` : ''}
+              · <span style="color:${ev.approved ? 'var(--green)' : 'var(--yellow)'}">${ev.approved ? '✓ Approved' : '○ Unapproved'}</span>
             </div>
           </div>
           <span class="roi-badge ${badgeCls}">${badgeTxt}</span>
