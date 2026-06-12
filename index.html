@@ -12,346 +12,793 @@
 <script src="supabase-sync.js" defer></script>
 <title>Business Command Center</title>
 <style>
-  body { min-height: 100vh; display: flex; flex-direction: column; }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
-  /* ── Header ── */
-  header {
-    background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 0 32px; display: flex; align-items: center;
-    justify-content: space-between; min-height: 58px;
-    position: sticky; top: 0; z-index: 100;
-  }
-  .brand { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.4px; }
-  .brand .hi { color: var(--accent); }
-  .brand .lo { color: var(--accent2); }
-  .header-date { font-size: 0.75rem; color: var(--text2); }
+:root {
+  --c-sales:   #6C8EFF;
+  --c-goals:   #A78BFA;
+  --c-events:  #34D399;
+  --c-review:  #60A5FA;
+  --c-expense: #F87171;
+  --c-intel:   #34D399;
+  --c-prod:    #FB923C;
+  --c-content: #FBBF24;
+}
 
-  /* ── Hero ── */
-  .hero {
-    text-align: center; padding: 64px 24px 48px;
-    background: radial-gradient(ellipse at 50% 0%, #1a1d3a 0%, var(--bg) 70%);
-    border-bottom: 1px solid var(--border);
-  }
-  .hero-eyebrow {
-    font-size: 0.7rem; font-weight: 700; letter-spacing: 2px;
-    text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
-  }
-  .hero-title {
-    font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 900;
-    letter-spacing: -1px; line-height: 1.1; margin-bottom: 16px;
-  }
-  .hero-title .grad {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .hero-sub {
-    font-size: 1rem; color: var(--text2); max-width: 500px; margin: 0 auto;
-    line-height: 1.6;
-  }
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', var(--font-sans, system-ui, sans-serif);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
 
-  /* ── Section labels ── */
-  .section-block { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
-  .section-block:first-of-type { margin-top: 48px; }
-  .section-label {
-    font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 1.5px; color: var(--text2); margin-bottom: 14px;
-    padding-bottom: 8px; border-bottom: 1px solid var(--border);
-  }
+/* ── HEADER ── */
+header {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(15,17,23,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  min-height: 56px;
+}
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 0.95rem; font-weight: 800; letter-spacing: -0.3px;
+}
+.brand-mark {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem; flex-shrink: 0;
+  box-shadow: 0 2px 12px rgba(108,140,255,0.35);
+}
+.brand-name { color: var(--text); }
+.brand-name span { color: var(--accent); }
+.header-right { display: flex; align-items: center; gap: 16px; }
+.header-date { font-size: 0.75rem; color: var(--text2); font-weight: 500; }
+.header-nav { display: flex; gap: 4px; }
+.header-nav a {
+  font-size: 0.78rem; font-weight: 600; color: var(--text2);
+  text-decoration: none; padding: 5px 10px; border-radius: 7px;
+  transition: all 0.15s;
+}
+.header-nav a:hover { color: var(--text); background: var(--surface2); }
 
-  /* ── Grid ── */
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px; margin-bottom: 32px;
-  }
+/* ── HERO ── */
+.hero {
+  position: relative; overflow: hidden;
+  padding: 56px 32px 52px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+.hero-bg {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 60% at 15% 50%, rgba(108,140,255,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 70% at 85% 20%, rgba(167,139,250,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 50% at 60% 90%, rgba(52,211,153,0.05) 0%, transparent 60%);
+}
+/* animated shimmer line */
+.hero-line {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--accent) 30%, var(--accent2) 60%, transparent 100%);
+  opacity: 0.4;
+  animation: shimmer 4s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0%,100% { opacity: 0.2; transform: scaleX(0.95); }
+  50%      { opacity: 0.5; transform: scaleX(1); }
+}
+.hero-inner { position: relative; max-width: 1100px; margin: 0 auto; }
+.hero-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  flex-wrap: wrap; gap: 24px; margin-bottom: 40px;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 1.8px;
+  text-transform: uppercase; color: var(--accent);
+  background: rgba(108,140,255,0.1); border: 1px solid rgba(108,140,255,0.2);
+  border-radius: 20px; padding: 3px 10px; margin-bottom: 14px;
+}
+.hero-eyebrow::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: block; animation: pulse-dot 2s ease-in-out infinite; }
+@keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+.hero-title {
+  font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 900;
+  letter-spacing: -1.2px; line-height: 1.08; margin-bottom: 12px;
+}
+.hero-title .grad {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 50%, #A78BFA 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero-sub { font-size: 0.95rem; color: var(--text2); line-height: 1.65; max-width: 440px; }
+.hero-cta {
+  display: flex; align-items: center; gap: 10px; margin-top: 20px; flex-wrap: wrap;
+}
+.btn-primary {
+  background: var(--accent); color: #fff; border: none;
+  border-radius: 9px; padding: 10px 20px; font-size: 0.85rem; font-weight: 700;
+  cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 7px;
+  transition: all 0.18s; font-family: inherit;
+  box-shadow: 0 2px 16px rgba(108,140,255,0.3);
+}
+.btn-primary:hover { background: #7B9FFF; box-shadow: 0 4px 24px rgba(108,140,255,0.45); transform: translateY(-1px); }
+.btn-secondary {
+  background: var(--surface); color: var(--text2); border: 1px solid var(--border);
+  border-radius: 9px; padding: 10px 18px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 7px;
+  transition: all 0.18s; font-family: inherit;
+}
+.btn-secondary:hover { border-color: var(--accent); color: var(--text); }
 
-  /* ── JARVIS featured card ── */
-  .card-featured {
-    grid-column: 1 / -1;
-    flex-direction: row; align-items: center; gap: 24px;
-    background: linear-gradient(135deg, #131929 0%, #0f1117 100%);
-    border-color: rgba(0,180,255,0.35);
-    padding: 24px 28px;
-  }
-  .card-featured:hover { border-color: rgba(0,180,255,0.7); box-shadow: 0 8px 40px rgba(0,180,255,0.1); }
-  .card-featured .card-icon { width: 56px; height: 56px; font-size: 1.7rem; flex-shrink: 0; background: rgba(0,180,255,0.12); border-radius: 14px; }
-  .card-featured .card-body { flex: 1; }
-  .card-featured .card-title { font-size: 1.15rem; }
-  .card-featured .card-arrow { color: rgba(0,180,255,0.9); margin-top: 8px; }
+/* ── KPI STRIP ── */
+.kpi-strip {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 12px; align-self: flex-start; min-width: 340px;
+}
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px 18px;
+  position: relative; overflow: hidden;
+  transition: border-color 0.2s, transform 0.18s;
+}
+.kpi-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--kpi-color, var(--accent));
+  opacity: 0.6;
+}
+.kpi-card:hover { border-color: var(--kpi-color, var(--accent)); transform: translateY(-2px); }
+.kpi-label { font-size: 0.62rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text2); margin-bottom: 8px; }
+.kpi-value { font-size: 1.4rem; font-weight: 900; letter-spacing: -0.5px; color: var(--text); line-height: 1; }
+.kpi-sub { font-size: 0.68rem; color: var(--text2); margin-top: 5px; }
+.kpi-up { color: var(--green); }
+.kpi-down { color: var(--red); }
 
-  /* ── Cards ── */
-  .card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 24px;
-    text-decoration: none; color: var(--text);
-    display: flex; flex-direction: column; gap: 12px;
-    transition: border-color 0.2s, transform 0.18s, box-shadow 0.2s;
-    cursor: pointer;
-  }
-  .card:hover {
-    border-color: var(--accent); transform: translateY(-3px);
-    box-shadow: 0 8px 32px rgba(108,140,255,0.1);
-  }
-  .card-icon {
-    width: 44px; height: 44px; border-radius: 11px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.4rem; flex-shrink: 0;
-  }
-  .card-icon.blue   { background: rgba(108,140,255,0.12); }
-  .card-icon.purple { background: rgba(167,139,250,0.12); }
-  .card-icon.green  { background: rgba(52,211,153,0.12); }
-  .card-icon.yellow { background: rgba(251,191,36,0.12); }
-  .card-icon.orange { background: rgba(251,146,60,0.12); }
-  .card-title { font-size: 1rem; font-weight: 700; letter-spacing: -0.2px; }
-  .card-desc { font-size: 0.82rem; color: var(--text2); line-height: 1.55; flex: 1; }
-  .card-arrow {
-    font-size: 0.77rem; font-weight: 600; color: var(--accent);
-    display: flex; align-items: center; gap: 4px; margin-top: 4px;
-    transition: gap 0.2s;
-  }
-  .card-arrow::after { content: '→'; transition: transform 0.2s; }
-  .card:hover .card-arrow::after { transform: translateX(4px); }
+/* ── MAIN CONTENT ── */
+.main { flex: 1; max-width: 1100px; margin: 0 auto; padding: 40px 24px 32px; width: 100%; }
 
-  /* ── Widgets ── */
-  .widgets {
-    max-width: 1100px; margin: 0 auto 40px; padding: 0 24px;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
-  }
-  .widget {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 20px;
-  }
-  .widget-title {
-    font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 1.5px; margin-bottom: 14px;
-  }
+/* ── SECTION ── */
+.section { margin-bottom: 40px; }
+.section-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px;
+}
+.section-icon {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: var(--si-bg, rgba(108,140,255,0.12));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; flex-shrink: 0;
+}
+.section-label {
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.2px; color: var(--text2);
+}
+.section-line { flex: 1; height: 1px; background: var(--border); }
 
-  @media (max-width: 900px) {
-    .grid { grid-template-columns: repeat(2, 1fr); }
-  }
-  @media (max-width: 640px) {
-    .grid { grid-template-columns: 1fr; }
-    .widgets { grid-template-columns: 1fr; }
-    .card-featured { flex-direction: column; }
-    .hero-title { font-size: 1.8rem; }
-    header { padding: 0 12px; min-height: 52px; }
-    .section-block { padding: 0 10px; }
-    .section-block:first-of-type { margin-top: 28px; }
-    .hero { padding: 40px 16px 32px; }
-    .hero-sub { font-size: 0.88rem; }
-    .card { padding: 16px; }
-    .card-icon { width: 38px; height: 38px; font-size: 1.2rem; }
-    .card-title { font-size: 0.9rem; }
-    .card-desc { font-size: 0.78rem; }
-  }
-  @media (max-width: 480px) {
-    .grid { gap: 10px; }
-    .section-block { margin-bottom: 0; }
-  }
+/* ── CARD GRID ── */
+.grid { display: grid; gap: 14px; margin-bottom: 0; }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-auto { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 
-  /* ── Footer ── */
-  footer {
-    text-align: center; padding: 28px 24px;
-    font-size: 0.72rem; color: var(--text2);
-    border-top: 1px solid var(--border);
-    margin-top: 16px;
-  }
-  footer a { color: var(--accent); text-decoration: none; }
-  footer a:hover { text-decoration: underline; }
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px;
+  text-decoration: none;
+  color: var(--text);
+  display: flex; flex-direction: column; gap: 0;
+  transition: border-color 0.2s, transform 0.18s, box-shadow 0.2s;
+  cursor: pointer;
+  position: relative; overflow: hidden;
+}
+/* colored left accent on hover */
+.card::after {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--card-accent, var(--accent));
+  opacity: 0; transform: scaleY(0.5);
+  transition: opacity 0.2s, transform 0.2s;
+  border-radius: 0 2px 2px 0;
+}
+.card:hover { border-color: var(--card-accent, var(--accent)); transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,0.25); }
+.card:hover::after { opacity: 1; transform: scaleY(1); }
+
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.card-icon {
+  width: 42px; height: 42px; border-radius: 11px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.25rem;
+  background: var(--ci-bg, rgba(108,140,255,0.12));
+}
+.card-badge {
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.5px;
+  text-transform: uppercase; padding: 3px 8px; border-radius: 20px;
+  background: var(--badge-bg, rgba(108,140,255,0.1));
+  color: var(--badge-color, var(--accent));
+  border: 1px solid var(--badge-border, rgba(108,140,255,0.2));
+  white-space: nowrap;
+}
+.card-title { font-size: 1rem; font-weight: 800; letter-spacing: -0.3px; margin-bottom: 6px; }
+.card-desc { font-size: 0.8rem; color: var(--text2); line-height: 1.6; flex: 1; }
+.card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 16px; padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.card-arrow {
+  font-size: 0.76rem; font-weight: 700;
+  color: var(--card-accent, var(--accent));
+  display: flex; align-items: center; gap: 5px;
+  transition: gap 0.18s;
+}
+.card-arrow svg { width: 13px; height: 13px; transition: transform 0.18s; }
+.card:hover .card-arrow svg { transform: translateX(3px); }
+.card-stat { font-size: 0.7rem; color: var(--text2); }
+.card-stat strong { color: var(--text); font-weight: 700; }
+
+/* FEATURED card — full-width with horizontal layout */
+.card-featured {
+  grid-column: 1 / -1;
+  flex-direction: row; align-items: center; gap: 28px;
+  padding: 24px 28px;
+  background: linear-gradient(135deg, rgba(108,140,255,0.06) 0%, var(--surface) 60%);
+  border-color: rgba(108,140,255,0.25);
+}
+.card-featured .card-top { flex-direction: column; margin-bottom: 0; flex-shrink: 0; }
+.card-featured .card-icon { width: 54px; height: 54px; font-size: 1.6rem; }
+.card-featured .card-body { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.card-featured .card-title { font-size: 1.15rem; }
+.card-featured .card-footer { margin-top: 10px; padding-top: 10px; }
+
+/* ── LIVE WIDGETS ── */
+.widgets-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+  margin-bottom: 40px;
+}
+.widget {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 20px;
+}
+.widget-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+}
+.widget-icon {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: var(--wi-bg, rgba(108,140,255,0.12));
+  display: flex; align-items: center; justify-content: center; font-size: 0.85rem;
+}
+.widget-title { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text2); }
+.widget-body { font-size: 0.82rem; color: var(--text2); }
+
+/* ── ALERTS BAR ── */
+.alerts-bar {
+  margin-bottom: 32px; display: flex; flex-direction: column; gap: 8px;
+}
+.alert-pill {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-radius: 10px;
+  font-size: 0.82rem; font-weight: 500;
+  animation: slideIn 0.3s ease both;
+}
+.alert-pill.danger  { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.25); }
+.alert-pill.warning { background: rgba(251,191,36,0.07);  border: 1px solid rgba(251,191,36,0.25); }
+.alert-pill.ok      { background: rgba(52,211,153,0.07);  border: 1px solid rgba(52,211,153,0.2); }
+.alert-pill .alert-icon { font-size: 0.95rem; flex-shrink: 0; }
+.alert-pill .alert-text { flex: 1; color: var(--text); }
+.alert-pill a { font-size: 0.75rem; color: var(--accent); text-decoration: none; white-space: nowrap; font-weight: 600; }
+.alert-pill a:hover { text-decoration: underline; }
+@keyframes slideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+/* ── CLOUD SYNC BANNER ── */
+.sync-banner-wrap { margin-bottom: 24px; display: none; }
+.sync-banner-wrap.show { display: block; }
+.sync-banner {
+  background: rgba(108,140,255,0.06); border: 1px solid rgba(108,140,255,0.22);
+  border-radius: 12px; padding: 14px 18px;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+.sync-banner-text { flex: 1; min-width: 220px; }
+.sync-banner-text strong { font-size: 0.85rem; font-weight: 700; display: block; margin-bottom: 2px; }
+.sync-banner-text span { font-size: 0.75rem; color: var(--text2); }
+.sync-banner-actions { display: flex; gap: 8px; align-items: center; }
+
+/* ── FOOTER ── */
+footer {
+  text-align: center; padding: 24px;
+  font-size: 0.72rem; color: var(--text2);
+  border-top: 1px solid var(--border);
+}
+footer a { color: var(--accent); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 960px) {
+  .kpi-strip { grid-template-columns: repeat(2, 1fr); min-width: 0; }
+  .hero-top { flex-direction: column; }
+  .kpi-strip { width: 100%; }
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 700px) {
+  header { padding: 0 14px; }
+  .header-nav { display: none; }
+  .hero { padding: 36px 16px 36px; }
+  .hero-title { font-size: 1.75rem; }
+  .hero-sub { font-size: 0.87rem; }
+  .main { padding: 24px 14px 24px; }
+  .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+  .grid-3, .grid-2 { grid-template-columns: 1fr; }
+  .grid-auto { grid-template-columns: 1fr; }
+  .widgets-row { grid-template-columns: 1fr; }
+  .card-featured { flex-direction: column; gap: 16px; }
+  .card-featured .card-footer { display: none; }
+}
+@media (max-width: 480px) {
+  .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+  .kpi-value { font-size: 1.2rem; }
+  .card { padding: 16px; }
+}
 </style>
 </head>
 <body>
 
+<!-- HEADER -->
 <header>
-  <div class="brand"><span class="hi">Business</span> <span class="lo">Command Center</span></div>
-  <div class="header-date" id="hdate"></div>
+  <div class="brand">
+    <div class="brand-mark">🌲</div>
+    <div class="brand-name"><span>VPC</span> Command Center</div>
+  </div>
+  <div class="header-right">
+    <nav class="header-nav">
+      <a href="vault-pine-collective.html">Sales</a>
+      <a href="goals-dashboard.html">Goals</a>
+      <a href="analytics.html">Intel</a>
+      <a href="review.html">Review</a>
+    </nav>
+    <div class="header-date" id="hdate"></div>
+  </div>
 </header>
 
-<div class="hero">
-  <div class="hero-eyebrow">Your Hub</div>
-  <h1 class="hero-title">Life Manager &amp; <span class="grad">Business Planner</span></h1>
-  <p class="hero-sub">Track your sales, hit your goals, and manage your business — all in one place.</p>
-</div>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-line"></div>
+  <div class="hero-inner">
+    <div class="hero-top">
+      <div>
+        <div class="hero-eyebrow">Vault &amp; Pine Collective</div>
+        <h1 class="hero-title">Your Business,<br><span class="grad">Command Ready.</span></h1>
+        <p class="hero-sub">Track sales, hit goals, manage events, and stay on top of your numbers — all in one place.</p>
+        <div class="hero-cta">
+          <a class="btn-primary" href="vault-pine-collective.html">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            Open Sales Hub
+          </a>
+          <a class="btn-secondary" href="review.html">☀ Daily Review</a>
+        </div>
+      </div>
 
-<!-- ── Business Operations ── -->
-<div class="section-block">
-  <div class="section-label">Business Operations</div>
-  <div class="grid">
-    <a class="card" href="vault-pine-collective.html">
-      <div class="card-icon blue">🌲</div>
-      <div class="card-title">Vault &amp; Pine Collective</div>
-      <div class="card-desc">Full business hub — riser sales, filament tracking, printer payoff, installed base, jet tags, pins, expenses, events, and goals.</div>
-      <div class="card-arrow">Open Dashboard</div>
-    </a>
-    <a class="card" href="goals-dashboard.html">
-      <div class="card-icon purple">🎯</div>
-      <div class="card-title">Goals &amp; Objectives</div>
-      <div class="card-desc">Set targets, track progress, and stay focused on what matters most this quarter.</div>
-      <div class="card-arrow">View Goals</div>
-    </a>
-    <a class="card" href="events.html">
-      <div class="card-icon" style="background:rgba(52,211,153,0.12);">🗓️</div>
-      <div class="card-title">Events &amp; Tables</div>
-      <div class="card-desc">Track table purchases across events and vendors — see who's paid, what's outstanding, and totals per vendor at a glance.</div>
-      <div class="card-arrow" style="color:var(--green)">Manage Tables</div>
-    </a>
-  </div>
-</div>
-
-<!-- ── Personal ── -->
-<div class="section-block">
-  <div class="section-label">Personal</div>
-  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">
-    <a class="card" href="review.html" style="border-color:rgba(108,140,255,0.3);">
-      <div class="card-icon blue">📋</div>
-      <div class="card-title">Daily Review</div>
-      <div class="card-desc">Morning briefing — overdue goals, budget status, upcoming events, trend alerts, and revenue snapshot in one view.</div>
-      <div class="card-arrow">Open Briefing</div>
-    </a>
-    <a class="card" href="expenses.html" style="border-color:rgba(248,113,113,0.3);">
-      <div class="card-icon" style="background:rgba(248,113,113,0.12);">💸</div>
-      <div class="card-title">Personal Expenses</div>
-      <div class="card-desc">Track monthly spending by category, set a budget, log recurring bills, and visualize where your money goes.</div>
-      <div class="card-arrow" style="color:var(--red)">Track Expenses</div>
-    </a>
-  </div>
-</div>
-
-<!-- ── Intelligence & Planning ── -->
-<div class="section-block">
-  <div class="section-label">Intelligence &amp; Planning</div>
-  <div class="grid">
-    <a class="card" href="analytics.html" style="border-color:rgba(52,211,153,0.3);">
-      <div class="card-icon green">📊</div>
-      <div class="card-title">Business Intelligence</div>
-      <div class="card-desc">Profit margins by product, show performance comparisons, and monthly revenue trends.</div>
-      <div class="card-arrow" style="color:var(--green)">View Analytics</div>
-    </a>
-    <a class="card" href="production.html" style="border-color:rgba(251,146,60,0.3);">
-      <div class="card-icon orange">🖨️</div>
-      <div class="card-title">Production Hub</div>
-      <div class="card-desc">Track active print jobs, monitor progress, and manage on-hand inventory with low-stock alerts.</div>
-      <div class="card-arrow" style="color:var(--orange)">Open Production</div>
-    </a>
-    <a class="card" href="content.html" style="border-color:rgba(251,191,36,0.3);">
-      <div class="card-icon yellow">📱</div>
-      <div class="card-title">Content Planner</div>
-      <div class="card-desc">Plan show announcements, product drops, and card spotlights. Calendar, queue, and templates.</div>
-      <div class="card-arrow" style="color:var(--yellow)">Open Planner</div>
-    </a>
-  </div>
-</div>
-
-<!-- ── Widgets ── -->
-<div class="widgets" id="widget-row">
-  <div class="widget">
-    <div class="widget-title" style="color:var(--accent)">📦 Upcoming Deliveries</div>
-    <div id="delivery-list" style="font-size:0.82rem;color:var(--text2);">Loading...</div>
-  </div>
-  <div class="widget">
-    <div class="widget-title" style="color:var(--green)">💰 Revenue Snapshot</div>
-    <div id="revenue-snapshot" style="font-size:0.82rem;color:var(--text2);">Loading...</div>
-  </div>
-</div>
-
-<!-- Cloud sync first-run banner -->
-<div id="sync-banner" style="display:none;max-width:1100px;margin:0 auto 16px;padding:0 24px">
-  <div style="background:rgba(108,140,255,0.08);border:1px solid rgba(108,140,255,0.3);border-radius:var(--radius);padding:16px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-    <div style="font-size:1.2rem">☁️</div>
-    <div style="flex:1">
-      <div style="font-size:0.88rem;font-weight:700;margin-bottom:3px">Back up your data to the cloud</div>
-      <div style="font-size:0.78rem;color:var(--text2)">Your data lives in this browser. Push it to Supabase so it's safe and available on any device.</div>
+      <!-- LIVE KPI STRIP -->
+      <div class="kpi-strip" id="kpi-strip">
+        <div class="kpi-card" style="--kpi-color:var(--green);">
+          <div class="kpi-label">All-Time Revenue</div>
+          <div class="kpi-value" id="kpi-rev">—</div>
+          <div class="kpi-sub" id="kpi-rev-sub">Loading…</div>
+        </div>
+        <div class="kpi-card" style="--kpi-color:var(--accent);">
+          <div class="kpi-label">This Month</div>
+          <div class="kpi-value" id="kpi-month">—</div>
+          <div class="kpi-sub" id="kpi-month-sub">Loading…</div>
+        </div>
+        <div class="kpi-card" style="--kpi-color:var(--accent2);">
+          <div class="kpi-label">Net Profit</div>
+          <div class="kpi-value" id="kpi-profit">—</div>
+          <div class="kpi-sub" id="kpi-profit-sub">Loading…</div>
+        </div>
+        <div class="kpi-card" style="--kpi-color:#A78BFA;">
+          <div class="kpi-label">Active Goals</div>
+          <div class="kpi-value" id="kpi-goals">—</div>
+          <div class="kpi-sub" id="kpi-goals-sub">Loading…</div>
+        </div>
+      </div>
     </div>
-    <button onclick="pushAllAndDismiss()" style="background:var(--accent);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap">
-      ☁️ Push to Cloud
-    </button>
-    <button onclick="dismissSyncBanner()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem;padding:4px">✕</button>
   </div>
-</div>
+</section>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- Alerts -->
+  <div class="alerts-bar" id="alerts-bar"></div>
+
+  <!-- Cloud sync banner -->
+  <div class="sync-banner-wrap" id="sync-banner">
+    <div class="sync-banner">
+      <div style="font-size:1.2rem">☁️</div>
+      <div class="sync-banner-text">
+        <strong>Back up your data to the cloud</strong>
+        <span>Your data lives in this browser. Push it to Supabase so it's safe and synced across devices.</span>
+      </div>
+      <div class="sync-banner-actions">
+        <button class="btn-primary" onclick="pushAllAndDismiss()" id="sync-btn">☁️ Push to Cloud</button>
+        <button class="btn-secondary" onclick="dismissSyncBanner()" style="padding:9px 12px;">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── BUSINESS OPERATIONS ── -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-icon" style="--si-bg:rgba(108,140,255,0.12);">📊</div>
+      <div class="section-label">Business Operations</div>
+      <div class="section-line"></div>
+    </div>
+    <div class="grid grid-3">
+      <a class="card card-featured" href="vault-pine-collective.html"
+         style="--card-accent:var(--c-sales);">
+        <div class="card-top">
+          <div class="card-icon" style="--ci-bg:rgba(108,140,255,0.15);width:54px;height:54px;font-size:1.55rem;">🌲</div>
+          <div class="card-badge" style="--badge-bg:rgba(108,140,255,0.1);--badge-color:var(--c-sales);--badge-border:rgba(108,140,255,0.2);">Primary Hub</div>
+        </div>
+        <div class="card-body">
+          <div class="card-title">Vault &amp; Pine Collective</div>
+          <div class="card-desc">Full business hub — riser sales, filament tracking, printer payoff, installed base, jet tags, pins, expenses, and events.</div>
+          <div class="card-footer">
+            <div class="card-arrow" style="--card-accent:var(--c-sales);">Open Dashboard <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+            <div class="card-stat" id="vpc-stat">—</div>
+          </div>
+        </div>
+      </a>
+
+      <a class="card" href="goals-dashboard.html" style="--card-accent:var(--c-goals);">
+        <div class="card-top">
+          <div class="card-icon" style="--ci-bg:rgba(167,139,250,0.12);">🎯</div>
+          <div class="card-badge" style="--badge-bg:rgba(167,139,250,0.1);--badge-color:var(--c-goals);--badge-border:rgba(167,139,250,0.2);" id="goals-badge">Goals</div>
+        </div>
+        <div class="card-title">Goals &amp; Objectives</div>
+        <div class="card-desc">Set targets, track progress, and stay focused on what matters most this quarter.</div>
+        <div class="card-footer">
+          <div class="card-arrow">View Goals <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+          <div class="card-stat" id="goals-stat">—</div>
+        </div>
+      </a>
+
+      <a class="card" href="events.html" style="--card-accent:var(--c-events);">
+        <div class="card-top">
+          <div class="card-icon" style="--ci-bg:rgba(52,211,153,0.12);">🗓️</div>
+          <div class="card-badge" style="--badge-bg:rgba(52,211,153,0.1);--badge-color:var(--c-events);--badge-border:rgba(52,211,153,0.2);">Events</div>
+        </div>
+        <div class="card-title">Events &amp; Tables</div>
+        <div class="card-desc">Track table purchases across events and vendors — see who's paid, outstanding amounts, and totals per vendor.</div>
+        <div class="card-footer">
+          <div class="card-arrow" style="--card-accent:var(--c-events);">Manage Tables <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+          <div class="card-stat" id="events-stat">—</div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ── PERSONAL ── -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-icon" style="--si-bg:rgba(96,165,250,0.12);">🧭</div>
+      <div class="section-label">Personal</div>
+      <div class="section-line"></div>
+    </div>
+    <div class="grid grid-2">
+      <a class="card" href="review.html" style="--card-accent:var(--c-review);">
+        <div class="card-top">
+          <div class="card-icon" style="--ci-bg:rgba(96,165,250,0.12);">📋</div>
+          <div class="card-badge" style="--badge-bg:rgba(96,165,250,0.1);--badge-color:var(--c-review);--badge-border:rgba(96,165,250,0.2);">Daily</div>
+        </div>
+        <div class="card-title">Daily Review</div>
+        <div class="card-desc">Morning briefing — overdue goals, budget status, upcoming events, trend alerts, and revenue snapshot in one view.</div>
+        <div class="card-footer">
+          <div class="card-arrow" style="--card-accent:var(--c-review);">Open Briefing <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+      </a>
+
+      <a class="card" href="expenses.html" style="--card-accent:var(--c-expense);">
+        <div class="card-top">
+          <div class="card-icon" style="--ci-bg:rgba(248,113,113,0.12);">💸</div>
+          <div class="card-badge" style="--badge-bg:rgba(248,113,113,0.1);--badge-color:var(--c-expense);--badge-border:rgba(248,113,113,0.2);" id="expense-badge">Expenses</div>
+        </div>
+        <div class="card-title">Personal Expenses</div>
+        <div class="card-desc">Track monthly spending by category, set a budget, log recurring bills, and visualize where your money goes.</div>
+        <div class="card-footer">
+          <div class="card-arrow" style="--card-accent:var(--c-expense);">Track Expenses <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+          <div class="card-stat" id="expense-stat">—</div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ── INTELLIGENCE & PLANNING ── -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-icon" style="--si-bg:rgba(52,211,153,0.12);">⚡</div>
+      <div class="section-label">Intelligence &amp; Planning</div>
+      <div class="section-line"></div>
+    </div>
+    <div class="grid grid-3">
+      <a class="card" href="analytics.html" style="--card-accent:var(--c-intel);">
+        <div class="card-top">
+          <div class="card-icon" style="--ci-bg:rgba(52,211,153,0.12);">📈</div>
+          <div class="card-badge" style="--badge-bg:rgba(52,211,153,0.1);--badge-color:var(--c-intel);--badge-border:rgba(52,211,153,0.2);">Analytics</div>
+        </div>
+        <div class="card-title">Business Intelligence</div>
+        <div class="card-desc">Profit margins by product, show performance comparisons, and monthly revenue trends.</div>
+        <div class="card-footer">
+          <div class="card-arrow" style="--card-accent:var(--c-intel);">View Analytics <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+      </a>
+
+      <a class="card" href="production.html" style="--card-accent:var(--c-prod);">
+        <div class="card-top">
+          <div class="card-icon" style="--ci-bg:rgba(251,146,60,0.12);">🖨️</div>
+          <div class="card-badge" style="--badge-bg:rgba(251,146,60,0.1);--badge-color:var(--c-prod);--badge-border:rgba(251,146,60,0.2);" id="prod-badge">Production</div>
+        </div>
+        <div class="card-title">Production Hub</div>
+        <div class="card-desc">Track active print jobs, monitor progress, and manage on-hand inventory with low-stock alerts.</div>
+        <div class="card-footer">
+          <div class="card-arrow" style="--card-accent:var(--c-prod);">Open Production <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+      </a>
+
+      <a class="card" href="content.html" style="--card-accent:var(--c-content);">
+        <div class="card-top">
+          <div class="card-icon" style="--ci-bg:rgba(251,191,36,0.12);">📱</div>
+          <div class="card-badge" style="--badge-bg:rgba(251,191,36,0.1);--badge-color:var(--c-content);--badge-border:rgba(251,191,36,0.2);">Content</div>
+        </div>
+        <div class="card-title">Content Planner</div>
+        <div class="card-desc">Plan show announcements, product drops, and card spotlights. Calendar, queue, and templates.</div>
+        <div class="card-footer">
+          <div class="card-arrow" style="--card-accent:var(--c-content);">Open Planner <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ── LIVE WIDGETS ── -->
+  <div class="widgets-row">
+    <div class="widget">
+      <div class="widget-header">
+        <div class="widget-icon" style="--wi-bg:rgba(108,140,255,0.12);">📦</div>
+        <div class="widget-title">Upcoming Deliveries</div>
+      </div>
+      <div class="widget-body" id="delivery-list">Loading…</div>
+    </div>
+    <div class="widget">
+      <div class="widget-header">
+        <div class="widget-icon" style="--wi-bg:rgba(52,211,153,0.12);">💰</div>
+        <div class="widget-title">Revenue Snapshot</div>
+      </div>
+      <div class="widget-body" id="revenue-snapshot">Loading…</div>
+    </div>
+  </div>
+
+</main>
 
 <footer>
   <strong style="color:var(--text)">Business Command Center</strong> &nbsp;·&nbsp; Vault &amp; Pine Collective &nbsp;·&nbsp;
   <a href="vault-pine-collective.html">Dashboard</a> &nbsp;·&nbsp;
-  <a href="analytics.html">Analytics</a>
+  <a href="analytics.html">Analytics</a> &nbsp;·&nbsp;
+  <a href="review.html">Daily Review</a>
 </footer>
 
 <script>
-  const d = new Date();
-  document.getElementById('hdate').textContent = d.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+'use strict';
 
-  // Cloud sync banner logic
-  function dismissSyncBanner() {
-    document.getElementById('sync-banner').style.display = 'none';
-    localStorage.setItem('vpc_sync_banner_dismissed', '1');
-  }
-  async function pushAllAndDismiss() {
-    const btn = event.target;
-    btn.textContent = '⏳ Pushing…'; btn.disabled = true;
-    await window.VpcSync?.pushAll();
-    btn.textContent = '✓ Done!';
-    setTimeout(dismissSyncBanner, 1200);
-  }
-  // Show banner if user has data but hasn't done a cloud sync yet
-  document.addEventListener('DOMContentLoaded', () => {
-    const hasDismissed = localStorage.getItem('vpc_sync_banner_dismissed');
-    const hasData = localStorage.getItem('vp_orders_v2');
-    const lastSync = localStorage.getItem('vpc_last_sync_at');
-    if (!hasDismissed && hasData && !lastSync) {
-      document.getElementById('sync-banner').style.display = 'block';
-    }
-  });
+const fmt = n => '$' + Math.abs(n).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+const fmtD = n => '$' + Math.abs(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
-  // Upcoming Deliveries
-  (function() {
-    const orders = JSON.parse(localStorage.getItem('vp_orders_v2') || '[]');
-    const today = new Date(); today.setHours(0,0,0,0);
-    const upcoming = orders.filter(o => {
-      if (!o.notes) return false;
-      const m = o.notes.match(/(?:deliver|delivery|pickup|pick up)[^\d]*(\d{1,2}\/\d{1,2})/i);
-      if (!m) return false;
-      const [mo, dy] = m[1].split('/').map(Number);
-      const dt = new Date(today.getFullYear(), mo - 1, dy);
-      return dt >= today;
-    }).sort((a, b) => {
-      const parse = n => { const m = n.notes.match(/(\d{1,2})\/(\d{1,2})/); return m ? new Date(today.getFullYear(), m[1]-1, m[2]) : new Date('9999'); };
-      return parse(a) - parse(b);
-    }).slice(0, 6);
-    const el = document.getElementById('delivery-list');
-    if (!upcoming.length) { el.innerHTML = '<span style="color:var(--text2)">No upcoming deliveries found.</span>'; return; }
-    el.innerHTML = upcoming.map(o => {
-      const m = o.notes.match(/(\d{1,2}\/\d{1,2})/);
-      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);">
-        <div><div style="color:var(--text);font-weight:600">${o.customer}</div><div style="font-size:0.72rem;color:var(--text2)">${o.product}</div></div>
-        <div style="font-size:0.75rem;font-weight:700;color:var(--yellow);white-space:nowrap;margin-left:12px;">📅 ${m ? m[1] : ''}</div>
-      </div>`;
-    }).join('');
-  })();
+// ── Date ──
+document.getElementById('hdate').textContent =
+  new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
 
-  // Revenue Snapshot
-  (function() {
-    const orders = JSON.parse(localStorage.getItem('vp_orders_v2') || '[]');
-    const jtSales = JSON.parse(localStorage.getItem('vp_jettags_v1') || '[]');
+// ── Cloud sync banner ──
+function dismissSyncBanner() {
+  document.getElementById('sync-banner').classList.remove('show');
+  localStorage.setItem('vpc_sync_banner_dismissed', '1');
+}
+async function pushAllAndDismiss() {
+  const btn = document.getElementById('sync-btn');
+  btn.textContent = '⏳ Pushing…'; btn.disabled = true;
+  await window.VpcSync?.pushAll();
+  btn.textContent = '✓ Done!';
+  setTimeout(dismissSyncBanner, 1200);
+}
+
+// ── KPI Cards ──
+(function loadKPIs() {
+  try {
+    const orders   = JSON.parse(localStorage.getItem('vp_orders_v2') || '[]');
+    const jtSales  = JSON.parse(localStorage.getItem('vp_jettags_v1') || '[]');
     const pinSales = JSON.parse(localStorage.getItem('vp_pins_v1') || '[]');
-    const now = new Date();
+    const now      = new Date();
     const thisMonth = now.toISOString().slice(0, 7);
-    const riserRev = orders.reduce((s,o) => s + o.salePrice, 0);
-    const riserProfit = orders.reduce((s,o) => s + o.salePrice - o.cogs, 0);
-    const moRev = orders.filter(o => o.date.startsWith(thisMonth)).reduce((s,o) => s + o.salePrice, 0);
-    const jtRev = jtSales.reduce((s,x) => s + x.revenue, 0);
-    const pinRev = pinSales.reduce((s,x) => s + x.revenue, 0);
-    const totalRev = riserRev + jtRev + pinRev;
-    const fmt = n => '$' + n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    const el = document.getElementById('revenue-snapshot');
-    if (!orders.length) { el.innerHTML = '<span>No data — <a href="vault-pine-collective.html" style="color:var(--accent)">open dashboard</a> and restore your backup.</span>'; return; }
-    el.innerHTML = `
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div style="background:var(--surface2);border-radius:8px;padding:12px;"><div style="font-size:1.1rem;font-weight:800;color:var(--green)">${fmt(totalRev)}</div><div style="font-size:0.65rem;color:var(--text2);margin-top:2px;text-transform:uppercase;letter-spacing:.5px">All-Time Revenue</div></div>
-        <div style="background:var(--surface2);border-radius:8px;padding:12px;"><div style="font-size:1.1rem;font-weight:800;color:var(--accent)">${fmt(riserProfit)}</div><div style="font-size:0.65rem;color:var(--text2);margin-top:2px;text-transform:uppercase;letter-spacing:.5px">Riser Profit</div></div>
-        <div style="background:var(--surface2);border-radius:8px;padding:12px;"><div style="font-size:1.1rem;font-weight:800;color:var(--accent2)">${fmt(moRev)}</div><div style="font-size:0.65rem;color:var(--text2);margin-top:2px;text-transform:uppercase;letter-spacing:.5px">This Month</div></div>
-        <div style="background:var(--surface2);border-radius:8px;padding:12px;"><div style="font-size:1.1rem;font-weight:800;color:var(--yellow)">${orders.length}</div><div style="font-size:0.65rem;color:var(--text2);margin-top:2px;text-transform:uppercase;letter-spacing:.5px">Total Orders</div></div>
-      </div>`;
-  })();
+
+    const riserRev   = orders.reduce((s,o) => s + (o.salePrice||0), 0);
+    const jtRev      = jtSales.reduce((s,x) => s + (x.revenue||0), 0);
+    const pinRev     = pinSales.reduce((s,x) => s + (x.revenue||0), 0);
+    const totalRev   = riserRev + jtRev + pinRev;
+    const profit     = orders.reduce((s,o) => s + (o.salePrice||0) - (o.cogs||0), 0);
+    const monthRev   = orders.filter(o => (o.date||'').startsWith(thisMonth)).reduce((s,o) => s + (o.salePrice||0), 0);
+    const monthOrders= orders.filter(o => (o.date||'').startsWith(thisMonth)).length;
+
+    document.getElementById('kpi-rev').textContent      = totalRev > 0 ? fmt(totalRev) : '$0';
+    document.getElementById('kpi-rev-sub').textContent  = `${orders.length} total orders`;
+    document.getElementById('kpi-month').textContent    = monthRev > 0 ? fmt(monthRev) : '$0';
+    document.getElementById('kpi-month-sub').textContent= `${monthOrders} order${monthOrders!==1?'s':''} this month`;
+    document.getElementById('kpi-profit').textContent   = profit !== 0 ? fmt(profit) : '$0';
+    document.getElementById('kpi-profit-sub').innerHTML = profit >= 0
+      ? '<span class="kpi-up">↑ On track</span>'
+      : '<span class="kpi-down">↓ Check costs</span>';
+
+    // Card stat for VPC
+    document.getElementById('vpc-stat').innerHTML = `<strong>${orders.length}</strong> orders`;
+  } catch(e) {
+    ['kpi-rev','kpi-month','kpi-profit'].forEach(id => document.getElementById(id).textContent = '—');
+  }
+
+  // Goals KPI
+  try {
+    const g = JSON.parse(localStorage.getItem('goals_dashboard_v1') || '{"goals":[]}');
+    const today = new Date(); today.setHours(0,0,0,0);
+    const active  = (g.goals||[]).filter(x => !x.done);
+    const done    = (g.goals||[]).filter(x => x.done);
+    const overdue = active.filter(x => x.due && new Date(x.due+'T00:00:00') < today);
+    document.getElementById('kpi-goals').textContent    = active.length;
+    document.getElementById('kpi-goals-sub').innerHTML  = overdue.length
+      ? `<span class="kpi-down">⚠ ${overdue.length} overdue</span>`
+      : `<span class="kpi-up">${done.length} completed</span>`;
+    document.getElementById('goals-stat').innerHTML = `<strong>${done.length}</strong> done`;
+    if (overdue.length) {
+      document.getElementById('goals-badge').textContent = `⚠ ${overdue.length} overdue`;
+      document.getElementById('goals-badge').style.setProperty('--badge-color','var(--yellow)');
+      document.getElementById('goals-badge').style.setProperty('--badge-bg','rgba(251,191,36,0.1)');
+      document.getElementById('goals-badge').style.setProperty('--badge-border','rgba(251,191,36,0.25)');
+    }
+  } catch(e) {}
+
+  // Events stat
+  try {
+    const events = JSON.parse(localStorage.getItem('vp_events_v1')||localStorage.getItem('vpc_events_v1')||'[]');
+    const today  = new Date(); today.setHours(0,0,0,0);
+    const upcoming = events.filter(e => new Date((e.start||e.date||'')+'T00:00:00') >= today);
+    document.getElementById('events-stat').innerHTML = `<strong>${upcoming.length}</strong> upcoming`;
+  } catch(e) {}
+
+  // Expenses stat
+  try {
+    const now    = new Date();
+    const prefix = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    const exps   = JSON.parse(localStorage.getItem('vpc_personal_expenses_v1')||'[]');
+    const spent  = exps.filter(e => (e.date||'').startsWith(prefix)).reduce((s,e) => s+(e.amount||0), 0);
+    const budget = JSON.parse(localStorage.getItem('vpc_expense_budget_v1')||'{"total":0}').total;
+    document.getElementById('expense-stat').innerHTML = `<strong>${fmt(spent)}</strong> this month`;
+    if (budget > 0 && spent > budget) {
+      document.getElementById('expense-badge').textContent = '⚠ Over Budget';
+      document.getElementById('expense-badge').style.setProperty('--badge-color','var(--red)');
+      document.getElementById('expense-badge').style.setProperty('--badge-bg','rgba(248,113,113,0.1)');
+      document.getElementById('expense-badge').style.setProperty('--badge-border','rgba(248,113,113,0.3)');
+    }
+  } catch(e) {}
+})();
+
+// ── Alerts ──
+(function renderAlerts() {
+  const bar = document.getElementById('alerts-bar');
+  const alerts = [];
+  const today = new Date(); today.setHours(0,0,0,0);
+  const week  = new Date(today); week.setDate(week.getDate()+7);
+  const now   = new Date();
+  const prefix= `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+
+  try {
+    const g = JSON.parse(localStorage.getItem('goals_dashboard_v1')||'{"goals":[]}');
+    const od = (g.goals||[]).filter(x => !x.done && x.due && new Date(x.due+'T00:00:00') < today);
+    if (od.length) alerts.push({ type:'danger', icon:'⚠️', text:`${od.length} goal${od.length>1?'s':''} overdue — immediate attention needed`, url:'goals-dashboard.html', label:'View Goals' });
+    const soon = (g.goals||[]).filter(x => !x.done && x.due && new Date(x.due+'T00:00:00') <= week && new Date(x.due+'T00:00:00') >= today);
+    if (soon.length) alerts.push({ type:'warning', icon:'⏰', text:`${soon.length} goal${soon.length>1?'s':''} due within the next 7 days`, url:'goals-dashboard.html', label:'Manage' });
+  } catch(e) {}
+
+  try {
+    const budget = JSON.parse(localStorage.getItem('vpc_expense_budget_v1')||'{"total":0}');
+    const exps   = JSON.parse(localStorage.getItem('vpc_personal_expenses_v1')||'[]');
+    const spent  = exps.filter(e => (e.date||'').startsWith(prefix)).reduce((s,e) => s+(e.amount||0), 0);
+    if (budget.total > 0) {
+      const pct = spent / budget.total * 100;
+      if (spent > budget.total) alerts.push({ type:'danger', icon:'💸', text:`Budget exceeded — spent ${fmt(spent)} of ${fmt(budget.total)} limit`, url:'expenses.html', label:'View' });
+      else if (pct > 80) alerts.push({ type:'warning', icon:'💸', text:`Budget ${Math.round(pct)}% used — ${fmt(budget.total-spent)} remaining`, url:'expenses.html', label:'View' });
+    }
+  } catch(e) {}
+
+  if (!alerts.length) return; // no alerts = no bar shown, keeps it clean
+
+  bar.innerHTML = alerts.map((a,i) => `
+    <div class="alert-pill ${a.type}" style="animation-delay:${i*0.06}s">
+      <span class="alert-icon">${a.icon}</span>
+      <span class="alert-text">${a.text}</span>
+      ${a.url ? `<a href="${a.url}">${a.label} →</a>` : ''}
+    </div>`).join('');
+})();
+
+// ── Deliveries Widget ──
+(function() {
+  const orders = JSON.parse(localStorage.getItem('vp_orders_v2') || '[]');
+  const today  = new Date(); today.setHours(0,0,0,0);
+  const upcoming = orders.filter(o => {
+    if (!o.notes) return false;
+    const m = o.notes.match(/(?:deliver|delivery|pickup|pick up)[^\d]*(\d{1,2}\/\d{1,2})/i);
+    if (!m) return false;
+    const [mo, dy] = m[1].split('/').map(Number);
+    return new Date(today.getFullYear(), mo-1, dy) >= today;
+  }).sort((a,b) => {
+    const parse = n => { const m = n.notes.match(/(\d{1,2})\/(\d{1,2})/); return m ? new Date(today.getFullYear(),m[1]-1,m[2]) : new Date('9999'); };
+    return parse(a) - parse(b);
+  }).slice(0, 5);
+
+  const el = document.getElementById('delivery-list');
+  if (!upcoming.length) { el.innerHTML = '<span style="color:var(--text2)">No upcoming deliveries found.</span>'; return; }
+  el.innerHTML = upcoming.map(o => {
+    const m = o.notes.match(/(\d{1,2}\/\d{1,2})/);
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+      <div>
+        <div style="color:var(--text);font-weight:600;font-size:0.82rem">${o.customer}</div>
+        <div style="font-size:0.72rem;color:var(--text2);margin-top:2px">${o.product}</div>
+      </div>
+      <div style="font-size:0.72rem;font-weight:700;color:var(--yellow);white-space:nowrap;margin-left:12px;background:rgba(251,191,36,0.08);padding:3px 8px;border-radius:6px;">📅 ${m?m[1]:''}</div>
+    </div>`;
+  }).join('');
+})();
+
+// ── Revenue Snapshot Widget ──
+(function() {
+  const orders   = JSON.parse(localStorage.getItem('vp_orders_v2') || '[]');
+  const jtSales  = JSON.parse(localStorage.getItem('vp_jettags_v1') || '[]');
+  const pinSales = JSON.parse(localStorage.getItem('vp_pins_v1') || '[]');
+  const now = new Date(), thisMonth = now.toISOString().slice(0,7);
+  const riserRev = orders.reduce((s,o)=>s+(o.salePrice||0),0);
+  const profit   = orders.reduce((s,o)=>s+(o.salePrice||0)-(o.cogs||0),0);
+  const moRev    = orders.filter(o=>(o.date||'').startsWith(thisMonth)).reduce((s,o)=>s+(o.salePrice||0),0);
+  const totalRev = riserRev + jtSales.reduce((s,x)=>s+(x.revenue||0),0) + pinSales.reduce((s,x)=>s+(x.revenue||0),0);
+  const el = document.getElementById('revenue-snapshot');
+  if (!orders.length && !jtSales.length) {
+    el.innerHTML = `<span>No data — <a href="vault-pine-collective.html" style="color:var(--accent)">open dashboard</a> to get started.</span>`;
+    return;
+  }
+  const stats = [
+    { label:'All-Time Revenue', value: fmt(totalRev), color:'var(--green)' },
+    { label:'Riser Profit',     value: fmt(profit),   color:'var(--accent)' },
+    { label:'This Month',       value: fmt(moRev),    color:'var(--accent2)' },
+    { label:'Total Orders',     value: orders.length, color:'var(--text)' },
+  ];
+  el.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">` +
+    stats.map(s => `<div style="background:var(--surface2);border-radius:10px;padding:12px 14px;">
+      <div style="font-size:1.1rem;font-weight:900;color:${s.color};letter-spacing:-0.3px">${s.value}</div>
+      <div style="font-size:0.62rem;color:var(--text2);margin-top:3px;text-transform:uppercase;letter-spacing:.5px">${s.label}</div>
+    </div>`).join('') + '</div>';
+})();
+
+// ── Sync banner ──
+document.addEventListener('DOMContentLoaded', () => {
+  const dismissed = localStorage.getItem('vpc_sync_banner_dismissed');
+  const hasData   = localStorage.getItem('vp_orders_v2');
+  const lastSync  = localStorage.getItem('vpc_last_sync_at');
+  if (!dismissed && hasData && !lastSync) {
+    document.getElementById('sync-banner').classList.add('show');
+  }
+});
 </script>
 
 </body>
