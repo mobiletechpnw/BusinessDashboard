@@ -274,7 +274,6 @@ function buildSearchIndex() {
     { title: 'Vault & Pine Collective', sub: 'Sales · Goals · Expenses · Jet Tags · Pins · Events', url: 'vault-pine-collective.html', icon: '🌲', type: 'Page' },
     { title: 'Analytics', sub: 'Margins, show breakdowns, trends', url: 'analytics.html', icon: '📈', type: 'Page' },
     { title: 'Goals & Objectives', sub: 'Track your goals', url: 'goals-dashboard.html', icon: '🎯', type: 'Page' },
-    { title: 'JARVIS', sub: 'AI command center with voice control', url: 'jarvis.html', icon: '🤖', type: 'Page' },
     { title: 'Personal Expenses', sub: 'Track monthly spending & budget', url: 'expenses.html', icon: '💸', type: 'Page' },
     { title: 'Daily Review', sub: 'Morning briefing — goals, expenses, alerts', url: 'review.html', icon: '📋', type: 'Page' },
   ].forEach(p => results.push(p));
@@ -379,7 +378,6 @@ document.addEventListener('keydown', e => {
     case 'h': e.preventDefault(); location.href = 'index.html'; break;
     case 'g': e.preventDefault(); location.href = 'goals-dashboard.html'; break;
     case 'e': e.preventDefault(); location.href = 'expenses.html'; break;
-    case 'j': e.preventDefault(); location.href = 'jarvis.html'; break;
     case 'a': e.preventDefault(); location.href = 'analytics.html'; break;
     case 'r': e.preventDefault(); location.href = 'review.html'; break;
   }

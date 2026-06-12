@@ -28,6 +28,6 @@
     { "name": "Daily Review", "url": "/review.html", "description": "Morning briefing" },
     { "name": "Sales Dashboard", "url": "/vault-pine-collective.html", "description": "Open sales tracker" },
     { "name": "Goals", "url": "/goals-dashboard.html", "description": "View goals" },
-    { "name": "JARVIS", "url": "/jarvis.html", "description": "AI command center" }
+    { "name": "Analytics", "url": "/analytics.html", "description": "Business analytics" }
   ]
 }
