@@ -64,7 +64,6 @@ const SYNC_KEYS = [
 
   // ── User preferences (sync across devices) ───────────────
   'vpc_theme',
-  'vpc_pin_hash',
 
   // ── Upcoming Deliveries ──────────────────────────────────
   'vpc_pipeline_v1',

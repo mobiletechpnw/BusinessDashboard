@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════
-   shared.js — PIN Lock · Theme · Search · Shortcuts
+   shared.js — Theme · Search · Shortcuts
                Audit Log · Notifications · Alerts
    Vault & Pine Collective
 ═══════════════════════════════════════════════════ */
@@ -35,177 +35,6 @@ function injectThemeBtn() {
   const header = document.querySelector('header');
   if (header) header.appendChild(btn);
 }
-
-// ── PIN LOCK ──────────────────────────────────────
-const PIN_STORE   = 'vpc_pin_hash';
-const PIN_SESSION = 'vpc_authed';
-const PIN_TIMEOUT = 8 * 60 * 60 * 1000; // 8 hours
-
-async function hashPin(pin) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('vpc_salt_' + pin));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-}
-
-function isPinSet()     { return !!localStorage.getItem(PIN_STORE); }
-function isAuthed()     {
-  const s = sessionStorage.getItem(PIN_SESSION);
-  if (!s) return false;
-  const { ts } = JSON.parse(s);
-  return Date.now() - ts < PIN_TIMEOUT;
-}
-function markAuthed()   { sessionStorage.setItem(PIN_SESSION, JSON.stringify({ ts: Date.now() })); }
-function clearAuth()    { sessionStorage.removeItem(PIN_SESSION); }
-
-function showPinOverlay(mode = 'unlock') {
-  const overlay = document.createElement('div');
-  overlay.id = 'pin-overlay';
-  overlay.style.cssText = `
-    position:fixed;inset:0;background:var(--bg,#0f1117);z-index:99999;
-    display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0;
-  `;
-
-  const isSetup = mode === 'setup';
-  const isChange = mode === 'change';
-
-  overlay.innerHTML = `
-    <div style="text-align:center;max-width:300px;width:90%;">
-      <div style="font-size:2rem;margin-bottom:12px;">🔒</div>
-      <div style="font-family:'Orbitron',system-ui;font-size:1rem;font-weight:700;color:var(--accent,#6c8cff);letter-spacing:2px;margin-bottom:6px;">
-        ${isSetup ? 'CREATE PIN' : isChange ? 'NEW PIN' : 'ENTER PIN'}
-      </div>
-      <div id="pin-subtitle" style="font-size:0.75rem;color:var(--text2,#8892b0);margin-bottom:28px;">
-        ${isSetup ? 'Set a 4-digit PIN to protect your dashboard' : isChange ? 'Enter your new 4-digit PIN' : 'Business Command Center'}
-      </div>
-      <div id="pin-dots" style="display:flex;gap:16px;justify-content:center;margin-bottom:28px;">
-        ${[0,1,2,3].map(i => `<div id="dot-${i}" style="width:14px;height:14px;border-radius:50%;border:2px solid var(--border,#2e3350);transition:all 0.2s;"></div>`).join('')}
-      </div>
-      <div id="pin-error" style="color:#f87171;font-size:0.75rem;min-height:18px;margin-bottom:12px;"></div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:240px;margin:0 auto;">
-        ${[1,2,3,4,5,6,7,8,9,'',0,'⌫'].map(k => `
-          <button onclick="pinKeyPress('${k}')" style="
-            background:var(--surface,#1a1d27);border:1px solid var(--border,#2e3350);
-            border-radius:10px;padding:16px;font-size:1.2rem;font-weight:700;
-            color:var(--text,#e2e8f0);cursor:pointer;transition:all 0.15s;
-            ${k === '' ? 'visibility:hidden;' : ''}
-          " onmouseover="this.style.borderColor='var(--accent,#6c8cff)';this.style.background='var(--surface2,#22263a)'"
-            onmouseout="this.style.borderColor='var(--border,#2e3350)';this.style.background='var(--surface,#1a1d27)'"
-          >${k}</button>`).join('')}
-      </div>
-      ${!isSetup && !isChange ? `<div style="margin-top:20px;"><button onclick="showPinSetup()" style="background:none;border:none;color:var(--text2,#8892b0);font-size:0.72rem;cursor:pointer;text-decoration:underline;">Forgot PIN? Reset</button></div>` : ''}
-    </div>
-  `;
-  document.body.appendChild(overlay);
-}
-
-let pinBuffer = '';
-let pinStep = 'enter'; // enter | confirm
-let pinFirst = '';
-
-window.pinKeyPress = function(key) {
-  if (key === '') return;
-  const err = document.getElementById('pin-error');
-  if (key === '⌫') {
-    pinBuffer = pinBuffer.slice(0, -1);
-  } else if (pinBuffer.length < 4) {
-    pinBuffer += key;
-  }
-  // update dots
-  for (let i = 0; i < 4; i++) {
-    const dot = document.getElementById('dot-' + i);
-    if (!dot) continue;
-    dot.style.background = i < pinBuffer.length ? 'var(--accent,#6c8cff)' : 'transparent';
-    dot.style.borderColor = i < pinBuffer.length ? 'var(--accent,#6c8cff)' : 'var(--border,#2e3350)';
-  }
-  if (pinBuffer.length === 4) {
-    const mode = document.getElementById('pin-overlay')?.dataset.mode || 'unlock';
-    setTimeout(() => handlePinSubmit(mode), 150);
-  }
-};
-
-async function handlePinSubmit(mode) {
-  const err = document.getElementById('pin-error');
-  const hash = await hashPin(pinBuffer);
-
-  if (mode === 'setup' || mode === 'change') {
-    if (pinStep === 'enter') {
-      pinFirst = pinBuffer;
-      pinBuffer = '';
-      pinStep = 'confirm';
-      document.getElementById('pin-subtitle').textContent = 'Confirm your PIN';
-      for (let i = 0; i < 4; i++) {
-        const dot = document.getElementById('dot-' + i);
-        if (dot) { dot.style.background = 'transparent'; dot.style.borderColor = 'var(--border,#2e3350)'; }
-      }
-      return;
-    } else {
-      if (pinBuffer !== pinFirst) {
-        err.textContent = 'PINs do not match — try again';
-        pinBuffer = ''; pinFirst = ''; pinStep = 'enter';
-        for (let i = 0; i < 4; i++) {
-          const dot = document.getElementById('dot-' + i);
-          if (dot) { dot.style.background = 'transparent'; dot.style.borderColor = 'var(--border,#2e3350)'; }
-        }
-        return;
-      }
-      localStorage.setItem(PIN_STORE, hash);
-      markAuthed();
-      document.getElementById('pin-overlay')?.remove();
-      if (mode === 'change') showPinToast('PIN updated successfully');
-      pinBuffer = ''; pinFirst = ''; pinStep = 'enter';
-      return;
-    }
-  }
-
-  // Unlock mode
-  const stored = localStorage.getItem(PIN_STORE);
-  if (hash === stored) {
-    markAuthed();
-    document.getElementById('pin-overlay')?.remove();
-    pinBuffer = '';
-  } else {
-    err.textContent = 'Incorrect PIN';
-    pinBuffer = '';
-    for (let i = 0; i < 4; i++) {
-      const dot = document.getElementById('dot-' + i);
-      if (dot) { dot.style.background = '#f87171'; dot.style.borderColor = '#f87171'; }
-    }
-    setTimeout(() => {
-      err.textContent = '';
-      for (let i = 0; i < 4; i++) {
-        const dot = document.getElementById('dot-' + i);
-        if (dot) { dot.style.background = 'transparent'; dot.style.borderColor = 'var(--border,#2e3350)'; }
-      }
-    }, 700);
-  }
-}
-
-window.showPinSetup = function(mode = 'setup') {
-  pinBuffer = ''; pinFirst = ''; pinStep = 'enter';
-  document.getElementById('pin-overlay')?.remove();
-  showPinOverlay(mode);
-  document.getElementById('pin-overlay').dataset.mode = mode;
-};
-
-function showPinToast(msg) {
-  const t = document.createElement('div');
-  t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--accent);border-radius:8px;padding:10px 20px;font-size:0.82rem;color:var(--accent);z-index:99998;';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 2500);
-}
-
-function initPin() {
-  if (!isPinSet()) {
-    showPinOverlay('setup');
-    document.getElementById('pin-overlay').dataset.mode = 'setup';
-  } else if (!isAuthed()) {
-    showPinOverlay('unlock');
-    document.getElementById('pin-overlay').dataset.mode = 'unlock';
-  }
-}
-
-// Expose change PIN for settings
-window.changePin = () => { clearAuth(); showPinSetup('change'); };
 
 // ── GLOBAL SEARCH ──────────────────────────────────
 function buildSearchIndex() {
@@ -372,7 +201,6 @@ document.addEventListener('keydown', e => {
   // Single-key nav — skip when typing in a field
   const tag = document.activeElement?.tagName;
   if (e.ctrlKey || e.metaKey || e.altKey || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-  if (document.getElementById('pin-overlay')) return;
   switch (e.key) {
     case '?': e.preventDefault(); showShortcutsPanel(); break;
     case 'h': e.preventDefault(); location.href = 'index.html'; break;
@@ -394,7 +222,6 @@ function showShortcutsPanel() {
     ['e', 'Personal Expenses'],
     ['r', 'Daily Review'],
     ['a', 'Analytics'],
-    ['j', 'JARVIS'],
     ['h', 'Home'],
     ['Ctrl+K', 'Global Search'],
     ['Ctrl+L', 'Audit Log'],
@@ -635,9 +462,6 @@ function injectLightModeCSS() {
       color: var(--text);
       border-color: var(--border);
     }
-    [data-theme="light"] #pin-overlay {
-      background: var(--bg);
-    }
     [data-theme="light"] body {
       background-image:
         linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
@@ -679,8 +503,7 @@ document.addEventListener('DOMContentLoaded', () => {
   injectThemeBtn();
   injectSearchBtn();
   registerSW();
-  initPin();
-  // Deferred enhancements (after auth)
+  // Deferred enhancements
   setTimeout(() => {
     checkAndNotify();
     injectTrendAlerts();
