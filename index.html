@@ -51,7 +51,7 @@ header {
   border-bottom: 1px solid var(--glass-border);
   padding: 0 32px;
   display: flex; align-items: center; justify-content: space-between;
-  min-height: 56px;
+  min-height: 58px;
 }
 .brand { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; font-weight: 800; letter-spacing: -0.3px; }
 .brand-mark {
@@ -64,13 +64,6 @@ header {
 .brand-name span { color: var(--accent); }
 .header-right { display: flex; align-items: center; gap: 16px; }
 .header-date { font-size: 0.75rem; color: var(--text2); font-weight: 500; }
-.header-nav { display: flex; gap: 4px; }
-.header-nav a {
-  font-size: 0.78rem; font-weight: 600; color: var(--text2);
-  text-decoration: none; padding: 5px 10px; border-radius: 7px;
-  transition: all 0.15s;
-}
-.header-nav a:hover { color: var(--text); background: var(--glass); }
 
 /* ── HERO (compact — bento carries the weight now) ── */
 .hero { padding: 44px 32px 8px; }
@@ -261,7 +254,6 @@ footer a { color: var(--accent); text-decoration: none; }
 }
 @media (max-width: 640px) {
   header { padding: 0 14px; }
-  .header-nav { display: none; }
   .hero { padding: 30px 16px 4px; }
   main { padding: 12px 12px 28px; }
   .bento { grid-auto-rows: 84px; gap: 10px; }
@@ -280,15 +272,21 @@ footer a { color: var(--accent); text-decoration: none; }
     <div class="brand-name"><span>VPC</span> Command Center</div>
   </div>
   <div class="header-right">
-    <nav class="header-nav">
-      <a href="vault-pine-collective.html">Sales</a>
-      <a href="goals-dashboard.html">Goals</a>
-      <a href="analytics.html">Intel</a>
-      <a href="review.html">Review</a>
-    </nav>
     <div class="header-date" id="hdate"></div>
   </div>
 </header>
+
+<nav class="dash-nav">
+  <a href="index.html" class="dash-nav-link active">⌂ Home</a>
+  <a href="vault-pine-collective.html" class="dash-nav-link">📊 Sales Hub</a>
+  <a href="goals-dashboard.html" class="dash-nav-link">🎯 Goals</a>
+  <a href="expenses.html" class="dash-nav-link">💸 Expenses</a>
+  <a href="analytics.html" class="dash-nav-link">📈 Analytics</a>
+  <a href="production.html" class="dash-nav-link">🖨️ Production</a>
+  <a href="events.html" class="dash-nav-link">🎪 Events</a>
+  <a href="content.html" class="dash-nav-link">📱 Content</a>
+  <a href="review.html" class="dash-nav-link">📋 Review</a>
+</nav>
 
 <section class="hero">
   <div class="hero-inner">

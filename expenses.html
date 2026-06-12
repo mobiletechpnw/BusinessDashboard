@@ -46,10 +46,12 @@
 
   /* ── Month nav + Tab bar ── */
   .toolbar {
-    background: var(--surface); border-bottom: 1px solid var(--border);
+    background: rgba(13, 15, 22, 0.7); backdrop-filter: blur(18px) saturate(1.2);
+    border-bottom: 1px solid var(--border);
     padding: 0 32px; display: flex; align-items: center;
-    justify-content: space-between; position: sticky; top: 58px; z-index: 150; gap: 16px;
+    justify-content: space-between; position: sticky; top: 98px; z-index: 150; gap: 16px;
   }
+  @media (max-width: 700px) { .toolbar { top: 92px; } }
   .month-nav { display: flex; align-items: center; gap: 10px; padding: 12px 0; }
   .nav-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
   .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
@@ -180,6 +182,18 @@
   <div class="brand">💸 <span>Personal</span> Expenses</div>
   <a class="home-link" href="index.html">⌂ Home</a>
 </header>
+
+<nav class="dash-nav">
+  <a href="index.html" class="dash-nav-link">⌂ Home</a>
+  <a href="vault-pine-collective.html" class="dash-nav-link">📊 Sales Hub</a>
+  <a href="goals-dashboard.html" class="dash-nav-link">🎯 Goals</a>
+  <a href="expenses.html" class="dash-nav-link active">💸 Expenses</a>
+  <a href="analytics.html" class="dash-nav-link">📈 Analytics</a>
+  <a href="production.html" class="dash-nav-link">🖨️ Production</a>
+  <a href="events.html" class="dash-nav-link">🎪 Events</a>
+  <a href="content.html" class="dash-nav-link">📱 Content</a>
+  <a href="review.html" class="dash-nav-link">📋 Review</a>
+</nav>
 
 <!-- KPI strip -->
 <div class="kpi-strip" id="kpi-strip">

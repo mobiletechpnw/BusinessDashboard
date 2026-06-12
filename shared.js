@@ -4,6 +4,39 @@
    Vault & Pine Collective
 ═══════════════════════════════════════════════════ */
 
+// ── UNIFIED NAVIGATION ─────────────────────────────
+// One nav, every page, same order — injected here so a page can never
+// drift out of sync or dead-end the user again.
+const DASH_NAV = [
+  ['index.html',                 '⌂',  'Home'],
+  ['vault-pine-collective.html', '📊', 'Sales Hub'],
+  ['goals-dashboard.html',       '🎯', 'Goals'],
+  ['expenses.html',              '💸', 'Expenses'],
+  ['analytics.html',             '📈', 'Analytics'],
+  ['production.html',            '🖨️', 'Production'],
+  ['events.html',                '🎪', 'Events'],
+  ['content.html',               '📱', 'Content'],
+  ['review.html',                '📋', 'Review'],
+];
+
+function injectDashNav() {
+  const cur = location.pathname.split('/').pop() || 'index.html';
+  const html = DASH_NAV.map(([href, icon, label]) =>
+    `<a href="${href}" class="dash-nav-link${href === cur ? ' active' : ''}">${icon} ${label}</a>`
+  ).join('');
+  let nav = document.querySelector('nav.dash-nav');
+  if (!nav) {
+    nav = document.createElement('nav');
+    nav.className = 'dash-nav';
+    const header = document.querySelector('header');
+    if (header) header.insertAdjacentElement('afterend', nav);
+    else document.body.prepend(nav);
+  }
+  nav.innerHTML = html;
+  // On mobile the bar scrolls horizontally — keep the current page visible
+  nav.querySelector('.active')?.scrollIntoView({ inline: 'center', block: 'nearest' });
+}
+
 // ── CURSOR GLOW — soft flashlight that follows the pointer ──
 function injectCursorGlow() {
   // Pointer-driven effect: skip touch devices and reduced-motion users
@@ -208,9 +241,13 @@ document.addEventListener('keydown', e => {
   switch (e.key) {
     case '?': e.preventDefault(); showShortcutsPanel(); break;
     case 'h': e.preventDefault(); location.href = 'index.html'; break;
+    case 's': e.preventDefault(); location.href = 'vault-pine-collective.html'; break;
     case 'g': e.preventDefault(); location.href = 'goals-dashboard.html'; break;
     case 'e': e.preventDefault(); location.href = 'expenses.html'; break;
     case 'a': e.preventDefault(); location.href = 'analytics.html'; break;
+    case 'p': e.preventDefault(); location.href = 'production.html'; break;
+    case 'v': e.preventDefault(); location.href = 'events.html'; break;
+    case 'c': e.preventDefault(); location.href = 'content.html'; break;
     case 'r': e.preventDefault(); location.href = 'review.html'; break;
   }
 });
@@ -222,11 +259,15 @@ function showShortcutsPanel() {
   overlay.id = 'shortcuts-overlay';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9997;display:flex;align-items:center;justify-content:center;';
   const rows = [
+    ['h', 'Home'],
+    ['s', 'Sales Hub'],
     ['g', 'Goals & Objectives'],
     ['e', 'Personal Expenses'],
-    ['r', 'Daily Review'],
     ['a', 'Analytics'],
-    ['h', 'Home'],
+    ['p', 'Production'],
+    ['v', 'Events'],
+    ['c', 'Content Planner'],
+    ['r', 'Daily Review'],
     ['Ctrl+K', 'Global Search'],
     ['Ctrl+L', 'Audit Log'],
     ['?', 'This shortcuts panel'],
@@ -442,6 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   sessionStorage.setItem('vpc_last_page', _curPage);
+  injectDashNav();
   injectSearchBtn();
   injectCursorGlow();
   registerSW();
