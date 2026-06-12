@@ -12,13 +12,12 @@ function injectCursorGlow() {
   const glow = document.createElement('div');
   glow.id = 'cursor-glow';
   glow.style.cssText = `
-    position:fixed;left:-999px;top:-999px;width:560px;height:560px;
+    position:fixed;left:-999px;top:-999px;width:220px;height:220px;
     border-radius:50%;pointer-events:none;z-index:900;opacity:0;
     background:radial-gradient(circle,
-      rgba(108,142,255,0.07) 0%,
-      rgba(167,139,250,0.045) 30%,
-      rgba(45,212,191,0.02) 55%,
-      transparent 72%);
+      rgba(108,142,255,0.035) 0%,
+      rgba(167,139,250,0.02) 35%,
+      transparent 68%);
     transform:translate(-50%,-50%);
     transition:opacity 0.5s ease;
     mix-blend-mode:screen;will-change:left,top;
