@@ -67,6 +67,9 @@ const SYNC_KEYS = [
   'vpc_pin_hash',
   'jarvis_webhook',
   'jarvis_vad',
+  'jarvis_apikey',
+  'jarvis_eleven_key',
+  'jarvis_eleven_voice',
 
   // ── Upcoming Deliveries ──────────────────────────────────
   'vpc_pipeline_v1',

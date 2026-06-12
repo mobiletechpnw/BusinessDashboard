@@ -602,6 +602,16 @@ body::after{
       <div class="hint">Leave blank for unauthenticated webhooks.</div>
     </div>
     <div class="cfg-field">
+      <label>ElevenLabs API Key (optional — natural voice)</label>
+      <input type="password" id="cfg-eleven-key" placeholder="sk_… from elevenlabs.io → Profile → API Keys">
+      <div class="hint">When set, Jarvis speaks with a cinematic neural voice instead of the robotic browser TTS. Free tier includes ~10 min/month.</div>
+    </div>
+    <div class="cfg-field">
+      <label>ElevenLabs Voice ID</label>
+      <input type="text" id="cfg-eleven-voice" placeholder="onwK4e9ZLuTAKqWW03F9 (Daniel — British male)">
+      <div class="hint">Default is "Daniel", a deep British voice close to the Iron Man Jarvis. Browse voices at elevenlabs.io/voice-library and paste any voice ID.</div>
+    </div>
+    <div class="cfg-field">
       <label>VAD Sensitivity (1–30, lower = more sensitive)</label>
       <input type="number" id="cfg-vad" min="1" max="30" placeholder="8">
       <div class="hint">Amplitude threshold for voice activity detection.</div>
@@ -623,6 +633,10 @@ const CFG = {
   set webhookUrl(v) { localStorage.setItem('jarvis_webhook', v); },
   get apiKey()      { return localStorage.getItem('jarvis_apikey') || ''; },
   set apiKey(v)     { localStorage.setItem('jarvis_apikey', v); },
+  get elevenKey()   { return localStorage.getItem('jarvis_eleven_key') || ''; },
+  set elevenKey(v)  { localStorage.setItem('jarvis_eleven_key', v); },
+  get elevenVoice() { return localStorage.getItem('jarvis_eleven_voice') || 'onwK4e9ZLuTAKqWW03F9'; },
+  set elevenVoice(v){ localStorage.setItem('jarvis_eleven_voice', v || 'onwK4e9ZLuTAKqWW03F9'); },
   get vadThreshold(){ return parseInt(localStorage.getItem('jarvis_vad') || '8', 10); },
   set vadThreshold(v){ localStorage.setItem('jarvis_vad', String(v)); },
 };
@@ -630,6 +644,8 @@ const CFG = {
 function openConfig() {
   document.getElementById('cfg-webhook').value = CFG.webhookUrl;
   document.getElementById('cfg-apikey').value  = CFG.apiKey;
+  document.getElementById('cfg-eleven-key').value   = CFG.elevenKey;
+  document.getElementById('cfg-eleven-voice').value = CFG.elevenVoice;
   document.getElementById('cfg-vad').value     = CFG.vadThreshold;
   document.getElementById('cfg-test-result').textContent = '';
   document.getElementById('config-modal').classList.add('open');
@@ -638,10 +654,13 @@ function closeConfig() { document.getElementById('config-modal').classList.remov
 function saveConfig() {
   CFG.webhookUrl   = document.getElementById('cfg-webhook').value.trim();
   CFG.apiKey       = document.getElementById('cfg-apikey').value.trim();
+  CFG.elevenKey    = document.getElementById('cfg-eleven-key').value.trim();
+  CFG.elevenVoice  = document.getElementById('cfg-eleven-voice').value.trim();
   CFG.vadThreshold = parseInt(document.getElementById('cfg-vad').value, 10) || 8;
   closeConfig();
   updatePills();
   telem('config.saved ok', 'ok');
+  if (CFG.elevenKey) jarvisSpeak('Neural voice engaged, sir. How do I sound?');
 }
 
 async function testWebhook() {
@@ -740,35 +759,89 @@ function setTranscript(text, interim=false) {
 //  TTS
 // ══════════════════════════════════════════════════════════════
 let jarvisVoice=null, voiceReady=false, speakQueue=[], isSpeaking=false, afterSpeakCb=null;
+let elevenAudio=null;
+
+// Rank browser voices: neural/"Natural" voices (Edge) sound dramatically
+// better than classic ones, so they win even over Google UK English Male.
+function scoreVoice(v) {
+  if (!v.lang.startsWith('en')) return -1;
+  let s = 0;
+  const n = v.name;
+  if (/natural|neural|online/i.test(n))            s += 40;  // Edge neural voices
+  if (v.lang === 'en-GB')                          s += 20;  // British, like the films
+  if (/ryan|thomas|daniel|george|guy|james/i.test(n)) s += 12;  // male British names
+  if (n === 'Google UK English Male')              s += 10;
+  if (/male/i.test(n) && !/female/i.test(n))       s += 5;
+  if (/google/i.test(n))                           s += 3;
+  return s;
+}
 function initVoices() {
   const voices = window.speechSynthesis?.getVoices() || [];
   if (!voices.length) return;
-  const tryList = [
-    v => v.name === 'Google UK English Male',
-    v => v.name.includes('Daniel') && v.lang.startsWith('en'),
-    v => v.name.includes('George') && v.lang.startsWith('en'),
-    v => v.lang === 'en-GB',
-    v => v.lang.startsWith('en') && v.name.toLowerCase().includes('male'),
-    v => v.lang.startsWith('en'),
-  ];
-  for (const test of tryList) { const m = voices.find(test); if (m) { jarvisVoice=m; break; } }
+  jarvisVoice = voices.slice().sort((a,b) => scoreVoice(b)-scoreVoice(a))[0] || null;
   voiceReady = true;
   telem(`voice.${jarvisVoice?.name||'default'} ready`, 'ok');
   if (speakQueue.length) { const t=speakQueue.shift(); _doSpeak(t); }
 }
 if (window.speechSynthesis) { window.speechSynthesis.onvoiceschanged=initVoices; initVoices(); }
 
+// Light prosody pass — pauses and phrasing make TTS feel far less robotic.
+function naturalize(text) {
+  return String(text)
+    .replace(/J\.A\.R\.V\.I\.S\./g, 'Jarvis')
+    .replace(/\s[·—]\s/g, ', ')
+    .replace(/,\s*/g, ', ')      // ensure breath pause after commas
+    .replace(/(\d)%/g, '$1 percent')
+    .replace(/\$(\d[\d,]*)/g, '$1 dollars');
+}
+
+// ── ElevenLabs neural TTS (primary when configured) ──
+async function _speakEleven(text) {
+  setState('speaking');
+  try {
+    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(CFG.elevenVoice)}?output_format=mp3_44100_128`, {
+      method: 'POST',
+      headers: { 'xi-api-key': CFG.elevenKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: naturalize(text),
+        model_id: 'eleven_turbo_v2_5',
+        voice_settings: { stability: 0.45, similarity_boost: 0.85, style: 0.35, use_speaker_boost: true },
+      }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    elevenAudio = new Audio(url);
+    elevenAudio.onended = elevenAudio.onerror = () => {
+      URL.revokeObjectURL(url);
+      isSpeaking = false; _onSpeakEnd();
+    };
+    isSpeaking = true;
+    await elevenAudio.play();
+  } catch(err) {
+    telem(`tts.eleven fail — ${err.message}, fallback`, 'warn');
+    _doSpeak(text);  // graceful fallback to browser TTS
+  }
+}
+
+// ── Browser TTS (fallback) ──
 function _doSpeak(text) {
   if (!window.speechSynthesis) { isSpeaking=false; _onSpeakEnd(); return; }
   window.speechSynthesis.cancel();
-  const utt = new SpeechSynthesisUtterance(text);
+  const utt = new SpeechSynthesisUtterance(naturalize(text));
   if (jarvisVoice) utt.voice = jarvisVoice;
-  utt.pitch=0.85; utt.rate=0.92; utt.volume=1.0;
+  // Natural conversational tuning — the old 0.85 pitch sounded synthetic
+  utt.pitch=1.0; utt.rate=1.0; utt.volume=1.0;
   utt.onstart = () => setState('speaking');
   utt.onend   = () => { isSpeaking=false; _onSpeakEnd(); };
   utt.onerror = () => { isSpeaking=false; _onSpeakEnd(); };
   isSpeaking = true;
   window.speechSynthesis.speak(utt);
+}
+function stopAllSpeech() {
+  window.speechSynthesis?.cancel();
+  if (elevenAudio) { try { elevenAudio.pause(); elevenAudio.onended=null; elevenAudio.onerror=null; } catch(_){} elevenAudio=null; }
+  isSpeaking = false;
 }
 function _onSpeakEnd() {
   if (afterSpeakCb) { const cb=afterSpeakCb; afterSpeakCb=null; cb(); return; }
@@ -776,8 +849,9 @@ function _onSpeakEnd() {
 }
 function jarvisSpeak(text, afterCb=null) {
   pauseRecognition();
-  window.speechSynthesis?.cancel();
-  isSpeaking=false; speakQueue=[]; afterSpeakCb=afterCb;
+  stopAllSpeech();
+  speakQueue=[]; afterSpeakCb=afterCb;
+  if (CFG.elevenKey) { _speakEleven(text); return; }
   if (!voiceReady) { speakQueue.push(text); setState('speaking'); return; }
   _doSpeak(text);
 }
@@ -974,7 +1048,7 @@ function muteJarvis()      { autoRestart=false; recogPaused=false; if(recogRunni
 
 document.getElementById('mic-btn').addEventListener('click',()=>{
   if(jarvisState==='muted'){ autoRestart=true; startListening(); const r="Voice systems back online."; addChat('jarvis',r); jarvisSpeak(r); }
-  else { window.speechSynthesis?.cancel(); isSpeaking=false; muteJarvis(); addChat('jarvis','Voice suspended.'); telem('voice.muted','warn'); }
+  else { stopAllSpeech(); muteJarvis(); addChat('jarvis','Voice suspended.'); telem('voice.muted','warn'); }
 });
 document.addEventListener('keydown',e=>{
   if(e.code==='Space'&&!e.target.matches('input,textarea,select')){ e.preventDefault(); document.getElementById('mic-btn').click(); }
@@ -1394,7 +1468,8 @@ function showBriefing(force=false) {
 }
 
 function closeBriefing() {
-  window.speechSynthesis?.cancel();
+  stopAllSpeech();
+  isBriefingNarrating = false;
   document.getElementById('briefing-overlay').classList.remove('open');
   document.getElementById('brief-narrate-btn').textContent = '▶ NARRATE';
 }
@@ -1402,23 +1477,19 @@ function closeBriefing() {
 let isBriefingNarrating = false;
 function narrateBriefing() {
   if (isBriefingNarrating) {
-    window.speechSynthesis?.cancel();
+    stopAllSpeech();
     isBriefingNarrating = false;
     document.getElementById('brief-narrate-btn').textContent = '▶ NARRATE';
     return;
   }
-  if (!window.speechSynthesis) return;
   isBriefingNarrating = true;
   document.getElementById('brief-narrate-btn').textContent = '⏹ STOP';
-  const text = buildBriefingNarration(briefingItems);
-  const utt = new SpeechSynthesisUtterance(text);
-  if (jarvisVoice) utt.voice = jarvisVoice;
-  utt.pitch=0.85; utt.rate=0.92; utt.volume=1.0;
-  utt.onend = utt.onerror = () => {
+  // Same engine as conversation — neural voice when configured
+  jarvisSpeak(buildBriefingNarration(briefingItems), () => {
     isBriefingNarrating = false;
     document.getElementById('brief-narrate-btn').textContent = '▶ NARRATE';
-  };
-  window.speechSynthesis.speak(utt);
+    if (jarvisState !== 'muted') resumeListening();
+  });
 }
 
 // ══════════════════════════════════════════════════════════════
