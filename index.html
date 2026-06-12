@@ -160,12 +160,29 @@ a.tile:hover::before { opacity: 0.65; }
 a.tile:hover .tile-orb { opacity: 0.22; }
 
 /* tile spans */
-.span-6x3 { grid-column: span 6; grid-row: span 3; }
-.span-3x3 { grid-column: span 3; grid-row: span 3; }
-.span-3x2 { grid-column: span 3; grid-row: span 2; }
-.span-4x2 { grid-column: span 4; grid-row: span 2; }
-.span-6x2 { grid-column: span 6; grid-row: span 2; }
-.span-3x1 { grid-column: span 3; grid-row: span 1; }
+.span-6x3  { grid-column: span 6;  grid-row: span 3; }
+.span-3x3  { grid-column: span 3;  grid-row: span 3; }
+.span-3x2  { grid-column: span 3;  grid-row: span 2; }
+.span-4x2  { grid-column: span 4;  grid-row: span 2; }
+.span-6x2  { grid-column: span 6;  grid-row: span 2; }
+.span-3x1  { grid-column: span 3;  grid-row: span 1; }
+.span-12x2 { grid-column: span 12; grid-row: span 2; }
+
+/* Sensei tile — animated gradient border always-on */
+.sensei-tile {
+  background: linear-gradient(160deg, rgba(167,139,250,0.06) 0%, rgba(108,142,255,0.03) 55%, rgba(167,139,250,0.04) 100%);
+  position: relative;
+}
+.sensei-tile::after {
+  content: ''; position: absolute; inset: 0; border-radius: 20px; padding: 1px;
+  background: linear-gradient(120deg, rgba(167,139,250,0.5) 0%, rgba(108,142,255,0.2) 50%, rgba(167,139,250,0.5) 100%);
+  background-size: 200% 100%;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: sensei-border 4s linear infinite;
+  pointer-events: none;
+}
+@keyframes sensei-border { 0%{background-position:0% 0} 100%{background-position:200% 0} }
 
 /* tile internals */
 .tile-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: auto; }
@@ -251,6 +268,7 @@ footer a { color: var(--accent); text-decoration: none; }
   .span-6x3, .span-3x3, .span-3x2, .span-4x2, .span-6x2, .span-3x1 { grid-column: span 6; }
   .span-6x3 { grid-row: span 3; }
   .span-3x2, .span-3x1 { grid-row: span 2; }
+  .span-12x2 { grid-column: span 12; }
 }
 @media (max-width: 640px) {
   header { padding: 0 14px; }
@@ -259,6 +277,7 @@ footer a { color: var(--accent); text-decoration: none; }
   .bento { grid-auto-rows: 84px; gap: 10px; }
   .span-6x3, .span-3x3, .span-3x2, .span-4x2, .span-6x2 { grid-column: span 12; }
   .span-3x1 { grid-column: span 6; }
+  .span-12x2 { grid-column: span 12; grid-row: span 3; }
   .kpi-value { font-size: 1.4rem; }
   .tile { border-radius: 16px; padding: 18px; }
 }
@@ -291,8 +310,8 @@ footer a { color: var(--accent); text-decoration: none; }
 <section class="hero">
   <div class="hero-inner">
     <div class="hero-eyebrow">Live · Vault &amp; Pine Collective</div>
-    <h1 class="hero-title">Your Business, <span class="grad">Command Ready.</span></h1>
-    <p class="hero-sub">Everything that matters today, in one glance.</p>
+    <h1 class="hero-title" id="hero-greeting">Your Business, <span class="grad">Command Ready.</span></h1>
+    <p class="hero-sub" id="hero-sub">Everything that matters today, in one glance.</p>
   </div>
 </section>
 
@@ -456,7 +475,7 @@ footer a { color: var(--accent); text-decoration: none; }
       </div>
     </a>
 
-    <!-- Content · 3x2 -->
+    <!-- Content · 6x2 -->
     <a class="tile span-6x2" href="content.html" style="--tile-accent:var(--c-content);">
       <div class="tile-orb"></div>
       <div class="tile-head">
@@ -469,6 +488,29 @@ footer a { color: var(--accent); text-decoration: none; }
         <span class="tile-arrow">Open Planner <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
       </div>
     </a>
+
+    <!-- Business Sensei · 12x2 — full-width rotating tip -->
+    <div class="tile span-12x2 sensei-tile" style="--tile-accent:#a78bfa;">
+      <div class="tile-orb" style="background:radial-gradient(circle,#a78bfa 0%,transparent 70%);"></div>
+      <div style="display:flex;align-items:flex-start;gap:18px;height:100%;">
+        <div style="flex-shrink:0;text-align:center;">
+          <div style="font-size:2rem;margin-bottom:4px;">🧠</div>
+          <div style="font-size:0.55rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#a78bfa;white-space:nowrap;">Sensei</div>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <div id="sensei-home-cat" style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;padding:2px 9px;border-radius:20px;background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.25);color:#a78bfa;">Business Tip</div>
+            <div id="sensei-home-count" style="font-size:0.6rem;color:#8892b0;"></div>
+          </div>
+          <div id="sensei-home-head" style="font-size:0.95rem;font-weight:800;color:#e2e8f0;letter-spacing:-0.2px;margin-bottom:5px;"></div>
+          <div id="sensei-home-body" style="font-size:0.78rem;color:#8892b0;line-height:1.6;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;"></div>
+        </div>
+        <div style="flex-shrink:0;display:flex;flex-direction:column;gap:6px;justify-content:center;">
+          <button onclick="senseiHomePrev()" style="background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.2);color:#a78bfa;padding:6px 12px;border-radius:8px;font-size:0.72rem;cursor:pointer;font-family:inherit;min-height:unset;transition:all .15s;" onmouseover="this.style.background='rgba(167,139,250,0.18)'" onmouseout="this.style.background='rgba(167,139,250,0.08)'">← Prev</button>
+          <button onclick="senseiHomeNext()" style="background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.2);color:#a78bfa;padding:6px 12px;border-radius:8px;font-size:0.72rem;cursor:pointer;font-family:inherit;min-height:unset;transition:all .15s;" onmouseover="this.style.background='rgba(167,139,250,0.18)'" onmouseout="this.style.background='rgba(167,139,250,0.08)'">Next →</button>
+        </div>
+      </div>
+    </div>
 
   </div>
 </main>
@@ -484,8 +526,33 @@ footer a { color: var(--accent); text-decoration: none; }
 'use strict';
 const fmt = n => '$' + Math.abs(n).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
+const _now = new Date();
 document.getElementById('hdate').textContent =
-  new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  _now.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+// Time-based greeting + business health line in hero
+(function setGreeting() {
+  const hr = _now.getHours();
+  const greet = hr < 12 ? 'Good Morning' : hr < 17 ? 'Good Afternoon' : 'Good Evening';
+  // Try to build a health summary
+  let healthLine = 'Everything that matters today, in one glance.';
+  try {
+    const orders = JSON.parse(localStorage.getItem('vp_orders_v2') || '[]');
+    const thisMonth = _now.toISOString().slice(0,7);
+    const mRev = orders.filter(o=>(o.date||'').startsWith(thisMonth)).reduce((s,o)=>s+(o.salePrice||0),0);
+    const goals = JSON.parse(localStorage.getItem('goals_dashboard_v1') || '{"goals":[]}').goals || [];
+    const active = goals.filter(x=>!x.done).length;
+    const today2 = new Date(); today2.setHours(0,0,0,0);
+    const overdue = goals.filter(x=>!x.done && x.due && new Date(x.due+'T00:00:00') < today2).length;
+    const parts = [];
+    if (mRev > 0) parts.push(`$${mRev.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',')} in sales this month`);
+    if (active > 0) parts.push(`${active} active goal${active>1?'s':''}`);
+    if (overdue > 0) parts.push(`⚠ ${overdue} overdue`);
+    if (parts.length) healthLine = parts.join(' · ');
+  } catch(e) {}
+  document.getElementById('hero-greeting').innerHTML = `${greet} — <span class="grad">Let's build something.</span>`;
+  document.getElementById('hero-sub').textContent = healthLine;
+})();
 
 // ── Cloud sync banner ──
 function dismissSyncBanner() {
@@ -664,6 +731,36 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
       <div style="font-size:0.7rem;font-weight:700;color:var(--yellow);background:rgba(251,191,36,0.08);padding:3px 8px;border-radius:6px;white-space:nowrap;">📅 ${m?m[1]:''}</div>
     </div>`;
   }).join('');
+})();
+
+// ── Business Sensei home tile ──
+(function initSenseiHome() {
+  // Wait for shared.js to load SENSEI_TIPS
+  function tryInit() {
+    if (!window.SENSEI_TIPS) { setTimeout(tryInit, 100); return; }
+    const pool = [
+      ...window.SENSEI_TIPS.general,
+      ...window.SENSEI_TIPS.sales,
+      ...window.SENSEI_TIPS.goals,
+      ...window.SENSEI_TIPS.expenses,
+    ];
+    let idx = Math.floor(Math.random() * pool.length);
+
+    function render() {
+      const t = pool[idx];
+      document.getElementById('sensei-home-cat').textContent   = t.cat;
+      document.getElementById('sensei-home-head').textContent  = t.head;
+      document.getElementById('sensei-home-body').textContent  = t.body;
+      document.getElementById('sensei-home-count').textContent = `${idx + 1} / ${pool.length}`;
+    }
+
+    window.senseiHomeNext = () => { idx = (idx + 1) % pool.length; render(); };
+    window.senseiHomePrev = () => { idx = (idx - 1 + pool.length) % pool.length; render(); };
+    render();
+    // Auto-advance every 60s
+    setInterval(window.senseiHomeNext, 60000);
+  }
+  tryInit();
 })();
 
 // ── Alerts ──

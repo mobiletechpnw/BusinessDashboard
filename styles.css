@@ -544,6 +544,54 @@ button.loading {
   box-shadow: 0 0 0 3px rgba(108,140,255,0.12);
 }
 
+/* ══════════════════════════════════════════════════
+   BUSINESS SENSEI — insight bar responsive
+══════════════════════════════════════════════════ */
+#sensei-insight-bar {
+  padding: 9px 32px;
+  font-size: 0.76rem;
+}
+@media (max-width: 700px) {
+  #sensei-insight-bar { padding: 8px 14px; font-size: 0.72rem; }
+}
+
+/* ── Design elevation: shimmer on KPI values ── */
+@keyframes kpi-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+.kpi-val[data-shimmer],
+.kpi-value[data-shimmer] {
+  background: linear-gradient(90deg, var(--text) 20%, var(--accent) 50%, var(--text) 80%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: kpi-shimmer 2.4s linear 1 both;
+}
+
+/* ── Design elevation: card glow accent on hover ── */
+.card[data-accent]:hover {
+  box-shadow: 0 8px 40px color-mix(in srgb, attr(data-accent) 14%, transparent);
+}
+
+/* ── Design elevation: progress bar glow ── */
+.progress-fill {
+  position: relative;
+  overflow: hidden;
+}
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: progress-sweep 2.5s ease-in-out 0.5s 1 forwards;
+}
+@keyframes progress-sweep {
+  from { left: -60%; }
+  to   { left: 120%; }
+}
+
 /* ── 375px (iPhone SE) breakpoints ── */
 @media (max-width: 380px) {
   .kpi-bar, .kpi-strip, .goals-stat-bar,
