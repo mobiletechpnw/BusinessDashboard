@@ -4,36 +4,41 @@
    Vault & Pine Collective
 ═══════════════════════════════════════════════════ */
 
-// ── THEME ─────────────────────────────────────────
-const THEME_KEY = 'vpc_theme';
-
-function applyTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
-  localStorage.setItem(THEME_KEY, theme);
-  const btn = document.getElementById('theme-toggle');
-  if (btn) btn.textContent = theme === 'light' ? '🌙' : '☀️';
-}
-
-function toggleTheme() {
-  const current = localStorage.getItem(THEME_KEY) || 'dark';
-  applyTheme(current === 'dark' ? 'light' : 'dark');
-}
-
-// Inject theme toggle button into any header
-function injectThemeBtn() {
-  const btn = document.createElement('button');
-  btn.id = 'theme-toggle';
-  btn.title = 'Toggle light/dark mode';
-  btn.onclick = toggleTheme;
-  btn.style.cssText = `
-    background:none;border:1px solid var(--border);border-radius:6px;
-    padding:5px 10px;cursor:pointer;font-size:1rem;color:var(--text2);
-    transition:all 0.2s;flex-shrink:0;
+// ── CURSOR GLOW — soft flashlight that follows the pointer ──
+function injectCursorGlow() {
+  // Pointer-driven effect: skip touch devices and reduced-motion users
+  if (window.matchMedia('(pointer: coarse)').matches) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const glow = document.createElement('div');
+  glow.id = 'cursor-glow';
+  glow.style.cssText = `
+    position:fixed;left:-999px;top:-999px;width:560px;height:560px;
+    border-radius:50%;pointer-events:none;z-index:900;opacity:0;
+    background:radial-gradient(circle,
+      rgba(108,142,255,0.07) 0%,
+      rgba(167,139,250,0.045) 30%,
+      rgba(45,212,191,0.02) 55%,
+      transparent 72%);
+    transform:translate(-50%,-50%);
+    transition:opacity 0.5s ease;
+    mix-blend-mode:screen;will-change:left,top;
   `;
-  btn.onmouseover = () => { btn.style.borderColor = 'var(--accent)'; btn.style.color = 'var(--accent)'; };
-  btn.onmouseout  = () => { btn.style.borderColor = 'var(--border)';  btn.style.color = 'var(--text2)'; };
-  const header = document.querySelector('header');
-  if (header) header.appendChild(btn);
+  document.body.appendChild(glow);
+  let tx = -999, ty = -999, x = -999, y = -999, raf = null;
+  function loop() {
+    x += (tx - x) * 0.16;  // soft lag — feels like light, not a cursor copy
+    y += (ty - y) * 0.16;
+    glow.style.left = x + 'px';
+    glow.style.top  = y + 'px';
+    raf = (Math.abs(tx - x) > 0.4 || Math.abs(ty - y) > 0.4) ? requestAnimationFrame(loop) : null;
+  }
+  window.addEventListener('pointermove', e => {
+    tx = e.clientX; ty = e.clientY;
+    if (x === -999) { x = tx; y = ty; }  // first move: snap, don't fly in
+    glow.style.opacity = '1';
+    if (!raf) raf = requestAnimationFrame(loop);
+  }, { passive: true });
+  document.documentElement.addEventListener('mouseleave', () => { glow.style.opacity = '0'; });
 }
 
 // ── GLOBAL SEARCH ──────────────────────────────────
@@ -412,65 +417,6 @@ function registerSW() {
   }
 }
 
-// ── LIGHT MODE CSS ────────────────────────────────
-function injectLightModeCSS() {
-  const style = document.createElement('style');
-  style.textContent = `
-    [data-theme="light"] {
-      --bg: #f0f4f8;
-      --surface: #ffffff;
-      --surface2: #e8edf3;
-      --border: #cbd5e1;
-      --text: #1e293b;
-      --text2: #64748b;
-      --accent: #3b6ef6;
-      --accent2: #7c3aed;
-      --green: #059669;
-      --yellow: #d97706;
-      --red: #dc2626;
-      --orange: #ea580c;
-    }
-    [data-theme="light"] body {
-      background: var(--bg);
-    }
-    [data-theme="light"] .card,
-    [data-theme="light"] header,
-    [data-theme="light"] .panel-box,
-    [data-theme="light"] .kpi,
-    [data-theme="light"] .gstat,
-    [data-theme="light"] .hstat,
-    [data-theme="light"] .jtat,
-    [data-theme="light"] .estat,
-    [data-theme="light"] .jt-stat-bar,
-    [data-theme="light"] .goals-stat-bar,
-    [data-theme="light"] .kpi-bar,
-    [data-theme="light"] .exp-stat-bar,
-    [data-theme="light"] .tab-bar,
-    [data-theme="light"] .modal {
-      background: var(--surface);
-    }
-    [data-theme="light"] table thead tr {
-      background: var(--surface2);
-    }
-    [data-theme="light"] table tbody tr:hover {
-      background: var(--surface2);
-    }
-    [data-theme="light"] input,
-    [data-theme="light"] select,
-    [data-theme="light"] textarea {
-      background: var(--surface2);
-      color: var(--text);
-      border-color: var(--border);
-    }
-    [data-theme="light"] body {
-      background-image:
-        linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
-    }
-  `;
-  document.head.appendChild(style);
-}
-
 // ── INIT ──────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   // ── Smart back-link tracking ──────────────────────────
@@ -497,11 +443,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   sessionStorage.setItem('vpc_last_page', _curPage);
-  injectLightModeCSS();
-  const saved = localStorage.getItem(THEME_KEY) || 'dark';
-  applyTheme(saved);
-  injectThemeBtn();
   injectSearchBtn();
+  injectCursorGlow();
   registerSW();
   // Deferred enhancements
   setTimeout(() => {

@@ -40,25 +40,7 @@ body {
   position: relative;
 }
 
-/* ── 2026: ambient gradient mesh background ── */
-.mesh-bg {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background:
-    radial-gradient(ellipse 60% 50% at 12% 8%,  rgba(108,142,255,0.10) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 45% at 88% 12%, rgba(167,139,250,0.09) 0%, transparent 60%),
-    radial-gradient(ellipse 55% 50% at 75% 85%, rgba(45,212,191,0.06) 0%, transparent 60%),
-    radial-gradient(ellipse 45% 40% at 20% 90%, rgba(251,146,60,0.05) 0%, transparent 60%);
-  animation: mesh-drift 24s ease-in-out infinite alternate;
-}
-@keyframes mesh-drift {
-  from { transform: translate(0,0) scale(1); }
-  to   { transform: translate(-1.5%, 1%) scale(1.04); }
-}
-/* ── 2026: film-grain noise overlay (glassmorphism texture) ── */
-.noise {
-  position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.35;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.05'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
+/* ambient mesh + noise come from styles.css (shared 2026 skin) */
 header, main, footer, .hero { position: relative; z-index: 2; }
 
 /* ── HEADER ── */
@@ -291,9 +273,6 @@ footer a { color: var(--accent); text-decoration: none; }
 </style>
 </head>
 <body>
-
-<div class="mesh-bg"></div>
-<div class="noise"></div>
 
 <header>
   <div class="brand">

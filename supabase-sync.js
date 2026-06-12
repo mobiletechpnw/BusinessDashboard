@@ -62,9 +62,6 @@ const SYNC_KEYS = [
   // ── Audit log ───────────────────────────────────────────
   'vpc_audit_log',
 
-  // ── User preferences (sync across devices) ───────────────
-  'vpc_theme',
-
   // ── Upcoming Deliveries ──────────────────────────────────
   'vpc_pipeline_v1',
 ];

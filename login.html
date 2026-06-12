@@ -7,10 +7,10 @@
 <title>Sign In — VPC</title>
 <style>
 :root {
-  --bg: #0f1117;
-  --surface: #1a1d27;
-  --surface2: #0f1117;
-  --border: #2e3350;
+  --bg: #0d0f16;
+  --surface: rgba(255,255,255,0.04);
+  --surface2: rgba(255,255,255,0.06);
+  --border: rgba(255,255,255,0.09);
   --text: #e2e8f0;
   --text2: #8892b0;
   --accent: #6c8cff;
@@ -21,9 +21,22 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{min-height:100vh;display:flex;align-items:center;justify-content:center;
   background:var(--bg);font-family:system-ui,-apple-system,sans-serif;color:var(--text);}
+/* 2026 skin: ambient mesh + grain */
+body::before{content:'';position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background:
+    radial-gradient(ellipse 60% 50% at 12% 8%, rgba(108,142,255,0.1) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 45% at 88% 12%, rgba(167,139,250,0.09) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 50% at 75% 85%, rgba(45,212,191,0.06) 0%, transparent 60%);
+  animation:mesh-drift 26s ease-in-out infinite alternate;}
+@keyframes mesh-drift{from{transform:translate(0,0) scale(1);}to{transform:translate(-1.5%,1%) scale(1.04);}}
+body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:0.35;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.05'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
 
-.card{background:var(--surface);border:1px solid var(--border);border-radius:18px;
-  padding:44px 40px;width:400px;max-width:95vw;}
+.card{background:linear-gradient(160deg,rgba(255,255,255,0.05) 0%,rgba(255,255,255,0.015) 60%);
+  backdrop-filter:blur(18px) saturate(1.2);
+  border:1px solid var(--border);border-radius:20px;
+  padding:44px 40px;width:400px;max-width:95vw;
+  box-shadow:0 24px 80px rgba(0,0,0,0.45);}
 
 .logo{text-align:center;margin-bottom:32px;}
 .logo-icon{font-size:2.4rem;margin-bottom:10px;}
@@ -178,8 +191,6 @@ async function handleAuth() {
       expires_at:    Date.now() + data.expires_in * 1000,
       user:          data.user,
     }));
-    // Pre-authorize PIN session so the PIN overlay doesn't appear after redirect
-    sessionStorage.setItem('vpc_authed', JSON.stringify({ ts: Date.now() }));
 
     // Redirect
     const params   = new URLSearchParams(window.location.search);
