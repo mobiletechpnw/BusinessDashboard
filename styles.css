@@ -4,14 +4,19 @@
  *
  * All pages link this file so brand changes happen in one place.
  * Page-specific rules stay in each file's own <style> block.
+ *
+ * 2026 design language: dark-only · bento/glass surfaces ·
+ * ambient gradient mesh · noise texture · accent glows.
  */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 /* ── Design Tokens ── */
 :root {
-  --bg:       #0f1117;
-  --surface:  #1a1d27;
-  --surface2: #22263a;
-  --border:   #2e3350;
+  --bg:       #0d0f16;
+  --surface:  rgba(255, 255, 255, 0.035);
+  --surface2: rgba(255, 255, 255, 0.06);
+  --border:   rgba(255, 255, 255, 0.09);
   --accent:   #6c8cff;
   --accent2:  #a78bfa;
   --green:    #34d399;
@@ -20,17 +25,8 @@
   --orange:   #fb923c;
   --text:     #e2e8f0;
   --text2:    #8892b0;
-  --radius:   10px;
-}
-
-/* ── Light theme overrides ── */
-[data-theme="light"] {
-  --bg:       #f4f6fb;
-  --surface:  #ffffff;
-  --surface2: #eef0f8;
-  --border:   #d0d4e8;
-  --text:     #1a1d27;
-  --text2:    #5a6580;
+  --radius:   16px;
+  --glass-border: rgba(255, 255, 255, 0.08);
 }
 
 /* ── Base reset ── */
@@ -39,17 +35,46 @@
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ── Shared card ── */
+/* ── 2026: ambient gradient mesh — every page, zero markup ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: -2; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 12% 8%,  rgba(108,142,255,0.09) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 45% at 88% 12%, rgba(167,139,250,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 50% at 75% 85%, rgba(45,212,191,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 45% 40% at 20% 90%, rgba(251,146,60,0.04) 0%, transparent 60%);
+  animation: vpc-mesh-drift 26s ease-in-out infinite alternate;
+}
+@keyframes vpc-mesh-drift {
+  from { transform: translate(0,0) scale(1); }
+  to   { transform: translate(-1.5%, 1%) scale(1.04); }
+}
+/* ── 2026: film-grain noise texture ── */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.35;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.05'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; }
+}
+
+/* ── Shared card — dark glassmorphism ── */
 .card {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: linear-gradient(160deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.012) 55%, rgba(255,255,255,0.03) 100%);
+  backdrop-filter: blur(14px) saturate(1.2);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius);
   padding: 22px;
+  transition: border-color 0.2s, box-shadow 0.25s;
 }
+.card:hover { border-color: rgba(255,255,255,0.16); }
 .card-title {
   font-size: 0.7rem;
   font-weight: 700;
@@ -94,9 +119,10 @@ body {
 }
 .modal-overlay.open { display: flex; }
 .modal {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
+  background: rgba(22, 25, 38, 0.92);
+  backdrop-filter: blur(24px) saturate(1.3);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
   padding: 28px;
   width: 500px;
   max-width: 95vw;
@@ -118,27 +144,35 @@ body {
 .field-row       { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
 /* ── Shared buttons ── */
-button { cursor: pointer; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; padding: 9px 16px; transition: all 0.15s; }
-.btn-primary  { background: var(--accent); color: #fff; }
-.btn-primary:hover { background: #7d9bff; }
+button { cursor: pointer; border: none; border-radius: 10px; font-size: 0.85rem; font-weight: 600; padding: 9px 16px; transition: all 0.15s; font-family: inherit; }
+.btn-primary  { background: var(--accent); color: #fff; box-shadow: 0 2px 14px rgba(108,140,255,0.3); }
+.btn-primary:hover { background: #7d9bff; box-shadow: 0 4px 20px rgba(108,140,255,0.45); transform: translateY(-1px); }
 .btn-ghost    { background: transparent; color: var(--text2); border: 1px solid var(--border); }
 .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
 .btn-danger   { background: var(--red); color: #fff; }
 .btn-danger:hover { opacity: 0.85; }
 
-/* ── Shared KPI strip ── */
+/* ── Shared KPI strip — bento tiles ── */
 .kpi-strip {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1px;
-  background: var(--border);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
+  gap: 12px;
+  background: none;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
   margin-bottom: 28px;
 }
-.kpi           { background: var(--surface); padding: 16px 22px; }
-.kpi-val       { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; line-height: 1; }
+.kpi {
+  background: linear-gradient(160deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.015) 100%);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 16px 22px;
+  transition: border-color 0.2s, transform 0.18s;
+}
+.kpi:hover     { border-color: rgba(255,255,255,0.16); transform: translateY(-2px); }
+.kpi-val       { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; line-height: 1; font-variant-numeric: tabular-nums; }
 .kpi-label     { font-size: 0.65rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 5px; }
 .kpi-sub       { font-size: 0.72rem; margin-top: 3px; }
 @media (max-width: 680px) { .kpi-strip { grid-template-columns: 1fr 1fr; } }
@@ -147,9 +181,10 @@ button { cursor: pointer; border: none; border-radius: 8px; font-size: 0.85rem; 
 .tab-bar {
   display: flex;
   gap: 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--glass-border);
   padding: 0 32px;
-  background: var(--surface);
+  background: rgba(13, 15, 22, 0.7);
+  backdrop-filter: blur(18px) saturate(1.2);
   position: sticky;
   top: 98px;   /* 58px header + 40px dash-nav */
   z-index: 150;
@@ -167,10 +202,11 @@ button { cursor: pointer; border: none; border-radius: 8px; font-size: 0.85rem; 
 .tab:hover { color: var(--text); }
 .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-/* ── Shared header ── */
+/* ── Shared header — frosted glass ── */
 header {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  background: rgba(13, 15, 22, 0.72);
+  backdrop-filter: blur(20px) saturate(1.3);
+  border-bottom: 1px solid var(--glass-border);
   padding: 0 32px;
   display: flex;
   align-items: center;
@@ -205,8 +241,10 @@ tr:last-child td { border-bottom: none; }
   position: fixed;
   bottom: 24px;
   right: 24px;
-  background: var(--surface);
+  background: rgba(22, 25, 38, 0.92);
+  backdrop-filter: blur(16px);
   border: 1px solid var(--accent);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 20px rgba(108,140,255,0.12);
   color: var(--text);
   padding: 11px 18px;
   border-radius: 9px;
@@ -440,8 +478,9 @@ button.loading {
 
 /* ── Cross-dashboard navigation bar ── */
 .dash-nav {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  background: rgba(13, 15, 22, 0.65);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--glass-border);
   padding: 0 32px;
   display: flex;
   align-items: center;
@@ -503,6 +542,54 @@ button.loading {
 .field textarea:focus,
 .field select:focus {
   box-shadow: 0 0 0 3px rgba(108,140,255,0.12);
+}
+
+/* ══════════════════════════════════════════════════
+   BUSINESS SENSEI — insight bar responsive
+══════════════════════════════════════════════════ */
+#sensei-insight-bar {
+  padding: 9px 32px;
+  font-size: 0.76rem;
+}
+@media (max-width: 700px) {
+  #sensei-insight-bar { padding: 8px 14px; font-size: 0.72rem; }
+}
+
+/* ── Design elevation: shimmer on KPI values ── */
+@keyframes kpi-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+.kpi-val[data-shimmer],
+.kpi-value[data-shimmer] {
+  background: linear-gradient(90deg, var(--text) 20%, var(--accent) 50%, var(--text) 80%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: kpi-shimmer 2.4s linear 1 both;
+}
+
+/* ── Design elevation: card glow accent on hover ── */
+.card[data-accent]:hover {
+  box-shadow: 0 8px 40px color-mix(in srgb, attr(data-accent) 14%, transparent);
+}
+
+/* ── Design elevation: progress bar glow ── */
+.progress-fill {
+  position: relative;
+  overflow: hidden;
+}
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: progress-sweep 2.5s ease-in-out 0.5s 1 forwards;
+}
+@keyframes progress-sweep {
+  from { left: -60%; }
+  to   { left: 120%; }
 }
 
 /* ── 375px (iPhone SE) breakpoints ── */

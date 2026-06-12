@@ -12,362 +12,788 @@
 <script src="supabase-sync.js" defer></script>
 <title>Business Command Center</title>
 <style>
-  body { min-height: 100vh; display: flex; flex-direction: column; }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
-  /* ── Header ── */
-  header {
-    background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 0 32px; display: flex; align-items: center;
-    justify-content: space-between; min-height: 58px;
-    position: sticky; top: 0; z-index: 100;
-  }
-  .brand { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.4px; }
-  .brand .hi { color: var(--accent); }
-  .brand .lo { color: var(--accent2); }
-  .header-date { font-size: 0.75rem; color: var(--text2); }
+:root {
+  --c-sales:   #6C8EFF;
+  --c-goals:   #A78BFA;
+  --c-events:  #34D399;
+  --c-review:  #60A5FA;
+  --c-expense: #F87171;
+  --c-intel:   #2DD4BF;
+  --c-prod:    #FB923C;
+  --c-content: #FBBF24;
+  --glass: rgba(255,255,255,0.03);
+  --glass-border: rgba(255,255,255,0.08);
+}
 
-  /* ── Hero ── */
-  .hero {
-    text-align: center; padding: 64px 24px 48px;
-    background: radial-gradient(ellipse at 50% 0%, #1a1d3a 0%, var(--bg) 70%);
-    border-bottom: 1px solid var(--border);
-  }
-  .hero-eyebrow {
-    font-size: 0.7rem; font-weight: 700; letter-spacing: 2px;
-    text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
-  }
-  .hero-title {
-    font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 900;
-    letter-spacing: -1px; line-height: 1.1; margin-bottom: 16px;
-  }
-  .hero-title .grad {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .hero-sub {
-    font-size: 1rem; color: var(--text2); max-width: 500px; margin: 0 auto;
-    line-height: 1.6;
-  }
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', var(--font-sans, system-ui, sans-serif);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+}
 
-  /* ── Section labels ── */
-  .section-block { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
-  .section-block:first-of-type { margin-top: 48px; }
-  .section-label {
-    font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 1.5px; color: var(--text2); margin-bottom: 14px;
-    padding-bottom: 8px; border-bottom: 1px solid var(--border);
-  }
+/* ambient mesh + noise come from styles.css (shared 2026 skin) */
+header, main, footer, .hero { position: relative; z-index: 2; }
 
-  /* ── Grid ── */
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px; margin-bottom: 32px;
-  }
+/* ── HEADER ── */
+header {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(15,17,23,0.7);
+  backdrop-filter: blur(20px) saturate(1.3);
+  border-bottom: 1px solid var(--glass-border);
+  padding: 0 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  min-height: 58px;
+}
+.brand { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; font-weight: 800; letter-spacing: -0.3px; }
+.brand-mark {
+  width: 30px; height: 30px; border-radius: 9px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem; flex-shrink: 0;
+  box-shadow: 0 2px 16px rgba(108,140,255,0.45);
+}
+.brand-name span { color: var(--accent); }
+.header-right { display: flex; align-items: center; gap: 16px; }
+.header-date { font-size: 0.75rem; color: var(--text2); font-weight: 500; }
 
-  /* ── JARVIS featured card ── */
-  .card-featured {
-    grid-column: 1 / -1;
-    flex-direction: row; align-items: center; gap: 24px;
-    background: linear-gradient(135deg, #131929 0%, #0f1117 100%);
-    border-color: rgba(0,180,255,0.35);
-    padding: 24px 28px;
-  }
-  .card-featured:hover { border-color: rgba(0,180,255,0.7); box-shadow: 0 8px 40px rgba(0,180,255,0.1); }
-  .card-featured .card-icon { width: 56px; height: 56px; font-size: 1.7rem; flex-shrink: 0; background: rgba(0,180,255,0.12); border-radius: 14px; }
-  .card-featured .card-body { flex: 1; }
-  .card-featured .card-title { font-size: 1.15rem; }
-  .card-featured .card-arrow { color: rgba(0,180,255,0.9); margin-top: 8px; }
+/* ── HERO (compact — bento carries the weight now) ── */
+.hero { padding: 44px 32px 8px; }
+.hero-inner { max-width: 1160px; margin: 0 auto; }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 1.8px;
+  text-transform: uppercase; color: var(--accent);
+  background: rgba(108,140,255,0.08);
+  border: 1px solid rgba(108,140,255,0.18);
+  backdrop-filter: blur(8px);
+  border-radius: 20px; padding: 4px 12px; margin-bottom: 14px;
+}
+.hero-eyebrow::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--green); animation:pulse-dot 2s ease-in-out infinite; box-shadow:0 0 8px var(--green); }
+@keyframes pulse-dot { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+.hero-title {
+  font-size: clamp(1.7rem, 3.6vw, 2.6rem); font-weight: 900;
+  letter-spacing: -1.2px; line-height: 1.1; margin: 0 0 8px;
+}
+.hero-title .grad {
+  background: linear-gradient(120deg, var(--accent) 0%, #A78BFA 45%, var(--accent2) 90%);
+  background-size: 200% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  animation: grad-pan 7s ease-in-out infinite alternate;
+}
+@keyframes grad-pan { from { background-position: 0% center; } to { background-position: 100% center; } }
+.hero-sub { font-size: 0.92rem; color: var(--text2); margin: 0 0 28px; }
 
-  /* ── Cards ── */
-  .card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 24px;
-    text-decoration: none; color: var(--text);
-    display: flex; flex-direction: column; gap: 12px;
-    transition: border-color 0.2s, transform 0.18s, box-shadow 0.2s;
-    cursor: pointer;
-  }
-  .card:hover {
-    border-color: var(--accent); transform: translateY(-3px);
-    box-shadow: 0 8px 32px rgba(108,140,255,0.1);
-  }
-  .card-icon {
-    width: 44px; height: 44px; border-radius: 11px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.4rem; flex-shrink: 0;
-  }
-  .card-icon.blue   { background: rgba(108,140,255,0.12); }
-  .card-icon.purple { background: rgba(167,139,250,0.12); }
-  .card-icon.green  { background: rgba(52,211,153,0.12); }
-  .card-icon.yellow { background: rgba(251,191,36,0.12); }
-  .card-icon.orange { background: rgba(251,146,60,0.12); }
-  .card-title { font-size: 1rem; font-weight: 700; letter-spacing: -0.2px; }
-  .card-desc { font-size: 0.82rem; color: var(--text2); line-height: 1.55; flex: 1; }
-  .card-arrow {
-    font-size: 0.77rem; font-weight: 600; color: var(--accent);
-    display: flex; align-items: center; gap: 4px; margin-top: 4px;
-    transition: gap 0.2s;
-  }
-  .card-arrow::after { content: '→'; transition: transform 0.2s; }
-  .card:hover .card-arrow::after { transform: translateX(4px); }
+/* ── MAIN ── */
+main { flex: 1; max-width: 1160px; margin: 0 auto; padding: 18px 24px 36px; width: 100%; }
 
-  /* ── Widgets ── */
-  .widgets {
-    max-width: 1100px; margin: 0 auto 40px; padding: 0 24px;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
-  }
-  .widget {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 20px;
-  }
-  .widget-title {
-    font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 1.5px; margin-bottom: 14px;
-  }
+/* ── ALERTS ── */
+.alerts-bar { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+.alert-pill {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-radius: 12px;
+  font-size: 0.82rem; font-weight: 500;
+  backdrop-filter: blur(10px);
+  animation: slideIn 0.35s ease both;
+}
+.alert-pill.danger  { background: rgba(248,113,113,0.07); border: 1px solid rgba(248,113,113,0.25); }
+.alert-pill.warning { background: rgba(251,191,36,0.06);  border: 1px solid rgba(251,191,36,0.22); }
+.alert-pill .alert-icon { flex-shrink: 0; }
+.alert-pill .alert-text { flex: 1; color: var(--text); }
+.alert-pill a { font-size: 0.75rem; color: var(--accent); text-decoration: none; white-space: nowrap; font-weight: 600; }
+@keyframes slideIn { from { opacity:0; transform: translateY(-6px); } to { opacity:1; transform:none; } }
 
-  @media (max-width: 900px) {
-    .grid { grid-template-columns: repeat(2, 1fr); }
-  }
-  @media (max-width: 640px) {
-    .grid { grid-template-columns: 1fr; }
-    .widgets { grid-template-columns: 1fr; }
-    .card-featured { flex-direction: column; }
-    .hero-title { font-size: 1.8rem; }
-    header { padding: 0 12px; min-height: 52px; }
-    .section-block { padding: 0 10px; }
-    .section-block:first-of-type { margin-top: 28px; }
-    .hero { padding: 40px 16px 32px; }
-    .hero-sub { font-size: 0.88rem; }
-    .card { padding: 16px; }
-    .card-icon { width: 38px; height: 38px; font-size: 1.2rem; }
-    .card-title { font-size: 0.9rem; }
-    .card-desc { font-size: 0.78rem; }
-  }
-  @media (max-width: 480px) {
-    .grid { gap: 10px; }
-    .section-block { margin-bottom: 0; }
-  }
+/* ════════════════════════════════════════════
+   2026 BENTO GRID — asymmetric modular tiles
+════════════════════════════════════════════ */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-auto-rows: 96px;
+  gap: 14px;
+}
+.tile {
+  position: relative;
+  border-radius: 20px;
+  padding: 22px;
+  overflow: hidden;
+  text-decoration: none;
+  color: var(--text);
+  display: flex; flex-direction: column;
+  /* dark glassmorphism */
+  background:
+    linear-gradient(160deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.012) 55%, rgba(255,255,255,0.03) 100%);
+  backdrop-filter: blur(14px) saturate(1.2);
+  border: 1px solid var(--glass-border);
+  transition: transform 0.22s cubic-bezier(.2,.8,.3,1.1), border-color 0.22s, box-shadow 0.25s;
+  /* scroll reveal */
+  opacity: 0; transform: translateY(14px);
+}
+.tile.revealed { opacity: 1; transform: none; }
+/* gradient border glow on hover (2026 glass standard) */
+.tile::before {
+  content: ''; position: absolute; inset: 0; border-radius: 20px; padding: 1px;
+  background: linear-gradient(140deg, var(--tile-accent, var(--accent)) 0%, transparent 40%, transparent 60%, var(--tile-accent, var(--accent)) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  opacity: 0; transition: opacity 0.25s;
+  pointer-events: none;
+}
+a.tile:hover { transform: translateY(-4px) scale(1.005); box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 32px color-mix(in srgb, var(--tile-accent, var(--accent)) 14%, transparent); }
+a.tile:hover::before { opacity: 0.65; }
+/* corner glow orb */
+.tile-orb {
+  position: absolute; width: 140px; height: 140px; border-radius: 50%;
+  top: -50px; right: -50px;
+  background: radial-gradient(circle, var(--tile-accent, var(--accent)) 0%, transparent 70%);
+  opacity: 0.1; pointer-events: none;
+  transition: opacity 0.3s;
+}
+a.tile:hover .tile-orb { opacity: 0.22; }
 
-  /* ── Footer ── */
-  footer {
-    text-align: center; padding: 28px 24px;
-    font-size: 0.72rem; color: var(--text2);
-    border-top: 1px solid var(--border);
-    margin-top: 16px;
-  }
-  footer a { color: var(--accent); text-decoration: none; }
-  footer a:hover { text-decoration: underline; }
+/* tile spans */
+.span-6x3  { grid-column: span 6;  grid-row: span 3; }
+.span-3x3  { grid-column: span 3;  grid-row: span 3; }
+.span-3x2  { grid-column: span 3;  grid-row: span 2; }
+.span-4x2  { grid-column: span 4;  grid-row: span 2; }
+.span-6x2  { grid-column: span 6;  grid-row: span 2; }
+.span-3x1  { grid-column: span 3;  grid-row: span 1; }
+.span-12x2 { grid-column: span 12; grid-row: span 2; }
+
+/* Sensei tile — animated gradient border always-on */
+.sensei-tile {
+  background: linear-gradient(160deg, rgba(167,139,250,0.06) 0%, rgba(108,142,255,0.03) 55%, rgba(167,139,250,0.04) 100%);
+  position: relative;
+}
+.sensei-tile::after {
+  content: ''; position: absolute; inset: 0; border-radius: 20px; padding: 1px;
+  background: linear-gradient(120deg, rgba(167,139,250,0.5) 0%, rgba(108,142,255,0.2) 50%, rgba(167,139,250,0.5) 100%);
+  background-size: 200% 100%;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: sensei-border 4s linear infinite;
+  pointer-events: none;
+}
+@keyframes sensei-border { 0%{background-position:0% 0} 100%{background-position:200% 0} }
+
+/* tile internals */
+.tile-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: auto; }
+.tile-icon {
+  width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+  background: color-mix(in srgb, var(--tile-accent, var(--accent)) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tile-accent, var(--accent)) 18%, transparent);
+}
+.tile-badge {
+  font-size: 0.58rem; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 20px; white-space: nowrap;
+  color: var(--tile-accent, var(--accent));
+  background: color-mix(in srgb, var(--tile-accent, var(--accent)) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tile-accent, var(--accent)) 22%, transparent);
+}
+.tile-title { font-size: 1rem; font-weight: 800; letter-spacing: -0.3px; margin: 14px 0 5px; }
+.tile-desc  { font-size: 0.78rem; color: var(--text2); line-height: 1.55; }
+.tile-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--glass-border);
+}
+.tile-arrow {
+  font-size: 0.75rem; font-weight: 700; color: var(--tile-accent, var(--accent));
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.tile-arrow svg { width: 12px; height: 12px; transition: transform 0.2s; }
+a.tile:hover .tile-arrow svg { transform: translateX(3px); }
+.tile-stat { font-size: 0.7rem; color: var(--text2); }
+.tile-stat strong { color: var(--text); }
+
+/* KPI tiles (small, number-led — dopamine glow) */
+.kpi-tile { justify-content: center; padding: 18px 22px; }
+.kpi-label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text2); margin-bottom: 6px; }
+.kpi-value {
+  font-size: 1.7rem; font-weight: 900; letter-spacing: -1px; line-height: 1;
+  color: var(--tile-accent, var(--text));
+  text-shadow: 0 0 24px color-mix(in srgb, var(--tile-accent, var(--accent)) 35%, transparent);
+  font-variant-numeric: tabular-nums;
+}
+.kpi-sub { font-size: 0.68rem; color: var(--text2); margin-top: 6px; }
+.kpi-up { color: var(--green); } .kpi-down { color: var(--red); }
+
+/* widget tiles (data lists inside bento) */
+.widget-tile { padding: 20px 22px; }
+.widget-head { display: flex; align-items: center; gap: 9px; margin-bottom: 12px; }
+.widget-title { font-size: 0.64rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text2); }
+.widget-body { font-size: 0.8rem; color: var(--text2); overflow-y: auto; flex: 1; }
+
+/* sparkline canvas in featured tile */
+.spark-wrap { margin-top: 12px; }
+#spark { width: 100%; height: 52px; display: block; }
+
+/* sync banner */
+.sync-banner-wrap { margin-bottom: 18px; display: none; }
+.sync-banner-wrap.show { display: block; }
+.sync-banner {
+  background: rgba(108,140,255,0.05); border: 1px solid rgba(108,140,255,0.2);
+  backdrop-filter: blur(12px);
+  border-radius: 16px; padding: 14px 18px;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+.sync-banner-text { flex: 1; min-width: 220px; }
+.sync-banner-text strong { font-size: 0.85rem; display: block; margin-bottom: 2px; }
+.sync-banner-text span { font-size: 0.75rem; color: var(--text2); }
+.btn-primary {
+  background: var(--accent); color: #fff; border: none; border-radius: 10px;
+  padding: 9px 18px; font-size: 0.82rem; font-weight: 700; cursor: pointer;
+  font-family: inherit; box-shadow: 0 2px 16px rgba(108,140,255,0.35);
+  transition: all 0.18s;
+}
+.btn-primary:hover { box-shadow: 0 4px 24px rgba(108,140,255,0.5); transform: translateY(-1px); }
+.btn-ghost { background: none; border: 1px solid var(--glass-border); border-radius: 10px; color: var(--text2); padding: 8px 12px; cursor: pointer; font-family: inherit; font-size: 0.82rem; }
+
+footer {
+  text-align: center; padding: 24px; font-size: 0.72rem; color: var(--text2);
+  border-top: 1px solid var(--glass-border);
+}
+footer a { color: var(--accent); text-decoration: none; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 980px) {
+  .span-6x3, .span-3x3, .span-3x2, .span-4x2, .span-6x2, .span-3x1 { grid-column: span 6; }
+  .span-6x3 { grid-row: span 3; }
+  .span-3x2, .span-3x1 { grid-row: span 2; }
+  .span-12x2 { grid-column: span 12; }
+}
+@media (max-width: 640px) {
+  header { padding: 0 14px; }
+  .hero { padding: 30px 16px 4px; }
+  main { padding: 12px 12px 28px; }
+  .bento { grid-auto-rows: 84px; gap: 10px; }
+  .span-6x3, .span-3x3, .span-3x2, .span-4x2, .span-6x2 { grid-column: span 12; }
+  .span-3x1 { grid-column: span 6; }
+  .span-12x2 { grid-column: span 12; grid-row: span 3; }
+  .kpi-value { font-size: 1.4rem; }
+  .tile { border-radius: 16px; padding: 18px; }
+}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="brand"><span class="hi">Business</span> <span class="lo">Command Center</span></div>
-  <div class="header-date" id="hdate"></div>
+  <div class="brand">
+    <div class="brand-mark">🌲</div>
+    <div class="brand-name"><span>VPC</span> Command Center</div>
+  </div>
+  <div class="header-right">
+    <div class="header-date" id="hdate"></div>
+  </div>
 </header>
 
-<div class="hero">
-  <div class="hero-eyebrow">Your Hub</div>
-  <h1 class="hero-title">Life Manager &amp; <span class="grad">Business Planner</span></h1>
-  <p class="hero-sub">Track your sales, hit your goals, and manage your business — all in one place.</p>
-</div>
+<nav class="dash-nav">
+  <a href="index.html" class="dash-nav-link active">⌂ Home</a>
+  <a href="vault-pine-collective.html" class="dash-nav-link">📊 Sales Hub</a>
+  <a href="goals-dashboard.html" class="dash-nav-link">🎯 Goals</a>
+  <a href="expenses.html" class="dash-nav-link">💸 Expenses</a>
+  <a href="analytics.html" class="dash-nav-link">📈 Analytics</a>
+  <a href="production.html" class="dash-nav-link">🖨️ Production</a>
+  <a href="events.html" class="dash-nav-link">🎪 Events</a>
+  <a href="content.html" class="dash-nav-link">📱 Content</a>
+  <a href="review.html" class="dash-nav-link">📋 Review</a>
+</nav>
 
-<!-- ── Business Operations ── -->
-<div class="section-block">
-  <div class="section-label">Business Operations</div>
-  <div class="grid">
-    <a class="card" href="vault-pine-collective.html">
-      <div class="card-icon blue">🌲</div>
-      <div class="card-title">Vault &amp; Pine Collective</div>
-      <div class="card-desc">Full business hub — riser sales, filament tracking, printer payoff, installed base, jet tags, pins, expenses, events, and goals.</div>
-      <div class="card-arrow">Open Dashboard</div>
-    </a>
-    <a class="card" href="goals-dashboard.html">
-      <div class="card-icon purple">🎯</div>
-      <div class="card-title">Goals &amp; Objectives</div>
-      <div class="card-desc">Set targets, track progress, and stay focused on what matters most this quarter.</div>
-      <div class="card-arrow">View Goals</div>
-    </a>
-    <a class="card" href="events.html">
-      <div class="card-icon" style="background:rgba(52,211,153,0.12);">🗓️</div>
-      <div class="card-title">Events &amp; Tables</div>
-      <div class="card-desc">Track table purchases across events and vendors — see who's paid, what's outstanding, and totals per vendor at a glance.</div>
-      <div class="card-arrow" style="color:var(--green)">Manage Tables</div>
-    </a>
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Live · Vault &amp; Pine Collective</div>
+    <h1 class="hero-title" id="hero-greeting">Your Business, <span class="grad">Command Ready.</span></h1>
+    <p class="hero-sub" id="hero-sub">Everything that matters today, in one glance.</p>
   </div>
-</div>
+</section>
 
-<!-- ── Personal ── -->
-<div class="section-block">
-  <div class="section-label">Personal</div>
-  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">
-    <a class="card" href="review.html" style="border-color:rgba(108,140,255,0.3);">
-      <div class="card-icon blue">📋</div>
-      <div class="card-title">Daily Review</div>
-      <div class="card-desc">Morning briefing — overdue goals, budget status, upcoming events, trend alerts, and revenue snapshot in one view.</div>
-      <div class="card-arrow">Open Briefing</div>
-    </a>
-    <a class="card" href="expenses.html" style="border-color:rgba(248,113,113,0.3);">
-      <div class="card-icon" style="background:rgba(248,113,113,0.12);">💸</div>
-      <div class="card-title">Personal Expenses</div>
-      <div class="card-desc">Track monthly spending by category, set a budget, log recurring bills, and visualize where your money goes.</div>
-      <div class="card-arrow" style="color:var(--red)">Track Expenses</div>
-    </a>
+<main>
+  <div class="alerts-bar" id="alerts-bar"></div>
+
+  <div class="sync-banner-wrap" id="sync-banner">
+    <div class="sync-banner">
+      <div style="font-size:1.2rem">☁️</div>
+      <div class="sync-banner-text">
+        <strong>Back up your data to the cloud</strong>
+        <span>Your data lives in this browser. Push it to Supabase so it's safe and synced.</span>
+      </div>
+      <button class="btn-primary" onclick="pushAllAndDismiss()" id="sync-btn">☁️ Push to Cloud</button>
+      <button class="btn-ghost" onclick="dismissSyncBanner()">✕</button>
+    </div>
   </div>
-</div>
 
-<!-- ── Intelligence & Planning ── -->
-<div class="section-block">
-  <div class="section-label">Intelligence &amp; Planning</div>
-  <div class="grid">
-    <a class="card" href="analytics.html" style="border-color:rgba(52,211,153,0.3);">
-      <div class="card-icon green">📊</div>
-      <div class="card-title">Business Intelligence</div>
-      <div class="card-desc">Profit margins by product, show performance comparisons, and monthly revenue trends.</div>
-      <div class="card-arrow" style="color:var(--green)">View Analytics</div>
-    </a>
-    <a class="card" href="production.html" style="border-color:rgba(251,146,60,0.3);">
-      <div class="card-icon orange">🖨️</div>
-      <div class="card-title">Production Hub</div>
-      <div class="card-desc">Track active print jobs, monitor progress, and manage on-hand inventory with low-stock alerts.</div>
-      <div class="card-arrow" style="color:var(--orange)">Open Production</div>
-    </a>
-    <a class="card" href="content.html" style="border-color:rgba(251,191,36,0.3);">
-      <div class="card-icon yellow">📱</div>
-      <div class="card-title">Content Planner</div>
-      <div class="card-desc">Plan show announcements, product drops, and card spotlights. Calendar, queue, and templates.</div>
-      <div class="card-arrow" style="color:var(--yellow)">Open Planner</div>
-    </a>
-  </div>
-</div>
+  <!-- ════ BENTO GRID ════ -->
+  <div class="bento">
 
-<!-- ── Command ── -->
-<div class="section-block">
-  <div class="section-label">Command</div>
-  <div class="grid">
-    <a class="card card-featured" href="jarvis.html">
-      <div class="card-icon">🤖</div>
-      <div class="card-body">
-        <div class="card-title">J.A.R.V.I.S.</div>
-        <div class="card-desc" style="color:var(--text2);font-size:0.82rem;margin-top:4px;">AI command center with voice control. Navigate all your dashboards hands-free — just say the word.</div>
-        <div class="card-arrow">Launch JARVIS</div>
+    <!-- FEATURED: Sales hub w/ sparkline · 6x3 -->
+    <a class="tile span-6x3" href="vault-pine-collective.html" style="--tile-accent:var(--c-sales);">
+      <div class="tile-orb"></div>
+      <div class="tile-head">
+        <div class="tile-icon">🌲</div>
+        <div class="tile-badge">Primary Hub</div>
+      </div>
+      <div class="tile-title">Vault &amp; Pine Collective</div>
+      <div class="tile-desc">Riser sales, filament tracking, printer payoff, jet tags, pins, and events — the whole operation.</div>
+      <div class="spark-wrap"><canvas id="spark"></canvas></div>
+      <div class="tile-foot">
+        <span class="tile-arrow">Open Dashboard <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
+        <span class="tile-stat" id="vpc-stat">—</span>
       </div>
     </a>
-  </div>
-</div>
 
-<!-- ── Widgets ── -->
-<div class="widgets" id="widget-row">
-  <div class="widget">
-    <div class="widget-title" style="color:var(--accent)">📦 Upcoming Deliveries</div>
-    <div id="delivery-list" style="font-size:0.82rem;color:var(--text2);">Loading...</div>
-  </div>
-  <div class="widget">
-    <div class="widget-title" style="color:var(--green)">💰 Revenue Snapshot</div>
-    <div id="revenue-snapshot" style="font-size:0.82rem;color:var(--text2);">Loading...</div>
-  </div>
-</div>
-
-<!-- Cloud sync first-run banner -->
-<div id="sync-banner" style="display:none;max-width:1100px;margin:0 auto 16px;padding:0 24px">
-  <div style="background:rgba(108,140,255,0.08);border:1px solid rgba(108,140,255,0.3);border-radius:var(--radius);padding:16px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-    <div style="font-size:1.2rem">☁️</div>
-    <div style="flex:1">
-      <div style="font-size:0.88rem;font-weight:700;margin-bottom:3px">Back up your data to the cloud</div>
-      <div style="font-size:0.78rem;color:var(--text2)">Your data lives in this browser. Push it to Supabase so it's safe and available on any device.</div>
+    <!-- KPI tiles · 3x1 each, stacked 2x2 beside featured -->
+    <div class="tile span-3x1 kpi-tile" style="--tile-accent:var(--green);">
+      <div class="kpi-label">All-Time Revenue</div>
+      <div class="kpi-value" id="kpi-rev" data-prefix="$">0</div>
+      <div class="kpi-sub" id="kpi-rev-sub"></div>
     </div>
-    <button onclick="pushAllAndDismiss()" style="background:var(--accent);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap">
-      ☁️ Push to Cloud
-    </button>
-    <button onclick="dismissSyncBanner()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem;padding:4px">✕</button>
+    <div class="tile span-3x1 kpi-tile" style="--tile-accent:var(--accent);">
+      <div class="kpi-label">This Month</div>
+      <div class="kpi-value" id="kpi-month" data-prefix="$">0</div>
+      <div class="kpi-sub" id="kpi-month-sub"></div>
+    </div>
+    <div class="tile span-3x1 kpi-tile" style="--tile-accent:var(--accent2);">
+      <div class="kpi-label">Net Profit</div>
+      <div class="kpi-value" id="kpi-profit" data-prefix="$">0</div>
+      <div class="kpi-sub" id="kpi-profit-sub"></div>
+    </div>
+    <div class="tile span-3x1 kpi-tile" style="--tile-accent:var(--c-goals);">
+      <div class="kpi-label">Active Goals</div>
+      <div class="kpi-value" id="kpi-goals">0</div>
+      <div class="kpi-sub" id="kpi-goals-sub"></div>
+    </div>
+    <!-- Revenue snapshot widget · 6x1 fills below KPIs -->
+    <div class="tile span-6x2 widget-tile">
+      <div class="widget-head">
+        <div class="tile-icon" style="width:30px;height:30px;font-size:0.85rem;--tile-accent:var(--green);">💰</div>
+        <div class="widget-title">Revenue Snapshot</div>
+      </div>
+      <div class="widget-body" id="revenue-snapshot">Loading…</div>
+    </div>
+
+    <!-- Goals · 3x2 -->
+    <a class="tile span-3x2" href="goals-dashboard.html" style="--tile-accent:var(--c-goals);">
+      <div class="tile-orb"></div>
+      <div class="tile-head">
+        <div class="tile-icon">🎯</div>
+        <div class="tile-badge" id="goals-badge">Goals</div>
+      </div>
+      <div class="tile-title">Goals &amp; Objectives</div>
+      <div class="tile-desc">Targets, progress, and focus for the quarter.</div>
+      <div class="tile-foot">
+        <span class="tile-arrow">View <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
+        <span class="tile-stat" id="goals-stat">—</span>
+      </div>
+    </a>
+
+    <!-- Events · 3x2 -->
+    <a class="tile span-3x2" href="events.html" style="--tile-accent:var(--c-events);">
+      <div class="tile-orb"></div>
+      <div class="tile-head">
+        <div class="tile-icon">🗓️</div>
+        <div class="tile-badge">Events</div>
+      </div>
+      <div class="tile-title">Events &amp; Tables</div>
+      <div class="tile-desc">Vendor tables, payments, and totals per event.</div>
+      <div class="tile-foot">
+        <span class="tile-arrow">Manage <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
+        <span class="tile-stat" id="events-stat">—</span>
+      </div>
+    </a>
+
+    <!-- Deliveries widget · 6x2 -->
+    <div class="tile span-6x2 widget-tile">
+      <div class="widget-head">
+        <div class="tile-icon" style="width:30px;height:30px;font-size:0.85rem;--tile-accent:var(--c-sales);">📦</div>
+        <div class="widget-title">Upcoming Deliveries</div>
+      </div>
+      <div class="widget-body" id="delivery-list">Loading…</div>
+    </div>
+
+    <!-- Daily review · 4x2 -->
+    <a class="tile span-4x2" href="review.html" style="--tile-accent:var(--c-review);">
+      <div class="tile-orb"></div>
+      <div class="tile-head">
+        <div class="tile-icon">📋</div>
+        <div class="tile-badge">Daily</div>
+      </div>
+      <div class="tile-title">Daily Review</div>
+      <div class="tile-desc">Morning briefing — alerts, budget, and revenue at a glance.</div>
+      <div class="tile-foot">
+        <span class="tile-arrow">Open Briefing <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
+      </div>
+    </a>
+
+    <!-- Expenses · 4x2 -->
+    <a class="tile span-4x2" href="expenses.html" style="--tile-accent:var(--c-expense);">
+      <div class="tile-orb"></div>
+      <div class="tile-head">
+        <div class="tile-icon">💸</div>
+        <div class="tile-badge" id="expense-badge">Expenses</div>
+      </div>
+      <div class="tile-title">Personal Expenses</div>
+      <div class="tile-desc">Spending by category, budget, recurring bills.</div>
+      <div class="tile-foot">
+        <span class="tile-arrow">Track <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
+        <span class="tile-stat" id="expense-stat">—</span>
+      </div>
+    </a>
+
+    <!-- Analytics · 4x2 -->
+    <a class="tile span-4x2" href="analytics.html" style="--tile-accent:var(--c-intel);">
+      <div class="tile-orb"></div>
+      <div class="tile-head">
+        <div class="tile-icon">📈</div>
+        <div class="tile-badge">Analytics</div>
+      </div>
+      <div class="tile-title">Business Intelligence</div>
+      <div class="tile-desc">Margins, show comparisons, monthly trends.</div>
+      <div class="tile-foot">
+        <span class="tile-arrow">View Intel <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
+      </div>
+    </a>
+
+    <!-- Production · 3x2 -->
+    <a class="tile span-6x2" href="production.html" style="--tile-accent:var(--c-prod);">
+      <div class="tile-orb"></div>
+      <div class="tile-head">
+        <div class="tile-icon">🖨️</div>
+        <div class="tile-badge">Production</div>
+      </div>
+      <div class="tile-title">Production Hub</div>
+      <div class="tile-desc">Print queue, progress, and inventory with low-stock alerts.</div>
+      <div class="tile-foot">
+        <span class="tile-arrow">Open Production <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
+      </div>
+    </a>
+
+    <!-- Content · 6x2 -->
+    <a class="tile span-6x2" href="content.html" style="--tile-accent:var(--c-content);">
+      <div class="tile-orb"></div>
+      <div class="tile-head">
+        <div class="tile-icon">📱</div>
+        <div class="tile-badge">Content</div>
+      </div>
+      <div class="tile-title">Content Planner</div>
+      <div class="tile-desc">Announcements, drops, and spotlights — calendar and queue.</div>
+      <div class="tile-foot">
+        <span class="tile-arrow">Open Planner <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
+      </div>
+    </a>
+
+    <!-- Business Sensei · 12x2 — full-width rotating tip -->
+    <div class="tile span-12x2 sensei-tile" style="--tile-accent:#a78bfa;">
+      <div class="tile-orb" style="background:radial-gradient(circle,#a78bfa 0%,transparent 70%);"></div>
+      <div style="display:flex;align-items:flex-start;gap:18px;height:100%;">
+        <div style="flex-shrink:0;text-align:center;">
+          <div style="font-size:2rem;margin-bottom:4px;">🧠</div>
+          <div style="font-size:0.55rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#a78bfa;white-space:nowrap;">Sensei</div>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <div id="sensei-home-cat" style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;padding:2px 9px;border-radius:20px;background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.25);color:#a78bfa;">Business Tip</div>
+            <div id="sensei-home-count" style="font-size:0.6rem;color:#8892b0;"></div>
+          </div>
+          <div id="sensei-home-head" style="font-size:0.95rem;font-weight:800;color:#e2e8f0;letter-spacing:-0.2px;margin-bottom:5px;"></div>
+          <div id="sensei-home-body" style="font-size:0.78rem;color:#8892b0;line-height:1.6;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;"></div>
+        </div>
+        <div style="flex-shrink:0;display:flex;flex-direction:column;gap:6px;justify-content:center;">
+          <button onclick="senseiHomePrev()" style="background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.2);color:#a78bfa;padding:6px 12px;border-radius:8px;font-size:0.72rem;cursor:pointer;font-family:inherit;min-height:unset;transition:all .15s;" onmouseover="this.style.background='rgba(167,139,250,0.18)'" onmouseout="this.style.background='rgba(167,139,250,0.08)'">← Prev</button>
+          <button onclick="senseiHomeNext()" style="background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.2);color:#a78bfa;padding:6px 12px;border-radius:8px;font-size:0.72rem;cursor:pointer;font-family:inherit;min-height:unset;transition:all .15s;" onmouseover="this.style.background='rgba(167,139,250,0.18)'" onmouseout="this.style.background='rgba(167,139,250,0.08)'">Next →</button>
+        </div>
+      </div>
+    </div>
+
   </div>
-</div>
+</main>
 
 <footer>
   <strong style="color:var(--text)">Business Command Center</strong> &nbsp;·&nbsp; Vault &amp; Pine Collective &nbsp;·&nbsp;
   <a href="vault-pine-collective.html">Dashboard</a> &nbsp;·&nbsp;
   <a href="analytics.html">Analytics</a> &nbsp;·&nbsp;
-  <a href="jarvis.html">JARVIS</a>
+  <a href="review.html">Daily Review</a>
 </footer>
 
 <script>
-  const d = new Date();
-  document.getElementById('hdate').textContent = d.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+'use strict';
+const fmt = n => '$' + Math.abs(n).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
-  // Cloud sync banner logic
-  function dismissSyncBanner() {
-    document.getElementById('sync-banner').style.display = 'none';
-    localStorage.setItem('vpc_sync_banner_dismissed', '1');
+const _now = new Date();
+document.getElementById('hdate').textContent =
+  _now.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+// Time-based greeting + business health line in hero
+(function setGreeting() {
+  const hr = _now.getHours();
+  const greet = hr < 12 ? 'Good Morning' : hr < 17 ? 'Good Afternoon' : 'Good Evening';
+  // Try to build a health summary
+  let healthLine = 'Everything that matters today, in one glance.';
+  try {
+    const orders = JSON.parse(localStorage.getItem('vp_orders_v2') || '[]');
+    const thisMonth = _now.toISOString().slice(0,7);
+    const mRev = orders.filter(o=>(o.date||'').startsWith(thisMonth)).reduce((s,o)=>s+(o.salePrice||0),0);
+    const goals = JSON.parse(localStorage.getItem('goals_dashboard_v1') || '{"goals":[]}').goals || [];
+    const active = goals.filter(x=>!x.done).length;
+    const today2 = new Date(); today2.setHours(0,0,0,0);
+    const overdue = goals.filter(x=>!x.done && x.due && new Date(x.due+'T00:00:00') < today2).length;
+    const parts = [];
+    if (mRev > 0) parts.push(`$${mRev.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',')} in sales this month`);
+    if (active > 0) parts.push(`${active} active goal${active>1?'s':''}`);
+    if (overdue > 0) parts.push(`⚠ ${overdue} overdue`);
+    if (parts.length) healthLine = parts.join(' · ');
+  } catch(e) {}
+  document.getElementById('hero-greeting').innerHTML = `${greet} — <span class="grad">Let's build something.</span>`;
+  document.getElementById('hero-sub').textContent = healthLine;
+})();
+
+// ── Cloud sync banner ──
+function dismissSyncBanner() {
+  document.getElementById('sync-banner').classList.remove('show');
+  localStorage.setItem('vpc_sync_banner_dismissed', '1');
+}
+async function pushAllAndDismiss() {
+  const btn = document.getElementById('sync-btn');
+  btn.textContent = '⏳ Pushing…'; btn.disabled = true;
+  await window.VpcSync?.pushAll();
+  btn.textContent = '✓ Done!';
+  setTimeout(dismissSyncBanner, 1200);
+}
+document.addEventListener('DOMContentLoaded', () => {
+  if (!localStorage.getItem('vpc_sync_banner_dismissed')
+      && localStorage.getItem('vp_orders_v2')
+      && !localStorage.getItem('vpc_last_sync_at')) {
+    document.getElementById('sync-banner').classList.add('show');
   }
-  async function pushAllAndDismiss() {
-    const btn = event.target;
-    btn.textContent = '⏳ Pushing…'; btn.disabled = true;
-    await window.VpcSync?.pushAll();
-    btn.textContent = '✓ Done!';
-    setTimeout(dismissSyncBanner, 1200);
+});
+
+// ── 2026 micro-interaction: count-up animation for KPI numbers ──
+function countUp(el, target, prefix = '', duration = 900) {
+  const start = performance.now();
+  const from = 0;
+  function frame(now) {
+    const t = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+    const val = Math.round(from + (target - from) * eased);
+    el.textContent = prefix + Math.abs(val).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    if (t < 1) requestAnimationFrame(frame);
   }
-  // Show banner if user has data but hasn't done a cloud sync yet
-  document.addEventListener('DOMContentLoaded', () => {
-    const hasDismissed = localStorage.getItem('vpc_sync_banner_dismissed');
-    const hasData = localStorage.getItem('vp_orders_v2');
-    const lastSync = localStorage.getItem('vpc_last_sync_at');
-    if (!hasDismissed && hasData && !lastSync) {
-      document.getElementById('sync-banner').style.display = 'block';
+  requestAnimationFrame(frame);
+}
+
+// ── 2026 micro-interaction: staggered scroll-reveal ──
+const observer = new IntersectionObserver(entries => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('revealed'), (e.target.dataset.idx % 6) * 60);
+      observer.unobserve(e.target);
     }
   });
+}, { threshold: 0.1 });
+document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observer.observe(t); });
 
-  // Upcoming Deliveries
-  (function() {
-    const orders = JSON.parse(localStorage.getItem('vp_orders_v2') || '[]');
+// ── Data load ──
+(function loadData() {
+  let orders = [], jtSales = [], pinSales = [];
+  try {
+    orders   = JSON.parse(localStorage.getItem('vp_orders_v2') || '[]');
+    jtSales  = JSON.parse(localStorage.getItem('vp_jettags_v1') || '[]');
+    pinSales = JSON.parse(localStorage.getItem('vp_pins_v1') || '[]');
+  } catch(e) {}
+  const now = new Date(), thisMonth = now.toISOString().slice(0,7);
+
+  const riserRev = orders.reduce((s,o)=>s+(o.salePrice||0),0);
+  const totalRev = riserRev + jtSales.reduce((s,x)=>s+(x.revenue||0),0) + pinSales.reduce((s,x)=>s+(x.revenue||0),0);
+  const profit   = orders.reduce((s,o)=>s+(o.salePrice||0)-(o.cogs||0),0);
+  const monthRev = orders.filter(o=>(o.date||'').startsWith(thisMonth)).reduce((s,o)=>s+(o.salePrice||0),0);
+  const monthOrders = orders.filter(o=>(o.date||'').startsWith(thisMonth)).length;
+
+  countUp(document.getElementById('kpi-rev'),    totalRev, '$');
+  countUp(document.getElementById('kpi-month'),  monthRev, '$');
+  countUp(document.getElementById('kpi-profit'), profit,   '$');
+  document.getElementById('kpi-rev-sub').textContent   = `${orders.length} total orders`;
+  document.getElementById('kpi-month-sub').textContent = `${monthOrders} order${monthOrders!==1?'s':''} this month`;
+  document.getElementById('kpi-profit-sub').innerHTML  = profit >= 0 ? '<span class="kpi-up">↑ on track</span>' : '<span class="kpi-down">↓ check costs</span>';
+  document.getElementById('vpc-stat').innerHTML = `<strong>${orders.length}</strong> orders`;
+
+  // Sparkline — last 8 weeks of revenue (2026: data-forward tiles)
+  try {
+    const weeks = Array.from({length:8}, (_,i) => {
+      const end = new Date(now); end.setDate(end.getDate() - i*7);
+      const start = new Date(end); start.setDate(start.getDate() - 7);
+      return orders.filter(o => { const d = new Date(o.date); return d > start && d <= end; })
+        .reduce((s,o)=>s+(o.salePrice||0),0);
+    }).reverse();
+    const c = document.getElementById('spark');
+    c.width = c.offsetWidth * 2; c.height = 104; // 2x for retina
+    const ctx = c.getContext('2d');
+    const max = Math.max(...weeks, 1), w = c.width, h = c.height, step = w/(weeks.length-1);
+    const pts = weeks.map((v,i)=>[i*step, h-8-(v/max)*(h-20)]);
+    // area fill
+    const grad = ctx.createLinearGradient(0,0,0,h);
+    grad.addColorStop(0,'rgba(108,142,255,0.28)'); grad.addColorStop(1,'rgba(108,142,255,0)');
+    ctx.beginPath(); ctx.moveTo(pts[0][0], h);
+    pts.forEach(p=>ctx.lineTo(p[0],p[1])); ctx.lineTo(w,h); ctx.closePath();
+    ctx.fillStyle = grad; ctx.fill();
+    // line
+    ctx.beginPath(); pts.forEach((p,i)=>i===0?ctx.moveTo(p[0],p[1]):ctx.lineTo(p[0],p[1]));
+    ctx.strokeStyle = '#6C8EFF'; ctx.lineWidth = 2.5; ctx.lineJoin='round'; ctx.stroke();
+    // end dot glow
+    const [lx,ly] = pts[pts.length-1];
+    ctx.beginPath(); ctx.arc(lx-3,ly,4,0,Math.PI*2);
+    ctx.fillStyle='#fff'; ctx.shadowBlur=12; ctx.shadowColor='#6C8EFF'; ctx.fill(); ctx.shadowBlur=0;
+  } catch(e) {}
+
+  // Goals
+  try {
+    const g = JSON.parse(localStorage.getItem('goals_dashboard_v1') || '{"goals":[]}');
     const today = new Date(); today.setHours(0,0,0,0);
-    const upcoming = orders.filter(o => {
-      if (!o.notes) return false;
-      const m = o.notes.match(/(?:deliver|delivery|pickup|pick up)[^\d]*(\d{1,2}\/\d{1,2})/i);
-      if (!m) return false;
-      const [mo, dy] = m[1].split('/').map(Number);
-      const dt = new Date(today.getFullYear(), mo - 1, dy);
-      return dt >= today;
-    }).sort((a, b) => {
-      const parse = n => { const m = n.notes.match(/(\d{1,2})\/(\d{1,2})/); return m ? new Date(today.getFullYear(), m[1]-1, m[2]) : new Date('9999'); };
-      return parse(a) - parse(b);
-    }).slice(0, 6);
-    const el = document.getElementById('delivery-list');
-    if (!upcoming.length) { el.innerHTML = '<span style="color:var(--text2)">No upcoming deliveries found.</span>'; return; }
-    el.innerHTML = upcoming.map(o => {
-      const m = o.notes.match(/(\d{1,2}\/\d{1,2})/);
-      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);">
-        <div><div style="color:var(--text);font-weight:600">${o.customer}</div><div style="font-size:0.72rem;color:var(--text2)">${o.product}</div></div>
-        <div style="font-size:0.75rem;font-weight:700;color:var(--yellow);white-space:nowrap;margin-left:12px;">📅 ${m ? m[1] : ''}</div>
-      </div>`;
-    }).join('');
-  })();
+    const active  = (g.goals||[]).filter(x=>!x.done);
+    const done    = (g.goals||[]).filter(x=>x.done);
+    const overdue = active.filter(x=>x.due && new Date(x.due+'T00:00:00') < today);
+    countUp(document.getElementById('kpi-goals'), active.length, '', 700);
+    document.getElementById('kpi-goals-sub').innerHTML = overdue.length
+      ? `<span class="kpi-down">⚠ ${overdue.length} overdue</span>` : `<span class="kpi-up">${done.length} completed</span>`;
+    document.getElementById('goals-stat').innerHTML = `<strong>${done.length}</strong> done`;
+    if (overdue.length) {
+      const b = document.getElementById('goals-badge');
+      b.textContent = `⚠ ${overdue.length} overdue`;
+      b.style.color = 'var(--yellow)'; b.style.borderColor = 'rgba(251,191,36,0.3)'; b.style.background = 'rgba(251,191,36,0.08)';
+    }
+  } catch(e) {}
 
-  // Revenue Snapshot
-  (function() {
-    const orders = JSON.parse(localStorage.getItem('vp_orders_v2') || '[]');
-    const jtSales = JSON.parse(localStorage.getItem('vp_jettags_v1') || '[]');
-    const pinSales = JSON.parse(localStorage.getItem('vp_pins_v1') || '[]');
-    const now = new Date();
-    const thisMonth = now.toISOString().slice(0, 7);
-    const riserRev = orders.reduce((s,o) => s + o.salePrice, 0);
-    const riserProfit = orders.reduce((s,o) => s + o.salePrice - o.cogs, 0);
-    const moRev = orders.filter(o => o.date.startsWith(thisMonth)).reduce((s,o) => s + o.salePrice, 0);
-    const jtRev = jtSales.reduce((s,x) => s + x.revenue, 0);
-    const pinRev = pinSales.reduce((s,x) => s + x.revenue, 0);
-    const totalRev = riserRev + jtRev + pinRev;
-    const fmt = n => '$' + n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    const el = document.getElementById('revenue-snapshot');
-    if (!orders.length) { el.innerHTML = '<span>No data — <a href="vault-pine-collective.html" style="color:var(--accent)">open dashboard</a> and restore your backup.</span>'; return; }
-    el.innerHTML = `
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div style="background:var(--surface2);border-radius:8px;padding:12px;"><div style="font-size:1.1rem;font-weight:800;color:var(--green)">${fmt(totalRev)}</div><div style="font-size:0.65rem;color:var(--text2);margin-top:2px;text-transform:uppercase;letter-spacing:.5px">All-Time Revenue</div></div>
-        <div style="background:var(--surface2);border-radius:8px;padding:12px;"><div style="font-size:1.1rem;font-weight:800;color:var(--accent)">${fmt(riserProfit)}</div><div style="font-size:0.65rem;color:var(--text2);margin-top:2px;text-transform:uppercase;letter-spacing:.5px">Riser Profit</div></div>
-        <div style="background:var(--surface2);border-radius:8px;padding:12px;"><div style="font-size:1.1rem;font-weight:800;color:var(--accent2)">${fmt(moRev)}</div><div style="font-size:0.65rem;color:var(--text2);margin-top:2px;text-transform:uppercase;letter-spacing:.5px">This Month</div></div>
-        <div style="background:var(--surface2);border-radius:8px;padding:12px;"><div style="font-size:1.1rem;font-weight:800;color:var(--yellow)">${orders.length}</div><div style="font-size:0.65rem;color:var(--text2);margin-top:2px;text-transform:uppercase;letter-spacing:.5px">Total Orders</div></div>
-      </div>`;
-  })();
+  // Events
+  try {
+    const events = JSON.parse(localStorage.getItem('vp_events_v1')||localStorage.getItem('vpc_events_v1')||'[]');
+    const today = new Date(); today.setHours(0,0,0,0);
+    const up = events.filter(e => new Date((e.start||e.date||'')+'T00:00:00') >= today);
+    document.getElementById('events-stat').innerHTML = `<strong>${up.length}</strong> upcoming`;
+  } catch(e) {}
+
+  // Expenses
+  try {
+    const prefix = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    const exps   = JSON.parse(localStorage.getItem('vpc_personal_expenses_v1')||'[]');
+    const spent  = exps.filter(e=>(e.date||'').startsWith(prefix)).reduce((s,e)=>s+(e.amount||0),0);
+    const budget = JSON.parse(localStorage.getItem('vpc_expense_budget_v1')||'{"total":0}').total;
+    document.getElementById('expense-stat').innerHTML = `<strong>${fmt(spent)}</strong> this month`;
+    if (budget > 0 && spent > budget) {
+      const b = document.getElementById('expense-badge');
+      b.textContent = '⚠ Over Budget';
+      b.style.color = 'var(--red)'; b.style.borderColor = 'rgba(248,113,113,0.3)'; b.style.background = 'rgba(248,113,113,0.08)';
+    }
+  } catch(e) {}
+
+  // Revenue snapshot widget
+  const rsEl = document.getElementById('revenue-snapshot');
+  if (!orders.length && !jtSales.length) {
+    rsEl.innerHTML = `<span>No data — <a href="vault-pine-collective.html" style="color:var(--accent)">open dashboard</a> to get started.</span>`;
+  } else {
+    const stats = [
+      ['All-Time', fmt(totalRev), 'var(--green)'],
+      ['Riser Profit', fmt(profit), 'var(--accent)'],
+      ['This Month', fmt(monthRev), 'var(--accent2)'],
+      ['Orders', orders.length, 'var(--text)'],
+    ];
+    rsEl.innerHTML = `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">` +
+      stats.map(([l,v,c]) => `<div style="background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);border-radius:12px;padding:10px 12px;">
+        <div style="font-size:1rem;font-weight:900;color:${c};letter-spacing:-0.3px">${v}</div>
+        <div style="font-size:0.6rem;color:var(--text2);margin-top:3px;text-transform:uppercase;letter-spacing:.5px">${l}</div>
+      </div>`).join('') + '</div>';
+  }
+
+  // Deliveries widget
+  const today = new Date(); today.setHours(0,0,0,0);
+  const upcoming = orders.filter(o => {
+    if (!o.notes) return false;
+    const m = o.notes.match(/(?:deliver|delivery|pickup|pick up)[^\d]*(\d{1,2}\/\d{1,2})/i);
+    if (!m) return false;
+    const [mo, dy] = m[1].split('/').map(Number);
+    return new Date(today.getFullYear(), mo-1, dy) >= today;
+  }).sort((a,b) => {
+    const parse = n => { const m = n.notes.match(/(\d{1,2})\/(\d{1,2})/); return m ? new Date(today.getFullYear(),m[1]-1,m[2]) : new Date('9999'); };
+    return parse(a) - parse(b);
+  }).slice(0, 4);
+  const dEl = document.getElementById('delivery-list');
+  if (!upcoming.length) { dEl.innerHTML = '<span>No upcoming deliveries found.</span>'; }
+  else dEl.innerHTML = upcoming.map(o => {
+    const m = o.notes.match(/(\d{1,2}\/\d{1,2})/);
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--glass-border);">
+      <div><div style="color:var(--text);font-weight:600;font-size:0.8rem">${o.customer}</div>
+      <div style="font-size:0.7rem;color:var(--text2)">${o.product}</div></div>
+      <div style="font-size:0.7rem;font-weight:700;color:var(--yellow);background:rgba(251,191,36,0.08);padding:3px 8px;border-radius:6px;white-space:nowrap;">📅 ${m?m[1]:''}</div>
+    </div>`;
+  }).join('');
+})();
+
+// ── Business Sensei home tile ──
+(function initSenseiHome() {
+  // Wait for shared.js to load SENSEI_TIPS
+  function tryInit() {
+    if (!window.SENSEI_TIPS) { setTimeout(tryInit, 100); return; }
+    const pool = [
+      ...window.SENSEI_TIPS.general,
+      ...window.SENSEI_TIPS.sales,
+      ...window.SENSEI_TIPS.goals,
+      ...window.SENSEI_TIPS.expenses,
+    ];
+    let idx = Math.floor(Math.random() * pool.length);
+
+    function render() {
+      const t = pool[idx];
+      document.getElementById('sensei-home-cat').textContent   = t.cat;
+      document.getElementById('sensei-home-head').textContent  = t.head;
+      document.getElementById('sensei-home-body').textContent  = t.body;
+      document.getElementById('sensei-home-count').textContent = `${idx + 1} / ${pool.length}`;
+    }
+
+    window.senseiHomeNext = () => { idx = (idx + 1) % pool.length; render(); };
+    window.senseiHomePrev = () => { idx = (idx - 1 + pool.length) % pool.length; render(); };
+    render();
+    // Auto-advance every 60s
+    setInterval(window.senseiHomeNext, 60000);
+  }
+  tryInit();
+})();
+
+// ── Alerts ──
+(function renderAlerts() {
+  const bar = document.getElementById('alerts-bar');
+  const alerts = [];
+  const today = new Date(); today.setHours(0,0,0,0);
+  const week  = new Date(today); week.setDate(week.getDate()+7);
+  const now = new Date(), prefix = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  try {
+    const g = JSON.parse(localStorage.getItem('goals_dashboard_v1')||'{"goals":[]}');
+    const od = (g.goals||[]).filter(x=>!x.done && x.due && new Date(x.due+'T00:00:00') < today);
+    if (od.length) alerts.push({ type:'danger', icon:'⚠️', text:`${od.length} goal${od.length>1?'s':''} overdue`, url:'goals-dashboard.html', label:'View' });
+    const soon = (g.goals||[]).filter(x=>!x.done && x.due && new Date(x.due+'T00:00:00') <= week && new Date(x.due+'T00:00:00') >= today);
+    if (soon.length) alerts.push({ type:'warning', icon:'⏰', text:`${soon.length} goal${soon.length>1?'s':''} due within 7 days`, url:'goals-dashboard.html', label:'Manage' });
+  } catch(e) {}
+  try {
+    const budget = JSON.parse(localStorage.getItem('vpc_expense_budget_v1')||'{"total":0}');
+    const exps   = JSON.parse(localStorage.getItem('vpc_personal_expenses_v1')||'[]');
+    const spent  = exps.filter(e=>(e.date||'').startsWith(prefix)).reduce((s,e)=>s+(e.amount||0),0);
+    if (budget.total > 0) {
+      const pct = spent/budget.total*100;
+      if (spent > budget.total) alerts.push({ type:'danger', icon:'💸', text:`Budget exceeded — ${fmt(spent)} of ${fmt(budget.total)}`, url:'expenses.html', label:'View' });
+      else if (pct > 80) alerts.push({ type:'warning', icon:'💸', text:`Budget ${Math.round(pct)}% used`, url:'expenses.html', label:'View' });
+    }
+  } catch(e) {}
+  if (!alerts.length) return;
+  bar.innerHTML = alerts.map((a,i)=>`
+    <div class="alert-pill ${a.type}" style="animation-delay:${i*0.06}s">
+      <span class="alert-icon">${a.icon}</span><span class="alert-text">${a.text}</span>
+      <a href="${a.url}">${a.label} →</a>
+    </div>`).join('');
+})();
 </script>
 
 </body>
