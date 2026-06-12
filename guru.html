@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f1117">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="styles.css">
+<script src="shared.js" defer></script>
+<script src="supabase-sync.js" defer></script>
+<title>Financial Guru · VPC</title>
+<style>
+  body { min-height: 100vh; display: flex; flex-direction: column; }
+
+  header h1 { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.3px; }
+  header h1 span { color: var(--accent2); }
+  .rank-chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 0.72rem; font-weight: 700; padding: 5px 13px; border-radius: 20px;
+    background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.28);
+    color: var(--accent2); white-space: nowrap;
+  }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 26px 24px 40px; width: 100%; flex: 1; }
+
+  /* ── HERO: health ring + progress ── */
+  .guru-hero {
+    display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center;
+    background: linear-gradient(160deg, rgba(167,139,250,0.07) 0%, rgba(108,142,255,0.03) 60%);
+    backdrop-filter: blur(16px) saturate(1.2);
+    border: 1px solid rgba(167,139,250,0.2);
+    border-radius: 22px; padding: 26px 30px; margin-bottom: 22px;
+    position: relative; overflow: hidden;
+  }
+  .guru-hero::before {
+    content: ''; position: absolute; width: 220px; height: 220px; border-radius: 50%;
+    top: -90px; right: -70px; pointer-events: none;
+    background: radial-gradient(circle, rgba(167,139,250,0.35) 0%, transparent 70%);
+    opacity: 0.25;
+  }
+  .ring-wrap { position: relative; width: 150px; height: 150px; flex-shrink: 0; }
+  .ring-wrap svg { transform: rotate(-90deg); }
+  .ring-bg   { fill: none; stroke: rgba(255,255,255,0.07); stroke-width: 11; }
+  .ring-fill { fill: none; stroke-width: 11; stroke-linecap: round; transition: stroke-dashoffset 1.2s cubic-bezier(.3,.8,.3,1), stroke 0.5s; }
+  .ring-center {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+  }
+  .ring-score { font-size: 2.1rem; font-weight: 900; letter-spacing: -1.5px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .ring-label { font-size: 0.56rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text2); margin-top: 4px; }
+
+  .hero-info h2 { font-size: 1.3rem; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .hero-info h2 em { font-style: normal; color: var(--accent2); }
+  .hero-grade { font-size: 0.85rem; color: var(--text2); margin-bottom: 14px; line-height: 1.55; }
+  .hero-grade strong { color: var(--text); }
+  .hero-stats { display: flex; gap: 22px; flex-wrap: wrap; margin-bottom: 14px; }
+  .hstat { display: flex; align-items: baseline; gap: 7px; }
+  .hstat b { font-size: 1.15rem; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
+  .hstat span { font-size: 0.68rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .btn-continue {
+    background: var(--accent2); color: #14101f; border: none; border-radius: 10px;
+    padding: 10px 20px; font-size: 0.84rem; font-weight: 800; cursor: pointer;
+    box-shadow: 0 2px 18px rgba(167,139,250,0.35); transition: all 0.18s; font-family: inherit;
+  }
+  .btn-continue:hover { box-shadow: 0 4px 26px rgba(167,139,250,0.5); transform: translateY(-1px); }
+
+  /* ── Tabs ── */
+  .guru-tabs { display: flex; gap: 6px; margin-bottom: 22px; flex-wrap: wrap; }
+  .gtab {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text2);
+    border-radius: 10px; padding: 9px 18px; font-size: 0.8rem; font-weight: 700;
+    cursor: pointer; transition: all 0.15s; font-family: inherit;
+  }
+  .gtab:hover { color: var(--text); border-color: rgba(167,139,250,0.4); }
+  .gtab.active { background: rgba(167,139,250,0.12); border-color: rgba(167,139,250,0.45); color: var(--accent2); }
+
+  /* ── Academy: belts & lessons ── */
+  .belt-section { margin-bottom: 30px; }
+  .belt-head { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .belt-band { width: 38px; height: 12px; border-radius: 4px; flex-shrink: 0; box-shadow: 0 0 14px color-mix(in srgb, var(--belt-c) 40%, transparent); background: var(--belt-c); }
+  .belt-name { font-size: 0.95rem; font-weight: 800; letter-spacing: -0.2px; }
+  .belt-sub { font-size: 0.72rem; color: var(--text2); }
+  .belt-progress { margin-left: auto; font-size: 0.7rem; color: var(--text2); font-weight: 600; white-space: nowrap; }
+  .belt-track { height: 4px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; margin-bottom: 14px; }
+  .belt-fill { height: 100%; border-radius: 3px; background: var(--belt-c); transition: width 0.6s ease; }
+
+  .lesson-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 12px; }
+  .lesson-card {
+    background: linear-gradient(160deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.012) 100%);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border); border-radius: 14px;
+    padding: 15px 17px; cursor: pointer; transition: all 0.18s;
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .lesson-card:hover { border-color: color-mix(in srgb, var(--belt-c) 45%, transparent); transform: translateY(-2px); }
+  .lesson-card.done { border-color: color-mix(in srgb, var(--green) 30%, transparent); }
+  .lesson-num {
+    width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; font-weight: 800;
+    background: color-mix(in srgb, var(--belt-c) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--belt-c) 25%, transparent);
+    color: var(--belt-c);
+  }
+  .lesson-card.done .lesson-num { background: rgba(52,211,153,0.12); border-color: rgba(52,211,153,0.3); color: var(--green); }
+  .lesson-t { font-size: 0.84rem; font-weight: 700; line-height: 1.35; }
+  .lesson-m { font-size: 0.66rem; color: var(--text2); margin-top: 3px; }
+
+  /* ── Health Score breakdown ── */
+  .score-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 18px; border-radius: 14px; margin-bottom: 10px;
+    background: linear-gradient(160deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.01) 100%);
+    border: 1px solid var(--glass-border);
+  }
+  .score-icon { font-size: 1.2rem; flex-shrink: 0; width: 34px; text-align: center; }
+  .score-info { flex: 1; min-width: 0; }
+  .score-name { font-size: 0.84rem; font-weight: 700; }
+  .score-tip { font-size: 0.72rem; color: var(--text2); margin-top: 3px; line-height: 1.5; }
+  .score-pts { font-size: 0.92rem; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .score-pts small { font-size: 0.68rem; color: var(--text2); font-weight: 600; }
+
+  /* ── Milestones ── */
+  .mile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(230px, 100%), 1fr)); gap: 12px; }
+  .mile {
+    background: linear-gradient(160deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.012) 100%);
+    border: 1px solid var(--glass-border); border-radius: 14px;
+    padding: 18px; text-align: center; transition: all 0.2s;
+  }
+  .mile.earned { border-color: rgba(251,191,36,0.35); background: linear-gradient(160deg, rgba(251,191,36,0.07) 0%, rgba(255,255,255,0.01) 100%); }
+  .mile.locked { opacity: 0.45; filter: grayscale(0.7); }
+  .mile-ico { font-size: 1.9rem; margin-bottom: 8px; }
+  .mile-name { font-size: 0.8rem; font-weight: 800; margin-bottom: 4px; }
+  .mile-how { font-size: 0.67rem; color: var(--text2); line-height: 1.5; }
+  .mile-tag { display: inline-block; margin-top: 9px; font-size: 0.58rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.7px; padding: 2px 9px; border-radius: 20px; }
+  .mile.earned .mile-tag { background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); color: var(--yellow); }
+  .mile.locked .mile-tag { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text2); }
+
+  /* ── Tools / calculators ── */
+  .tool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(330px, 100%), 1fr)); gap: 16px; }
+  .tool-card {
+    background: linear-gradient(160deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.012) 100%);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border); border-radius: 16px; padding: 20px;
+  }
+  .tool-title { font-size: 0.86rem; font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .tool-why { font-size: 0.7rem; color: var(--text2); line-height: 1.55; margin-bottom: 14px; }
+  .tool-card .field { margin-bottom: 10px; }
+  .tool-result {
+    background: rgba(167,139,250,0.07); border: 1px solid rgba(167,139,250,0.22);
+    border-radius: 10px; padding: 12px 14px; margin-top: 12px;
+    font-size: 0.8rem; line-height: 1.7; color: var(--text2);
+  }
+  .tool-result b { color: var(--text); font-size: 0.95rem; }
+  .tool-result .big { font-size: 1.25rem; font-weight: 900; color: var(--accent2); letter-spacing: -0.5px; }
+
+  .sub-table { width: 100%; font-size: 0.78rem; }
+  .sub-table td { padding: 7px 4px; }
+
+  /* ── Lesson modal extras ── */
+  .modal.lesson-modal { width: 560px; }
+  .lm-belt { display: inline-flex; align-items: center; gap: 7px; font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; padding: 3px 11px; border-radius: 20px; margin-bottom: 12px; background: color-mix(in srgb, var(--belt-c) 10%, transparent); border: 1px solid color-mix(in srgb, var(--belt-c) 28%, transparent); color: var(--belt-c); }
+  .lm-title { font-size: 1.15rem; font-weight: 900; letter-spacing: -0.4px; margin-bottom: 14px; line-height: 1.3; }
+  .lm-body p { font-size: 0.84rem; color: var(--text2); line-height: 1.75; margin-bottom: 12px; }
+  .lm-takeaway {
+    background: rgba(52,211,153,0.06); border: 1px solid rgba(52,211,153,0.22);
+    border-left: 3px solid var(--green); border-radius: 10px;
+    padding: 12px 16px; font-size: 0.8rem; line-height: 1.6; margin: 16px 0;
+  }
+  .lm-takeaway b { color: var(--green); display: block; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px; }
+  .lm-quiz { background: rgba(108,142,255,0.05); border: 1px solid rgba(108,142,255,0.18); border-radius: 12px; padding: 16px; margin: 16px 0; }
+  .lm-quiz-q { font-size: 0.82rem; font-weight: 700; margin-bottom: 11px; }
+  .lm-quiz-q::before { content: '🧠 Quick check — '; color: var(--accent); }
+  .quiz-opt {
+    display: block; width: 100%; text-align: left;
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--text2);
+    border-radius: 9px; padding: 9px 13px; font-size: 0.78rem; margin-bottom: 7px;
+    cursor: pointer; transition: all 0.15s; font-family: inherit;
+  }
+  .quiz-opt:hover { border-color: var(--accent); color: var(--text); }
+  .quiz-opt.right { background: rgba(52,211,153,0.12); border-color: var(--green); color: var(--green); font-weight: 700; }
+  .quiz-opt.wrong { background: rgba(248,113,113,0.1); border-color: var(--red); color: var(--red); }
+  .lm-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+  .lm-action-link {
+    display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+    background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.3); color: var(--accent2);
+    border-radius: 10px; padding: 9px 16px; font-size: 0.78rem; font-weight: 700; transition: all 0.15s;
+  }
+  .lm-action-link:hover { background: rgba(167,139,250,0.18); }
+  .btn-complete { background: var(--green); color: #07211a; font-weight: 800; }
+  .btn-complete.is-done { background: rgba(52,211,153,0.15); color: var(--green); border: 1px solid rgba(52,211,153,0.35); cursor: default; }
+
+  @media (max-width: 700px) {
+    main { padding: 16px 14px 32px; }
+    .guru-hero { grid-template-columns: 1fr; text-align: center; padding: 22px 18px; }
+    .ring-wrap { margin: 0 auto; }
+    .hero-stats { justify-content: center; }
+    .modal.lesson-modal { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🥋 <span>Financial</span> Guru</h1>
+  <div class="header-right" style="display:flex;align-items:center;gap:10px;">
+    <div class="rank-chip" id="rank-chip">🥋 Novice</div>
+  </div>
+</header>
+
+<nav class="dash-nav">
+  <a href="index.html" class="dash-nav-link">⌂ Home</a>
+  <a href="vault-pine-collective.html" class="dash-nav-link">📊 Sales Hub</a>
+  <a href="goals-dashboard.html" class="dash-nav-link">🎯 Goals</a>
+  <a href="expenses.html" class="dash-nav-link">💸 Expenses</a>
+  <a href="analytics.html" class="dash-nav-link">📈 Analytics</a>
+  <a href="production.html" class="dash-nav-link">🖨️ Production</a>
+  <a href="events.html" class="dash-nav-link">🎪 Events</a>
+  <a href="content.html" class="dash-nav-link">📱 Content</a>
+  <a href="review.html" class="dash-nav-link">📋 Review</a>
+  <a href="guru.html" class="dash-nav-link active">🥋 Guru</a>
+</nav>
+
+<main>
+
+  <!-- ── HERO: Financial Health Score ── -->
+  <div class="guru-hero">
+    <div class="ring-wrap">
+      <svg width="150" height="150" viewBox="0 0 150 150">
+        <circle class="ring-bg"   cx="75" cy="75" r="64"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="75" cy="75" r="64"
+                stroke="#a78bfa" stroke-dasharray="402.1" stroke-dashoffset="402.1"></circle>
+      </svg>
+      <div class="ring-center">
+        <div class="ring-score" id="ring-score">0</div>
+        <div class="ring-label">Health Score</div>
+      </div>
+    </div>
+    <div class="hero-info">
+      <h2>Your Financial <em>Dojo</em></h2>
+      <div class="hero-grade" id="hero-grade">Calculating your financial health…</div>
+      <div class="hero-stats">
+        <div class="hstat"><b id="hs-lessons">0/25</b><span>Lessons</span></div>
+        <div class="hstat"><b id="hs-belts">0/5</b><span>Belts</span></div>
+        <div class="hstat"><b id="hs-miles">0/12</b><span>Milestones</span></div>
+      </div>
+      <button class="btn-continue" id="btn-continue" onclick="continueLearning()">▶ Continue Learning</button>
+    </div>
+  </div>
+
+  <!-- ── Tabs ── -->
+  <div class="guru-tabs">
+    <button class="gtab active" data-tab="academy"    onclick="showGuruTab('academy')">📚 Academy</button>
+    <button class="gtab" data-tab="health"     onclick="showGuruTab('health')">💪 Health Score</button>
+    <button class="gtab" data-tab="milestones" onclick="showGuruTab('milestones')">🏆 Milestones</button>
+    <button class="gtab" data-tab="tools"      onclick="showGuruTab('tools')">🧮 Tools</button>
+  </div>
+
+  <div class="panel active" id="panel-academy"></div>
+
+  <div class="panel" id="panel-health">
+    <p style="font-size:0.78rem;color:var(--text2);line-height:1.65;margin-bottom:18px;">
+      Your Financial Health Score is computed live from your real data — budget, spending, sales margins, goals, and learning progress.
+      Each row below shows exactly how to earn the missing points.
+    </p>
+    <div id="score-breakdown"></div>
+  </div>
+
+  <div class="panel" id="panel-milestones">
+    <p style="font-size:0.78rem;color:var(--text2);line-height:1.65;margin-bottom:18px;">
+      Milestones unlock automatically as you run your business — no need to claim anything. They're proof of habits, not luck.
+    </p>
+    <div class="mile-grid" id="mile-grid"></div>
+  </div>
+
+  <div class="panel" id="panel-tools">
+    <div class="tool-grid">
+
+      <div class="tool-card">
+        <div class="tool-title">⚖️ Break-Even Calculator</div>
+        <div class="tool-why">How many items must you sell before a booth fee, a new tool, or your fixed monthly costs are paid off? Below this number you're covering costs — above it, everything is profit.</div>
+        <div class="field"><label>Fixed cost to cover ($)</label><input type="number" id="be-fixed" placeholder="e.g. 100 booth fee" oninput="calcBreakEven()"></div>
+        <div class="field"><label>Profit per item ($)</label><input type="number" id="be-profit" placeholder="price minus cost, e.g. 8" oninput="calcBreakEven()"></div>
+        <div class="tool-result" id="be-result">Enter both numbers to see your break-even point.</div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-title">📊 Profit Margin Calculator</div>
+        <div class="tool-why">Margin tells you how much of every sale you actually keep. Product businesses should target 40–60% gross margin. Below 30% usually means underpricing.</div>
+        <div class="field"><label>Sale price ($)</label><input type="number" id="pm-price" placeholder="e.g. 25" oninput="calcMargin()"></div>
+        <div class="field"><label>Cost to make/buy ($)</label><input type="number" id="pm-cost" placeholder="e.g. 9" oninput="calcMargin()"></div>
+        <div class="tool-result" id="pm-result">Enter price and cost to see your margin.</div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-title">🛡️ Emergency Fund Builder</div>
+        <div class="tool-why">An emergency fund turns disasters into inconveniences. Start with $500, then build toward 3–6 months of essential living costs.</div>
+        <div class="field"><label>Essential monthly expenses ($)</label><input type="number" id="ef-monthly" placeholder="rent + food + bills" oninput="calcFund()"></div>
+        <div class="field"><label>Months of cover (3–6 typical)</label><input type="number" id="ef-months" value="3" min="1" max="12" oninput="calcFund()"></div>
+        <div class="field"><label>Saved so far ($)</label><input type="number" id="ef-saved" placeholder="0" oninput="calcFund()"></div>
+        <div class="tool-result" id="ef-result">Enter your essentials to get a target.</div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-title">🧭 50/30/20 Split</div>
+        <div class="tool-why">The classic budgeting compass: 50% of take-home pay to needs, 30% to wants, 20% to savings &amp; debt payoff. Adjust to your reality — the point is intentional allocation.</div>
+        <div class="field"><label>Monthly take-home income ($)</label><input type="number" id="fs-income" placeholder="e.g. 3000" oninput="calcSplit()"></div>
+        <div class="tool-result" id="fs-result">Enter income to see your suggested split.</div>
+      </div>
+
+      <div class="tool-card" style="grid-column: 1 / -1;">
+        <div class="tool-title">🔄 Subscription &amp; Recurring Bill Audit</div>
+        <div class="tool-why">Small monthly charges hide their real size — $12.99/month is $156 a year. This audit reads the recurring bills you've logged in Expenses and shows their true annual cost. Cancel anything you wouldn't re-buy today at the annual price.</div>
+        <div id="sub-audit">Loading…</div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<!-- ── Lesson modal ── -->
+<div class="modal-overlay" id="lesson-overlay" onclick="if(event.target===this)closeLesson()">
+  <div class="modal lesson-modal" id="lesson-modal"></div>
+</div>
+
+<script>
+'use strict';
+
+/* ════════════════════════════════════════════════
+   CURRICULUM — 25 lessons · 5 belts
+════════════════════════════════════════════════ */
+const BELTS = [
+  { id: 'white',  name: 'White Belt',  sub: 'Money Foundations',  color: '#e2e8f0' },
+  { id: 'yellow', name: 'Yellow Belt', sub: 'Cash Flow Control',  color: '#fbbf24' },
+  { id: 'green',  name: 'Green Belt',  sub: 'Business Money',     color: '#34d399' },
+  { id: 'brown',  name: 'Brown Belt',  sub: 'Protect & Grow',     color: '#fb923c' },
+  { id: 'black',  name: 'Black Belt',  sub: 'Wealth Mastery',     color: '#a78bfa' },
+];
+
+const LESSONS = [
+  // ── WHITE BELT ──
+  { id:'w1', belt:'white', min:3, title:'The Three Numbers That Run Your Money',
+    body:[
+      "All of money management reduces to three numbers: what comes in (income), what goes out (expenses), and the gap between them. Everything else — budgets, apps, advice — exists to make that gap bigger.",
+      "Most people cannot state any of those three numbers within 10% accuracy. If you can, you're already managing money better than the majority of adults.",
+      "The gap is the only number that builds wealth. A high income with no gap builds nothing. A modest income with a steady gap builds everything, given time."
+    ],
+    takeaway:"Income, expenses, gap. Grow the gap — that's the entire game.",
+    action:{ label:'Log today\'s expenses now', url:'expenses.html' },
+    quiz:{ q:'Which of the three numbers actually builds wealth?', opts:['Income','Expenses','The gap between them','Your credit score'], a:2 } },
+
+  { id:'w2', belt:'white', min:2, title:'Awareness Before Control',
+    body:[
+      "You can't fix what you can't see. Before any budgeting technique works, you need raw visibility: every dollar, logged, categorized.",
+      "Here's the secret: tracking changes behavior on its own. People who simply log their spending — with no other rules — spend less. The act of writing it down creates a moment of decision where there used to be autopilot.",
+      "Make the habit frictionless: log at the moment of purchase. It takes ten seconds and beats trying to reconstruct a week from memory."
+    ],
+    takeaway:"Tracking isn't preparation for control — tracking IS control.",
+    action:{ label:'Open the Expenses tracker', url:'expenses.html' },
+    quiz:{ q:'What is the very first step to controlling spending?', opts:['Cutting all subscriptions','Tracking every dollar','Opening a savings account','Setting strict category limits'], a:1 } },
+
+  { id:'w3', belt:'white', min:3, title:'The 50/30/20 Rule',
+    body:[
+      "A classic compass for take-home pay: 50% to needs (housing, food, utilities, transport, minimum debt payments), 30% to wants (everything optional), 20% to savings and extra debt payoff.",
+      "Define 'needs' strictly — survival and legal obligations only. Restaurant food is a want. The upgraded phone plan is a want. Honesty here is where most budgets quietly fail.",
+      "It's a starting point, not a law. High cost-of-living area? Maybe 60/20/20. Aggressive saver? 50/20/30. The number that matters most is the last one — protect your savings percentage first."
+    ],
+    takeaway:"50 needs / 30 wants / 20 savings — adjust the first two, defend the third.",
+    action:{ label:'Try the 50/30/20 calculator', url:'guru.html#tools' },
+    quiz:{ q:'In the 50/30/20 rule, the 20% goes to…', opts:['Entertainment','Rent and utilities','Savings and debt payoff','Groceries'], a:2 } },
+
+  { id:'w4', belt:'white', min:3, title:'Build Your First Budget',
+    body:[
+      "A budget isn't a cage — it's permission to spend without guilt. Money assigned to 'fun' in advance is fun you never have to feel bad about.",
+      "The simple method: look at last month's actual spending per category, set caps slightly below that, and review weekly. Don't design a fantasy budget from zero — start from reality and nudge it.",
+      "Budgets fail from perfection, not overspending. If every dollar is rigidly assigned, the first surprise breaks the whole system. Leave a buffer category of 5–10% for life happening."
+    ],
+    takeaway:"Start from real numbers, cut slightly, keep a buffer. Review weekly.",
+    action:{ label:'Set your monthly budget', url:'expenses.html' },
+    quiz:{ q:'Why do most budgets fail?', opts:['Income is too low','They\'re too rigid with no buffer','Banks charge fees','Tracking apps are bad'], a:1 } },
+
+  { id:'w5', belt:'white', min:2, title:'The $500 Emergency Fund',
+    body:[
+      "Before investing, before extra debt payments, before anything fancy: build a starter emergency fund of $500–$1,000. This single buffer converts most emergencies into inconveniences.",
+      "Without it, every surprise — a flat tire, a broken tool — lands on a credit card and starts compounding against you. With it, surprises are just line items.",
+      "Keep it separate and boring: a savings account you don't see daily. It's not an investment; its job is to exist. Long-term, grow it toward 3–6 months of essential expenses."
+    ],
+    takeaway:"$500 first. Boring account. Then build toward 3–6 months of essentials.",
+    action:{ label:'Use the Emergency Fund builder', url:'guru.html#tools' },
+    quiz:{ q:'What\'s the first savings milestone before anything else?', opts:['Six months of salary','A starter fund of $500–$1,000','A retirement account','Paying off your mortgage'], a:1 } },
+
+  // ── YELLOW BELT ──
+  { id:'y1', belt:'yellow', min:3, title:'Fixed vs Variable Expenses',
+    body:[
+      "Fixed expenses are the same every month: rent, insurance, subscriptions. Variable expenses fluctuate: food, fuel, entertainment, supplies.",
+      "They're fought with different weapons. Fixed costs are decided once and paid forever — attack them rarely but hard: negotiate, switch providers, cancel. One phone call can save $300 a year.",
+      "Variable costs are decided daily — they respond to habits, not negotiations. Meal planning, shopping lists, and the 24-hour rule are the tools here."
+    ],
+    takeaway:"Negotiate fixed costs hard but rarely. Fight variable costs with daily habits.",
+    action:{ label:'Tag your recurring bills', url:'expenses.html' },
+    quiz:{ q:'Which type of expense do you control with daily habits?', opts:['Fixed expenses','Variable expenses','Taxes','Insurance premiums'], a:1 } },
+
+  { id:'y2', belt:'yellow', min:2, title:'The Subscription Audit',
+    body:[
+      "Subscriptions are priced monthly because monthly numbers look harmless. $12.99/month doesn't feel like what it is: $156 a year.",
+      "Run an audit quarterly. For each recurring charge, ask one question: would I sign up again today if I had to pay the full year upfront? If not, cancel it.",
+      "Companies count on inertia — the average household pays for multiple subscriptions it forgot it had. Inertia is their revenue; awareness is your refund."
+    ],
+    takeaway:"Multiply every subscription by 12, then ask: would I buy that?",
+    action:{ label:'Run your Subscription Audit', url:'guru.html#tools' },
+    quiz:{ q:'A $15/month subscription costs roughly how much per year?', opts:['$90','$120','$180','$240'], a:2 } },
+
+  { id:'y3', belt:'yellow', min:2, title:'Pay Yourself First',
+    body:[
+      "The standard plan — spend all month, save 'what's left' — fails because what's left is always zero. Spending expands to fill available money.",
+      "Reverse it: move money to savings the moment income arrives, before any spending. Then live on the remainder, guilt-free.",
+      "Automate the transfer so willpower isn't involved. And start embarrassingly small if needed — $25 on payday builds the identity of a saver, and identity scales."
+    ],
+    takeaway:"Save first, spend what's left — never the reverse. Automate it.",
+    action:{ label:'Set a savings goal', url:'goals-dashboard.html' },
+    quiz:{ q:'When should savings leave your account?', opts:['At the end of the month','Whenever there\'s extra','Immediately when income arrives','Once a year'], a:2 } },
+
+  { id:'y4', belt:'yellow', min:2, title:'The 24-Hour Rule',
+    body:[
+      "Impulse purchases are emotional events dressed up as decisions. The emotion peaks at the moment of 'add to cart' and decays fast.",
+      "The rule: any unplanned purchase over your threshold (say $50) waits 24 hours. No exceptions. Most urges simply expire overnight — that's the point.",
+      "Pair it with a wants wishlist: write the item down with the date. Anything still on the list after 30 days is a real want — buy it without guilt. The list filters emotion from intention."
+    ],
+    takeaway:"Sleep on anything over $50. Real wants survive the wait; impulses don't.",
+    action:{ label:'Review this month\'s spending', url:'expenses.html' },
+    quiz:{ q:'What does the 24-hour wait actually remove from a purchase?', opts:['The cost','Sales tax','The emotion driving it','Shipping time'], a:2 } },
+
+  { id:'y5', belt:'yellow', min:3, title:'Cash Flow vs Profit',
+    body:[
+      "Profit is an opinion; cash is a fact. Profit is an accounting calculation — revenue minus costs on paper. Cash is what's actually in your account right now.",
+      "You can be profitable and broke at the same time: a big order you've paid materials for but haven't been paid on is profit on paper and a hole in your bank account.",
+      "Watch the timing of money, not just the amounts. When does cash actually arrive? When does it actually leave? Businesses die of cash flow problems while their books show profit."
+    ],
+    takeaway:"You pay bills with cash, not profit. Track when money actually moves.",
+    action:{ label:'Check your sales timeline', url:'analytics.html' },
+    quiz:{ q:'Which one can you actually spend?', opts:['Projected profit','Cash in your account','Gross revenue','Inventory value'], a:1 } },
+
+  // ── GREEN BELT ──
+  { id:'g1', belt:'green', min:3, title:'Separate Business and Personal Money',
+    body:[
+      "One account for the business, one for your life — even if the business is small and informal. This single move is the foundation of every other business-money skill.",
+      "Mixed money hides the only question that matters: does this business actually make money? When supplies come from the grocery card and sales go to your pocket, nobody knows.",
+      "Pay yourself with a deliberate transfer from business to personal. That transfer is your salary, and what remains in the business account is its honest scoreboard. Tax season also goes from nightmare to paperwork."
+    ],
+    takeaway:"Two accounts. Deliberate transfers. The business account is the scoreboard.",
+    action:{ label:'Review your expense categories', url:'expenses.html' },
+    quiz:{ q:'The main reason to separate business and personal money is…', opts:['Banks require it','To see true business profitability','Higher interest rates','It looks professional'], a:1 } },
+
+  { id:'g2', belt:'green', min:3, title:'COGS and Gross Margin',
+    body:[
+      "COGS — cost of goods sold — is what it directly costs to make or buy the thing you sold: materials, filament, packaging, payment fees.",
+      "Gross margin % = (revenue − COGS) ÷ revenue × 100. It's the percentage of every sale you actually keep before overhead. Healthy product businesses run 40–60%.",
+      "Margin is the engine; revenue is just fuel flow. A $5,000 month at 15% margin earns less than a $2,000 month at 50%. When margin is healthy, growth multiplies profit — when it's broken, growth multiplies losses."
+    ],
+    takeaway:"Know your margin %. Below 30%? You have a pricing or cost problem to fix first.",
+    action:{ label:'See your real margins', url:'analytics.html' },
+    quiz:{ q:'A healthy gross margin for a product business is roughly…', opts:['5–10%','15–25%','40–60%','90–100%'], a:2 } },
+
+  { id:'g3', belt:'green', min:3, title:'Break-Even: Your Most Important Number',
+    body:[
+      "Break-even units = fixed costs ÷ profit per unit. It answers: how many do I need to sell before this cost is covered?",
+      "Use it everywhere. A $100 booth fee with $8 profit per item means 13 items before the event earns you anything. A $400 printer at $8/item is 50 items. Now decisions have numbers attached.",
+      "Below break-even, every sale subsidizes a cost. Above it, every sale is real profit. Knowing the line changes how an event feels at 2pm when you've sold 11 items — you know exactly where you stand."
+    ],
+    takeaway:"Fixed cost ÷ profit per unit. Calculate it before every event and purchase.",
+    action:{ label:'Open the Break-Even calculator', url:'guru.html#tools' },
+    quiz:{ q:'Break-even units are calculated as…', opts:['Revenue ÷ costs','Fixed costs ÷ profit per unit','Price × quantity','Profit − expenses'], a:1 } },
+
+  { id:'g4', belt:'green', min:3, title:'Pricing With Confidence',
+    body:[
+      "Price on the value to the buyer, with your costs as the floor — never price on fear. Fear-pricing ('what if no one buys?') is how skilled makers end up earning $4 an hour.",
+      "Underpricing backfires twice: it signals low quality to good customers and attracts bargain hunters who haggle hardest and complain most.",
+      "Test increases of 10–15%. Most owners discover the volume they lose is far smaller than the margin they gain. And a useful diagnostic: if nobody ever hesitates at your price, it's almost certainly too low."
+    ],
+    takeaway:"Costs set the floor, value sets the price. Zero pushback = priced too low.",
+    action:{ label:'Review your product pricing', url:'vault-pine-collective.html' },
+    quiz:{ q:'If no customer ever objects to your price, it usually means…', opts:['Perfect pricing','The price is too low','The product is amazing','Customers are rich'], a:1 } },
+
+  { id:'g5', belt:'green', min:3, title:'The Owner\'s Salary Problem',
+    body:[
+      "'I'll pay myself whatever's left over' means you work free most months — there's always a reason the business 'needs' the money more.",
+      "Set a fixed owner's draw, even a tiny one, on a schedule. $50 a month is fine to start. The amount matters less than the discipline: it forces the business to be honest about what it can afford.",
+      "And price your time into your products. If a piece takes an hour to make, that hour is a real cost — a business that only works because the owner's labor is free isn't profitable, it's a donation."
+    ],
+    takeaway:"Fixed draw, on schedule, no matter how small. Your time is a real cost.",
+    action:{ label:'Add owner pay as a recurring item', url:'expenses.html' },
+    quiz:{ q:'How should a solo owner pay themselves?', opts:['Whatever is left over','A fixed amount on a schedule','Only after $10k revenue','Never — reinvest everything'], a:1 } },
+
+  // ── BROWN BELT ──
+  { id:'b1', belt:'brown', min:3, title:'The Tax Set-Aside Habit',
+    body:[
+      "Self-employment income arrives untaxed — which makes it feel bigger than it is. A slice of every dollar of profit already belongs to the tax authorities; you're just holding it.",
+      "The habit: move 25–30% of profit into a separate 'tax bucket' account as the money arrives. Not at year-end — as it arrives. The April panic is what happens to people who skip this.",
+      "Rates vary by location, income, and entity type, so confirm your actual percentage with a local tax professional. The habit, though, is universal: tax money is not your money. Quarantine it early."
+    ],
+    takeaway:"Move ~25–30% of profit to a tax bucket the moment it arrives.",
+    action:{ label:'Create a tax set-aside category', url:'expenses.html' },
+    quiz:{ q:'Roughly how much of self-employed profit should be set aside for taxes?', opts:['5%','10–15%','25–30%','50–60%'], a:2 } },
+
+  { id:'b2', belt:'brown', min:2, title:'Deductions: Track Now, Save Later',
+    body:[
+      "Legitimate business expenses reduce your taxable profit — but only the ones you can prove. An undocumented expense is a discount you gave the government.",
+      "Materials, booth fees, shipping, packaging, software, a share of tools and equipment, business mileage: log them with date, amount, and purpose at the moment they happen.",
+      "Your expense tracker is doing double duty: it's your management dashboard today and your audit defense later. The receipt you photograph in ten seconds now can be worth real money in April."
+    ],
+    takeaway:"Every documented business expense is a tax discount. Log them same-day.",
+    action:{ label:'Log your business expenses', url:'expenses.html' },
+    quiz:{ q:'A business expense only reduces your taxes if it is…', opts:['Over $100','Paid in cash','Documented with records','Recurring monthly'], a:2 } },
+
+  { id:'b3', belt:'brown', min:3, title:'Debt: Tool or Trap',
+    body:[
+      "Debt is a tool when it buys assets that earn more than the interest costs — equipment that pays for itself, inventory that turns. It's a trap when it buys consumption that's gone before the bill arrives.",
+      "For paying debt down, two methods work: the avalanche (highest interest rate first — mathematically optimal) and the snowball (smallest balance first — psychologically powerful, quick wins build momentum).",
+      "The best method is whichever one you'll actually sustain. Pick one, automate the payments, and stop re-deciding every month — re-deciding is where plans die."
+    ],
+    takeaway:"Avalanche saves the most money; snowball saves the most motivation. Pick one and automate.",
+    action:{ label:'Set a debt payoff goal', url:'goals-dashboard.html' },
+    quiz:{ q:'The avalanche method pays off which debt first?', opts:['The smallest balance','The newest one','The highest interest rate','The largest balance'], a:2 } },
+
+  { id:'b4', belt:'brown', min:2, title:'The Weekly Money Ritual',
+    body:[
+      "Fifteen minutes, same day every week. Log anything missed, check budget percentage, glance at margin, review goals. That's the entire practice.",
+      "Rituals beat motivation because they don't ask for it. Nobody feels like reviewing numbers — people who do it anyway have simply removed the decision by scheduling it like a customer meeting.",
+      "The weekly cadence is the sweet spot: daily is obsessive, monthly is archaeology. Weekly, problems are still small enough to fix cheaply."
+    ],
+    takeaway:"15 minutes, same day weekly: log, budget check, margin glance, goal review.",
+    action:{ label:'Run your Daily Review', url:'review.html' },
+    quiz:{ q:'Why do rituals beat motivation?', opts:['They\'re more fun','They remove the need to decide each time','They take less time','They impress others'], a:1 } },
+
+  { id:'b5', belt:'brown', min:3, title:'Reinvest or Take Home?',
+    body:[
+      "Early-stage profits face one question: back into the business, or into your pocket? The answer is a test, not a feeling.",
+      "Reinvest when the return is obvious and nameable: materials you'll definitely sell, equipment that removes a bottleneck, a booth at an event that historically pays 3×. Every reinvested dollar should answer 'how does this come back larger?'",
+      "Take home your fixed draw regardless (that's Green Belt law), and be suspicious of vague reinvestment — 'upgrading' gear that wasn't limiting you is consumption wearing a business costume."
+    ],
+    takeaway:"Reinvest what compounds, take home what you've earned, name the return before spending.",
+    action:{ label:'Check what\'s selling', url:'analytics.html' },
+    quiz:{ q:'When should profit be reinvested in the business?', opts:['Always — growth first','When the return is clear and nameable','Never — take it all home','Only above $5,000'], a:1 } },
+
+  // ── BLACK BELT ──
+  { id:'k1', belt:'black', min:3, title:'Compound Interest: The Eighth Wonder',
+    body:[
+      "Compounding is money earning money that then earns its own money. The curve is flat for years, then vertical — most people quit during the flat part.",
+      "The Rule of 72: divide 72 by an annual return percentage to estimate doubling time. At 8%, money doubles roughly every 9 years. At 12%, every 6.",
+      "Because growth multiplies over time, time in beats timing. A small amount started today routinely beats a large amount started a decade later. The most expensive thing in finance is waiting."
+    ],
+    takeaway:"72 ÷ return % ≈ years to double. Start small, start now — time is the engine.",
+    action:{ label:'Set a long-term savings goal', url:'goals-dashboard.html' },
+    quiz:{ q:'Using the Rule of 72, money growing at 8% doubles in about…', opts:['4 years','9 years','15 years','25 years'], a:1 } },
+
+  { id:'k2', belt:'black', min:3, title:'Investing Basics (Education, Not Advice)',
+    body:[
+      "Once you have an emergency fund and high-interest debt is handled, money sitting idle for the long term quietly loses to inflation. That's the point where investing enters the conversation.",
+      "The classic starting point most beginners study first: broad, low-cost index funds — owning a small slice of the whole market instead of betting on single companies. Boring by design; boring is the feature.",
+      "Two rules to carry: never invest in anything you can't explain in one sentence, and never invest money you'll need within five years. This lesson is education, not financial advice — your situation is yours, and a fiduciary advisor can address it specifically."
+    ],
+    takeaway:"Invest only after the foundation is built, only in what you understand, only for the long term.",
+    action:{ label:'Check your emergency fund first', url:'guru.html#tools' },
+    quiz:{ q:'Investing generally comes only after…', opts:['Your first $100','Emergency fund + high-interest debt handled','Age 40','Buying a house'], a:1 } },
+
+  { id:'k3', belt:'black', min:2, title:'Net Worth: The True Scoreboard',
+    body:[
+      "Net worth = everything you own minus everything you owe. Cash, savings, equipment, inventory value — minus cards, loans, anything outstanding.",
+      "Income is a snapshot; net worth is the movie. A high earner can have a negative net worth and a modest earner can quietly build a strong one. The trend line tells the truth that paychecks hide.",
+      "Calculate it monthly or quarterly and write it down. Expect it to grow slowly, then suddenly — that's compounding showing up on schedule."
+    ],
+    takeaway:"Own − owe = net worth. Track the trend, not the snapshot.",
+    action:{ label:'Review your full picture', url:'review.html' },
+    quiz:{ q:'Net worth equals…', opts:['Annual income','Assets minus liabilities','Cash in the bank','Revenue minus expenses'], a:1 } },
+
+  { id:'k4', belt:'black', min:2, title:'Live Below the Line',
+    body:[
+      "Wealth has a brutal little formula: income minus ego. Every raise invites a lifestyle upgrade, and lifestyle inflation can outrun any income — there are broke high earners everywhere.",
+      "The discipline: when income rises, raise your savings rate first and your lifestyle second. Bank the raise for three months before deciding what (if anything) to upgrade.",
+      "This isn't deprivation — it's sequencing. Upgrades you can already afford feel better than upgrades that re-trap you at a higher burn rate."
+    ],
+    takeaway:"When income grows, grow the savings rate first. Bank raises for 90 days before upgrading.",
+    action:{ label:'Check this month\'s spending trend', url:'expenses.html' },
+    quiz:{ q:'When your income increases, what should increase first?', opts:['Your rent','Your savings rate','Your subscriptions','Your car payment'], a:1 } },
+
+  { id:'k5', belt:'black', min:2, title:'Teach It to Keep It',
+    body:[
+      "The final test of understanding is explaining it simply. If you can teach the 50/30/20 rule, break-even math, or margin in plain words, you own the knowledge — it isn't just familiar, it's yours.",
+      "Build the loop: learn → apply to your own numbers → measure what changed → explain it out loud to someone (a friend, a partner, a rubber duck on the desk). Each pass through the loop deepens it.",
+      "You've now covered the foundations, cash flow, business money, protection, and wealth-building. The dashboard tracks your numbers; the ritual reviews them; the knowledge interprets them. You're not following a guru anymore — you're becoming one."
+    ],
+    takeaway:"Learn → apply → measure → teach. The loop is the mastery.",
+    action:{ label:'Revisit your Health Score', url:'guru.html' },
+    quiz:{ q:'The strongest proof you understand a money concept is…', opts:['Memorizing the definition','Explaining it simply to someone else','Reading it twice','Bookmarking the article'], a:1 } },
+];
+
+/* ════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════ */
+const GURU_KEY = 'vpc_guru_v1';
+function loadGuru() {
+  try { return JSON.parse(localStorage.getItem(GURU_KEY)) || { completed: {} }; }
+  catch(e) { return { completed: {} }; }
+}
+function saveGuru(g) { localStorage.setItem(GURU_KEY, JSON.stringify(g)); }
+
+const fmt$ = n => '$' + Math.abs(n).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+function readJSON(key, fallback) {
+  try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch(e) { return fallback; }
+}
+
+/* ════════════════════════════════════════════════
+   TABS
+════════════════════════════════════════════════ */
+function showGuruTab(id) {
+  document.querySelectorAll('.gtab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + id));
+}
+
+/* ════════════════════════════════════════════════
+   ACADEMY RENDER
+════════════════════════════════════════════════ */
+function beltLessons(beltId) { return LESSONS.filter(l => l.belt === beltId); }
+function beltDone(beltId, g) { return beltLessons(beltId).filter(l => g.completed[l.id]).length; }
+function beltsEarned(g) { return BELTS.filter(b => beltDone(b.id, g) === beltLessons(b.id).length).length; }
+
+function renderAcademy() {
+  const g = loadGuru();
+  const el = document.getElementById('panel-academy');
+  el.innerHTML = BELTS.map(b => {
+    const lessons = beltLessons(b.id);
+    const done = beltDone(b.id, g);
+    const pct = lessons.length ? Math.round(done / lessons.length * 100) : 0;
+    return `
+    <div class="belt-section" style="--belt-c:${b.color};">
+      <div class="belt-head">
+        <div class="belt-band"></div>
+        <div>
+          <div class="belt-name">${b.name} ${done === lessons.length ? '✓' : ''}</div>
+          <div class="belt-sub">${b.sub}</div>
+        </div>
+        <div class="belt-progress">${done} / ${lessons.length} complete</div>
+      </div>
+      <div class="belt-track"><div class="belt-fill" style="width:${pct}%"></div></div>
+      <div class="lesson-grid">
+        ${lessons.map((l, i) => `
+          <div class="lesson-card ${g.completed[l.id] ? 'done' : ''}" onclick="openLesson('${l.id}')">
+            <div class="lesson-num">${g.completed[l.id] ? '✓' : i + 1}</div>
+            <div>
+              <div class="lesson-t">${l.title}</div>
+              <div class="lesson-m">${l.min} min read · ${g.completed[l.id] ? 'Completed' : 'Not started'}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════════════════
+   LESSON MODAL
+════════════════════════════════════════════════ */
+let currentLesson = null;
+
+function openLesson(id) {
+  const l = LESSONS.find(x => x.id === id);
+  if (!l) return;
+  currentLesson = l;
+  const g = loadGuru();
+  const belt = BELTS.find(b => b.id === l.belt);
+  const isDone = !!g.completed[l.id];
+  const modal = document.getElementById('lesson-modal');
+  modal.style.setProperty('--belt-c', belt.color);
+  modal.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+      <span class="lm-belt">🥋 ${belt.name} · ${belt.sub}</span>
+      <button onclick="closeLesson()" style="background:none;border:none;color:var(--text2);font-size:1rem;cursor:pointer;padding:0;min-height:unset;font-family:inherit;">✕</button>
+    </div>
+    <div class="lm-title">${l.title}</div>
+    <div class="lm-body">${l.body.map(p => `<p>${p}</p>`).join('')}</div>
+    <div class="lm-takeaway"><b>Key takeaway</b>${l.takeaway}</div>
+    <div class="lm-quiz">
+      <div class="lm-quiz-q">${l.quiz.q}</div>
+      ${l.quiz.opts.map((o, i) => `<button class="quiz-opt" data-i="${i}" onclick="answerQuiz(this, ${i}, ${l.quiz.a})">${o}</button>`).join('')}
+      <div id="quiz-feedback" style="font-size:0.74rem;margin-top:6px;min-height:18px;"></div>
+    </div>
+    <div class="lm-actions">
+      ${l.action ? `<a class="lm-action-link" href="${l.action.url}">⚡ ${l.action.label}</a>` : ''}
+      <button class="btn-complete ${isDone ? 'is-done' : ''}" id="btn-complete" onclick="completeLesson()">
+        ${isDone ? '✓ Lesson completed' : 'Mark lesson complete'}
+      </button>
+    </div>
+  `;
+  document.getElementById('lesson-overlay').classList.add('open');
+}
+
+function answerQuiz(btn, picked, correct) {
+  document.querySelectorAll('.quiz-opt').forEach(b => {
+    b.disabled = true;
+    const i = Number(b.dataset.i);
+    if (i === correct) b.classList.add('right');
+    else if (i === picked) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('quiz-feedback');
+  fb.textContent = picked === correct
+    ? '✓ Correct — that\'s the guru mindset.'
+    : '✗ Not quite — the highlighted answer is the one to remember.';
+  fb.style.color = picked === correct ? 'var(--green)' : 'var(--red)';
+}
+
+function completeLesson() {
+  if (!currentLesson) return;
+  const g = loadGuru();
+  if (!g.completed[currentLesson.id]) {
+    g.completed[currentLesson.id] = Date.now();
+    saveGuru(g);
+    if (window.auditLog) auditLog('learn', GURU_KEY, 'Completed lesson: ' + currentLesson.title);
+  }
+  const btn = document.getElementById('btn-complete');
+  btn.textContent = '✓ Lesson completed';
+  btn.classList.add('is-done');
+  renderAll();
+}
+
+function closeLesson() {
+  document.getElementById('lesson-overlay').classList.remove('open');
+  currentLesson = null;
+}
+
+function continueLearning() {
+  const g = loadGuru();
+  const next = LESSONS.find(l => !g.completed[l.id]);
+  if (next) openLesson(next.id);
+  else showGuruTab('milestones');
+}
+
+/* ════════════════════════════════════════════════
+   FINANCIAL HEALTH SCORE — computed from real data
+════════════════════════════════════════════════ */
+function computeHealth() {
+  const g = loadGuru();
+  const now = new Date();
+  const monthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+  const expenses  = readJSON('vpc_personal_expenses_v1', []);
+  const recurring = readJSON('vpc_recurring_expenses_v1', []);
+  const budget    = readJSON('vpc_expense_budget_v1', { total: 0 });
+  const orders    = readJSON('vp_orders_v2', []);
+  const goals     = (readJSON('goals_dashboard_v1', { goals: [] }).goals) || [];
+
+  const spentMonth = expenses.filter(e => (e.date || '').startsWith(monthPrefix)).reduce((s, e) => s + (e.amount || 0), 0);
+  const weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate() - 7);
+  const loggedThisWeek = expenses.some(e => e.date && new Date(e.date + 'T00:00:00') >= weekAgo);
+  const recurringTotal = recurring.reduce((s, r) => s + (r.amount || 0), 0);
+
+  const totalRev  = orders.reduce((s, o) => s + (o.salePrice || 0), 0);
+  const totalCogs = orders.reduce((s, o) => s + (o.cogs || 0), 0);
+  const margin    = totalRev > 0 ? (totalRev - totalCogs) / totalRev * 100 : 0;
+  const salesThisMonth = orders.some(o => (o.date || '').startsWith(monthPrefix));
+
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const activeGoals  = goals.filter(x => !x.done);
+  const datedGoals   = activeGoals.filter(x => x.due);
+  const overdueGoals = activeGoals.filter(x => x.due && new Date(x.due + 'T00:00:00') < today);
+
+  const doneLessons = Object.keys(loadGuru().completed).length;
+
+  const comp = [];
+
+  // 1 · Budget set — 10
+  comp.push({
+    icon: '🎯', name: 'Monthly budget set', max: 10,
+    pts: budget.total > 0 ? 10 : 0,
+    tip: budget.total > 0 ? `Budget of ${fmt$(budget.total)} is active.` : 'Set a monthly budget in Expenses — even a rough number creates accountability.',
+    url: 'expenses.html',
+  });
+
+  // 2 · Within budget — 15 (scaled down as you exceed)
+  let wbPts = 0, wbTip;
+  if (budget.total <= 0) { wbTip = 'Needs a budget first — set one and these points unlock.'; }
+  else if (spentMonth <= budget.total) { wbPts = 15; wbTip = `On track: ${fmt$(spentMonth)} of ${fmt$(budget.total)} used.`; }
+  else {
+    const overPct = (spentMonth / budget.total - 1) * 100;
+    wbPts = Math.max(0, Math.round(15 - overPct / 4));
+    wbTip = `Over budget by ${Math.round(overPct)}% — freeze one category for the rest of the month to recover points.`;
+  }
+  comp.push({ icon: '💸', name: 'Spending within budget', max: 15, pts: wbPts, tip: wbTip, url: 'expenses.html' });
+
+  // 3 · Logging habit — 10
+  comp.push({
+    icon: '🧾', name: 'Expenses logged this week', max: 10,
+    pts: loggedThisWeek ? 10 : 0,
+    tip: loggedThisWeek ? 'Logging habit is alive — awareness before control.' : 'No expenses logged in 7 days. Log as you spend; ten seconds per entry.',
+    url: 'expenses.html',
+  });
+
+  // 4 · Recurring bills tracked & sane — 10
+  let recPts = 0, recTip;
+  if (!recurring.length) { recTip = 'Add your recurring bills so the fixed-cost load is visible (and auditable).'; }
+  else if (budget.total > 0 && recurringTotal > budget.total * 0.5) {
+    recPts = 4;
+    recTip = `Recurring bills are ${Math.round(recurringTotal / budget.total * 100)}% of budget — above the 50% comfort line. Time for a subscription audit.`;
+  } else { recPts = 10; recTip = `${recurring.length} recurring bill${recurring.length > 1 ? 's' : ''} tracked (${fmt$(recurringTotal)}/mo) — fixed load under control.`; }
+  comp.push({ icon: '🔄', name: 'Recurring bills tracked', max: 10, pts: recPts, tip: recTip, url: 'expenses.html' });
+
+  // 5 · Sales logged this month — 10
+  comp.push({
+    icon: '💵', name: 'Sales logged this month', max: 10,
+    pts: salesThisMonth ? 10 : 0,
+    tip: salesThisMonth ? 'Sales data is flowing — your analytics stay honest.' : 'No sales logged this month. Log every sale the same day, even cash ones.',
+    url: 'vault-pine-collective.html',
+  });
+
+  // 6 · Gross margin — 15 (scaled to 40% target)
+  let mgPts = 0, mgTip;
+  if (!orders.length) { mgTip = 'No orders with cost data yet — log sales with COGS to measure margin.'; }
+  else {
+    mgPts = Math.min(15, Math.round(margin / 40 * 15));
+    mgTip = margin >= 40
+      ? `Gross margin ${margin.toFixed(1)}% — at or above the 40% health line.`
+      : `Gross margin ${margin.toFixed(1)}% — below the 40% target. Check pricing or COGS accuracy.`;
+  }
+  comp.push({ icon: '📈', name: 'Gross margin ≥ 40%', max: 15, pts: mgPts, tip: mgTip, url: 'analytics.html' });
+
+  // 7 · Goal hygiene — 10
+  let glPts = 0;
+  if (activeGoals.length) glPts += 4;
+  if (activeGoals.length && datedGoals.length === activeGoals.length) glPts += 3;
+  if (activeGoals.length && !overdueGoals.length) glPts += 3;
+  const glTip = !activeGoals.length
+    ? 'No active goals. Set one 90-day goal with a number and a date.'
+    : overdueGoals.length
+      ? `${overdueGoals.length} overdue — re-date or close them; a goal without a live deadline is a wish.`
+      : datedGoals.length < activeGoals.length
+        ? `${activeGoals.length - datedGoals.length} goal${activeGoals.length - datedGoals.length > 1 ? 's' : ''} missing a deadline — add dates to create urgency.`
+        : 'Goals are active, dated, and none overdue. Textbook hygiene.';
+  comp.push({ icon: '🥅', name: 'Goal hygiene', max: 10, pts: glPts, tip: glTip, url: 'goals-dashboard.html' });
+
+  // 8 · Academy progress — 20
+  comp.push({
+    icon: '📚', name: 'Guru Academy progress', max: 20,
+    pts: Math.round(doneLessons / LESSONS.length * 20),
+    tip: doneLessons === LESSONS.length ? 'Full curriculum complete — Financial Guru.' : `${doneLessons} of ${LESSONS.length} lessons done. Each lesson is 2–3 minutes.`,
+    url: 'guru.html',
+  });
+
+  const score = comp.reduce((s, c) => s + c.pts, 0);
+  return { score, comp };
+}
+
+function gradeFor(score) {
+  if (score >= 95) return { name: 'Financial Guru', icon: '🥋', color: '#a78bfa', line: 'Full mastery — your money runs on systems, not stress.' };
+  if (score >= 80) return { name: 'Money Master',   icon: '🏆', color: '#34d399', line: 'Strong fundamentals everywhere. Polish the last details.' };
+  if (score >= 60) return { name: 'Practitioner',   icon: '💪', color: '#6c8cff', line: 'Solid habits forming. The score rows below show your next points.' };
+  if (score >= 40) return { name: 'Student',        icon: '📖', color: '#fbbf24', line: 'Foundations are appearing. Focus on budget + logging consistency.' };
+  return { name: 'Apprentice', icon: '🌱', color: '#f87171', line: 'Everyone starts here. Two quick wins: set a budget, log this week\'s expenses.' };
+}
+
+function renderHealth() {
+  const { score, comp } = computeHealth();
+  const grade = gradeFor(score);
+
+  // Ring
+  const C = 402.1; // 2πr, r=64
+  const ring = document.getElementById('ring-fill');
+  ring.style.stroke = grade.color;
+  requestAnimationFrame(() => { ring.style.strokeDashoffset = (C - C * score / 100).toFixed(1); });
+
+  // Count-up score
+  const el = document.getElementById('ring-score');
+  const start = performance.now();
+  (function frame(now) {
+    const t = Math.min(1, (now - start) / 900);
+    el.textContent = Math.round(score * (1 - Math.pow(1 - t, 3)));
+    if (t < 1) requestAnimationFrame(frame);
+  })(start);
+
+  document.getElementById('hero-grade').innerHTML =
+    `${grade.icon} You are a <strong style="color:${grade.color}">${grade.name}</strong> — ${grade.line}`;
+
+  // Breakdown rows
+  document.getElementById('score-breakdown').innerHTML = comp.map(c => `
+    <div class="score-row">
+      <div class="score-icon">${c.icon}</div>
+      <div class="score-info">
+        <div class="score-name">${c.name}</div>
+        <div class="score-tip">${c.tip} <a href="${c.url}" style="color:var(--accent);text-decoration:none;">Open →</a></div>
+      </div>
+      <div class="score-pts" style="color:${c.pts >= c.max ? 'var(--green)' : c.pts > 0 ? 'var(--yellow)' : 'var(--text2)'}">
+        ${c.pts}<small> / ${c.max}</small>
+      </div>
+    </div>`).join('');
+}
+
+/* ════════════════════════════════════════════════
+   MILESTONES — earned automatically from data
+════════════════════════════════════════════════ */
+function computeMilestones() {
+  const g = loadGuru();
+  const expenses  = readJSON('vpc_personal_expenses_v1', []);
+  const recurring = readJSON('vpc_recurring_expenses_v1', []);
+  const budget    = readJSON('vpc_expense_budget_v1', { total: 0 });
+  const orders    = readJSON('vp_orders_v2', []);
+  const jt        = readJSON('vp_jettags_v1', []);
+  const pins      = readJSON('vp_pins_v1', []);
+  const goals     = (readJSON('goals_dashboard_v1', { goals: [] }).goals) || [];
+
+  const totalRev  = orders.reduce((s, o) => s + (o.salePrice || 0), 0)
+                  + jt.reduce((s, x) => s + (x.revenue || 0), 0)
+                  + pins.reduce((s, x) => s + (x.revenue || 0), 0);
+  const totalCogs = orders.reduce((s, o) => s + (o.cogs || 0), 0);
+  const ordRev    = orders.reduce((s, o) => s + (o.salePrice || 0), 0);
+  const margin    = ordRev > 0 ? (ordRev - totalCogs) / ordRev * 100 : 0;
+
+  const now = new Date();
+  const lm = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lmPrefix = `${lm.getFullYear()}-${String(lm.getMonth() + 1).padStart(2, '0')}`;
+  const lastMonthSpent = expenses.filter(e => (e.date || '').startsWith(lmPrefix)).reduce((s, e) => s + (e.amount || 0), 0);
+
+  const doneLessons = Object.keys(g.completed).length;
+
+  return [
+    { ico: '🌱', name: 'First Dollar Tracked', how: 'Log your first expense',                          ok: expenses.length >= 1 },
+    { ico: '🧾', name: 'Ten in the Books',     how: 'Log 10 expenses',                                 ok: expenses.length >= 10 },
+    { ico: '🎯', name: 'Budget Boss',          how: 'Set a monthly budget',                            ok: budget.total > 0 },
+    { ico: '🛡️', name: 'Month Under Budget',  how: 'Finish a full month under budget',                ok: budget.total > 0 && lastMonthSpent > 0 && lastMonthSpent <= budget.total },
+    { ico: '💵', name: 'First Sale',           how: 'Log your first sale',                             ok: orders.length >= 1 },
+    { ico: '🏆', name: '$1K Club',             how: 'Reach $1,000 all-time revenue',                   ok: totalRev >= 1000 },
+    { ico: '📈', name: 'Margin Master',        how: 'Hold 40%+ gross margin across 5+ orders',         ok: orders.length >= 5 && margin >= 40 },
+    { ico: '🔄', name: 'Bill Watcher',         how: 'Track at least one recurring bill',               ok: recurring.length >= 1 },
+    { ico: '✅', name: 'Goal Getter',          how: 'Complete your first goal',                        ok: goals.some(x => x.done) },
+    { ico: '📚', name: 'First Lesson',         how: 'Complete a Guru Academy lesson',                  ok: doneLessons >= 1 },
+    { ico: '🥋', name: 'Belt Earned',          how: 'Complete every lesson in one belt',               ok: beltsEarned(g) >= 1 },
+    { ico: '🧠', name: 'Financial Guru',       how: 'Complete all 25 Academy lessons',                 ok: doneLessons >= LESSONS.length },
+  ];
+}
+
+function renderMilestones() {
+  const miles = computeMilestones();
+  document.getElementById('mile-grid').innerHTML = miles.map(m => `
+    <div class="mile ${m.ok ? 'earned' : 'locked'}">
+      <div class="mile-ico">${m.ico}</div>
+      <div class="mile-name">${m.name}</div>
+      <div class="mile-how">${m.how}</div>
+      <div class="mile-tag">${m.ok ? '★ Earned' : 'Locked'}</div>
+    </div>`).join('');
+  return miles.filter(m => m.ok).length;
+}
+
+/* ════════════════════════════════════════════════
+   TOOLS / CALCULATORS
+════════════════════════════════════════════════ */
+function calcBreakEven() {
+  const fixed  = parseFloat(document.getElementById('be-fixed').value);
+  const profit = parseFloat(document.getElementById('be-profit').value);
+  const el = document.getElementById('be-result');
+  if (!fixed || !profit || profit <= 0) { el.innerHTML = 'Enter both numbers to see your break-even point.'; return; }
+  const units = Math.ceil(fixed / profit);
+  el.innerHTML = `You break even at <span class="big">${units} items</span><br>
+    Item #${units + 1} onward is pure profit. Selling ${Math.ceil(units * 1.5)} would net you <b>${fmt$(Math.ceil(units * 1.5) * profit - fixed)}</b> after costs.`;
+}
+
+function calcMargin() {
+  const price = parseFloat(document.getElementById('pm-price').value);
+  const cost  = parseFloat(document.getElementById('pm-cost').value);
+  const el = document.getElementById('pm-result');
+  if (!price || isNaN(cost) || price <= 0) { el.innerHTML = 'Enter price and cost to see your margin.'; return; }
+  const margin = (price - cost) / price * 100;
+  const markup = cost > 0 ? (price - cost) / cost * 100 : 0;
+  const verdict = margin >= 60 ? '💪 Excellent — premium territory.'
+    : margin >= 40 ? '✅ Healthy — right in the 40–60% target zone.'
+    : margin >= 30 ? '⚡ Workable, but thin. Consider a price test.'
+    : '🚨 Danger zone — this price barely covers making the thing.';
+  el.innerHTML = `Gross margin: <span class="big">${margin.toFixed(1)}%</span> &nbsp; <b>${fmt$(price - cost)}</b> kept per sale<br>
+    Markup on cost: <b>${markup.toFixed(0)}%</b><br>${verdict}`;
+}
+
+function calcFund() {
+  const monthly = parseFloat(document.getElementById('ef-monthly').value);
+  const months  = parseFloat(document.getElementById('ef-months').value) || 3;
+  const saved   = parseFloat(document.getElementById('ef-saved').value) || 0;
+  const el = document.getElementById('ef-result');
+  if (!monthly || monthly <= 0) { el.innerHTML = 'Enter your essentials to get a target.'; return; }
+  const target = monthly * months;
+  const pct = Math.min(100, saved / target * 100);
+  const gap = Math.max(0, target - saved);
+  el.innerHTML = `Target: <span class="big">${fmt$(target)}</span> (${months} months of cover)<br>
+    Progress: <b>${pct.toFixed(0)}%</b> — ${gap > 0 ? `<b>${fmt$(gap)}</b> to go. At $50/week that's ~${Math.ceil(gap / 50 / 4.33)} months.` : 'fully funded. 🛡️'}
+    <div style="height:6px;background:rgba(255,255,255,0.07);border-radius:3px;margin-top:9px;overflow:hidden;">
+      <div style="height:100%;width:${pct}%;background:var(--green);border-radius:3px;transition:width .5s;"></div>
+    </div>`;
+}
+
+function calcSplit() {
+  const income = parseFloat(document.getElementById('fs-income').value);
+  const el = document.getElementById('fs-result');
+  if (!income || income <= 0) { el.innerHTML = 'Enter income to see your suggested split.'; return; }
+  el.innerHTML = `
+    🏠 Needs (50%): <b>${fmt$(income * 0.5)}</b> — housing, food, utilities, transport<br>
+    🎉 Wants (30%): <b>${fmt$(income * 0.3)}</b> — guilt-free by design<br>
+    💰 Savings (20%): <span class="big">${fmt$(income * 0.2)}</span> — pay yourself first`;
+}
+
+function renderSubAudit() {
+  const recurring = readJSON('vpc_recurring_expenses_v1', []);
+  const el = document.getElementById('sub-audit');
+  if (!recurring.length) {
+    el.innerHTML = `<div class="tool-result">No recurring bills logged yet.
+      <a href="expenses.html" style="color:var(--accent);text-decoration:none;">Add them in Expenses →</a>
+      and this audit will show their true annual cost automatically.</div>`;
+    return;
+  }
+  const rows = recurring.slice().sort((a, b) => (b.amount || 0) - (a.amount || 0));
+  const monthly = rows.reduce((s, r) => s + (r.amount || 0), 0);
+  el.innerHTML = `
+    <table class="sub-table">
+      <thead><tr><th>Bill</th><th class="num">Monthly</th><th class="num">Yearly</th></tr></thead>
+      <tbody>${rows.map(r => `
+        <tr><td>${r.name || r.category || 'Recurring'}</td>
+        <td class="num">${fmt$(r.amount || 0)}</td>
+        <td class="num" style="color:var(--yellow);font-weight:700">${fmt$((r.amount || 0) * 12)}</td></tr>`).join('')}
+      </tbody>
+    </table>
+    <div class="tool-result" style="margin-top:14px;">
+      Total fixed load: <b>${fmt$(monthly)}/mo</b> = <span class="big">${fmt$(monthly * 12)}/yr</span><br>
+      Sensei's test: for each line, would you re-subscribe today at the yearly price? If not — cancel it this week.</div>`;
+}
+
+/* ════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════ */
+function renderAll() {
+  const g = loadGuru();
+  renderAcademy();
+  renderHealth();
+  const earnedMiles = renderMilestones();
+  renderSubAudit();
+
+  const done = Object.keys(g.completed).length;
+  const belts = beltsEarned(g);
+  document.getElementById('hs-lessons').textContent = `${done}/${LESSONS.length}`;
+  document.getElementById('hs-belts').textContent   = `${belts}/${BELTS.length}`;
+  document.getElementById('hs-miles').textContent   = `${earnedMiles}/12`;
+
+  // Rank chip = highest belt earned
+  let rank = 'Novice';
+  for (const b of BELTS) {
+    if (beltDone(b.id, g) === beltLessons(b.id).length) rank = b.name;
+  }
+  document.getElementById('rank-chip').textContent = `🥋 ${rank}`;
+
+  const next = LESSONS.find(l => !g.completed[l.id]);
+  document.getElementById('btn-continue').textContent = next
+    ? (done === 0 ? '▶ Start Lesson 1: ' + next.title.slice(0, 26) + (next.title.length > 26 ? '…' : '') : '▶ Continue Learning')
+    : '🥋 Curriculum complete — review Milestones';
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLesson(); });
+
+renderAll();
+
+// Deep-link: guru.html#tools opens the Tools tab
+if (location.hash === '#tools') showGuruTab('tools');
+
+// supabase-sync.js calls window.renderAll() after pulling fresh cloud data,
+// so lesson progress synced from another device re-renders automatically.
+</script>
+</body>
+</html>

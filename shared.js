@@ -17,6 +17,7 @@ const DASH_NAV = [
   ['events.html',                '🎪', 'Events'],
   ['content.html',               '📱', 'Content'],
   ['review.html',                '📋', 'Review'],
+  ['guru.html',                  '🥋', 'Guru'],
 ];
 
 function injectDashNav() {
@@ -142,6 +143,7 @@ function buildSearchIndex() {
     { title: 'Goals & Objectives', sub: 'Track your goals', url: 'goals-dashboard.html', icon: '🎯', type: 'Page' },
     { title: 'Personal Expenses', sub: 'Track monthly spending & budget', url: 'expenses.html', icon: '💸', type: 'Page' },
     { title: 'Daily Review', sub: 'Morning briefing — goals, expenses, alerts', url: 'review.html', icon: '📋', type: 'Page' },
+    { title: 'Financial Guru', sub: 'Academy lessons, health score, milestones, calculators', url: 'guru.html', icon: '🥋', type: 'Page' },
   ].forEach(p => results.push(p));
   return results;
 }
@@ -249,6 +251,7 @@ document.addEventListener('keydown', e => {
     case 'v': e.preventDefault(); location.href = 'events.html'; break;
     case 'c': e.preventDefault(); location.href = 'content.html'; break;
     case 'r': e.preventDefault(); location.href = 'review.html'; break;
+    case 'u': e.preventDefault(); location.href = 'guru.html'; break;
   }
 });
 
@@ -268,6 +271,7 @@ function showShortcutsPanel() {
     ['v', 'Events'],
     ['c', 'Content Planner'],
     ['r', 'Daily Review'],
+    ['u', 'Financial Guru'],
     ['Ctrl+K', 'Global Search'],
     ['Ctrl+L', 'Audit Log'],
     ['?', 'This shortcuts panel'],
@@ -526,6 +530,7 @@ const SENSEI_PAGE_MAP = {
   'content.html':               'content',
   'review.html':                'general',
   'index.html':                 'general',
+  'guru.html':                  'general',
 };
 
 function injectSenseiPanel() {

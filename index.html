@@ -305,6 +305,7 @@ footer a { color: var(--accent); text-decoration: none; }
   <a href="events.html" class="dash-nav-link">🎪 Events</a>
   <a href="content.html" class="dash-nav-link">📱 Content</a>
   <a href="review.html" class="dash-nav-link">📋 Review</a>
+  <a href="guru.html" class="dash-nav-link">🥋 Guru</a>
 </nav>
 
 <section class="hero">
@@ -461,8 +462,8 @@ footer a { color: var(--accent); text-decoration: none; }
       </div>
     </a>
 
-    <!-- Production · 3x2 -->
-    <a class="tile span-6x2" href="production.html" style="--tile-accent:var(--c-prod);">
+    <!-- Production · 4x2 -->
+    <a class="tile span-4x2" href="production.html" style="--tile-accent:var(--c-prod);">
       <div class="tile-orb"></div>
       <div class="tile-head">
         <div class="tile-icon">🖨️</div>
@@ -475,8 +476,8 @@ footer a { color: var(--accent); text-decoration: none; }
       </div>
     </a>
 
-    <!-- Content · 6x2 -->
-    <a class="tile span-6x2" href="content.html" style="--tile-accent:var(--c-content);">
+    <!-- Content · 4x2 -->
+    <a class="tile span-4x2" href="content.html" style="--tile-accent:var(--c-content);">
       <div class="tile-orb"></div>
       <div class="tile-head">
         <div class="tile-icon">📱</div>
@@ -486,6 +487,21 @@ footer a { color: var(--accent); text-decoration: none; }
       <div class="tile-desc">Announcements, drops, and spotlights — calendar and queue.</div>
       <div class="tile-foot">
         <span class="tile-arrow">Open Planner <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
+      </div>
+    </a>
+
+    <!-- Financial Guru · 4x2 -->
+    <a class="tile span-4x2" href="guru.html" style="--tile-accent:#a78bfa;">
+      <div class="tile-orb"></div>
+      <div class="tile-head">
+        <div class="tile-icon">🥋</div>
+        <div class="tile-badge" id="guru-badge">Academy</div>
+      </div>
+      <div class="tile-title">Financial Guru</div>
+      <div class="tile-desc">25-lesson money academy, health score, milestones, and calculators.</div>
+      <div class="tile-foot">
+        <span class="tile-arrow">Enter the Dojo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
+        <span class="tile-stat" id="guru-stat">—</span>
       </div>
     </a>
 
@@ -508,6 +524,7 @@ footer a { color: var(--accent); text-decoration: none; }
         <div style="flex-shrink:0;display:flex;flex-direction:column;gap:6px;justify-content:center;">
           <button onclick="senseiHomePrev()" style="background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.2);color:#a78bfa;padding:6px 12px;border-radius:8px;font-size:0.72rem;cursor:pointer;font-family:inherit;min-height:unset;transition:all .15s;" onmouseover="this.style.background='rgba(167,139,250,0.18)'" onmouseout="this.style.background='rgba(167,139,250,0.08)'">← Prev</button>
           <button onclick="senseiHomeNext()" style="background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.2);color:#a78bfa;padding:6px 12px;border-radius:8px;font-size:0.72rem;cursor:pointer;font-family:inherit;min-height:unset;transition:all .15s;" onmouseover="this.style.background='rgba(167,139,250,0.18)'" onmouseout="this.style.background='rgba(167,139,250,0.08)'">Next →</button>
+          <a href="guru.html" style="text-align:center;background:#a78bfa;color:#14101f;padding:6px 12px;border-radius:8px;font-size:0.72rem;font-weight:800;text-decoration:none;box-shadow:0 2px 12px rgba(167,139,250,0.3);transition:all .15s;" onmouseover="this.style.boxShadow='0 4px 18px rgba(167,139,250,0.5)'" onmouseout="this.style.boxShadow='0 2px 12px rgba(167,139,250,0.3)'">🥋 Academy</a>
         </div>
       </div>
     </div>
@@ -667,6 +684,14 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
       b.textContent = `⚠ ${overdue.length} overdue`;
       b.style.color = 'var(--yellow)'; b.style.borderColor = 'rgba(251,191,36,0.3)'; b.style.background = 'rgba(251,191,36,0.08)';
     }
+  } catch(e) {}
+
+  // Financial Guru — lesson progress
+  try {
+    const guru = JSON.parse(localStorage.getItem('vpc_guru_v1') || '{"completed":{}}');
+    const doneLessons = Object.keys(guru.completed || {}).length;
+    document.getElementById('guru-stat').innerHTML = `<strong>${doneLessons}/25</strong> lessons`;
+    if (doneLessons === 0) document.getElementById('guru-badge').textContent = 'New';
   } catch(e) {}
 
   // Events
