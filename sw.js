@@ -1,8 +1,9 @@
-const CACHE = 'vpc-v4';
+const CACHE = 'vpc-v5';
 const ASSETS = [
   '/', '/index.html', '/vault-pine-collective.html',
   '/sales-dashboard.html', '/goals-dashboard.html',
   '/expenses.html', '/events.html', '/review.html', '/analytics.html',
+  '/production.html', '/content.html', '/guru.html',
   '/shared.js', '/supabase-sync.js', '/styles.css', '/manifest.json'
 ];
 

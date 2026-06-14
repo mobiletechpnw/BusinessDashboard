@@ -59,6 +59,11 @@ const SYNC_KEYS = [
   'riser_filament_v1',
   'vpc_costs_v1',
 
+  // ── Financial Guru — Academy progress, net worth, income ─
+  'vpc_guru_v1',
+  'vpc_networth_v1',
+  'vpc_income_v1',
+
   // ── Audit log ───────────────────────────────────────────
   'vpc_audit_log',
 
