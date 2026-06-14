@@ -134,6 +134,69 @@
 
   .empty-msg { color: var(--text2); font-size: 0.82rem; padding: 12px 0; text-align: center; }
 
+  /* ── Weekly Money Ritual ── */
+  .ritual-card {
+    background: linear-gradient(160deg, rgba(167,139,250,0.08) 0%, rgba(108,142,255,0.03) 60%);
+    border: 1px solid rgba(167,139,250,0.25);
+    position: relative; overflow: hidden;
+  }
+  .ritual-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 14px; }
+  .ritual-title { font-size: 1.05rem; font-weight: 900; letter-spacing: -0.3px; }
+  .ritual-sub { font-size: 0.74rem; color: var(--text2); margin-top: 3px; line-height: 1.5; max-width: 540px; }
+  .streak-badge {
+    display: flex; flex-direction: column; align-items: center; flex-shrink: 0;
+    background: rgba(251,146,60,0.1); border: 1px solid rgba(251,146,60,0.3);
+    border-radius: 14px; padding: 8px 16px; font-size: 1.35rem; font-weight: 900; color: var(--orange);
+    line-height: 1; font-variant-numeric: tabular-nums;
+  }
+  .streak-badge small { font-size: 0.55rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text2); margin-top: 4px; }
+  .ritual-progress { height: 5px; background: rgba(255,255,255,0.07); border-radius: 3px; overflow: hidden; margin-bottom: 14px; }
+  .ritual-progress-fill { height: 100%; width: 0; border-radius: 3px; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width 0.4s ease; }
+
+  .ritual-step {
+    display: flex; align-items: center; gap: 12px; padding: 11px 12px;
+    border-radius: 10px; transition: background 0.12s; cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .ritual-step:hover { background: rgba(255,255,255,0.03); }
+  .ritual-step.done { background: rgba(52,211,153,0.06); border-color: rgba(52,211,153,0.18); }
+  .step-check {
+    width: 22px; height: 22px; border-radius: 7px; flex-shrink: 0;
+    border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; color: #07211a; transition: all 0.15s;
+  }
+  .ritual-step.done .step-check { background: var(--green); border-color: var(--green); }
+  .step-icon { font-size: 1.1rem; flex-shrink: 0; }
+  .step-body { flex: 1; min-width: 0; }
+  .step-label { font-size: 0.86rem; font-weight: 700; }
+  .ritual-step.done .step-label { text-decoration: line-through; color: var(--text2); }
+  .step-sub { font-size: 0.72rem; color: var(--text2); margin-top: 2px; }
+  .step-link {
+    flex-shrink: 0; font-size: 0.72rem; font-weight: 700; text-decoration: none;
+    color: var(--accent2); background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.25);
+    border-radius: 8px; padding: 6px 12px; white-space: nowrap; transition: all 0.15s;
+  }
+  .step-link:hover { background: rgba(167,139,250,0.22); }
+
+  .ritual-reflect { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--glass-border); }
+  .reflect-label { font-size: 0.7rem; font-weight: 700; color: var(--text2); margin-bottom: 8px; }
+  .reflect-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .reflect-row input {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text); padding: 9px 12px; font-size: 0.82rem; outline: none; font-family: inherit;
+    transition: border-color 0.15s;
+  }
+  .reflect-row input:focus { border-color: var(--accent2); }
+  .ritual-done-banner {
+    margin-top: 14px; background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.3);
+    border-radius: 12px; padding: 14px 16px; font-size: 0.86rem; color: var(--text); line-height: 1.55;
+  }
+  .ritual-done-banner b { color: var(--green); }
+  @media (max-width: 700px) {
+    .reflect-row { grid-template-columns: 1fr; }
+    .step-link { padding: 6px 10px; }
+  }
+
   @media (max-width: 700px) {
     header { padding: 0 12px; min-height: 52px; }
     main { padding: 14px 10px; }
@@ -188,6 +251,27 @@
   </div>
 
   <div class="review-grid">
+
+    <!-- ── WEEKLY MONEY RITUAL ── -->
+    <div class="panel section-full ritual-card" id="ritual-card">
+      <div class="ritual-head">
+        <div>
+          <div class="ritual-title">🥋 Weekly Money Ritual</div>
+          <div class="ritual-sub">The 15-minute habit that ties every tool together. Do it once a week — same day, every week.</div>
+        </div>
+        <div class="streak-badge" id="streak-badge" title="Consecutive weeks completed">🔥 <span id="streak-num">0</span><small>wk streak</small></div>
+      </div>
+      <div class="ritual-progress"><div class="ritual-progress-fill" id="ritual-progress-fill"></div></div>
+      <div id="ritual-steps"></div>
+      <div class="ritual-reflect" id="ritual-reflect">
+        <div class="reflect-label">✍️ Lock it in — one line each (optional)</div>
+        <div class="reflect-row">
+          <input type="text" id="reflect-win" placeholder="One win this week…" onchange="saveReflection()">
+          <input type="text" id="reflect-fix" placeholder="One thing to fix next week…" onchange="saveReflection()">
+        </div>
+      </div>
+      <div id="ritual-done-banner" class="ritual-done-banner" style="display:none"></div>
+    </div>
 
     <!-- ── ALERTS ── -->
     <div class="panel section-full" id="alerts-panel">
@@ -548,6 +632,180 @@ function renderObjectivesDue() {
   } catch(e) { el.innerHTML = '<div class="empty-msg">Could not load objectives.</div>'; }
 }
 
+// ════════════════════════════════════════════════
+//  WEEKLY MONEY RITUAL
+// ════════════════════════════════════════════════
+const RITUAL_KEY = 'vpc_ritual_v1';
+
+function isoWeek(d) {
+  const dt = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = dt.getUTCDay() || 7;
+  dt.setUTCDate(dt.getUTCDate() + 4 - day);
+  const yearStart = new Date(Date.UTC(dt.getUTCFullYear(), 0, 1));
+  const weekNo = Math.ceil((((dt - yearStart) / 86400000) + 1) / 7);
+  return dt.getUTCFullYear() + '-W' + String(weekNo).padStart(2, '0');
+}
+function weekStringOffset(n) { const d = new Date(); d.setDate(d.getDate() - n * 7); return isoWeek(d); }
+
+function loadRitual() {
+  let r;
+  try { r = JSON.parse(localStorage.getItem(RITUAL_KEY)); } catch(e) {}
+  if (!r || typeof r !== 'object') r = { completions: [], weekState: null, reflections: [] };
+  r.completions = r.completions || [];
+  r.reflections = r.reflections || [];
+  const wk = isoWeek(new Date());
+  if (!r.weekState || r.weekState.week !== wk) r.weekState = { week: wk, checked: {}, win: '', fix: '' };
+  return r;
+}
+function saveRitual(r) { localStorage.setItem(RITUAL_KEY, JSON.stringify(r)); }
+
+function computeStreak(completions) {
+  const set = new Set(completions);
+  let start = set.has(weekStringOffset(0)) ? 0 : (set.has(weekStringOffset(1)) ? 1 : null);
+  if (start === null) return 0;
+  let i = start, streak = 0;
+  while (set.has(weekStringOffset(i))) { streak++; i++; }
+  return streak;
+}
+
+function ritualSteps() {
+  const now = new Date();
+  const prefix = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  // live data for sublabels
+  let logSub = 'Catch anything you spent but didn\'t record', budgetSub = 'No budget set yet', marginSub = 'No sales data yet', goalsSub = 'No goals yet', nwSub = 'No net worth logged yet';
+  try {
+    const exps = JSON.parse(localStorage.getItem('vpc_personal_expenses_v1')||'[]');
+    const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate()-7);
+    const cnt = exps.filter(e => e.date && new Date(e.date+'T00:00:00') >= weekAgo).length;
+    logSub = `${cnt} expense${cnt!==1?'s':''} logged in the last 7 days`;
+    const budget = JSON.parse(localStorage.getItem('vpc_expense_budget_v1')||'{"total":0}').total;
+    const spent = exps.filter(e=>(e.date||'').startsWith(prefix)).reduce((s,e)=>s+(e.amount||0),0);
+    if (budget>0) budgetSub = `${Math.round(spent/budget*100)}% of ${fmt(budget)} budget used`;
+  } catch(e) {}
+  try {
+    const orders = JSON.parse(localStorage.getItem('vp_orders_v2')||'[]');
+    if (orders.length) {
+      const rev = orders.reduce((s,o)=>s+(o.salePrice||0),0), cogs = orders.reduce((s,o)=>s+(o.cogs||0),0);
+      const m = rev>0 ? (rev-cogs)/rev*100 : 0;
+      marginSub = `Current gross margin ${m.toFixed(0)}%`;
+    }
+  } catch(e) {}
+  try {
+    const g = JSON.parse(localStorage.getItem('goals_dashboard_v1')||'{"goals":[]}').goals||[];
+    const today = new Date(); today.setHours(0,0,0,0);
+    const active = g.filter(x=>!x.done);
+    const od = active.filter(x=>x.due && new Date(x.due+'T00:00:00')<today).length;
+    if (g.length) goalsSub = `${active.length} active${od?` · ${od} overdue`:''}`;
+  } catch(e) {}
+  try {
+    const nw = JSON.parse(localStorage.getItem('vpc_networth_v1')||'{"assets":[],"liabilities":[]}');
+    const a = (nw.assets||[]).reduce((s,x)=>s+(x.amount||0),0), l = (nw.liabilities||[]).reduce((s,x)=>s+(x.amount||0),0);
+    if ((nw.assets||[]).length||(nw.liabilities||[]).length) nwSub = `Net worth ${fmt(a-l)} — capture this week's number`;
+  } catch(e) {}
+
+  return [
+    { id:'log',      icon:'🧾', label:'Log any missed expenses',     sub:logSub,    link:'expenses.html',         linkLabel:'Open Expenses' },
+    { id:'budget',   icon:'💸', label:'Check your budget status',    sub:budgetSub, link:'expenses.html',         linkLabel:'Review' },
+    { id:'margin',   icon:'📈', label:'Glance at your profit margin',sub:marginSub, link:'analytics.html',        linkLabel:'Analytics' },
+    { id:'goals',    icon:'🎯', label:'Review goals & deadlines',    sub:goalsSub,  link:'goals-dashboard.html',  linkLabel:'Goals' },
+    { id:'snapshot', icon:'💰', label:'Save a net-worth snapshot',   sub:nwSub,     action:'snapshot',            linkLabel:'Save now' },
+  ];
+}
+
+function toggleRitualStep(id) {
+  const r = loadRitual();
+  r.weekState.checked[id] = !r.weekState.checked[id];
+  saveRitual(r);
+  renderRitual();
+}
+
+function ritualSaveSnapshot() {
+  let d;
+  try { d = JSON.parse(localStorage.getItem('vpc_networth_v1')); } catch(e) {}
+  if (!d || (!(d.assets||[]).length && !(d.liabilities||[]).length)) {
+    location.href = 'guru.html#networth'; return;
+  }
+  const a = (d.assets||[]).reduce((s,x)=>s+(x.amount||0),0), l = (d.liabilities||[]).reduce((s,x)=>s+(x.amount||0),0);
+  const today = new Date().toISOString().slice(0,10);
+  d.snapshots = (d.snapshots||[]).filter(s=>s.date!==today);
+  d.snapshots.push({ date: today, net: a - l });
+  d.snapshots.sort((x,y)=>x.date.localeCompare(y.date));
+  if (d.snapshots.length > 60) d.snapshots = d.snapshots.slice(-60);
+  localStorage.setItem('vpc_networth_v1', JSON.stringify(d));
+  const r = loadRitual(); r.weekState.checked['snapshot'] = true; saveRitual(r);
+  if (window.auditLog) auditLog('snapshot', 'vpc_networth_v1', `Net worth ${fmt(a-l)} (ritual)`);
+  showToast('📸 Snapshot saved — net worth ' + fmt(a - l));
+  renderRitual();
+}
+
+function saveReflection() {
+  const r = loadRitual();
+  r.weekState.win = $('reflect-win').value.trim();
+  r.weekState.fix = $('reflect-fix').value.trim();
+  saveRitual(r);
+}
+
+function showToast(msg) {
+  let t = document.getElementById('vpc-toast');
+  if (!t) { t = document.createElement('div'); t.id = 'vpc-toast'; t.className = 'toast'; document.body.appendChild(t); }
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(showToast._t); showToast._t = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+function renderRitual() {
+  const r = loadRitual();
+  const steps = ritualSteps();
+  const checked = r.weekState.checked;
+  const doneCount = steps.filter(s => checked[s.id]).length;
+  const allDone = doneCount === steps.length;
+
+  $('ritual-steps').innerHTML = steps.map(s => `
+    <div class="ritual-step ${checked[s.id] ? 'done' : ''}" onclick="toggleRitualStep('${s.id}')">
+      <div class="step-check">${checked[s.id] ? '✓' : ''}</div>
+      <div class="step-icon">${s.icon}</div>
+      <div class="step-body">
+        <div class="step-label">${s.label}</div>
+        <div class="step-sub">${s.sub}</div>
+      </div>
+      ${s.action === 'snapshot'
+        ? `<button class="step-link" onclick="event.stopPropagation();ritualSaveSnapshot()">${s.linkLabel}</button>`
+        : `<a class="step-link" href="${s.link}" onclick="event.stopPropagation()">${s.linkLabel} →</a>`}
+    </div>`).join('');
+
+  $('ritual-progress-fill').style.width = (doneCount / steps.length * 100) + '%';
+
+  // reflection inputs
+  $('reflect-win').value = r.weekState.win || '';
+  $('reflect-fix').value = r.weekState.fix || '';
+
+  // completion: record this week once all steps checked
+  const wk = r.weekState.week;
+  const justCompleted = allDone && !r.completions.includes(wk);
+  if (justCompleted) {
+    r.completions.push(wk);
+    r.reflections = (r.reflections || []).filter(x => x.week !== wk);
+    r.reflections.push({ week: wk, win: r.weekState.win || '', fix: r.weekState.fix || '', ts: Date.now() });
+    if (r.reflections.length > 26) r.reflections = r.reflections.slice(-26);
+    saveRitual(r);
+    if (window.auditLog) auditLog('ritual', RITUAL_KEY, 'Completed weekly money ritual ' + wk);
+    showToast('🥋 Weekly ritual complete — streak ' + computeStreak(r.completions) + '!');
+  }
+
+  const streak = computeStreak(r.completions);
+  $('streak-num').textContent = streak;
+
+  const banner = $('ritual-done-banner');
+  if (r.completions.includes(wk)) {
+    banner.style.display = 'block';
+    banner.innerHTML = `<b>✓ This week's ritual is done.</b> ${streak > 1 ? `That's <b>${streak} weeks</b> in a row — this is exactly how financial discipline compounds.` : 'First week down. Come back next week to start a streak.'} Reviewed ${r.completions.length} week${r.completions.length>1?'s':''} total.`;
+  } else {
+    banner.style.display = 'block';
+    banner.style.background = 'rgba(108,142,255,0.06)';
+    banner.style.borderColor = 'rgba(108,142,255,0.22)';
+    banner.innerHTML = `<b style="color:var(--accent)">${doneCount}/${steps.length} steps done.</b> Finish all five to log this week${streak ? ` and keep your ${streak}-week streak alive 🔥` : ' and start your streak 🔥'}.`;
+  }
+}
+
 // ── NARRATE ──
 let isNarrating = false;
 function toggleNarrate() {
@@ -604,6 +862,7 @@ function toggleNarrate() {
 
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', () => {
+  renderRitual();
   renderAlerts();
   renderGoals();
   renderExpenses();
@@ -611,7 +870,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderEvents();
   renderObjectivesDue();
 });
-window.renderAll = () => { renderAlerts(); renderGoals(); renderExpenses(); renderRevenue(); renderEvents(); renderObjectivesDue(); };
+window.renderAll = () => { renderRitual(); renderAlerts(); renderGoals(); renderExpenses(); renderRevenue(); renderEvents(); renderObjectivesDue(); };
 </script>
 </body>
 </html>
