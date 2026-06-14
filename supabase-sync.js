@@ -63,6 +63,7 @@ const SYNC_KEYS = [
   'vpc_guru_v1',
   'vpc_networth_v1',
   'vpc_income_v1',
+  'vpc_ritual_v1',
 
   // ── Audit log ───────────────────────────────────────────
   'vpc_audit_log',
