@@ -192,6 +192,60 @@
   .btn-complete { background: var(--green); color: #07211a; font-weight: 800; }
   .btn-complete.is-done { background: rgba(52,211,153,0.15); color: var(--green); border: 1px solid rgba(52,211,153,0.35); cursor: default; }
 
+  /* ── Net Worth ── */
+  .nw-top { display: grid; grid-template-columns: 280px 1fr; gap: 16px; margin-bottom: 16px; }
+  .nw-summary {
+    background: linear-gradient(160deg, rgba(52,211,153,0.07) 0%, rgba(255,255,255,0.01) 60%);
+    border: 1px solid rgba(52,211,153,0.2); border-radius: 18px; padding: 22px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .nw-label { font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text2); }
+  .nw-big { font-size: 2.4rem; font-weight: 900; letter-spacing: -1.5px; line-height: 1.05; margin: 6px 0 4px; font-variant-numeric: tabular-nums; }
+  .nw-delta { font-size: 0.74rem; font-weight: 700; min-height: 18px; }
+  .nw-delta.up { color: var(--green); } .nw-delta.down { color: var(--red); }
+  .nw-split { display: flex; gap: 18px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--glass-border); font-size: 0.72rem; color: var(--text2); }
+  .nw-split b { display: block; color: var(--text); font-size: 0.92rem; font-weight: 800; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .nw-chart-wrap {
+    background: linear-gradient(160deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+    border: 1px solid var(--glass-border); border-radius: 18px; padding: 18px 20px;
+    display: flex; flex-direction: column;
+  }
+  .nw-chart-head { display: flex; align-items: center; justify-content: space-between; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--text2); margin-bottom: 8px; }
+  .btn-snapshot { background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.3); color: var(--accent2); border-radius: 8px; padding: 5px 12px; font-size: 0.7rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .btn-snapshot:hover { background: rgba(167,139,250,0.2); }
+  #nw-chart { width: 100%; height: 130px; display: block; flex: 1; }
+  .nw-chart-hint { font-size: 0.68rem; color: var(--text2); text-align: center; margin-top: 6px; }
+
+  .nw-income-card {
+    display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+    background: linear-gradient(160deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+    border: 1px solid var(--glass-border); border-radius: 16px; padding: 18px 20px; margin-bottom: 16px;
+  }
+  .nw-rate { font-size: 0.78rem; font-weight: 800; white-space: nowrap; min-width: 110px; text-align: right; }
+
+  .nw-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .nw-col {
+    background: linear-gradient(160deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.008) 100%);
+    border: 1px solid var(--glass-border); border-radius: 16px; padding: 16px 18px;
+  }
+  .nw-col-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 0.84rem; font-weight: 800; }
+  .nw-col-head small { font-size: 0.64rem; font-weight: 500; color: var(--text2); text-transform: none; letter-spacing: 0; margin-left: 4px; }
+  .nw-add { background: var(--surface2); border: 1px solid var(--border); color: var(--text2); border-radius: 8px; padding: 5px 12px; font-size: 0.72rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .nw-add:hover { border-color: var(--accent); color: var(--accent); }
+  .nw-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--glass-border); }
+  .nw-row:last-child { border-bottom: none; }
+  .nw-row-name { flex: 1; font-size: 0.82rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .nw-row-amt { font-size: 0.84rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .nw-row-del { background: none; border: none; color: var(--text2); cursor: pointer; font-size: 0.8rem; padding: 2px 5px; min-height: unset; opacity: 0.5; font-family: inherit; transition: opacity 0.15s; }
+  .nw-row-del:hover { opacity: 1; color: var(--red); }
+  .nw-empty { font-size: 0.74rem; color: var(--text2); padding: 14px 0; text-align: center; }
+  .nw-chip { background: rgba(108,142,255,0.08); border: 1px solid rgba(108,142,255,0.22); color: var(--accent); border-radius: 20px; padding: 4px 11px; font-size: 0.7rem; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .nw-chip:hover { background: rgba(108,142,255,0.18); }
+
+  @media (max-width: 760px) {
+    .nw-top { grid-template-columns: 1fr; }
+    .nw-cols { grid-template-columns: 1fr; }
+  }
   @media (max-width: 700px) {
     main { padding: 16px 14px 32px; }
     .guru-hero { grid-template-columns: 1fr; text-align: center; padding: 22px 18px; }
@@ -254,6 +308,7 @@
   <div class="guru-tabs">
     <button class="gtab active" data-tab="academy"    onclick="showGuruTab('academy')">📚 Academy</button>
     <button class="gtab" data-tab="health"     onclick="showGuruTab('health')">💪 Health Score</button>
+    <button class="gtab" data-tab="networth"   onclick="showGuruTab('networth')">💰 Net Worth</button>
     <button class="gtab" data-tab="milestones" onclick="showGuruTab('milestones')">🏆 Milestones</button>
     <button class="gtab" data-tab="tools"      onclick="showGuruTab('tools')">🧮 Tools</button>
   </div>
@@ -266,6 +321,64 @@
       Each row below shows exactly how to earn the missing points.
     </p>
     <div id="score-breakdown"></div>
+  </div>
+
+  <div class="panel" id="panel-networth">
+    <!-- Net worth summary + trend -->
+    <div class="nw-top">
+      <div class="nw-summary">
+        <div class="nw-label">Your Net Worth</div>
+        <div class="nw-big" id="nw-total">$0</div>
+        <div class="nw-delta" id="nw-delta"></div>
+        <div class="nw-split">
+          <div><span style="color:var(--green)">●</span> Assets <b id="nw-assets-tot">$0</b></div>
+          <div><span style="color:var(--red)">●</span> Debts <b id="nw-liab-tot">$0</b></div>
+        </div>
+      </div>
+      <div class="nw-chart-wrap">
+        <div class="nw-chart-head">
+          <span>Net Worth Trend</span>
+          <button class="btn-snapshot" onclick="takeSnapshot()">📸 Save snapshot</button>
+        </div>
+        <canvas id="nw-chart"></canvas>
+        <div class="nw-chart-hint" id="nw-chart-hint"></div>
+      </div>
+    </div>
+
+    <!-- Income / savings rate -->
+    <div class="nw-income-card">
+      <div style="flex:1;min-width:200px;">
+        <div class="tool-title" style="margin-bottom:2px;">💵 Monthly Take-Home Income</div>
+        <div class="tool-why" style="margin-bottom:0;">Set this once and your savings rate, 50/30/20 split, and emergency-fund math all become real — not hypothetical.</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="field" style="margin:0;">
+          <input type="number" id="nw-income" placeholder="e.g. 3000" style="width:140px;" onchange="saveIncome(this.value)">
+        </div>
+        <div class="nw-rate" id="nw-savings-rate"></div>
+      </div>
+    </div>
+
+    <!-- Assets & Liabilities columns -->
+    <div class="nw-cols">
+      <div class="nw-col">
+        <div class="nw-col-head">
+          <span>🟢 Assets <small>what you own</small></span>
+          <button class="nw-add" onclick="openNwItem('asset')">+ Add</button>
+        </div>
+        <div id="nw-asset-list"></div>
+      </div>
+      <div class="nw-col">
+        <div class="nw-col-head">
+          <span>🔴 Liabilities <small>what you owe</small></span>
+          <button class="nw-add" onclick="openNwItem('liability')">+ Add</button>
+        </div>
+        <div id="nw-liab-list"></div>
+      </div>
+    </div>
+    <p style="font-size:0.68rem;color:var(--text2);line-height:1.6;margin-top:16px;">
+      💡 Sensei: net worth is the true scoreboard — income is a snapshot, this is the movie. Update it monthly and save a snapshot to watch the line climb. Include business cash, equipment, and inventory value as assets.
+    </p>
   </div>
 
   <div class="panel" id="panel-milestones">
@@ -324,6 +437,26 @@
 <!-- ── Lesson modal ── -->
 <div class="modal-overlay" id="lesson-overlay" onclick="if(event.target===this)closeLesson()">
   <div class="modal lesson-modal" id="lesson-modal"></div>
+</div>
+
+<!-- ── Net worth item modal ── -->
+<div class="modal-overlay" id="nw-overlay" onclick="if(event.target===this)closeNwItem()">
+  <div class="modal" style="width:380px;">
+    <h2 id="nw-modal-title">Add Asset</h2>
+    <div class="field">
+      <label id="nw-name-label">Name</label>
+      <input type="text" id="nw-item-name" placeholder="e.g. Savings account">
+    </div>
+    <div class="field">
+      <label>Amount ($)</label>
+      <input type="number" id="nw-item-amount" placeholder="0">
+    </div>
+    <div id="nw-suggest" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeNwItem()">Cancel</button>
+      <button class="btn-primary" onclick="saveNwItem()">Save</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -619,6 +752,8 @@ function readJSON(key, fallback) {
 function showGuruTab(id) {
   document.querySelectorAll('.gtab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
   document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + id));
+  // Canvas needs a laid-out container to size correctly — redraw on reveal
+  if (id === 'networth') { const d = loadNw(); drawNwChart(d.snapshots || []); }
 }
 
 /* ════════════════════════════════════════════════
@@ -767,6 +902,7 @@ function computeHealth() {
   const overdueGoals = activeGoals.filter(x => x.due && new Date(x.due + 'T00:00:00') < today);
 
   const doneLessons = Object.keys(loadGuru().completed).length;
+  const nw = nwTotals();
 
   const comp = [];
 
@@ -778,16 +914,16 @@ function computeHealth() {
     url: 'expenses.html',
   });
 
-  // 2 · Within budget — 15 (scaled down as you exceed)
+  // 2 · Within budget — 12 (scaled down as you exceed)
   let wbPts = 0, wbTip;
   if (budget.total <= 0) { wbTip = 'Needs a budget first — set one and these points unlock.'; }
-  else if (spentMonth <= budget.total) { wbPts = 15; wbTip = `On track: ${fmt$(spentMonth)} of ${fmt$(budget.total)} used.`; }
+  else if (spentMonth <= budget.total) { wbPts = 12; wbTip = `On track: ${fmt$(spentMonth)} of ${fmt$(budget.total)} used.`; }
   else {
     const overPct = (spentMonth / budget.total - 1) * 100;
-    wbPts = Math.max(0, Math.round(15 - overPct / 4));
+    wbPts = Math.max(0, Math.round(12 - overPct / 5));
     wbTip = `Over budget by ${Math.round(overPct)}% — freeze one category for the rest of the month to recover points.`;
   }
-  comp.push({ icon: '💸', name: 'Spending within budget', max: 15, pts: wbPts, tip: wbTip, url: 'expenses.html' });
+  comp.push({ icon: '💸', name: 'Spending within budget', max: 12, pts: wbPts, tip: wbTip, url: 'expenses.html' });
 
   // 3 · Logging habit — 10
   comp.push({
@@ -797,14 +933,14 @@ function computeHealth() {
     url: 'expenses.html',
   });
 
-  // 4 · Recurring bills tracked & sane — 10
+  // 4 · Recurring bills tracked & sane — 8
   let recPts = 0, recTip;
   if (!recurring.length) { recTip = 'Add your recurring bills so the fixed-cost load is visible (and auditable).'; }
   else if (budget.total > 0 && recurringTotal > budget.total * 0.5) {
-    recPts = 4;
+    recPts = 3;
     recTip = `Recurring bills are ${Math.round(recurringTotal / budget.total * 100)}% of budget — above the 50% comfort line. Time for a subscription audit.`;
-  } else { recPts = 10; recTip = `${recurring.length} recurring bill${recurring.length > 1 ? 's' : ''} tracked (${fmt$(recurringTotal)}/mo) — fixed load under control.`; }
-  comp.push({ icon: '🔄', name: 'Recurring bills tracked', max: 10, pts: recPts, tip: recTip, url: 'expenses.html' });
+  } else { recPts = 8; recTip = `${recurring.length} recurring bill${recurring.length > 1 ? 's' : ''} tracked (${fmt$(recurringTotal)}/mo) — fixed load under control.`; }
+  comp.push({ icon: '🔄', name: 'Recurring bills tracked', max: 8, pts: recPts, tip: recTip, url: 'expenses.html' });
 
   // 5 · Sales logged this month — 10
   comp.push({
@@ -814,16 +950,16 @@ function computeHealth() {
     url: 'vault-pine-collective.html',
   });
 
-  // 6 · Gross margin — 15 (scaled to 40% target)
+  // 6 · Gross margin — 12 (scaled to 40% target)
   let mgPts = 0, mgTip;
   if (!orders.length) { mgTip = 'No orders with cost data yet — log sales with COGS to measure margin.'; }
   else {
-    mgPts = Math.min(15, Math.round(margin / 40 * 15));
+    mgPts = Math.min(12, Math.round(margin / 40 * 12));
     mgTip = margin >= 40
       ? `Gross margin ${margin.toFixed(1)}% — at or above the 40% health line.`
       : `Gross margin ${margin.toFixed(1)}% — below the 40% target. Check pricing or COGS accuracy.`;
   }
-  comp.push({ icon: '📈', name: 'Gross margin ≥ 40%', max: 15, pts: mgPts, tip: mgTip, url: 'analytics.html' });
+  comp.push({ icon: '📈', name: 'Gross margin ≥ 40%', max: 12, pts: mgPts, tip: mgTip, url: 'analytics.html' });
 
   // 7 · Goal hygiene — 10
   let glPts = 0;
@@ -839,10 +975,26 @@ function computeHealth() {
         : 'Goals are active, dated, and none overdue. Textbook hygiene.';
   comp.push({ icon: '🥅', name: 'Goal hygiene', max: 10, pts: glPts, tip: glTip, url: 'goals-dashboard.html' });
 
-  // 8 · Academy progress — 20
+  // 8 · Net worth tracked — 10
+  let nwPts = 0;
+  const nwItems = nw.data.assets.length + nw.data.liabilities.length;
+  const nwSnaps = (nw.data.snapshots || []).length;
+  if (nwItems > 0) nwPts += 4;
+  if (nwSnaps >= 2) nwPts += 3;
+  if (nwItems > 0 && nw.net > 0) nwPts += 3;
+  const nwTip = nwItems === 0
+    ? 'Add your assets and debts in the Net Worth tab to see the true scoreboard.'
+    : nwSnaps < 2
+      ? `Net worth ${fmt$(nw.net)}. Save a monthly snapshot to start your trend line (+3 pts at 2 snapshots).`
+      : nw.net <= 0
+        ? `Net worth is ${fmt$(nw.net)}. Chip away at liabilities — the trend matters more than the number.`
+        : `Net worth ${fmt$(nw.net)} and climbing across ${nwSnaps} snapshots. This is mastery.`;
+  comp.push({ icon: '💰', name: 'Net worth tracked', max: 10, pts: nwPts, tip: nwTip, url: 'guru.html' });
+
+  // 9 · Academy progress — 18
   comp.push({
-    icon: '📚', name: 'Guru Academy progress', max: 20,
-    pts: Math.round(doneLessons / LESSONS.length * 20),
+    icon: '📚', name: 'Guru Academy progress', max: 18,
+    pts: Math.round(doneLessons / LESSONS.length * 18),
     tip: doneLessons === LESSONS.length ? 'Full curriculum complete — Financial Guru.' : `${doneLessons} of ${LESSONS.length} lessons done. Each lesson is 2–3 minutes.`,
     url: 'guru.html',
   });
@@ -921,6 +1073,9 @@ function computeMilestones() {
   const lastMonthSpent = expenses.filter(e => (e.date || '').startsWith(lmPrefix)).reduce((s, e) => s + (e.amount || 0), 0);
 
   const doneLessons = Object.keys(g.completed).length;
+  const nw = nwTotals();
+  const nwSnaps = (nw.data.snapshots || []).length;
+  const income = loadIncome();
 
   return [
     { ico: '🌱', name: 'First Dollar Tracked', how: 'Log your first expense',                          ok: expenses.length >= 1 },
@@ -932,6 +1087,10 @@ function computeMilestones() {
     { ico: '📈', name: 'Margin Master',        how: 'Hold 40%+ gross margin across 5+ orders',         ok: orders.length >= 5 && margin >= 40 },
     { ico: '🔄', name: 'Bill Watcher',         how: 'Track at least one recurring bill',               ok: recurring.length >= 1 },
     { ico: '✅', name: 'Goal Getter',          how: 'Complete your first goal',                        ok: goals.some(x => x.done) },
+    { ico: '💰', name: 'Net Worth Known',      how: 'Log your assets &amp; liabilities',               ok: (nw.data.assets.length + nw.data.liabilities.length) >= 1 },
+    { ico: '📊', name: 'Trend Tracker',        how: 'Save 2+ net-worth snapshots',                     ok: nwSnaps >= 2 },
+    { ico: '🟢', name: 'In the Green',         how: 'Reach a positive net worth',                      ok: (nw.data.assets.length + nw.data.liabilities.length) >= 1 && nw.net > 0 },
+    { ico: '🧭', name: 'Income Mapped',        how: 'Set your monthly take-home income',               ok: income > 0 },
     { ico: '📚', name: 'First Lesson',         how: 'Complete a Guru Academy lesson',                  ok: doneLessons >= 1 },
     { ico: '🥋', name: 'Belt Earned',          how: 'Complete every lesson in one belt',               ok: beltsEarned(g) >= 1 },
     { ico: '🧠', name: 'Financial Guru',       how: 'Complete all 25 Academy lessons',                 ok: doneLessons >= LESSONS.length },
@@ -1030,20 +1189,195 @@ function renderSubAudit() {
 }
 
 /* ════════════════════════════════════════════════
+   NET WORTH TRACKER
+════════════════════════════════════════════════ */
+const NW_KEY     = 'vpc_networth_v1';
+const INCOME_KEY = 'vpc_income_v1';
+
+function loadNw() {
+  const d = readJSON(NW_KEY, null);
+  if (d && typeof d === 'object') return { assets: d.assets || [], liabilities: d.liabilities || [], snapshots: d.snapshots || [] };
+  return { assets: [], liabilities: [], snapshots: [] };
+}
+function saveNw(d) { localStorage.setItem(NW_KEY, JSON.stringify(d)); }
+function loadIncome() { return Number(readJSON(INCOME_KEY, { monthly: 0 }).monthly) || 0; }
+
+function nwTotals() {
+  const d = loadNw();
+  const a = d.assets.reduce((s, x) => s + (x.amount || 0), 0);
+  const l = d.liabilities.reduce((s, x) => s + (x.amount || 0), 0);
+  return { assets: a, liabilities: l, net: a - l, data: d };
+}
+
+const ASSET_SUGGEST = ['Cash / Checking', 'Savings account', 'Business cash', 'Equipment', 'Inventory value', 'Emergency fund'];
+const LIAB_SUGGEST  = ['Credit card', 'Loan', 'Buy-now-pay-later', 'Owed to supplier'];
+
+let nwEditKind = 'asset';
+
+function openNwItem(kind) {
+  nwEditKind = kind;
+  document.getElementById('nw-modal-title').textContent = kind === 'asset' ? 'Add Asset' : 'Add Liability';
+  document.getElementById('nw-name-label').textContent  = kind === 'asset' ? 'Asset name' : 'Liability name';
+  document.getElementById('nw-item-name').value = '';
+  document.getElementById('nw-item-amount').value = '';
+  const sugg = kind === 'asset' ? ASSET_SUGGEST : LIAB_SUGGEST;
+  document.getElementById('nw-suggest').innerHTML = sugg.map(s =>
+    `<button class="nw-chip" onclick="document.getElementById('nw-item-name').value='${s}';document.getElementById('nw-item-amount').focus()">${s}</button>`
+  ).join('');
+  document.getElementById('nw-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('nw-item-name').focus(), 50);
+}
+function closeNwItem() { document.getElementById('nw-overlay').classList.remove('open'); }
+
+function saveNwItem() {
+  const name = document.getElementById('nw-item-name').value.trim();
+  const amount = parseFloat(document.getElementById('nw-item-amount').value);
+  if (!name || isNaN(amount)) { closeNwItem(); return; }
+  const d = loadNw();
+  const item = { id: Date.now() + '' + Math.floor(Math.random() * 999), name, amount };
+  if (nwEditKind === 'asset') d.assets.push(item); else d.liabilities.push(item);
+  saveNw(d);
+  if (window.auditLog) auditLog('add', NW_KEY, `${nwEditKind}: ${name} ${fmt$(amount)}`);
+  closeNwItem();
+  renderNetWorth(); renderHealth();
+}
+
+function deleteNwItem(kind, id) {
+  const d = loadNw();
+  if (kind === 'asset') d.assets = d.assets.filter(x => x.id !== id);
+  else d.liabilities = d.liabilities.filter(x => x.id !== id);
+  saveNw(d);
+  renderNetWorth(); renderHealth();
+}
+
+function takeSnapshot() {
+  const { net } = nwTotals();
+  const d = loadNw();
+  const today = new Date().toISOString().slice(0, 10);
+  d.snapshots = (d.snapshots || []).filter(s => s.date !== today); // one per day
+  d.snapshots.push({ date: today, net });
+  d.snapshots.sort((a, b) => a.date.localeCompare(b.date));
+  if (d.snapshots.length > 60) d.snapshots = d.snapshots.slice(-60);
+  saveNw(d);
+  if (window.auditLog) auditLog('snapshot', NW_KEY, `Net worth ${fmt$(net)}`);
+  renderNetWorth();
+}
+
+function saveIncome(v) {
+  const monthly = parseFloat(v) || 0;
+  localStorage.setItem(INCOME_KEY, JSON.stringify({ monthly }));
+  renderNetWorth(); renderHealth();
+}
+
+function drawNwChart(snapshots) {
+  const c = document.getElementById('nw-chart');
+  if (!c) return;
+  const hint = document.getElementById('nw-chart-hint');
+  const w = c.offsetWidth * 2, h = 260;
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0, 0, w, h);
+
+  if (!snapshots || snapshots.length < 2) {
+    hint.textContent = snapshots && snapshots.length === 1
+      ? 'One snapshot saved — save another next month to start the trend line.'
+      : 'Save your first snapshot to begin tracking the trend.';
+    return;
+  }
+  hint.textContent = `${snapshots.length} snapshots · ${snapshots[0].date} → ${snapshots[snapshots.length-1].date}`;
+
+  const vals = snapshots.map(s => s.net);
+  const min = Math.min(...vals, 0), max = Math.max(...vals, 1);
+  const pad = 16, range = (max - min) || 1;
+  const step = (w - pad * 2) / (snapshots.length - 1);
+  const pts = vals.map((v, i) => [pad + i * step, h - pad - ((v - min) / range) * (h - pad * 2)]);
+
+  // zero line
+  const zeroY = h - pad - ((0 - min) / range) * (h - pad * 2);
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1; ctx.setLineDash([5, 5]);
+  ctx.beginPath(); ctx.moveTo(pad, zeroY); ctx.lineTo(w - pad, zeroY); ctx.stroke(); ctx.setLineDash([]);
+
+  // area
+  const grad = ctx.createLinearGradient(0, 0, 0, h);
+  grad.addColorStop(0, 'rgba(52,211,153,0.3)'); grad.addColorStop(1, 'rgba(52,211,153,0)');
+  ctx.beginPath(); ctx.moveTo(pts[0][0], h - pad);
+  pts.forEach(p => ctx.lineTo(p[0], p[1])); ctx.lineTo(pts[pts.length-1][0], h - pad); ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
+
+  // line
+  ctx.beginPath(); pts.forEach((p, i) => i === 0 ? ctx.moveTo(p[0], p[1]) : ctx.lineTo(p[0], p[1]));
+  ctx.strokeStyle = '#34d399'; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.stroke();
+
+  // end dot
+  const [lx, ly] = pts[pts.length - 1];
+  ctx.beginPath(); ctx.arc(lx, ly, 5, 0, Math.PI * 2);
+  ctx.fillStyle = '#fff'; ctx.shadowBlur = 12; ctx.shadowColor = '#34d399'; ctx.fill(); ctx.shadowBlur = 0;
+}
+
+function renderNetWorth() {
+  const { assets, liabilities, net, data } = nwTotals();
+
+  document.getElementById('nw-total').textContent      = (net < 0 ? '-' : '') + fmt$(net);
+  document.getElementById('nw-total').style.color      = net >= 0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('nw-assets-tot').textContent = fmt$(assets);
+  document.getElementById('nw-liab-tot').textContent   = fmt$(liabilities);
+
+  // delta vs previous snapshot
+  const snaps = data.snapshots || [];
+  const deltaEl = document.getElementById('nw-delta');
+  if (snaps.length >= 1) {
+    const prev = snaps[snaps.length - 1].net;
+    const diff = net - prev;
+    if (Math.abs(diff) < 0.5) { deltaEl.textContent = `No change since last snapshot (${snaps[snaps.length-1].date})`; deltaEl.className = 'nw-delta'; }
+    else { deltaEl.textContent = `${diff > 0 ? '↑' : '↓'} ${fmt$(diff)} since ${snaps[snaps.length-1].date}`; deltaEl.className = 'nw-delta ' + (diff > 0 ? 'up' : 'down'); }
+  } else { deltaEl.textContent = 'Save a snapshot to track changes over time'; deltaEl.className = 'nw-delta'; }
+
+  // lists
+  const renderList = (items, kind) => items.length
+    ? items.map(x => `
+      <div class="nw-row">
+        <span class="nw-row-name">${x.name}</span>
+        <span class="nw-row-amt" style="color:${kind === 'asset' ? 'var(--green)' : 'var(--red)'}">${fmt$(x.amount)}</span>
+        <button class="nw-row-del" onclick="deleteNwItem('${kind}','${x.id}')" title="Remove">✕</button>
+      </div>`).join('')
+    : `<div class="nw-empty">Nothing added yet${kind === 'asset' ? ' — add cash, savings, equipment…' : ' — add cards, loans…'}</div>`;
+  document.getElementById('nw-asset-list').innerHTML = renderList(data.assets, 'asset');
+  document.getElementById('nw-liab-list').innerHTML  = renderList(data.liabilities, 'liability');
+
+  // income + savings rate
+  const income = loadIncome();
+  const incEl = document.getElementById('nw-income');
+  if (document.activeElement !== incEl) incEl.value = income || '';
+  const rateEl = document.getElementById('nw-savings-rate');
+  if (income > 0) {
+    const now = new Date();
+    const prefix = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    const spent = readJSON('vpc_personal_expenses_v1', []).filter(e => (e.date||'').startsWith(prefix)).reduce((s,e)=>s+(e.amount||0),0);
+    const saved = income - spent;
+    const rate = income > 0 ? (saved / income * 100) : 0;
+    rateEl.innerHTML = `<span style="color:${rate >= 20 ? 'var(--green)' : rate >= 0 ? 'var(--yellow)' : 'var(--red)'}">${rate.toFixed(0)}%</span><br><span style="font-size:0.6rem;font-weight:500;color:var(--text2)">savings rate</span>`;
+  } else { rateEl.innerHTML = ''; }
+
+  drawNwChart(snaps);
+}
+
+/* ════════════════════════════════════════════════
    INIT
 ════════════════════════════════════════════════ */
 function renderAll() {
   const g = loadGuru();
   renderAcademy();
   renderHealth();
+  renderNetWorth();
   const earnedMiles = renderMilestones();
   renderSubAudit();
 
   const done = Object.keys(g.completed).length;
   const belts = beltsEarned(g);
+  const totalMiles = computeMilestones().length;
   document.getElementById('hs-lessons').textContent = `${done}/${LESSONS.length}`;
   document.getElementById('hs-belts').textContent   = `${belts}/${BELTS.length}`;
-  document.getElementById('hs-miles').textContent   = `${earnedMiles}/12`;
+  document.getElementById('hs-miles').textContent   = `${earnedMiles}/${totalMiles}`;
 
   // Rank chip = highest belt earned
   let rank = 'Novice';
@@ -1058,7 +1392,7 @@ function renderAll() {
     : '🥋 Curriculum complete — review Milestones';
 }
 
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLesson(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeLesson(); closeNwItem(); } });
 
 renderAll();
 
