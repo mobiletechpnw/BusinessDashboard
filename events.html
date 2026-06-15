@@ -49,8 +49,15 @@ header { background:var(--surface); border-bottom:1px solid var(--border); paddi
 /* MAIN */
 main { padding:0 24px 24px; }
 
-/* MATRIX SCROLL WRAPPER — horizontal only if needed, table expands vertically */
-.table-scroll { overflow-x:auto; overflow-y:visible; border:1px solid var(--border); border-radius:var(--radius); }
+/* MATRIX SCROLL WRAPPER — hides scrollbar, table still swipe/trackpad scrollable */
+.table-scroll {
+  overflow-x:auto;
+  overflow-y:visible;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  scrollbar-width:none; /* Firefox */
+}
+.table-scroll::-webkit-scrollbar { display:none; } /* Chrome / Safari */
 
 /* MATRIX */
 .matrix { border-collapse:collapse; width:100%; }
