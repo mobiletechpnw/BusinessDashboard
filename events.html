@@ -12,9 +12,9 @@
 <script src="supabase-sync.js" defer></script>
 <title>Events &amp; Tables — VPC</title>
 <style>
-/* ── LAYOUT: full-viewport, no page scroll ── */
-html, body { height:100%; overflow:hidden; }
-body { display:flex; flex-direction:column; min-height:0; }
+/* ── LAYOUT: natural document flow, content expands ── */
+html, body { height:auto; overflow:auto; }
+body { display:block; }
 
 /* HEADER */
 header { background:var(--surface); border-bottom:1px solid var(--border); padding:0 24px; display:flex; align-items:center; justify-content:space-between; height:54px; flex-shrink:0; z-index:100; gap:12px; }
@@ -29,7 +29,7 @@ header { background:var(--surface); border-bottom:1px solid var(--border); paddi
 .back-link:hover { color:var(--accent); border-color:var(--accent); }
 
 /* STAT BAR — glassmorphism strip */
-.stat-bar { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; padding:12px 24px; background:transparent; flex-shrink:0; }
+.stat-bar { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; padding:12px 24px; background:transparent; }
 .stat-cell {
   background:rgba(255,255,255,.03);
   border:1px solid var(--border);
@@ -45,11 +45,11 @@ header { background:var(--surface); border-bottom:1px solid var(--border); paddi
 .stat-val { font-size:1.25rem; font-weight:800; letter-spacing:-.4px; line-height:1; }
 .stat-lbl { font-size:.62rem; color:var(--text2); text-transform:uppercase; letter-spacing:.6px; margin-top:5px; }
 
-/* MAIN — fills remaining height */
-main { flex:1; padding:0 24px 16px; min-height:0; display:flex; flex-direction:column; overflow:hidden; }
+/* MAIN */
+main { padding:0 24px 24px; }
 
-/* MATRIX SCROLL WRAPPER — fills available height */
-.table-scroll { overflow:auto; border:1px solid var(--border); border-radius:var(--radius); flex:1; min-height:0; max-height:100%; }
+/* MATRIX SCROLL WRAPPER — horizontal only if needed, table expands vertically */
+.table-scroll { overflow-x:auto; overflow-y:visible; border:1px solid var(--border); border-radius:var(--radius); }
 
 /* MATRIX */
 .matrix { border-collapse:collapse; width:100%; }
@@ -62,7 +62,7 @@ main { flex:1; padding:0 24px 16px; min-height:0; display:flex; flex-direction:c
   padding:10px 14px;
   font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--text2);
   white-space:nowrap; text-align:center;
-  position:sticky; top:0; z-index:10;
+  position:sticky; top:0; z-index:10; /* sticks within the scroll container */
 }
 .matrix thead th.th-corner {
   text-align:left; min-width:220px;
@@ -193,9 +193,6 @@ main { flex:1; padding:0 24px 16px; min-height:0; display:flex; flex-direction:c
 .ev-tab:hover { color:var(--text); background:rgba(255,255,255,.03); }
 .ev-tab.active { color:var(--accent); border-bottom-color:var(--accent); background:rgba(108,140,255,.05); }
 
-/* ROI panel scroll */
-#panel-roi { flex:1; min-height:0; overflow-y:auto; }
-
 /* ROI CARDS */
 .roi-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:16px; margin-top:4px; }
 .roi-card { background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:var(--radius); padding:20px; backdrop-filter:blur(8px); transition:border-color .2s, transform .2s; }
@@ -264,8 +261,8 @@ main { flex:1; padding:0 24px 16px; min-height:0; display:flex; flex-direction:c
 </div>
 
 <main>
-  <div id="panel-matrix" style="flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;">
-    <div id="matrix-wrap" style="flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;">
+  <div id="panel-matrix">
+    <div id="matrix-wrap">
     <div class="empty-state" id="empty-state">
       <div class="empty-icon">🗓️</div>
       <div class="empty-title" id="empty-title">No data yet</div>
