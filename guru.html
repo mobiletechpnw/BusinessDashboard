@@ -242,9 +242,53 @@
   .nw-chip { background: rgba(108,142,255,0.08); border: 1px solid rgba(108,142,255,0.22); color: var(--accent); border-radius: 20px; padding: 4px 11px; font-size: 0.7rem; cursor: pointer; font-family: inherit; transition: all 0.15s; }
   .nw-chip:hover { background: rgba(108,142,255,0.18); }
 
+  /* ── Monthly Report Card ── */
+  .report-hero {
+    display: flex; align-items: center; gap: 20px;
+    background: linear-gradient(160deg, rgba(108,142,255,0.08) 0%, rgba(255,255,255,0.01) 60%);
+    border: 1px solid rgba(108,142,255,0.2); border-radius: 18px;
+    padding: 22px 24px; margin-bottom: 18px;
+  }
+  .report-grade {
+    width: 84px; height: 84px; border-radius: 20px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.6rem; font-weight: 900; letter-spacing: -2px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+  }
+  .report-month { font-size: 1.2rem; font-weight: 900; letter-spacing: -0.4px; }
+  .report-verdict { font-size: 0.84rem; color: var(--text2); line-height: 1.6; margin-top: 6px; }
+  .report-rows { display: grid; gap: 10px; }
+  .report-row {
+    display: grid; grid-template-columns: 36px 1fr auto auto; gap: 14px; align-items: center;
+    background: linear-gradient(160deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.008) 100%);
+    border: 1px solid var(--glass-border); border-radius: 14px; padding: 13px 18px;
+  }
+  .rr-icon { font-size: 1.2rem; text-align: center; }
+  .rr-name { font-size: 0.84rem; font-weight: 700; }
+  .rr-sub { font-size: 0.7rem; color: var(--text2); margin-top: 2px; }
+  .rr-vals { text-align: right; }
+  .rr-now { font-size: 1.05rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .rr-prev { font-size: 0.64rem; color: var(--text2); }
+  .rr-delta { font-size: 0.8rem; font-weight: 800; white-space: nowrap; min-width: 78px; text-align: right; }
+  .rr-delta.up { color: var(--green); } .rr-delta.down { color: var(--red); } .rr-delta.flat { color: var(--text2); }
+  .report-pace {
+    margin-top: 18px; background: linear-gradient(160deg, rgba(167,139,250,0.06) 0%, rgba(255,255,255,0.01) 100%);
+    border: 1px solid rgba(167,139,250,0.18); border-radius: 14px; padding: 16px 18px;
+  }
+  .report-pace h4 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.7px; color: var(--accent2); margin-bottom: 12px; }
+  .pace-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 14px; }
+  .pace-val { font-size: 1.1rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .pace-lbl { font-size: 0.62rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.4px; margin-top: 3px; }
+
   @media (max-width: 760px) {
     .nw-top { grid-template-columns: 1fr; }
     .nw-cols { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    .report-row { grid-template-columns: 30px 1fr auto; row-gap: 4px; }
+    .rr-delta { grid-column: 2 / -1; text-align: left; min-width: 0; }
+    .report-grade { width: 66px; height: 66px; font-size: 2rem; }
+    .report-hero { gap: 14px; padding: 18px; }
   }
   @media (max-width: 700px) {
     main { padding: 16px 14px 32px; }
@@ -309,6 +353,7 @@
     <button class="gtab active" data-tab="academy"    onclick="showGuruTab('academy')">📚 Academy</button>
     <button class="gtab" data-tab="health"     onclick="showGuruTab('health')">💪 Health Score</button>
     <button class="gtab" data-tab="networth"   onclick="showGuruTab('networth')">💰 Net Worth</button>
+    <button class="gtab" data-tab="report"     onclick="showGuruTab('report')">📋 Report Card</button>
     <button class="gtab" data-tab="milestones" onclick="showGuruTab('milestones')">🏆 Milestones</button>
     <button class="gtab" data-tab="tools"      onclick="showGuruTab('tools')">🧮 Tools</button>
   </div>
@@ -378,6 +423,21 @@
     </div>
     <p style="font-size:0.68rem;color:var(--text2);line-height:1.6;margin-top:16px;">
       💡 Sensei: net worth is the true scoreboard — income is a snapshot, this is the movie. Update it monthly and save a snapshot to watch the line climb. Include business cash, equipment, and inventory value as assets.
+    </p>
+  </div>
+
+  <div class="panel" id="panel-report">
+    <div class="report-hero">
+      <div class="report-grade" id="report-grade">—</div>
+      <div class="report-hero-info">
+        <div class="report-month" id="report-month">Monthly Report Card</div>
+        <div class="report-verdict" id="report-verdict"></div>
+      </div>
+    </div>
+    <div class="report-rows" id="report-rows"></div>
+    <div class="report-pace" id="report-pace"></div>
+    <p style="font-size:0.68rem;color:var(--text2);line-height:1.6;margin-top:16px;">
+      💡 Sensei: a business you don't review is a business you don't run. This card compares your last full month to the one before it — revenue, spending, margin, net worth, and your health score — so you see the trend, not just today's number. Read it on the 1st of every month.
     </p>
   </div>
 
@@ -754,6 +814,7 @@ function showGuruTab(id) {
   document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + id));
   // Canvas needs a laid-out container to size correctly — redraw on reveal
   if (id === 'networth') { const d = loadNw(); drawNwChart(d.snapshots || []); }
+  if (id === 'report') renderReportCard();
 }
 
 /* ════════════════════════════════════════════════
@@ -1362,13 +1423,151 @@ function renderNetWorth() {
 }
 
 /* ════════════════════════════════════════════════
+   MONTHLY REPORT CARD — this month's intelligence
+════════════════════════════════════════════════ */
+function mPfx(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; }
+function monthLabel(d) { return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }); }
+
+function monthMetrics(prefix) {
+  const orders = readJSON('vp_orders_v2', []);
+  const jt = readJSON('vp_jettags_v1', []), pins = readJSON('vp_pins_v1', []);
+  const exps = readJSON('vpc_personal_expenses_v1', []);
+  const mo = orders.filter(o => (o.date || '').startsWith(prefix));
+  const orderRev = mo.reduce((s, o) => s + (o.salePrice || 0), 0);
+  const cogs = mo.reduce((s, o) => s + (o.cogs || 0), 0);
+  const revenue = orderRev
+    + jt.filter(x => (x.date || '').startsWith(prefix)).reduce((s, x) => s + (x.revenue || 0), 0)
+    + pins.filter(x => (x.date || '').startsWith(prefix)).reduce((s, x) => s + (x.revenue || 0), 0);
+  const expenses = exps.filter(e => (e.date || '').startsWith(prefix)).reduce((s, e) => s + (e.amount || 0), 0);
+  const margin = orderRev > 0 ? (orderRev - cogs) / orderRev * 100 : null;
+  const snaps = (readJSON('vpc_networth_v1', { snapshots: [] }).snapshots || []).filter(s => s.date.startsWith(prefix));
+  const netWorth = snaps.length ? snaps[snaps.length - 1].net : null;
+  const sh = (loadGuru().scoreHistory || []).find(h => h.month === prefix);
+  return { revenue, expenses, profit: orderRev - cogs, margin, netWorth, orders: mo.length, score: sh ? sh.score : null };
+}
+
+// Capture the current health score once per month so trends accumulate
+function captureMonthlyScore() {
+  const g = loadGuru();
+  g.scoreHistory = g.scoreHistory || [];
+  const month = mPfx(new Date());
+  const { score } = computeHealth();
+  const ex = g.scoreHistory.find(h => h.month === month);
+  if (ex) ex.score = score; else g.scoreHistory.push({ month, score });
+  g.scoreHistory.sort((a, b) => a.month.localeCompare(b.month));
+  if (g.scoreHistory.length > 24) g.scoreHistory = g.scoreHistory.slice(-24);
+  saveGuru(g);
+}
+
+function deltaCell(cur, prev, betterUp) {
+  if (cur === null || prev === null || cur === undefined || prev === undefined) {
+    return `<div class="rr-delta flat">— <span style="font-weight:500;font-size:0.62rem;color:var(--text2)">no prior</span></div>`;
+  }
+  const diff = cur - prev;
+  if (Math.abs(diff) < 0.5) return `<div class="rr-delta flat">→ flat</div>`;
+  const good = betterUp ? diff > 0 : diff < 0;
+  const arrow = diff > 0 ? '↑' : '↓';
+  const pct = prev !== 0 ? Math.round(Math.abs(diff) / Math.abs(prev) * 100) : null;
+  return `<div class="rr-delta ${good ? 'up' : 'down'}">${arrow} ${pct !== null ? pct + '%' : ''}</div>`;
+}
+
+function renderReportCard() {
+  const now = new Date();
+  const lastM = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const prevM = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+  const last = monthMetrics(mPfx(lastM));
+  const prev = monthMetrics(mPfx(prevM));
+  const cur  = monthMetrics(mPfx(now));
+
+  document.getElementById('report-month').textContent = monthLabel(lastM) + ' Report Card';
+
+  const gradeEl = document.getElementById('report-grade');
+  const verdictEl = document.getElementById('report-verdict');
+  const rowsEl = document.getElementById('report-rows');
+  const paceEl = document.getElementById('report-pace');
+
+  // This-month pace (always shown)
+  const dom = now.getDate(), dim = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const projRev = dom ? cur.revenue / dom * dim : 0;
+  const projExp = dom ? cur.expenses / dom * dim : 0;
+  paceEl.innerHTML = `
+    <h4>📅 ${monthLabel(now)} so far — day ${dom} of ${dim}</h4>
+    <div class="pace-grid">
+      <div><div class="pace-val" style="color:var(--green)">${fmt$(cur.revenue)}</div><div class="pace-lbl">Revenue · proj ${fmt$(projRev)}</div></div>
+      <div><div class="pace-val" style="color:var(--red)">${fmt$(cur.expenses)}</div><div class="pace-lbl">Spending · proj ${fmt$(projExp)}</div></div>
+      <div><div class="pace-val">${cur.margin === null ? '—' : cur.margin.toFixed(0) + '%'}</div><div class="pace-lbl">Margin so far</div></div>
+      <div><div class="pace-val">${cur.orders}</div><div class="pace-lbl">Orders so far</div></div>
+    </div>`;
+
+  const hasData = last.revenue > 0 || last.expenses > 0 || last.netWorth !== null;
+  if (!hasData) {
+    gradeEl.textContent = '🌱';
+    gradeEl.style.color = 'var(--green)';
+    verdictEl.innerHTML = `No full month of history yet for <b style="color:var(--text)">${monthLabel(lastM)}</b>. Your first real report card writes itself once a completed month is behind you — keep logging sales, expenses, and a monthly net-worth snapshot. The pace tracker below is already live.`;
+    rowsEl.innerHTML = '';
+    return;
+  }
+
+  const rows = [
+    { icon: '💵', name: 'Revenue',       sub: `${last.orders} order${last.orders !== 1 ? 's' : ''}`, cur: last.revenue,  prev: prev.revenue,  up: true,  fmt: fmt$ },
+    { icon: '💸', name: 'Expenses',      sub: 'Personal spending',                                   cur: last.expenses, prev: prev.expenses, up: false, fmt: fmt$ },
+    { icon: '📈', name: 'Profit Margin', sub: 'Gross, on orders',                                    cur: last.margin,   prev: prev.margin,   up: true,  fmt: v => v === null ? '—' : v.toFixed(0) + '%' },
+    { icon: '💰', name: 'Net Worth',     sub: 'End-of-month snapshot',                               cur: last.netWorth, prev: prev.netWorth, up: true,  fmt: v => v === null ? '—' : (v < 0 ? '-' : '') + fmt$(v) },
+    { icon: '💪', name: 'Health Score',  sub: 'Out of 100',                                          cur: last.score,    prev: prev.score,    up: true,  fmt: v => v === null ? '—' : v + '' },
+  ];
+
+  rowsEl.innerHTML = rows.map(r => `
+    <div class="report-row">
+      <div class="rr-icon">${r.icon}</div>
+      <div><div class="rr-name">${r.name}</div><div class="rr-sub">${r.sub}</div></div>
+      <div class="rr-vals">
+        <div class="rr-now">${r.fmt(r.cur)}</div>
+        <div class="rr-prev">${r.prev === null ? '' : 'was ' + r.fmt(r.prev)}</div>
+      </div>
+      ${deltaCell(r.cur, r.prev, r.up)}
+    </div>`).join('');
+
+  // Grade: fraction of compared metrics that improved
+  let pts = 0, tot = 0; const ups = [], downs = [];
+  rows.forEach(r => {
+    if (r.cur === null || r.prev === null) return;
+    if (Math.abs(r.cur - r.prev) < 0.5) { tot++; pts += 0.5; return; }
+    tot++;
+    const good = r.up ? r.cur > r.prev : r.cur < r.prev;
+    if (good) { pts++; ups.push(r.name.toLowerCase()); } else { downs.push(r.name.toLowerCase()); }
+  });
+  // Margin health bonus
+  if (last.margin !== null) { tot++; if (last.margin >= 40) pts++; }
+
+  const ratio = tot ? pts / tot : 0.5;
+  const grade = ratio >= 0.9 ? { l: 'A', c: '#34d399' } : ratio >= 0.72 ? { l: 'B', c: '#6c8cff' }
+    : ratio >= 0.52 ? { l: 'C', c: '#fbbf24' } : ratio >= 0.32 ? { l: 'D', c: '#fb923c' } : { l: 'F', c: '#f87171' };
+  gradeEl.textContent = grade.l;
+  gradeEl.style.color = grade.c;
+  gradeEl.style.background = `color-mix(in srgb, ${grade.c} 14%, transparent)`;
+  gradeEl.style.borderColor = `color-mix(in srgb, ${grade.c} 35%, transparent)`;
+
+  let verdict = '';
+  if (ups.length && downs.length) verdict = `Solid month with mixed signals: <b style="color:var(--green)">${ups.join(', ')}</b> improved, but <b style="color:var(--red)">${downs.join(', ')}</b> slipped. `;
+  else if (ups.length) verdict = `Strong month — <b style="color:var(--green)">${ups.join(', ')}</b> all moved the right way. `;
+  else if (downs.length) verdict = `Tough month — <b style="color:var(--red)">${downs.join(', ')}</b> went the wrong way. One fix at a time. `;
+  else verdict = `Steady month — numbers held flat versus ${monthLabel(prevM)}. `;
+  if (last.margin !== null && last.margin < 40) verdict += `Top priority: margin is ${last.margin.toFixed(0)}% — below the 40% line. Revisit pricing or COGS.`;
+  else if (downs.includes('expenses')) verdict += `Watch spending first — it has the fastest payback.`;
+  else verdict += `Keep the weekly ritual going; consistency is what compounds.`;
+  verdictEl.innerHTML = `<b style="color:${grade.c}">Grade ${grade.l}.</b> ${verdict}`;
+}
+
+/* ════════════════════════════════════════════════
    INIT
 ════════════════════════════════════════════════ */
 function renderAll() {
   const g = loadGuru();
+  captureMonthlyScore();
   renderAcademy();
   renderHealth();
   renderNetWorth();
+  renderReportCard();
   const earnedMiles = renderMilestones();
   renderSubAudit();
 
