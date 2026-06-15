@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0f1117">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <title>Event Calendar — Vault &amp; Pine Collective</title>
 <style>
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
@@ -21,202 +23,132 @@
   --radius:12px;
 }
 
-html { font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); }
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+html, body {
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+  max-width:100%;
+}
 
 body {
   min-height:100vh;
-  background:var(--bg);
   background-image:
     radial-gradient(ellipse 80% 50% at 20% 10%, rgba(108,140,255,.12) 0%, transparent 60%),
     radial-gradient(ellipse 60% 40% at 80% 80%, rgba(167,139,250,.08) 0%, transparent 60%);
 }
 
 /* ── HEADER ── */
-.page-header {
-  text-align:center;
-  padding:48px 24px 32px;
-}
-.logo {
-  display:inline-flex;
-  align-items:center;
-  gap:10px;
-  margin-bottom:20px;
-}
-.logo-icon {
-  width:44px; height:44px;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  border-radius:12px;
-  display:flex; align-items:center; justify-content:center;
-  font-size:1.3rem;
-}
-.logo-name {
-  font-size:1.2rem;
-  font-weight:800;
-  letter-spacing:-.3px;
-}
+.page-header { text-align:center; padding:40px 20px 28px; }
+.logo { display:inline-flex; align-items:center; gap:10px; margin-bottom:16px; }
+.logo-icon { width:42px; height:42px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; }
+.logo-name { font-size:1.1rem; font-weight:800; letter-spacing:-.3px; }
 .logo-name span { color:var(--accent); }
-.page-title { font-size:2rem; font-weight:800; letter-spacing:-.5px; margin-bottom:8px; }
-.page-sub { font-size:.9rem; color:var(--text2); line-height:1.6; max-width:480px; margin:0 auto 28px; }
-.header-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+.page-title { font-size:1.8rem; font-weight:800; letter-spacing:-.5px; margin-bottom:6px; }
+.page-sub { font-size:.85rem; color:var(--text2); line-height:1.6; max-width:440px; margin:0 auto 22px; }
+.header-actions { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
 
 /* ── BUTTONS ── */
-.btn-primary {
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  color:#fff; border:none; border-radius:9px; padding:10px 22px;
-  font-size:.85rem; font-weight:700; cursor:pointer; transition:all .2s;
-  box-shadow:0 2px 14px rgba(108,140,255,.35); white-space:nowrap;
-}
-.btn-primary:hover { opacity:.9; transform:translateY(-1px); box-shadow:0 4px 20px rgba(108,140,255,.5); }
-.btn-ghost {
-  background:rgba(255,255,255,.04); border:1px solid var(--border);
-  border-radius:9px; padding:9px 20px; font-size:.85rem; font-weight:600;
-  color:var(--text2); cursor:pointer; transition:all .15s; white-space:nowrap;
-  backdrop-filter:blur(8px);
-}
-.btn-ghost:hover { border-color:var(--accent); color:var(--accent); background:rgba(108,140,255,.06); }
+.btn-primary { background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff; border:none; border-radius:8px; padding:9px 20px; font-size:.82rem; font-weight:700; cursor:pointer; transition:all .2s; box-shadow:0 2px 12px rgba(108,140,255,.3); white-space:nowrap; }
+.btn-primary:hover { opacity:.9; transform:translateY(-1px); }
+.btn-ghost { background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:8px; padding:8px 18px; font-size:.82rem; font-weight:600; color:var(--text2); cursor:pointer; transition:all .15s; white-space:nowrap; }
+.btn-ghost:hover { border-color:var(--accent); color:var(--accent); }
 
 /* ── FILTER BAR ── */
-.filter-bar {
-  display:flex; align-items:center; justify-content:center; gap:12px;
-  padding:0 24px 24px; flex-wrap:wrap;
-}
-.filter-chip {
-  padding:6px 16px; border-radius:99px; font-size:.78rem; font-weight:600;
-  border:1px solid var(--border); background:var(--surface);
-  color:var(--text2); cursor:pointer; transition:all .15s; user-select:none;
-}
+.filter-bar { display:flex; align-items:center; justify-content:center; gap:8px; padding:0 20px 20px; flex-wrap:wrap; }
+.filter-chip { padding:5px 14px; border-radius:99px; font-size:.75rem; font-weight:600; border:1px solid var(--border); background:var(--surface); color:var(--text2); cursor:pointer; transition:all .15s; user-select:none; }
 .filter-chip.active { border-color:var(--accent); color:var(--accent); background:rgba(108,140,255,.1); }
 
+/* ── VIEW TOGGLE ── */
+.view-toggle { display:flex; gap:3px; background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:8px; padding:3px; }
+.view-btn { padding:5px 13px; border-radius:6px; border:none; background:none; color:var(--text2); font-size:.76rem; font-weight:600; cursor:pointer; transition:all .15s; }
+.view-btn.active { background:var(--accent); color:#fff; }
+
 /* ── MONTH NAV ── */
-.month-nav {
-  display:flex; align-items:center; justify-content:center; gap:16px;
-  padding:0 24px 20px;
-}
-.month-btn {
-  width:36px; height:36px; border-radius:50%; border:1px solid var(--border);
-  background:var(--surface); color:var(--text2); font-size:1rem;
-  cursor:pointer; display:flex; align-items:center; justify-content:center;
-  transition:all .15s; flex-shrink:0;
-}
+.month-nav { display:flex; align-items:center; justify-content:center; gap:14px; padding:0 20px 16px; }
+.month-btn { width:34px; height:34px; border-radius:50%; border:1px solid var(--border); background:var(--surface); color:var(--text2); font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; flex-shrink:0; }
 .month-btn:hover { border-color:var(--accent); color:var(--accent); }
-.month-label { font-size:1.1rem; font-weight:800; letter-spacing:-.3px; min-width:180px; text-align:center; }
+.month-label { font-size:1rem; font-weight:800; letter-spacing:-.3px; min-width:160px; text-align:center; }
 
 /* ── CALENDAR GRID ── */
-.cal-wrap { max-width:960px; margin:0 auto; padding:0 24px 48px; }
+.cal-wrap { width:100%; max-width:920px; margin:0 auto; padding:0 16px 40px; }
+.cal-weekdays { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; margin-bottom:4px; }
+.cal-weekday { text-align:center; font-size:.6rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--text2); padding:5px 0; }
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
 
-.cal-weekdays {
-  display:grid; grid-template-columns:repeat(7,1fr);
-  gap:4px; margin-bottom:6px;
-}
-.cal-weekday {
-  text-align:center; font-size:.65rem; font-weight:700; text-transform:uppercase;
-  letter-spacing:.6px; color:var(--text2); padding:6px 0;
-}
-
-.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
-
-.cal-day {
-  min-height:90px; border-radius:10px; padding:8px;
-  border:1px solid var(--border);
-  background:rgba(255,255,255,.02);
-  transition:border-color .15s;
-  position:relative;
-}
-.cal-day.other-month { opacity:.35; }
+.cal-day { min-height:86px; border-radius:9px; padding:7px; border:1px solid var(--border); background:rgba(255,255,255,.02); transition:border-color .15s; overflow:hidden; }
+.cal-day.other-month { opacity:.3; }
 .cal-day.today { border-color:rgba(108,140,255,.4); background:rgba(108,140,255,.04); }
-.cal-day.has-event { border-color:rgba(167,139,250,.3); background:rgba(167,139,250,.04); }
-.cal-day-num {
-  font-size:.78rem; font-weight:700; color:var(--text2);
-  margin-bottom:4px; line-height:1;
-}
-.cal-day.today .cal-day-num {
-  background:var(--accent); color:#fff;
-  width:22px; height:22px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  font-size:.7rem;
-}
+.cal-day.has-event { border-color:rgba(167,139,250,.25); background:rgba(167,139,250,.03); }
+.cal-day-num { font-size:.75rem; font-weight:700; color:var(--text2); margin-bottom:3px; line-height:1; }
+.cal-day.today .cal-day-num { background:var(--accent); color:#fff; width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.65rem; }
 
-/* event chip inside day cell */
-.cal-event {
-  background:linear-gradient(135deg,rgba(108,140,255,.25),rgba(167,139,250,.2));
-  border:1px solid rgba(108,140,255,.35);
-  border-radius:6px; padding:4px 7px; margin-top:3px;
-  cursor:pointer; transition:all .15s;
-}
-.cal-event:hover { background:rgba(108,140,255,.35); border-color:var(--accent); }
-.cal-event-name { font-size:.68rem; font-weight:700; line-height:1.3; color:var(--text); }
-.cal-event-loc { font-size:.6rem; color:var(--text2); margin-top:1px; }
-.cal-event.approved { border-left:3px solid var(--green); }
-.cal-event.pending { border-left:3px solid var(--yellow); }
+.cal-event { background:linear-gradient(135deg,rgba(108,140,255,.22),rgba(167,139,250,.16)); border:1px solid rgba(108,140,255,.3); border-radius:5px; padding:3px 6px; margin-top:2px; cursor:pointer; transition:all .15s; }
+.cal-event:hover { background:rgba(108,140,255,.32); border-color:var(--accent); }
+.cal-event-name { font-size:.62rem; font-weight:700; line-height:1.3; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cal-event-loc { font-size:.57rem; color:var(--text2); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cal-event.approved { border-left:2px solid var(--green); }
+.cal-event.pending  { border-left:2px solid var(--yellow); }
 
 /* ── LIST VIEW ── */
-.list-wrap { max-width:720px; margin:0 auto; padding:0 24px 48px; }
-.list-month-group { margin-bottom:32px; }
-.list-month-heading {
-  font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.8px;
-  color:var(--text2); margin-bottom:12px; padding-bottom:8px;
-  border-bottom:1px solid var(--border);
-}
-.list-event {
-  display:flex; align-items:flex-start; gap:16px;
-  background:rgba(255,255,255,.03); border:1px solid var(--border);
-  border-radius:var(--radius); padding:16px 18px; margin-bottom:10px;
-  transition:border-color .2s, transform .15s; cursor:pointer;
-}
+.list-wrap { max-width:680px; margin:0 auto; padding:0 16px 40px; }
+.list-month-group { margin-bottom:28px; }
+.list-month-heading { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.7px; color:var(--text2); margin-bottom:10px; padding-bottom:7px; border-bottom:1px solid var(--border); }
+.list-event { display:flex; align-items:flex-start; gap:14px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; margin-bottom:8px; transition:border-color .2s, transform .15s; cursor:pointer; }
 .list-event:hover { border-color:rgba(108,140,255,.4); transform:translateX(3px); }
 .list-event.approved { border-left:3px solid var(--green); }
 .list-event.pending  { border-left:3px solid var(--yellow); }
-
-.list-date-col { text-align:center; flex-shrink:0; width:48px; }
-.list-date-day { font-size:1.5rem; font-weight:800; letter-spacing:-.5px; line-height:1; color:var(--accent); }
-.list-date-mon { font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--text2); margin-top:2px; }
+.list-date-col { text-align:center; flex-shrink:0; width:44px; }
+.list-date-day { font-size:1.4rem; font-weight:800; letter-spacing:-.5px; line-height:1; color:var(--accent); }
+.list-date-mon { font-size:.58rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--text2); margin-top:2px; }
 .list-divider { width:1px; background:var(--border); flex-shrink:0; align-self:stretch; }
 .list-info { flex:1; min-width:0; }
-.list-name { font-size:.95rem; font-weight:800; line-height:1.3; }
-.list-meta { font-size:.75rem; color:var(--text2); margin-top:5px; display:flex; flex-wrap:wrap; gap:10px; }
-.list-meta span { display:flex; align-items:center; gap:4px; }
-.status-badge {
-  font-size:.6rem; font-weight:700; padding:3px 10px; border-radius:99px;
-  text-transform:uppercase; letter-spacing:.3px; flex-shrink:0; align-self:flex-start;
-}
+.list-name { font-size:.9rem; font-weight:800; line-height:1.3; }
+.list-meta { font-size:.72rem; color:var(--text2); margin-top:4px; display:flex; flex-wrap:wrap; gap:8px; }
+.status-badge { font-size:.58rem; font-weight:700; padding:3px 9px; border-radius:99px; text-transform:uppercase; letter-spacing:.3px; flex-shrink:0; align-self:flex-start; white-space:nowrap; }
 .badge-approved { background:rgba(52,211,153,.15); color:var(--green); border:1px solid rgba(52,211,153,.3); }
 .badge-pending  { background:rgba(251,191,36,.15);  color:var(--yellow); border:1px solid rgba(251,191,36,.3); }
 
 /* ── EVENT DETAIL MODAL ── */
-.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:500; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:500; align-items:center; justify-content:center; backdrop-filter:blur(6px); padding:16px; }
 .modal-overlay.open { display:flex; }
-.modal {
-  background:#141720; border:1px solid var(--border); border-radius:18px;
-  padding:32px; width:440px; max-width:95vw;
-  box-shadow:0 24px 80px rgba(0,0,0,.6);
-}
-.modal-tag { font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--text2); margin-bottom:12px; }
-.modal-name { font-size:1.4rem; font-weight:800; letter-spacing:-.4px; line-height:1.3; margin-bottom:18px; }
-.modal-row { display:flex; align-items:center; gap:10px; font-size:.85rem; color:var(--text2); margin-bottom:10px; }
-.modal-row strong { color:var(--text); }
-.modal-close { display:block; width:100%; margin-top:24px; }
+.modal { background:#141720; border:1px solid var(--border); border-radius:18px; padding:28px; width:460px; max-width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 24px 80px rgba(0,0,0,.6); }
+.modal-tag { font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--text2); margin-bottom:10px; }
+.modal-name { font-size:1.3rem; font-weight:800; letter-spacing:-.4px; line-height:1.3; margin-bottom:6px; }
+.modal-sub { font-size:.78rem; color:var(--text2); margin-bottom:16px; display:flex; flex-wrap:wrap; gap:12px; }
+.modal-divider { border:none; border-top:1px solid var(--border); margin:16px 0; }
+
+/* vendor table list inside modal */
+.vendor-section-title { font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.7px; color:var(--text2); margin-bottom:10px; }
+.vendor-row { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-radius:9px; background:rgba(255,255,255,.03); border:1px solid var(--border); margin-bottom:6px; gap:10px; }
+.vendor-row-name { font-size:.85rem; font-weight:700; }
+.vendor-row-status { font-size:.6rem; font-weight:700; padding:3px 10px; border-radius:99px; text-transform:uppercase; letter-spacing:.3px; white-space:nowrap; }
+.vs-paid   { background:rgba(52,211,153,.15); color:var(--green); border:1px solid rgba(52,211,153,.3); }
+.vs-unpaid { background:rgba(251,191,36,.15);  color:var(--yellow); border:1px solid rgba(251,191,36,.3); }
+.no-vendors { font-size:.8rem; color:var(--text2); text-align:center; padding:16px 0; }
+
+.modal-close { display:block; width:100%; margin-top:20px; }
 
 /* ── EMPTY STATE ── */
-.empty { text-align:center; padding:80px 24px; color:var(--text2); }
-.empty-icon { font-size:3rem; margin-bottom:14px; }
-.empty-title { font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:8px; }
-.empty-sub { font-size:.85rem; line-height:1.65; max-width:360px; margin:0 auto; }
-
-/* ── VIEW TOGGLE ── */
-.view-toggle { display:flex; gap:4px; background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:9px; padding:3px; }
-.view-btn { padding:6px 14px; border-radius:7px; border:none; background:none; color:var(--text2); font-size:.78rem; font-weight:600; cursor:pointer; transition:all .15s; }
-.view-btn.active { background:var(--accent); color:#fff; }
+.empty { text-align:center; padding:60px 20px; color:var(--text2); }
+.empty-icon { font-size:2.8rem; margin-bottom:12px; }
+.empty-title { font-size:1rem; font-weight:700; color:var(--text); margin-bottom:6px; }
+.empty-sub { font-size:.82rem; line-height:1.65; max-width:320px; margin:0 auto; }
 
 /* ── FOOTER ── */
-footer { text-align:center; padding:24px; border-top:1px solid var(--border); font-size:.72rem; color:var(--text2); }
+footer { text-align:center; padding:20px; border-top:1px solid var(--border); font-size:.7rem; color:var(--text2); }
 
 /* ── RESPONSIVE ── */
-@media(max-width:640px) {
-  .page-title { font-size:1.5rem; }
-  .cal-day { min-height:64px; padding:5px; }
+@media(max-width:600px) {
+  .page-title { font-size:1.4rem; }
+  .cal-day { min-height:58px; padding:4px; }
   .cal-event-loc { display:none; }
-  .list-event { flex-wrap:wrap; }
+  .list-event { gap:10px; }
+}
+@media(max-width:420px) {
+  .cal-day { min-height:48px; }
+  .cal-event-name { font-size:.55rem; }
+  .header-actions { flex-direction:column; align-items:center; }
 }
 </style>
 </head>
@@ -228,22 +160,22 @@ footer { text-align:center; padding:24px; border-top:1px solid var(--border); fo
     <div class="logo-name">Vault <span>&amp;</span> Pine Collective</div>
   </div>
   <h1 class="page-title">Event Calendar</h1>
-  <p class="page-sub">Upcoming shows and events. Contact us to reserve your table spot.</p>
+  <p class="page-sub">Upcoming shows and events. Click any event to see table booking status.</p>
   <div class="header-actions">
     <div class="view-toggle">
       <button class="view-btn active" id="btn-cal" onclick="setView('calendar')">📅 Calendar</button>
       <button class="view-btn" id="btn-list" onclick="setView('list')">☰ List</button>
     </div>
-    <button class="btn-primary" onclick="exportICS()">⬇ Export to Calendar (.ics)</button>
+    <button class="btn-primary" onclick="exportICS()">⬇ Export .ics</button>
     <button class="btn-ghost" onclick="window.print()">🖨 Print</button>
   </div>
 </div>
 
 <div class="filter-bar">
-  <div class="filter-chip active" data-filter="all" onclick="setFilter('all')">All Events</div>
-  <div class="filter-chip" data-filter="approved" onclick="setFilter('approved')">✓ Confirmed</div>
-  <div class="filter-chip" data-filter="pending" onclick="setFilter('pending')">○ Pending</div>
-  <div class="filter-chip" data-filter="upcoming" onclick="setFilter('upcoming')">Upcoming</div>
+  <div class="filter-chip active" data-filter="all"      onclick="setFilter('all')">All Events</div>
+  <div class="filter-chip"        data-filter="approved" onclick="setFilter('approved')">✓ Confirmed</div>
+  <div class="filter-chip"        data-filter="pending"  onclick="setFilter('pending')">○ Pending</div>
+  <div class="filter-chip"        data-filter="upcoming" onclick="setFilter('upcoming')">Upcoming</div>
 </div>
 
 <!-- CALENDAR VIEW -->
@@ -274,38 +206,36 @@ footer { text-align:center; padding:24px; border-top:1px solid var(--border); fo
   <div class="modal">
     <div class="modal-tag">🎪 Event Details</div>
     <div class="modal-name" id="detail-name"></div>
-    <div class="modal-row" id="detail-date"></div>
-    <div class="modal-row" id="detail-location"></div>
-    <div class="modal-row" id="detail-status"></div>
+    <div class="modal-sub" id="detail-sub"></div>
+    <div id="detail-status-row"></div>
+    <hr class="modal-divider">
+    <div class="vendor-section-title">🪑 Table Bookings</div>
+    <div id="detail-vendors"></div>
     <button class="btn-ghost modal-close" onclick="closeDetail()">Close</button>
   </div>
 </div>
 
 <footer>
-  Vault &amp; Pine Collective &nbsp;·&nbsp; Read-only vendor view &nbsp;·&nbsp; For table inquiries contact us directly
+  Vault &amp; Pine Collective &nbsp;·&nbsp; Read-only vendor calendar &nbsp;·&nbsp; Contact us to reserve a table
 </footer>
 
 <script>
-const EV_KEY = 'vpc_events_v1';
+const EV_KEY  = 'vpc_events_v1';
+const VN_KEY  = 'vpc_vendors_v1';
+const TBL_KEY = 'vpc_tables_v1';
 
-// ── DATA ──────────────────────────────────────────────
-function getEvents() {
-  return JSON.parse(localStorage.getItem(EV_KEY) || '[]')
-    .sort((a,b) => (a.date||'9999').localeCompare(b.date||'9999'));
-}
+const getEvents  = () => JSON.parse(localStorage.getItem(EV_KEY)  || '[]').sort((a,b) => (a.date||'9999').localeCompare(b.date||'9999'));
+const getVendors = () => JSON.parse(localStorage.getItem(VN_KEY)  || '[]');
+const getTables  = () => JSON.parse(localStorage.getItem(TBL_KEY) || '[]');
 
 const fmtDate = d => d ? new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}) : '';
-const fmtMonthDay = d => d ? new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
 const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-// ── STATE ─────────────────────────────────────────────
-let viewMode  = 'calendar';
+let viewMode   = 'calendar';
 let filterMode = 'all';
-let curYear, curMonth;
-
-const today = new Date();
-curYear  = today.getFullYear();
-curMonth = today.getMonth(); // 0-indexed
+const today    = new Date();
+let curYear    = today.getFullYear();
+let curMonth   = today.getMonth();
 
 // ── FILTER ───────────────────────────────────────────
 function setFilter(f) {
@@ -315,7 +245,7 @@ function setFilter(f) {
 }
 
 function filteredEvents() {
-  const all = getEvents();
+  const all      = getEvents();
   const todayStr = today.toISOString().slice(0,10);
   if (filterMode === 'approved') return all.filter(e => e.approved);
   if (filterMode === 'pending')  return all.filter(e => !e.approved);
@@ -333,7 +263,6 @@ function setView(v) {
   render();
 }
 
-// ── MONTH NAV ────────────────────────────────────────
 function changeMonth(delta) {
   curMonth += delta;
   if (curMonth > 11) { curMonth = 0;  curYear++; }
@@ -348,58 +277,43 @@ function render() {
 }
 
 function renderCalendar() {
-  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  document.getElementById('month-label').textContent = `${monthNames[curMonth]} ${curYear}`;
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('month-label').textContent = `${MONTHS[curMonth]} ${curYear}`;
 
   const events = filteredEvents();
-  // Build lookup: date string → events[]
   const byDate = {};
-  events.forEach(e => {
-    if (!e.date) return;
-    (byDate[e.date] = byDate[e.date] || []).push(e);
-  });
+  events.forEach(e => { if (e.date) (byDate[e.date] = byDate[e.date]||[]).push(e); });
 
-  const firstDay = new Date(curYear, curMonth, 1).getDay(); // 0=Sun
+  const firstDay    = new Date(curYear, curMonth, 1).getDay();
   const daysInMonth = new Date(curYear, curMonth+1, 0).getDate();
   const daysInPrev  = new Date(curYear, curMonth, 0).getDate();
   const todayStr    = today.toISOString().slice(0,10);
 
-  let h = '';
-  let cellCount = 0;
+  let h = '', cellCount = 0;
 
-  // Leading days from prev month
   for (let i = firstDay - 1; i >= 0; i--) {
-    const d = daysInPrev - i;
-    h += `<div class="cal-day other-month"><div class="cal-day-num">${d}</div></div>`;
+    h += `<div class="cal-day other-month"><div class="cal-day-num">${daysInPrev - i}</div></div>`;
     cellCount++;
   }
 
-  // Current month days
   for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = `${curYear}-${String(curMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const isToday = dateStr === todayStr;
-    const dayEvs  = byDate[dateStr] || [];
-    const hasEv   = dayEvs.length > 0;
-    let cls = 'cal-day';
-    if (isToday) cls += ' today';
-    if (hasEv)   cls += ' has-event';
-
+    const ds  = `${curYear}-${String(curMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const evs = byDate[ds] || [];
+    let cls   = 'cal-day' + (ds === todayStr ? ' today' : '') + (evs.length ? ' has-event' : '');
     let inner = `<div class="cal-day-num">${d}</div>`;
-    dayEvs.slice(0,3).forEach(e => {
-      inner += `<div class="cal-event ${e.approved ? 'approved' : 'pending'}" onclick="showDetail('${e.id}')">
+    evs.slice(0,2).forEach(e => {
+      inner += `<div class="cal-event ${e.approved?'approved':'pending'}" onclick="showDetail('${e.id}')">
         <div class="cal-event-name">${esc(e.name)}</div>
         ${e.location ? `<div class="cal-event-loc">📍 ${esc(e.location)}</div>` : ''}
       </div>`;
     });
-    if (dayEvs.length > 3) inner += `<div style="font-size:.6rem;color:var(--text2);margin-top:3px">+${dayEvs.length-3} more</div>`;
-
+    if (evs.length > 2) inner += `<div style="font-size:.55rem;color:var(--text2);margin-top:2px">+${evs.length-2} more</div>`;
     h += `<div class="${cls}">${inner}</div>`;
     cellCount++;
   }
 
-  // Trailing days to fill grid
-  const remaining = (7 - (cellCount % 7)) % 7;
-  for (let d = 1; d <= remaining; d++) {
+  const rem = (7 - (cellCount % 7)) % 7;
+  for (let d = 1; d <= rem; d++) {
     h += `<div class="cal-day other-month"><div class="cal-day-num">${d}</div></div>`;
   }
 
@@ -411,39 +325,24 @@ function renderList() {
   const wrap   = document.getElementById('list-wrap');
 
   if (!events.length) {
-    wrap.innerHTML = `<div class="empty">
-      <div class="empty-icon">🗓️</div>
-      <div class="empty-title">No events found</div>
-      <div class="empty-sub">Try changing the filter above.</div>
-    </div>`;
+    wrap.innerHTML = `<div class="empty"><div class="empty-icon">🗓️</div><div class="empty-title">No events found</div><div class="empty-sub">Try a different filter above.</div></div>`;
     return;
   }
 
-  // Group by month
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const groups = {};
-  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  events.forEach(e => {
-    const key = e.date ? e.date.slice(0,7) : 'undated';
-    (groups[key] = groups[key] || []).push(e);
-  });
+  events.forEach(e => { const k = e.date ? e.date.slice(0,7) : 'undated'; (groups[k] = groups[k]||[]).push(e); });
 
   let h = '';
   Object.keys(groups).sort().forEach(key => {
-    let heading = 'No Date';
-    if (key !== 'undated') {
-      const [y,m] = key.split('-');
-      heading = `${monthNames[+m-1]} ${y}`;
-    }
+    const heading = key === 'undated' ? 'No Date' : (() => { const [y,m] = key.split('-'); return `${MONTHS[+m-1]} ${y}`; })();
     h += `<div class="list-month-group"><div class="list-month-heading">${heading}</div>`;
     groups[key].forEach(e => {
-      const dObj = e.date ? new Date(e.date+'T12:00:00') : null;
+      const dObj   = e.date ? new Date(e.date+'T12:00:00') : null;
       const dayNum = dObj ? dObj.getDate() : '—';
-      const monAbbr = dObj ? dObj.toLocaleDateString('en-US',{month:'short'}) : '';
-      h += `<div class="list-event ${e.approved ? 'approved' : 'pending'}" onclick="showDetail('${e.id}')">
-        <div class="list-date-col">
-          <div class="list-date-day">${dayNum}</div>
-          <div class="list-date-mon">${monAbbr}</div>
-        </div>
+      const mon    = dObj ? dObj.toLocaleDateString('en-US',{month:'short'}) : '';
+      h += `<div class="list-event ${e.approved?'approved':'pending'}" onclick="showDetail('${e.id}')">
+        <div class="list-date-col"><div class="list-date-day">${dayNum}</div><div class="list-date-mon">${mon}</div></div>
         <div class="list-divider"></div>
         <div class="list-info">
           <div class="list-name">${esc(e.name)}</div>
@@ -452,7 +351,7 @@ function renderList() {
             ${e.location ? `<span>📍 ${esc(e.location)}</span>` : ''}
           </div>
         </div>
-        <span class="status-badge ${e.approved ? 'badge-approved' : 'badge-pending'}">${e.approved ? '✓ Confirmed' : '○ Pending'}</span>
+        <span class="status-badge ${e.approved?'badge-approved':'badge-pending'}">${e.approved?'✓ Confirmed':'○ Pending'}</span>
       </div>`;
     });
     h += `</div>`;
@@ -463,19 +362,45 @@ function renderList() {
 
 // ── DETAIL MODAL ─────────────────────────────────────
 function showDetail(id) {
-  const e = getEvents().find(x => x.id === id);
+  const e       = getEvents().find(x => x.id === id);
   if (!e) return;
+  const vendors = getVendors();
+  const tables  = getTables().filter(t => t.eventId === id);
+
   document.getElementById('detail-name').textContent = e.name;
-  document.getElementById('detail-date').innerHTML =
-    e.date ? `📅 <strong>${fmtDate(e.date)}</strong>` : '';
-  document.getElementById('detail-location').innerHTML =
-    e.location ? `📍 <strong>${esc(e.location)}</strong>` : '';
-  document.getElementById('detail-status').innerHTML =
-    `<span class="status-badge ${e.approved ? 'badge-approved' : 'badge-pending'}" style="font-size:.72rem;padding:5px 14px">
+
+  // Sub line: date + location
+  let sub = '';
+  if (e.date)     sub += `<span>📅 ${fmtDate(e.date)}</span>`;
+  if (e.location) sub += `<span>📍 ${esc(e.location)}</span>`;
+  document.getElementById('detail-sub').innerHTML = sub;
+
+  // Status badge
+  document.getElementById('detail-status-row').innerHTML =
+    `<span class="status-badge ${e.approved?'badge-approved':'badge-pending'}" style="font-size:.7rem;padding:5px 14px">
       ${e.approved ? '✓ Confirmed' : '○ Pending Confirmation'}
     </span>`;
+
+  // Vendor table bookings — names + paid/unpaid, NO prices
+  let vh = '';
+  if (!tables.length) {
+    vh = `<div class="no-vendors">No tables booked for this event yet.</div>`;
+  } else {
+    tables.forEach(t => {
+      const v = vendors.find(x => x.id === t.vendorId);
+      if (!v) return;
+      vh += `<div class="vendor-row">
+        <div class="vendor-row-name">${esc(v.name)}</div>
+        <span class="vendor-row-status ${t.paid ? 'vs-paid' : 'vs-unpaid'}">${t.paid ? '✓ Paid' : '● Unpaid'}</span>
+      </div>`;
+    });
+    if (!vh) vh = `<div class="no-vendors">No matched vendor records.</div>`;
+  }
+  document.getElementById('detail-vendors').innerHTML = vh;
+
   document.getElementById('detail-modal').classList.add('open');
 }
+
 function closeDetail() {
   document.getElementById('detail-modal').classList.remove('open');
 }
@@ -489,45 +414,29 @@ function exportICS() {
   if (!events.length) { alert('No events to export yet.'); return; }
 
   const pad = n => String(n).padStart(2,'0');
-  const toICSDate = d => {
-    if (!d) return null;
-    const [y,m,day] = d.split('-');
-    return `${y}${m}${day}`;
-  };
-
+  const toICSDate = d => { if (!d) return null; const [y,m,day] = d.split('-'); return `${y}${m}${day}`; };
   const now = new Date();
   const dtstamp = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}T${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}Z`;
-  const safeText = s => String(s||'').replace(/\n/g,' ').replace(/,/g,'\\,').replace(/;/g,'\\;');
+  const safe = s => String(s||'').replace(/\n/g,' ').replace(/,/g,'\\,').replace(/;/g,'\\;');
 
   let ics = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Vault & Pine Collective//Event Calendar//EN\r\nCALSCALE:GREGORIAN\r\nX-WR-CALNAME:Vault & Pine Collective Events\r\nX-WR-TIMEZONE:America/Los_Angeles\r\n`;
 
   events.forEach(e => {
     const dtstart = toICSDate(e.date);
     if (!dtstart) return;
-    const dtObj  = new Date(e.date+'T12:00:00');
-    dtObj.setDate(dtObj.getDate()+1);
-    const dtend  = `${dtObj.getFullYear()}${pad(dtObj.getMonth()+1)}${pad(dtObj.getDate())}`;
-    ics += `BEGIN:VEVENT\r\n`;
-    ics += `UID:${e.id}@vaultpinecollective\r\n`;
-    ics += `DTSTAMP:${dtstamp}\r\n`;
-    ics += `DTSTART;VALUE=DATE:${dtstart}\r\n`;
-    ics += `DTEND;VALUE=DATE:${dtend}\r\n`;
-    ics += `SUMMARY:${safeText(e.name)}\r\n`;
-    if (e.location) ics += `LOCATION:${safeText(e.location)}\r\n`;
-    ics += `STATUS:${e.approved ? 'CONFIRMED' : 'TENTATIVE'}\r\n`;
-    ics += `END:VEVENT\r\n`;
+    const end = new Date(e.date+'T12:00:00');
+    end.setDate(end.getDate()+1);
+    const dtend = `${end.getFullYear()}${pad(end.getMonth()+1)}${pad(end.getDate())}`;
+    ics += `BEGIN:VEVENT\r\nUID:${e.id}@vaultpinecollective\r\nDTSTAMP:${dtstamp}\r\nDTSTART;VALUE=DATE:${dtstart}\r\nDTEND;VALUE=DATE:${dtend}\r\nSUMMARY:${safe(e.name)}\r\n`;
+    if (e.location) ics += `LOCATION:${safe(e.location)}\r\n`;
+    ics += `STATUS:${e.approved ? 'CONFIRMED' : 'TENTATIVE'}\r\nEND:VEVENT\r\n`;
   });
 
   ics += `END:VCALENDAR`;
-
   const blob = new Blob([ics], { type:'text/calendar;charset=utf-8' });
   const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url;
-  a.download = 'vpc-events.ics';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  const a    = Object.assign(document.createElement('a'), { href:url, download:'vpc-events.ics' });
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
 
