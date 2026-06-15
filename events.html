@@ -13,8 +13,9 @@
 <title>Events &amp; Tables — VPC</title>
 <style>
 /* ── LAYOUT: natural document flow, content expands ── */
-html, body { height:auto; overflow:auto; }
-body { display:block; }
+html { overflow-x:hidden; } /* clip horizontal page overflow — table scrolls inside its own container */
+html, body { height:auto; }
+body { display:block; overflow-x:hidden; }
 
 /* HEADER */
 header { background:var(--surface); border-bottom:1px solid var(--border); padding:0 24px; display:flex; align-items:center; justify-content:space-between; height:54px; flex-shrink:0; z-index:100; gap:12px; }
@@ -229,6 +230,7 @@ main { padding:0 24px 24px; }
   <div class="brand">Events <span>&amp; Tables</span></div>
   <div class="header-right">
     <a href="index.html" class="back-link">⌂ Home</a>
+    <a href="vendor-calendar.html" target="_blank" class="btn-ghost" style="text-decoration:none">📅 Vendor Calendar</a>
     <button class="btn-ghost" onclick="openVendorModal()">+ Vendor</button>
     <button class="btn-primary" onclick="openEventModal()">+ Event</button>
   </div>
