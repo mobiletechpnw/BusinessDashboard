@@ -224,11 +224,19 @@ footer { text-align:center; padding:20px; border-top:1px solid var(--border); fo
 </footer>
 
 <script>
-// ── DATA SOURCE: URL share link OR localStorage (owner's own device) ──────────
-let _sharedData = null;
+// ── DATA SOURCE ───────────────────────────────────────────────────────────────
+// Priority: (1) public Supabase snapshot — always current, no login needed
+//           (2) ?d= share-link param   — embedded snapshot
+//           (3) localStorage           — owner's own device
+let _sharedData   = null;
 let _isSharedLink = false;
+let _isPublic     = false;
 
-(function loadSharedData() {
+const PUB_SUPABASE_URL = 'https://cqvnspbdfmgwcutezmqe.supabase.co';
+const PUB_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxdm5zcGJkZm1nd2N1dGV6bXFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NjI3MDUsImV4cCI6MjA5NjEzODcwNX0.0GGjc6i8VwgJgDUFNwcNzEy4r0_sAo57I5iMMPi7dII';
+const PUB_CAL_ID = 'vault-pine';
+
+(function loadShareLink() {
   const param = new URLSearchParams(window.location.search).get('d');
   if (!param) return;
   try {
@@ -239,12 +247,31 @@ let _isSharedLink = false;
   }
 })();
 
+// Fetch the public snapshot (skipped if a ?d= link is already present)
+async function loadPublicData() {
+  if (_isSharedLink) return;
+  try {
+    const res = await fetch(
+      `${PUB_SUPABASE_URL}/rest/v1/public_calendar?id=eq.${PUB_CAL_ID}&select=data`,
+      { headers: { 'apikey': PUB_SUPABASE_KEY, 'Authorization': `Bearer ${PUB_SUPABASE_KEY}` } }
+    );
+    if (!res.ok) return;
+    const rows = await res.json();
+    if (rows.length && rows[0].data) {
+      _sharedData = rows[0].data;
+      _isPublic   = true;
+    }
+  } catch(e) {
+    console.warn('Public calendar fetch failed:', e.message);
+  }
+}
+
 const getEvents  = () => {
   const arr = _sharedData ? (_sharedData.events || []) : JSON.parse(localStorage.getItem('vpc_events_v1') || '[]');
   return arr.sort((a,b) => (a.date||'9999').localeCompare(b.date||'9999'));
 };
 const getVendors = () => _sharedData ? (_sharedData.vendors || []) : JSON.parse(localStorage.getItem('vpc_vendors_v1') || '[]');
-const getTables  = () => _sharedData ? (_sharedData.tables  || []) : JSON.parse(localStorage.getItem('vpc_tables_v1')  || []);
+const getTables  = () => _sharedData ? (_sharedData.tables  || []) : JSON.parse(localStorage.getItem('vpc_tables_v1')  || '[]');
 
 const fmtDate = d => d ? new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}) : '';
 const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -459,14 +486,20 @@ function exportICS() {
 }
 
 // ── INIT ─────────────────────────────────────────────
-if (_isSharedLink) {
-  document.getElementById('share-banner').style.display = '';
-  // Hide export/print buttons — data came from owner's link, not live localStorage
-  document.querySelectorAll('.btn-primary, .btn-ghost').forEach(b => {
-    if (b.textContent.includes('Export') || b.textContent.includes('Print')) b.style.display = 'none';
-  });
+async function init() {
+  render();                 // instant first paint (from link/localStorage if any)
+  await loadPublicData();   // then pull the always-current public snapshot
+
+  if (_isSharedLink || _isPublic) {
+    document.getElementById('share-banner').style.display = '';
+    // Hide export/print — viewers see a read-only snapshot, not live localStorage
+    document.querySelectorAll('.btn-primary, .btn-ghost').forEach(b => {
+      if (b.textContent.includes('Export') || b.textContent.includes('Print')) b.style.display = 'none';
+    });
+  }
+  render();                 // re-render with public data
 }
-render();
+init();
 </script>
 </body>
 </html>

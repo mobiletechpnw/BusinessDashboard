@@ -385,26 +385,20 @@ main { padding:0 24px 24px; }
 
 <script>
 // ── SHARE CALENDAR LINK ──────────────────────────────
-function generateShareLink() {
-  const events  = getEvents();
-  const vendors = getVendors();
-  // Tables: strip price for public share, keep only names + paid status
-  const tables  = getTables().map(({ id, eventId, vendorId, paid }) => ({ id, eventId, vendorId, paid }));
-
-  if (!events.length) {
-    alert('No events yet — add events first before generating a share link.');
+async function generateShareLink() {
+  if (!getEvents().length) {
+    alert('No events yet — add events first before sharing.');
     return;
   }
 
-  const payload = { events, vendors, tables };
-  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  // Push the latest snapshot now, then copy the fixed public URL.
+  await publishPublicCalendar();
 
-  const base = window.location.href.replace(/\/[^\/]*$/, '/vendor-calendar.html');
-  const url  = `${base}?d=${encoded}`;
+  const url = window.location.href.replace(/\/[^\/]*(\?.*)?$/, '/vendor-calendar.html');
 
   if (navigator.clipboard?.writeText) {
     navigator.clipboard.writeText(url)
-      .then(() => showToastMsg('📋 Share link copied! Send it to your vendors.'))
+      .then(() => showToastMsg('📋 Public calendar link copied — it always stays current!'))
       .catch(() => promptCopy(url));
   } else {
     promptCopy(url);
@@ -1072,8 +1066,50 @@ function renderAll() {
   renderStats();
   renderMatrix();
   if (currentEvTab === 'roi') renderROI();
+  schedulePublicPublish();
 }
 window.renderAll = renderAll;
+
+// ── AUTO-PUBLISH PUBLIC CALENDAR ─────────────────────
+// Pushes a sanitized snapshot (no prices) to a public Supabase table so the
+// vendor calendar has a fixed, always-current public URL — no re-sharing.
+const PUB_SUPABASE_URL = 'https://cqvnspbdfmgwcutezmqe.supabase.co';
+const PUB_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxdm5zcGJkZm1nd2N1dGV6bXFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NjI3MDUsImV4cCI6MjA5NjEzODcwNX0.0GGjc6i8VwgJgDUFNwcNzEy4r0_sAo57I5iMMPi7dII';
+const PUB_CAL_ID = 'vault-pine';
+
+let _pubTimer = null;
+function schedulePublicPublish() {
+  clearTimeout(_pubTimer);
+  _pubTimer = setTimeout(publishPublicCalendar, 1500);
+}
+
+async function publishPublicCalendar() {
+  try {
+    const session = window.VpcAuth ? await window.VpcAuth.getValid() : null;
+    if (!session?.access_token) return; // not signed in — skip silently
+
+    const payload = {
+      events:  getEvents(),
+      vendors: getVendors(),
+      // strip prices — only names + paid status are public
+      tables:  getTables().map(({ id, eventId, vendorId, paid }) => ({ id, eventId, vendorId, paid })),
+    };
+
+    await fetch(`${PUB_SUPABASE_URL}/rest/v1/public_calendar`, {
+      method:  'POST',
+      headers: {
+        'apikey':        PUB_SUPABASE_KEY,
+        'Authorization': `Bearer ${session.access_token}`,
+        'Content-Type':  'application/json',
+        'Prefer':        'resolution=merge-duplicates',
+      },
+      body: JSON.stringify({ id: PUB_CAL_ID, data: payload, updated_at: new Date().toISOString() }),
+    });
+  } catch (e) {
+    console.warn('[public calendar] publish skipped:', e.message);
+  }
+}
+
 renderAll();
 </script>
 <button class="fab" onclick="openEventModal()" title="Add Event" style="bottom:calc(24px + env(safe-area-inset-bottom));right:24px;position:fixed;z-index:300;background:var(--accent);color:#fff;border:none;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:0 4px 20px rgba(108,140,255,0.5);">＋</button>
