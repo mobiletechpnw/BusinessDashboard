@@ -237,7 +237,7 @@ main { padding:0 24px 24px; }
   <div class="brand">Events <span>&amp; Tables</span></div>
   <div class="header-right">
     <a href="index.html" class="back-link">⌂ Home</a>
-    <a href="vendor-calendar.html" target="_blank" class="btn-ghost" style="text-decoration:none">📅 Vendor Calendar</a>
+    <button class="btn-ghost" onclick="generateShareLink()" title="Generate a shareable link for vendors">📤 Share Calendar</button>
     <button class="btn-ghost" onclick="openVendorModal()">+ Vendor</button>
     <button class="btn-primary" onclick="openEventModal()">+ Event</button>
   </div>
@@ -384,6 +384,51 @@ main { padding:0 24px 24px; }
 </div>
 
 <script>
+// ── SHARE CALENDAR LINK ──────────────────────────────
+function generateShareLink() {
+  const events  = getEvents();
+  const vendors = getVendors();
+  // Tables: strip price for public share, keep only names + paid status
+  const tables  = getTables().map(({ id, eventId, vendorId, paid }) => ({ id, eventId, vendorId, paid }));
+
+  if (!events.length) {
+    alert('No events yet — add events first before generating a share link.');
+    return;
+  }
+
+  const payload = { events, vendors, tables };
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+
+  const base = window.location.href.replace(/\/[^\/]*$/, '/vendor-calendar.html');
+  const url  = `${base}?d=${encoded}`;
+
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(url)
+      .then(() => showToastMsg('📋 Share link copied! Send it to your vendors.'))
+      .catch(() => promptCopy(url));
+  } else {
+    promptCopy(url);
+  }
+}
+
+function promptCopy(url) {
+  prompt('Copy this link and share with your vendors:', url);
+}
+
+function showToastMsg(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = `
+    position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
+    background:#1e2235;border:1px solid var(--border);color:var(--text);
+    padding:11px 22px;border-radius:10px;font-size:.84rem;font-weight:600;
+    box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:9999;white-space:nowrap;
+    animation:fadeIn .2s ease;
+  `;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
 // ── STORAGE ─────────────────────────────────────────
 const EV_KEY  = 'vpc_events_v1';
 const VN_KEY  = 'vpc_vendors_v1';

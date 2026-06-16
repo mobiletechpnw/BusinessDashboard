@@ -171,6 +171,10 @@ footer { text-align:center; padding:20px; border-top:1px solid var(--border); fo
   </div>
 </div>
 
+<div id="share-banner" style="display:none;text-align:center;padding:8px 20px 4px;font-size:.75rem;color:var(--text2);">
+  📤 Shared by <strong style="color:var(--text)">Vault &amp; Pine Collective</strong> &nbsp;·&nbsp; Read-only event calendar
+</div>
+
 <div class="filter-bar">
   <div class="filter-chip active" data-filter="all"      onclick="setFilter('all')">All Events</div>
   <div class="filter-chip"        data-filter="approved" onclick="setFilter('approved')">✓ Confirmed</div>
@@ -220,13 +224,27 @@ footer { text-align:center; padding:20px; border-top:1px solid var(--border); fo
 </footer>
 
 <script>
-const EV_KEY  = 'vpc_events_v1';
-const VN_KEY  = 'vpc_vendors_v1';
-const TBL_KEY = 'vpc_tables_v1';
+// ── DATA SOURCE: URL share link OR localStorage (owner's own device) ──────────
+let _sharedData = null;
+let _isSharedLink = false;
 
-const getEvents  = () => JSON.parse(localStorage.getItem(EV_KEY)  || '[]').sort((a,b) => (a.date||'9999').localeCompare(b.date||'9999'));
-const getVendors = () => JSON.parse(localStorage.getItem(VN_KEY)  || '[]');
-const getTables  = () => JSON.parse(localStorage.getItem(TBL_KEY) || '[]');
+(function loadSharedData() {
+  const param = new URLSearchParams(window.location.search).get('d');
+  if (!param) return;
+  try {
+    _sharedData   = JSON.parse(decodeURIComponent(escape(atob(param))));
+    _isSharedLink = true;
+  } catch(e) {
+    console.warn('Invalid share link data', e);
+  }
+})();
+
+const getEvents  = () => {
+  const arr = _sharedData ? (_sharedData.events || []) : JSON.parse(localStorage.getItem('vpc_events_v1') || '[]');
+  return arr.sort((a,b) => (a.date||'9999').localeCompare(b.date||'9999'));
+};
+const getVendors = () => _sharedData ? (_sharedData.vendors || []) : JSON.parse(localStorage.getItem('vpc_vendors_v1') || '[]');
+const getTables  = () => _sharedData ? (_sharedData.tables  || []) : JSON.parse(localStorage.getItem('vpc_tables_v1')  || []);
 
 const fmtDate = d => d ? new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}) : '';
 const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -441,6 +459,13 @@ function exportICS() {
 }
 
 // ── INIT ─────────────────────────────────────────────
+if (_isSharedLink) {
+  document.getElementById('share-banner').style.display = '';
+  // Hide export/print buttons — data came from owner's link, not live localStorage
+  document.querySelectorAll('.btn-primary, .btn-ghost').forEach(b => {
+    if (b.textContent.includes('Export') || b.textContent.includes('Print')) b.style.display = 'none';
+  });
+}
 render();
 </script>
 </body>
