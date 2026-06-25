@@ -532,6 +532,36 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   window.addEventListener('online',  () => VpcSync.flushQueue());
   window.addEventListener('offline', () => VpcSync._emit('offline', 'No connection'));
+
+  // ── Auto-refresh: keep an open tab current without a manual reload ──────────
+  // Poll while the tab is visible (other devices/tabs may have pushed new data),
+  // and sync immediately whenever the tab regains focus or the day rolls over.
+  const AUTO_SYNC_MS = 90_000;
+  let _autoSyncTimer = null;
+  const _loadDateStr = new Date().toDateString();
+
+  async function autoSync() {
+    if (document.hidden) return;
+    // "Today"/"this month" are computed once at page load — if the calendar
+    // day has rolled over while this tab sat open, reload so date-driven
+    // charts (e.g. Monthly Revenue) pick up the new month/day correctly.
+    if (new Date().toDateString() !== _loadDateStr) {
+      window.location.reload();
+      return;
+    }
+    const { pulled: p } = await VpcSync.sync();
+    if (p > 0 && typeof window.renderAll === 'function') window.renderAll();
+  }
+
+  function startAutoSync() {
+    clearInterval(_autoSyncTimer);
+    _autoSyncTimer = setInterval(autoSync, AUTO_SYNC_MS);
+  }
+  startAutoSync();
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) autoSync();
+  });
 });
 
 // ── localStorage monkey-patch ─────────────────────────────────────────────────

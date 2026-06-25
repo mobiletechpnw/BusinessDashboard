@@ -1461,10 +1461,20 @@ let orderPage = 0;
 // One-time seed: load the built-in HISTORICAL baseline + any previously-logged
 // custom orders into the unified store. After this, ALL orders are editable.
 function initOrders() {
-  if (localStorage.getItem(LS_ORDERS)) return;
-  const legacy = JSON.parse(localStorage.getItem(LS_ORDERS_V1) || '[]');
-  const seeded = [...HISTORICAL.map(o => ({ ...o })), ...legacy];
-  localStorage.setItem(LS_ORDERS, JSON.stringify(seeded));
+  if (!localStorage.getItem(LS_ORDERS)) {
+    const legacy = JSON.parse(localStorage.getItem(LS_ORDERS_V1) || '[]');
+    const seeded = [...HISTORICAL.map(o => ({ ...o })), ...legacy];
+    localStorage.setItem(LS_ORDERS, JSON.stringify(seeded));
+    return;
+  }
+  // Merge in any new built-in HISTORICAL orders added since the user's last
+  // seed (e.g. newly-added months) without touching their existing edits.
+  const arr = rawOrders();
+  const ids = new Set(arr.map(o => o.id));
+  const missing = HISTORICAL.filter(o => !ids.has(o.id)).map(o => ({ ...o }));
+  if (missing.length) {
+    localStorage.setItem(LS_ORDERS, JSON.stringify([...arr, ...missing]));
+  }
 }
 function rawOrders() { return JSON.parse(localStorage.getItem(LS_ORDERS) || '[]'); }
 function getOrders() { return rawOrders().sort((a, b) => a.date.localeCompare(b.date)); }
