@@ -498,8 +498,29 @@ async function init() {
     });
   }
   render();                 // re-render with public data
+  startAutoRefresh();
 }
 init();
+
+// ── AUTO-REFRESH ─────────────────────────────────────
+// Public viewers never reload manually, so poll for new owner edits while
+// the tab is visible and re-render whenever the snapshot actually changed.
+function startAutoRefresh() {
+  if (_isSharedLink) return; // static base64 share links don't update server-side
+  const AUTO_REFRESH_MS = 30_000;
+  setInterval(async () => {
+    if (document.hidden) return;
+    const before = JSON.stringify(_sharedData);
+    await loadPublicData();
+    if (JSON.stringify(_sharedData) !== before) render();
+  }, AUTO_REFRESH_MS);
+  document.addEventListener('visibilitychange', async () => {
+    if (document.hidden) return;
+    const before = JSON.stringify(_sharedData);
+    await loadPublicData();
+    if (JSON.stringify(_sharedData) !== before) render();
+  });
+}
 </script>
 </body>
 </html>
