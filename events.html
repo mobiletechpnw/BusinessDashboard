@@ -47,14 +47,15 @@ header { background:var(--surface); border-bottom:1px solid var(--border); paddi
 .stat-lbl { font-size:.62rem; color:var(--text2); text-transform:uppercase; letter-spacing:.6px; margin-top:5px; }
 
 /* MAIN */
-main { padding:0 24px 24px; }
+main { padding:0 0 24px; }
+#panel-roi { padding:0 24px; }
 
 /* MATRIX SCROLL WRAPPER — hides scrollbar, table still swipe/trackpad scrollable */
 .table-scroll {
   overflow-x:auto;
   overflow-y:visible;
-  border:1px solid var(--border);
-  border-radius:var(--radius);
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
   scrollbar-width:none; /* Firefox */
 }
 .table-scroll::-webkit-scrollbar { display:none; } /* Chrome / Safari */
