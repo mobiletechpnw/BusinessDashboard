@@ -9,7 +9,6 @@
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="styles.css">
 <script src="shared.js" defer></script>
-<script src="supabase-sync.js" defer></script>
 <title>Vault &amp; Pine Collective</title>
 <style>
   body { min-height: 100vh; }
@@ -991,7 +990,7 @@
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px">
       <div>
         <div style="font-size:1rem;font-weight:800">Pokémon Jet Tags Tracker</div>
-        <div style="font-size:0.78rem;color:var(--text2);margin-top:3px" id="jtSubtitle">130 tags purchased · $112 total cost ($0.86/ea) · Sell price $5.00/ea</div>
+        <div style="font-size:0.78rem;color:var(--text2);margin-top:3px" id="jtSubtitle">150 tags purchased · $112 total cost ($0.75/ea) · Sell price $5.00/ea</div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn-ghost" onclick="openJtRestockModal()">+ Restock</button>
@@ -3225,19 +3224,23 @@ function downloadBlob(filename, text, mime) {
 function exportBackup() {
   const data = {
     _app: 'Vault & Pine Collective',
-    _version: 2,
+    _version: 3,
     exportedAt: new Date().toISOString(),
-    orders:       JSON.parse(localStorage.getItem(LS_ORDERS)       || '[]'),
-    goals:        JSON.parse(localStorage.getItem(GOALS_KEY)        || '{"goals":[]}'),
-    expenses:     JSON.parse(localStorage.getItem(EXP_KEY)          || '[]'),
-    jettags:      JSON.parse(localStorage.getItem(JT_KEY)           || '[]'),
-    jtRestocks:   JSON.parse(localStorage.getItem(JT_RESTOCK_KEY)   || '[]'),
-    pins:         JSON.parse(localStorage.getItem(PIN_KEY)          || '[]'),
-    pinRestocks:  JSON.parse(localStorage.getItem(PIN_RESTOCK_KEY)  || '[]'),
+    orders:         JSON.parse(localStorage.getItem(LS_ORDERS)           || '[]'),
+    goals:          JSON.parse(localStorage.getItem(GOALS_KEY)            || '{"goals":[]}'),
+    expenses:       JSON.parse(localStorage.getItem(EXP_KEY)              || '[]'),
+    jettags:        JSON.parse(localStorage.getItem(JT_KEY)               || '[]'),
+    jtRestocks:     JSON.parse(localStorage.getItem(JT_RESTOCK_KEY)       || '[]'),
+    pins:           JSON.parse(localStorage.getItem(PIN_KEY)              || '[]'),
+    pinRestocks:    JSON.parse(localStorage.getItem(PIN_RESTOCK_KEY)      || '[]'),
+    events:         JSON.parse(localStorage.getItem(EV_KEY)               || '[]'),
+    printerCredits: JSON.parse(localStorage.getItem(LS_PRINTER_CREDITS)   || '{}'),
+    monthlyGoal:    localStorage.getItem(LS_GOAL_KEY),
+    filament:       JSON.parse(localStorage.getItem(LS_FILAMENT_KEY)      || '[]'),
   };
   downloadBlob(`vault-pine-backup-${TODAY}.json`, JSON.stringify(data, null, 2), 'application/json');
   localStorage.setItem('vp_last_backup', Date.now());
-  toast('Full backup downloaded (includes Jet Tags & Pins).');
+  toast('Full backup downloaded (includes Jet Tags, Pins, Events & all settings).');
 }
 
 function importBackup(file) {
@@ -3249,22 +3252,23 @@ function importBackup(file) {
     if (!d || (d.orders === undefined && d.goals === undefined && d.expenses === undefined && d.jettags === undefined && d.pins === undefined)) {
       toast('That file is not a Vault & Pine backup.'); return;
     }
-    if (!confirm('Restore this backup? It replaces your currently saved data (orders, goals, expenses, Jet Tags, Pins).')) return;
-    if (d.orders      !== undefined) localStorage.setItem(LS_ORDERS,       JSON.stringify(d.orders));
-    if (d.goals       !== undefined) localStorage.setItem(GOALS_KEY,        JSON.stringify(d.goals));
-    if (d.expenses    !== undefined) localStorage.setItem(EXP_KEY,          JSON.stringify(d.expenses));
-    if (d.jettags     !== undefined) localStorage.setItem(JT_KEY,           JSON.stringify(d.jettags));
-    if (d.jtRestocks  !== undefined) localStorage.setItem(JT_RESTOCK_KEY,   JSON.stringify(d.jtRestocks));
-    if (d.pins        !== undefined) localStorage.setItem(PIN_KEY,          JSON.stringify(d.pins));
-    if (d.pinRestocks !== undefined) localStorage.setItem(PIN_RESTOCK_KEY,  JSON.stringify(d.pinRestocks));
+    if (!confirm('Restore this backup? It replaces your currently saved data (orders, goals, expenses, Jet Tags, Pins, Events & settings).')) return;
+    if (d.orders         !== undefined) localStorage.setItem(LS_ORDERS,           JSON.stringify(d.orders));
+    if (d.goals          !== undefined) localStorage.setItem(GOALS_KEY,            JSON.stringify(d.goals));
+    if (d.expenses       !== undefined) localStorage.setItem(EXP_KEY,              JSON.stringify(d.expenses));
+    if (d.jettags        !== undefined) localStorage.setItem(JT_KEY,               JSON.stringify(d.jettags));
+    if (d.jtRestocks     !== undefined) localStorage.setItem(JT_RESTOCK_KEY,       JSON.stringify(d.jtRestocks));
+    if (d.pins           !== undefined) localStorage.setItem(PIN_KEY,              JSON.stringify(d.pins));
+    if (d.pinRestocks    !== undefined) localStorage.setItem(PIN_RESTOCK_KEY,      JSON.stringify(d.pinRestocks));
+    if (d.events         !== undefined) localStorage.setItem(EV_KEY,               JSON.stringify(d.events));
+    if (d.printerCredits !== undefined) localStorage.setItem(LS_PRINTER_CREDITS,   JSON.stringify(d.printerCredits));
+    if (d.monthlyGoal    != null)       localStorage.setItem(LS_GOAL_KEY,          d.monthlyGoal);
+    if (d.filament       !== undefined) localStorage.setItem(LS_FILAMENT_KEY,      JSON.stringify(d.filament));
     loadGoals(); renderSalesAll(); renderGoals(); renderExpensesAll();
-    if (typeof renderJtAll === 'function') renderJtAll();
+    if (typeof renderJtAll  === 'function') renderJtAll();
     if (typeof renderPinAll === 'function') renderPinAll();
-    toast('Restored ✓ — syncing to cloud…');
-    // Push everything to Supabase immediately after restore
-    if (window.VpcSync) {
-      window.VpcSync.pushAll().then(() => toast('✅ All data restored and saved to cloud.'));
-    }
+    if (typeof renderEvAll  === 'function') renderEvAll();
+    toast('Restored ✓ — all local data replaced.');
   };
   reader.readAsText(file);
   document.getElementById('importFile').value = '';
@@ -3324,7 +3328,7 @@ const JT_INVENTORY = [
   { id:'cubone',      name:'Cubone',      purchased:10 },
 ];
 
-const JT_TOTAL_PURCHASED = JT_INVENTORY.reduce((s,c) => s + c.purchased, 0); // 130
+const JT_TOTAL_PURCHASED = JT_INVENTORY.reduce((s,c) => s + c.purchased, 0); // 150
 const JT_TOTAL_COST      = 112;
 const JT_COST_PER_TAG    = JT_TOTAL_COST / JT_TOTAL_PURCHASED; // ~$0.862
 const JT_SELL_PRICE      = 5.00;
@@ -3382,10 +3386,10 @@ function renderJtStatBar() {
   document.getElementById('jtProfit').style.color    = t.profit >= 0 ? 'var(--accent)' : 'var(--red)';
   document.getElementById('jtSold').textContent      = t.qty;
   document.getElementById('jtRemaining').textContent = t.remaining;
-  document.getElementById('jtCostBasis').textContent = fmt$(t.totalCost);
+  document.getElementById('jtCostBasis').textContent = fmt$(t.cogs);
   document.getElementById('jtInventoryDate').textContent = 'As of ' + new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   const sub = document.getElementById('jtSubtitle');
-  if (sub) sub.textContent = `${t.totalEffective} tags in stock · ${fmt$(t.totalCost)} total cost · $${JT_SELL_PRICE.toFixed(2)}/ea sell price`;
+  if (sub) sub.textContent = `${t.totalEffective} tags purchased · ${fmt$(t.totalCost)} total cost · $${JT_SELL_PRICE.toFixed(2)}/ea sell price`;
 }
 
 function renderJtInventoryGrid() {
@@ -3693,7 +3697,7 @@ function renderPinStatBar() {
   document.getElementById('pinProfit').style.color    = t.profit >= 0 ? '#2dd4bf' : 'var(--red)';
   document.getElementById('pinSold').textContent      = t.qty;
   document.getElementById('pinRemaining').textContent = t.remaining;
-  document.getElementById('pinCostBasis').textContent = fmt$(t.totalCost);
+  document.getElementById('pinCostBasis').textContent = fmt$(t.cogs);
   document.getElementById('pinInventoryDate').textContent = 'As of ' + new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 }
 
@@ -3938,7 +3942,6 @@ loadGoals();
 renderSalesAll();
 renderGoals();
 renderExpensesAll();
-initEvents();
 
 // ── EVENT TRACKER ──
 const EV_KEY = 'vp_events_v1';
@@ -4057,6 +4060,7 @@ function deleteEvent(id) {
   toast('Event deleted.');
 }
 function initEvents() { renderEvAll(); }
+initEvents();
 
 // Expose for Supabase sync re-render
 if (typeof window.renderAll === 'undefined') {
