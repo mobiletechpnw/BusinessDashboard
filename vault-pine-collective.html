@@ -9,6 +9,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="styles.css">
 <script src="shared.js" defer></script>
+<script src="supabase-sync.js" defer></script>
 <title>Vault &amp; Pine Collective</title>
 <style>
   body { min-height: 100vh; }
@@ -297,15 +298,13 @@
   .btn-primary:hover { background: #7d9bff; }
   .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
   .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
 
   /* ── Toast ── */
   .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--accent); color: var(--text); padding: 11px 18px; border-radius: 9px; font-size: 0.83rem; z-index: 600; transform: translateY(80px); opacity: 0; transition: all 0.25s; }
   .toast.show { transform: translateY(0); opacity: 1; }
 
-  /* ── Data tools (backup / restore / export) ── */
-  .data-tools { position: fixed; bottom: 18px; left: 18px; display: flex; gap: 6px; z-index: 400; }
-  .dt-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text2); font-size: 0.72rem; font-weight: 600; padding: 7px 11px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.35); }
-  .dt-btn:hover { border-color: var(--accent); color: var(--accent); }
 
   @media (max-width: 700px) {
     /* Header: row 1 = brand + sync chip, row 2 = section nav */
@@ -360,7 +359,6 @@
     .btn-primary, .btn-ghost { padding: 8px 14px; font-size: 0.78rem; min-height: 44px; }
     .goals-top-bar { flex-direction: column; align-items: flex-start; }
     .filter-group { flex-wrap: wrap; }
-    .data-tools { display: none; }
     #backup-banner { width: 92%; flex-wrap: wrap; }
   }
   @media (max-width: 480px) {
@@ -389,6 +387,7 @@
     <div class="main-tab" data-section="jettags">🏷 Jet Tags</div>
     <div class="main-tab" data-section="pins">📌 Pins</div>
     <div class="main-tab" data-section="events">🎪 Events</div>
+    <div class="main-tab" data-section="backoffice">⚙ Back Office</div>
   </div>
   <div class="header-stats">
     <div class="hstat">
@@ -1286,15 +1285,43 @@
 <!-- Context-aware FAB: shows the right "add" modal for the active section/tab -->
 <button class="fab" id="vpc-fab" onclick="vpcFabAction()" title="Quick add" aria-label="Add">＋</button>
 
-<!-- ══════════════════════════════════════════ DATA TOOLS ══ -->
-<div class="data-tools">
-  <button class="dt-btn" onclick="exportBackup()" title="Download a full backup (orders, goals, expenses) as JSON">⬇ Backup</button>
-  <button class="dt-btn" onclick="document.getElementById('importFile').click()" title="Restore from a backup file">⬆ Restore</button>
-  <button class="dt-btn" onclick="exportOrdersCSV()" title="Export all orders to a CSV spreadsheet">↧ CSV</button>
-  <button class="dt-btn" onclick="resetOrdersToDefault()" title="Restore the original 47 built-in orders (keeps orders you added)">↺ Reset 47</button>
-  <button class="dt-btn" id="push-all-btn" onclick="forcePushAll()" title="Force-upload ALL local data to the cloud (use this if a new device is missing your data)">☁ Push to Cloud</button>
-  <input type="file" id="importFile" accept="application/json,.json" style="display:none" onchange="importBackup(this.files[0])">
-</div>
+<!-- ══════════════════════════════════════════ BACK OFFICE ══ -->
+<div class="section" id="section-backoffice">
+  <main style="max-width:740px;margin:0 auto">
+    <div style="margin-bottom:28px">
+      <div style="font-size:1.1rem;font-weight:800;margin-bottom:4px">⚙ Back Office</div>
+      <div style="font-size:0.8rem;color:var(--text2)">Data management, backups, and cloud sync controls.</div>
+    </div>
+
+    <div class="card" style="margin-bottom:18px">
+      <div class="card-title" style="margin-bottom:14px">☁ Cloud Sync</div>
+      <div style="font-size:0.82rem;color:var(--text2);margin-bottom:14px">Your data auto-saves to Supabase on every change — no manual action needed. Use the button below only if you need to force a full upload (e.g. after importing a backup on a new device).</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <button class="btn-primary" onclick="forcePushAll()">☁ Force Push All to Cloud</button>
+        <div id="bo-sync-status" style="font-size:0.78rem;color:var(--text2)"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:18px">
+      <div class="card-title" style="margin-bottom:14px">💾 Backup &amp; Restore</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn-primary" onclick="exportBackup()">⬇ Download Backup</button>
+        <button class="btn-secondary" onclick="document.getElementById('importFile').click()">⬆ Restore from File</button>
+        <input type="file" id="importFile" accept="application/json,.json" style="display:none" onchange="importBackup(this.files[0])">
+      </div>
+      <div style="font-size:0.75rem;color:var(--text2);margin-top:10px">Backup includes all orders, goals, expenses, Jet Tags, Pins, Events, and settings.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:14px">📤 Export &amp; Reset</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn-secondary" onclick="exportOrdersCSV()">↧ Export Orders CSV</button>
+        <button class="btn-secondary" style="color:var(--red);border-color:var(--red)" onclick="resetOrdersToDefault()">↺ Reset to 47 Default Orders</button>
+      </div>
+      <div style="font-size:0.75rem;color:var(--text2);margin-top:10px">CSV export downloads all orders as a spreadsheet. Reset restores the original 47 built-in demo orders (any orders you added are kept).</div>
+    </div>
+  </main>
+</div><!-- /section-backoffice -->
 
 <div class="toast" id="toast"></div>
 
@@ -1377,6 +1404,8 @@ document.querySelectorAll('.main-tab').forEach(t => {
     document.querySelectorAll('.section').forEach(x => x.classList.remove('active'));
     t.classList.add('active');
     document.getElementById('section-' + t.dataset.section).classList.add('active');
+    const fab = document.getElementById('vpc-fab');
+    if (fab) fab.style.display = t.dataset.section === 'backoffice' ? 'none' : '';
   });
 });
 
@@ -4062,23 +4091,27 @@ function deleteEvent(id) {
 function initEvents() { renderEvAll(); }
 initEvents();
 
-// Expose for Supabase sync re-render
-if (typeof window.renderAll === 'undefined') {
-  window.renderAll = function() { try { renderSalesAll(); } catch(e) {} };
-}
+// Full re-render hook — called by VpcSync after pulling fresh cloud data
+window.renderAll = function() {
+  try { renderSalesAll();    } catch(e) {}
+  try { renderGoals();       } catch(e) {}
+  try { renderExpensesAll(); } catch(e) {}
+  try { renderJtAll();       } catch(e) {}
+  try { renderPinAll();      } catch(e) {}
+  try { renderEvAll();       } catch(e) {}
+  try { loadGoals();         } catch(e) {}
+};
 
-// Auto-backup reminder
-(function checkBackupReminder() {
-  const last = parseInt(localStorage.getItem('vp_last_backup') || '0');
-  const daysSince = (Date.now() - last) / (1000 * 60 * 60 * 24);
-  if (daysSince > 7) {
-    setTimeout(() => {
-      const banner = document.createElement('div');
-      banner.id = 'backup-banner';
-      banner.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#1a1d27;border:1px solid var(--yellow);border-radius:8px;padding:12px 20px;display:flex;align-items:center;gap:14px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.5);font-size:0.82rem;';
-      banner.innerHTML = `<span style="color:var(--yellow)">⚠️</span><span style="color:var(--text)">No backup in <strong>${Math.floor(daysSince)} days</strong> — your data is only saved locally.</span><button onclick="exportBackup();document.getElementById('backup-banner').remove()" style="background:var(--yellow);color:#000;border:none;border-radius:5px;padding:6px 14px;font-weight:700;cursor:pointer;font-size:0.78rem;">Download Backup</button><button onclick="document.getElementById('backup-banner').remove()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem;padding:0 4px;">✕</button>`;
-      document.body.appendChild(banner);
-    }, 1500);
+// Back Office sync status display
+(function updateBoSyncStatus() {
+  const el = document.getElementById('bo-sync-status');
+  if (!el) return;
+  const last = parseInt(localStorage.getItem('vpc_last_sync_at') || '0');
+  if (last) {
+    const mins = Math.round((Date.now() - last) / 60000);
+    el.textContent = mins < 2 ? 'Last synced: just now' : `Last synced: ${mins} min ago`;
+  } else {
+    el.textContent = 'Not yet synced this session';
   }
 })();
 </script>
