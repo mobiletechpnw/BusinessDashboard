@@ -305,6 +305,12 @@
   .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--accent); color: var(--text); padding: 11px 18px; border-radius: 9px; font-size: 0.83rem; z-index: 600; transform: translateY(80px); opacity: 0; transition: all 0.25s; }
   .toast.show { transform: translateY(0); opacity: 1; }
 
+  /* ── Date range filter bar ── */
+  .range-bar { display: flex; align-items: center; gap: 6px; padding: 10px 24px; border-bottom: 1px solid var(--border); background: var(--surface); flex-wrap: wrap; }
+  .range-btn { background: transparent; border: 1px solid var(--border); color: var(--text2); font-size: 0.72rem; font-weight: 600; padding: 5px 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s; }
+  .range-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .range-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .range-label { font-size: 0.7rem; color: var(--text2); margin-right: 4px; }
 
   @media (max-width: 700px) {
     /* Header: row 1 = brand + sync chip, row 2 = section nav */
@@ -426,6 +432,16 @@
 
 <!-- ══════════════════════════════════════════ SALES SECTION ══ -->
 <div class="section active" id="section-sales">
+
+  <div class="range-bar" id="sales-range-bar">
+    <span class="range-label">Range:</span>
+    <button class="range-btn active" data-range="all">All Time</button>
+    <button class="range-btn" data-range="ytd">YTD</button>
+    <button class="range-btn" data-range="6m">6 Months</button>
+    <button class="range-btn" data-range="3m">3 Months</button>
+    <button class="range-btn" data-range="30d">30 Days</button>
+    <button class="range-btn" data-range="7d">7 Days</button>
+  </div>
 
   <div class="kpi-bar">
     <div class="kpi">
@@ -1415,6 +1431,38 @@ document.querySelectorAll('.main-tab').forEach(t => {
 });
 
 // ══════════════════════════════════════════════════════════════
+//  DATE RANGE FILTER
+// ══════════════════════════════════════════════════════════════
+let ACTIVE_RANGE = 'all';
+
+function getRangeStart(range) {
+  const now = new Date();
+  if (range === 'all') return null;
+  if (range === 'ytd') return new Date(now.getFullYear(), 0, 1);
+  if (range === '6m')  { const d = new Date(now); d.setMonth(d.getMonth() - 6); return d; }
+  if (range === '3m')  { const d = new Date(now); d.setMonth(d.getMonth() - 3); return d; }
+  if (range === '30d') { const d = new Date(now); d.setDate(d.getDate() - 30); return d; }
+  if (range === '7d')  { const d = new Date(now); d.setDate(d.getDate() - 7); return d; }
+  return null;
+}
+
+function getFilteredOrders() {
+  const all = getOrders();
+  const start = getRangeStart(ACTIVE_RANGE);
+  if (!start) return all;
+  return all.filter(o => o.date && new Date(o.date + 'T00:00:00') >= start);
+}
+
+document.querySelectorAll('.range-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    ACTIVE_RANGE = btn.dataset.range;
+    renderSalesAll();
+  });
+});
+
+// ══════════════════════════════════════════════════════════════
 //  SALES — DATA
 // ══════════════════════════════════════════════════════════════
 const HISTORICAL = [
@@ -1561,7 +1609,7 @@ function daysSince(dateStr) {
 
 // ── Sales KPIs ──
 function renderKPIs() {
-  const orders = getOrders();
+  const orders = getFilteredOrders();
   const totalRev  = orders.reduce((s, o) => s + o.salePrice, 0);
   const totalProf = orders.reduce((s, o) => s + o.salePrice - o.cogs, 0);
   const totalCogs = orders.reduce((s, o) => s + o.cogs, 0);

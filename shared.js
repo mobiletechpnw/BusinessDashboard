@@ -819,9 +819,67 @@ document.addEventListener('DOMContentLoaded', () => {
   injectSenseiInsightBar();
   injectSenseiPanel();
   registerSW();
+  injectMobileNav();
   // Deferred enhancements
   setTimeout(() => {
     checkAndNotify();
     injectTrendAlerts();
   }, 2000);
 });
+
+// ── Mobile bottom navigation ──
+function injectMobileNav() {
+  if (window.location.pathname.endsWith('login.html')) return;
+
+  const style = document.createElement('style');
+  style.textContent = `
+    .mobile-bottom-nav {
+      display: none;
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(15,17,23,0.96);
+      backdrop-filter: blur(20px) saturate(1.4);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding: 0 0 env(safe-area-inset-bottom, 0);
+    }
+    .mobile-bottom-nav ul {
+      display: flex; list-style: none; margin: 0; padding: 0;
+      height: 56px;
+    }
+    .mobile-bottom-nav li { flex: 1; }
+    .mobile-bottom-nav a {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100%; text-decoration: none; color: #8892b0;
+      font-size: 0.52rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;
+      gap: 3px; transition: color 0.15s;
+    }
+    .mobile-bottom-nav a .nav-icon { font-size: 1.15rem; line-height: 1; }
+    .mobile-bottom-nav a.active { color: #6C8EFF; }
+    .mobile-bottom-nav a:hover { color: #c8d0e8; }
+    @media (max-width: 768px) {
+      .mobile-bottom-nav { display: block; }
+      body { padding-bottom: 60px; }
+    }
+  `;
+  document.head.appendChild(style);
+
+  const currentPath = window.location.pathname;
+  const links = [
+    { href: 'index.html',                  icon: '⌂',  label: 'Home'     },
+    { href: 'vault-pine-collective.html',   icon: '📊', label: 'Sales'    },
+    { href: 'events.html',                  icon: '🎪', label: 'Events'   },
+    { href: 'expenses.html',                icon: '💸', label: 'Expenses' },
+    { href: 'analytics.html',               icon: '📈', label: 'Insights' },
+  ];
+
+  const nav = document.createElement('nav');
+  nav.className = 'mobile-bottom-nav';
+  nav.setAttribute('aria-label', 'Mobile navigation');
+  nav.innerHTML = `<ul>${links.map(l => {
+    const isActive = currentPath.endsWith(l.href) || (l.href === 'index.html' && (currentPath.endsWith('/') || currentPath.endsWith('index.html')));
+    return `<li><a href="${l.href}"${isActive ? ' class="active"' : ''}>
+      <span class="nav-icon">${l.icon}</span>
+      <span>${l.label}</span>
+    </a></li>`;
+  }).join('')}</ul>`;
+  document.body.appendChild(nav);
+}

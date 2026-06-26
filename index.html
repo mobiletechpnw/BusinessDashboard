@@ -362,7 +362,7 @@ footer a { color: var(--accent); text-decoration: none; }
       <div class="kpi-sub" id="kpi-month-sub"></div>
     </div>
     <div class="tile span-3x1 kpi-tile" style="--tile-accent:var(--accent2);">
-      <div class="kpi-label">Net Profit</div>
+      <div class="kpi-label">Gross Profit</div>
       <div class="kpi-value" id="kpi-profit" data-prefix="$">0</div>
       <div class="kpi-sub" id="kpi-profit-sub"></div>
     </div>
@@ -628,7 +628,10 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
 
   const riserRev = orders.reduce((s,o)=>s+(o.salePrice||0),0);
   const totalRev = riserRev + jtSales.reduce((s,x)=>s+(x.revenue||0),0) + pinSales.reduce((s,x)=>s+(x.revenue||0),0);
-  const profit   = orders.reduce((s,o)=>s+(o.salePrice||0)-(o.cogs||0),0);
+  const riserProfit = orders.reduce((s,o)=>s+(o.salePrice||0)-(o.cogs||0),0);
+  const jtProfit    = jtSales.reduce((s,x)=>s+(x.revenue||0),0) - jtSales.reduce((s,x)=>s+(x.qty||0),0) * 0.747; // approx cost per tag
+  const pinProfit   = pinSales.reduce((s,x)=>s+(x.revenue||0),0) - pinSales.reduce((s,x)=>s+(x.qty||0),0) * 0.95;
+  const profit      = riserProfit + jtProfit + pinProfit;
   const monthRev = orders.filter(o=>(o.date||'').startsWith(thisMonth)).reduce((s,o)=>s+(o.salePrice||0),0);
   const monthOrders = orders.filter(o=>(o.date||'').startsWith(thisMonth)).length;
 
@@ -637,7 +640,11 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
   countUp(document.getElementById('kpi-profit'), profit,   '$');
   document.getElementById('kpi-rev-sub').textContent   = `${orders.length} total orders`;
   document.getElementById('kpi-month-sub').textContent = `${monthOrders} order${monthOrders!==1?'s':''} this month`;
-  document.getElementById('kpi-profit-sub').innerHTML  = profit >= 0 ? '<span class="kpi-up">↑ on track</span>' : '<span class="kpi-down">↓ check costs</span>';
+  const allRevForMargin = totalRev;
+  const grossMarginPct = allRevForMargin > 0 ? (profit / allRevForMargin * 100).toFixed(1) : '0.0';
+  document.getElementById('kpi-profit-sub').innerHTML  = profit >= 0
+    ? `<span class="kpi-up">↑ ${grossMarginPct}% margin</span>`
+    : `<span class="kpi-down">↓ check costs</span>`;
   document.getElementById('vpc-stat').innerHTML = `<strong>${orders.length}</strong> orders`;
 
   // Sparkline — last 8 weeks of revenue (2026: data-forward tiles)
@@ -718,14 +725,17 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
 
   // Revenue snapshot widget
   const rsEl = document.getElementById('revenue-snapshot');
-  if (!orders.length && !jtSales.length) {
+  const jtRev  = jtSales.reduce((s,x)=>s+(x.revenue||0),0);
+  const pinRev = pinSales.reduce((s,x)=>s+(x.revenue||0),0);
+  const riserRev2 = orders.reduce((s,o)=>s+(o.salePrice||0),0);
+  if (!orders.length && !jtSales.length && !pinSales.length) {
     rsEl.innerHTML = `<span>No data — <a href="vault-pine-collective.html" style="color:var(--accent)">open dashboard</a> to get started.</span>`;
   } else {
     const stats = [
-      ['All-Time', fmt(totalRev), 'var(--green)'],
-      ['Riser Profit', fmt(profit), 'var(--accent)'],
-      ['This Month', fmt(monthRev), 'var(--accent2)'],
-      ['Orders', orders.length, 'var(--text)'],
+      ['Risers', fmt(riserRev2), 'var(--green)'],
+      ['Jet Tags', fmt(jtRev), 'var(--yellow)'],
+      ['Pins', fmt(pinRev), '#2dd4bf'],
+      ['Total', fmt(totalRev), 'var(--accent)'],
     ];
     rsEl.innerHTML = `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">` +
       stats.map(([l,v,c]) => `<div style="background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);border-radius:12px;padding:10px 12px;">
@@ -810,6 +820,28 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
       const pct = spent/budget.total*100;
       if (spent > budget.total) alerts.push({ type:'danger', icon:'💸', text:`Budget exceeded — ${fmt(spent)} of ${fmt(budget.total)}`, url:'expenses.html', label:'View' });
       else if (pct > 80) alerts.push({ type:'warning', icon:'💸', text:`Budget ${Math.round(pct)}% used`, url:'expenses.html', label:'View' });
+    }
+  } catch(e) {}
+  // Jet Tags low stock
+  try {
+    const jt = JSON.parse(localStorage.getItem('vp_jettags_v1')||'[]');
+    const jtInv = JSON.parse(localStorage.getItem('vp_jt_inventory_v1')||'null');
+    if (jtInv) {
+      const soldMap = {};
+      jt.forEach(s => (s.chars||[]).forEach(c => { soldMap[c] = (soldMap[c]||0) + (s.qty||1); }));
+      const low = jtInv.filter(c => (c.purchased - (soldMap[c.id]||0)) <= 2 && (c.purchased - (soldMap[c.id]||0)) >= 0);
+      if (low.length) alerts.push({ type:'warning', icon:'🏷', text:`${low.length} Jet Tag character${low.length>1?'s':''} low on stock (≤2 remaining)`, url:'vault-pine-collective.html', label:'View' });
+    }
+  } catch(e) {}
+  // Pins low stock
+  try {
+    const pins = JSON.parse(localStorage.getItem('vp_pins_v1')||'[]');
+    const pinInv = JSON.parse(localStorage.getItem('vp_pin_inventory_v1')||'null');
+    if (pinInv) {
+      const soldMap = {};
+      pins.forEach(s => (s.chars||[]).forEach(c => { soldMap[c] = (soldMap[c]||0) + (s.qty||1); }));
+      const low = pinInv.filter(c => (c.purchased - (soldMap[c.id]||0)) <= 3 && (c.purchased - (soldMap[c.id]||0)) >= 0);
+      if (low.length) alerts.push({ type:'warning', icon:'📌', text:`${low.length} Pin character${low.length>1?'s':''} low on stock (≤3 remaining)`, url:'vault-pine-collective.html', label:'View' });
     }
   } catch(e) {}
   if (!alerts.length) return;
