@@ -238,7 +238,7 @@
   .exp-cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
 
   /* ── Jet Tags section ── */
-  .jt-stat-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
+  .jt-stat-bar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
   .jtat { background: var(--surface); padding: 14px 22px; }
   .jtat-num { font-size: 1.4rem; font-weight: 800; }
   .jtat-label { font-size: 0.68rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
@@ -255,7 +255,7 @@
   .jt-char-btn:hover { border-color: #8b5cf6; color: var(--text); }
 
   /* ── Pins section ── */
-  .pin-stat-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
+  .pin-stat-bar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
   .pintat { background: var(--surface); padding: 14px 22px; }
   .pintat-num { font-size: 1.4rem; font-weight: 800; }
   .pintat-label { font-size: 0.68rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
@@ -435,13 +435,13 @@
     </div>
     <div class="kpi">
       <div class="kpi-val" style="color:var(--accent)" id="kpiProfit">—</div>
-      <div class="kpi-label">Total Profit</div>
+      <div class="kpi-label">Gross Profit</div>
       <div class="kpi-sub" id="kpiProfitSub" style="color:var(--text2)"></div>
     </div>
     <div class="kpi">
       <div class="kpi-val" style="color:var(--yellow)" id="kpiRoi">—</div>
-      <div class="kpi-label">Avg ROI</div>
-      <div class="kpi-sub" style="color:var(--text2)">Competitor: $130/set</div>
+      <div class="kpi-label">Gross Margin</div>
+      <div class="kpi-sub" id="kpiRoiSub" style="color:var(--text2)"></div>
     </div>
     <div class="kpi">
       <div class="kpi-val" id="kpiOrders">—</div>
@@ -450,7 +450,7 @@
     </div>
     <div class="kpi">
       <div class="kpi-val" id="kpiCustomers">—</div>
-      <div class="kpi-label">Unique Customers</div>
+      <div class="kpi-label">Avg Order Value</div>
       <div class="kpi-sub" id="kpiCustSub" style="color:var(--text2)"></div>
     </div>
   </div>
@@ -740,7 +740,8 @@
     </div>
     <div class="estat">
       <div class="estat-num" id="eskpiNet">$0.00</div>
-      <div class="estat-label">Net Profit (After Exp.)</div>
+      <div class="estat-label">Operating Profit</div>
+      <div style="font-size:0.72rem;color:var(--text2);margin-top:2px" id="eskpiExpRatio"></div>
     </div>
   </div>
 
@@ -979,10 +980,12 @@
 
   <div class="jt-stat-bar" id="jtStatBar">
     <div class="jtat"><div class="jtat-num green" id="jtRevenue">$0.00</div><div class="jtat-label">Revenue</div></div>
-    <div class="jtat"><div class="jtat-num" style="color:var(--accent)" id="jtProfit">$0.00</div><div class="jtat-label">Profit</div></div>
-    <div class="jtat"><div class="jtat-num" style="color:var(--yellow)" id="jtSold">0</div><div class="jtat-label">Tags Sold</div></div>
-    <div class="jtat"><div class="jtat-num" id="jtRemaining">0</div><div class="jtat-label">Remaining</div></div>
-    <div class="jtat"><div class="jtat-num" style="color:var(--text2)" id="jtCostBasis">$0.00</div><div class="jtat-label">Cost Basis</div></div>
+    <div class="jtat"><div class="jtat-num" style="color:var(--accent)" id="jtProfit">$0.00</div><div class="jtat-label">Gross Profit</div></div>
+    <div class="jtat"><div class="jtat-num" style="color:var(--yellow)" id="jtMargin">—</div><div class="jtat-label">Gross Margin</div></div>
+    <div class="jtat"><div class="jtat-num" style="color:var(--text2)" id="jtCogs">$0.00</div><div class="jtat-label">COGS</div></div>
+    <div class="jtat"><div class="jtat-num" style="color:var(--text2)" id="jtInvCost">$0.00</div><div class="jtat-label">Inventory Cost</div></div>
+    <div class="jtat"><div class="jtat-num" style="color:var(--accent2)" id="jtSold">0</div><div class="jtat-label">Tags Sold</div></div>
+    <div class="jtat"><div class="jtat-num" id="jtRemaining">0</div><div class="jtat-label">In Stock</div></div>
   </div>
 
   <main>
@@ -1099,10 +1102,12 @@
 
   <div class="pin-stat-bar">
     <div class="pintat"><div class="pintat-num green" id="pinRevenue">$0.00</div><div class="pintat-label">Revenue</div></div>
-    <div class="pintat"><div class="pintat-num" style="color:#2dd4bf" id="pinProfit">$0.00</div><div class="pintat-label">Profit</div></div>
-    <div class="pintat"><div class="pintat-num" style="color:var(--yellow)" id="pinSold">0</div><div class="pintat-label">Pins Sold</div></div>
-    <div class="pintat"><div class="pintat-num" id="pinRemaining">0</div><div class="pintat-label">Remaining</div></div>
-    <div class="pintat"><div class="pintat-num" style="color:var(--text2)" id="pinCostBasis">$0.00</div><div class="pintat-label">Cost Basis</div></div>
+    <div class="pintat"><div class="pintat-num" style="color:#2dd4bf" id="pinProfit">$0.00</div><div class="pintat-label">Gross Profit</div></div>
+    <div class="pintat"><div class="pintat-num" style="color:var(--yellow)" id="pinMargin">—</div><div class="pintat-label">Gross Margin</div></div>
+    <div class="pintat"><div class="pintat-num" style="color:var(--text2)" id="pinCogs">$0.00</div><div class="pintat-label">COGS</div></div>
+    <div class="pintat"><div class="pintat-num" style="color:var(--text2)" id="pinInvCost">$0.00</div><div class="pintat-label">Inventory Cost</div></div>
+    <div class="pintat"><div class="pintat-num" style="color:var(--accent2)" id="pinSold">0</div><div class="pintat-label">Pins Sold</div></div>
+    <div class="pintat"><div class="pintat-num" id="pinRemaining">0</div><div class="pintat-label">In Stock</div></div>
   </div>
 
   <main>
@@ -1560,22 +1565,24 @@ function renderKPIs() {
   const totalRev  = orders.reduce((s, o) => s + o.salePrice, 0);
   const totalProf = orders.reduce((s, o) => s + o.salePrice - o.cogs, 0);
   const totalCogs = orders.reduce((s, o) => s + o.cogs, 0);
-  const avgRoi    = (totalProf / totalCogs * 100).toFixed(1);
   const custMap   = byCustomer(orders);
   const custCount = Object.keys(custMap).length;
   const thisMonth = THIS_MONTH;
   const thisMoOrders = orders.filter(o => o.date.startsWith(thisMonth));
   const thisMoRev = thisMoOrders.reduce((s, o) => s + o.salePrice, 0);
+  const grossMargin = totalRev > 0 ? (totalProf / totalRev * 100).toFixed(1) : '0.0';
+  const avgOrderVal = orders.length ? totalRev / orders.length : 0;
 
   document.getElementById('kpiRevenue').textContent   = fmt$(totalRev);
   document.getElementById('kpiProfit').textContent    = fmt$(totalProf);
-  document.getElementById('kpiRoi').textContent       = avgRoi + '%';
+  document.getElementById('kpiRoi').textContent       = grossMargin + '%';
   document.getElementById('kpiOrders').textContent    = orders.length;
-  document.getElementById('kpiCustomers').textContent = custCount;
+  document.getElementById('kpiCustomers').textContent = fmt$(avgOrderVal);
   document.getElementById('kpiRevSub').textContent    = `${fmt$(thisMoRev)} this month`;
-  document.getElementById('kpiProfitSub').textContent = `${((totalProf/totalRev)*100).toFixed(1)}% margin`;
+  document.getElementById('kpiProfitSub').textContent = `COGS: ${fmt$(totalCogs)}`;
+  document.getElementById('kpiRoiSub').textContent    = `${fmt$(totalCogs)} total COGS`;
   document.getElementById('kpiOrdersSub').textContent = `${thisMoOrders.length} this month`;
-  document.getElementById('kpiCustSub').textContent   = `${custCount} unique`;
+  document.getElementById('kpiCustSub').textContent   = `${custCount} unique customers`;
 
   // header quick-stats
   document.getElementById('hs-revenue').textContent = fmt$(totalRev);
@@ -2960,6 +2967,9 @@ function renderExpenseKPIs() {
   document.getElementById('eskpiVar').textContent   = fmt$(varMo);
   document.getElementById('eskpiNet').textContent   = fmt$(net);
   document.getElementById('eskpiNet').style.color   = net >= 0 ? 'var(--green)' : 'var(--red)';
+  const totalRev2 = getOrders().reduce((s,o) => s + o.salePrice, 0);
+  const expRatioEl = document.getElementById('eskpiExpRatio');
+  if (expRatioEl) expRatioEl.textContent = totalRev2 > 0 ? `${((totalMo / totalRev2) * 100).toFixed(1)}% of revenue` : '';
   document.getElementById('hs-expenses').textContent = fmt$(totalMo);
 }
 
@@ -3405,7 +3415,8 @@ function jtTotals() {
   const cogs   = qty * JT_COST_PER_TAG;
   const profit = revenue - cogs;
   const remaining = totalEffective - qty;
-  return { revenue, cogs, profit, qty, remaining, totalEffective, totalCost };
+  const margin = revenue > 0 ? (profit / revenue * 100) : 0;
+  return { revenue, cogs, profit, margin, qty, remaining, totalEffective, totalCost };
 }
 
 function renderJtStatBar() {
@@ -3413,12 +3424,16 @@ function renderJtStatBar() {
   document.getElementById('jtRevenue').textContent   = fmt$(t.revenue);
   document.getElementById('jtProfit').textContent    = fmt$(t.profit);
   document.getElementById('jtProfit').style.color    = t.profit >= 0 ? 'var(--accent)' : 'var(--red)';
+  const marginEl = document.getElementById('jtMargin');
+  marginEl.textContent  = t.revenue > 0 ? t.margin.toFixed(1) + '%' : '—';
+  marginEl.style.color  = t.margin >= 60 ? 'var(--green)' : t.margin >= 40 ? 'var(--yellow)' : 'var(--red)';
+  document.getElementById('jtCogs').textContent      = fmt$(t.cogs);
+  document.getElementById('jtInvCost').textContent   = fmt$(t.totalCost);
   document.getElementById('jtSold').textContent      = t.qty;
   document.getElementById('jtRemaining').textContent = t.remaining;
-  document.getElementById('jtCostBasis').textContent = fmt$(t.cogs);
   document.getElementById('jtInventoryDate').textContent = 'As of ' + new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   const sub = document.getElementById('jtSubtitle');
-  if (sub) sub.textContent = `${t.totalEffective} tags purchased · ${fmt$(t.totalCost)} total cost · $${JT_SELL_PRICE.toFixed(2)}/ea sell price`;
+  if (sub) sub.textContent = `${t.totalEffective} tags purchased · ${fmt$(t.totalCost)} inventory cost · $${JT_SELL_PRICE.toFixed(2)}/ea sell price`;
 }
 
 function renderJtInventoryGrid() {
@@ -3716,7 +3731,8 @@ function pinTotals() {
   const cogs    = qty * PIN_COST_PER_PIN;
   const profit  = revenue - cogs;
   const remaining = totalEffective - qty;
-  return { revenue, cogs, profit, qty, remaining, totalEffective, totalCost };
+  const margin = revenue > 0 ? (profit / revenue * 100) : 0;
+  return { revenue, cogs, profit, margin, qty, remaining, totalEffective, totalCost };
 }
 
 function renderPinStatBar() {
@@ -3724,9 +3740,13 @@ function renderPinStatBar() {
   document.getElementById('pinRevenue').textContent   = fmt$(t.revenue);
   document.getElementById('pinProfit').textContent    = fmt$(t.profit);
   document.getElementById('pinProfit').style.color    = t.profit >= 0 ? '#2dd4bf' : 'var(--red)';
+  const marginEl = document.getElementById('pinMargin');
+  marginEl.textContent  = t.revenue > 0 ? t.margin.toFixed(1) + '%' : '—';
+  marginEl.style.color  = t.margin >= 60 ? 'var(--green)' : t.margin >= 40 ? 'var(--yellow)' : 'var(--red)';
+  document.getElementById('pinCogs').textContent      = fmt$(t.cogs);
+  document.getElementById('pinInvCost').textContent   = fmt$(t.totalCost);
   document.getElementById('pinSold').textContent      = t.qty;
   document.getElementById('pinRemaining').textContent = t.remaining;
-  document.getElementById('pinCostBasis').textContent = fmt$(t.cogs);
   document.getElementById('pinInventoryDate').textContent = 'As of ' + new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 }
 
