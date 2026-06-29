@@ -13,7 +13,7 @@ const SHELL = [
   '/sales-dashboard.html', '/goals-dashboard.html',
   '/expenses.html', '/events.html', '/review.html', '/analytics.html',
   '/production.html', '/content.html', '/guru.html', '/vendor-calendar.html',
-  '/shared.js', '/supabase-sync.js',
+  '/util.js', '/shared.js', '/supabase-sync.js',
 ];
 
 self.addEventListener('install', e => {

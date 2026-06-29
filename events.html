@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="styles.css">
+<script src="util.js"></script>
 <script src="shared.js" defer></script>
 <script src="supabase-sync.js" defer></script>
 <title>Events &amp; Tables — VPC</title>
@@ -438,15 +439,15 @@ const setVendors = v  => localStorage.setItem(VN_KEY,  JSON.stringify(v));
 const setTables  = v  => localStorage.setItem(TBL_KEY, JSON.stringify(v));
 
 // ── UTILS ────────────────────────────────────────────
-const esc      = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const fmtDate  = d => d ? new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
-const fmtMoney = n => '$'+(+n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+// Shared helpers from util.js (loaded synchronously in <head>). Money is
+// cent-rounded to avoid floating-point drift across totals.
+const { esc, fmtDate, fmtMoney, money, sumMoney, todayStr } = VPCUtil;
 
 // ── STATS ────────────────────────────────────────────
 function renderStats() {
   const tbls  = getTables();
-  const paid  = tbls.filter(t => t.paid).reduce((s,t) => s + (+t.price||0), 0);
-  const owed  = tbls.filter(t => !t.paid).reduce((s,t) => s + (+t.price||0), 0);
+  const paid  = sumMoney(tbls.filter(t => t.paid),  t => t.price);
+  const owed  = sumMoney(tbls.filter(t => !t.paid), t => t.price);
   document.getElementById('st-events').textContent      = getEvents().length;
   document.getElementById('st-vendors').textContent     = getVendors().length;
   document.getElementById('st-booked').textContent      = tbls.length;
@@ -522,7 +523,7 @@ function renderMatrix() {
     vendors.forEach(v => {
       const t = (lk[ev.id]||{})[v.id];
       if (t) {
-        evTotal += +t.price || 0;
+        evTotal = money(evTotal + (+t.price || 0));
         const stateClass = t.paid ? 'is-paid' : 'is-unpaid';
         h += `<td class="cell ${stateClass}" onclick="openCellModal('${ev.id}','${v.id}')">
           <div class="cell-inner">
@@ -557,10 +558,10 @@ function renderMatrix() {
   let grandTotal = 0, grandDue = 0;
   vendors.forEach(v => {
     const vt   = tables.filter(t => t.vendorId === v.id);
-    const tot  = vt.reduce((s,t) => s + (+t.price||0), 0);
-    const due  = vt.filter(t => !t.paid).reduce((s,t) => s + (+t.price||0), 0);
-    grandTotal += tot;
-    grandDue   += due;
+    const tot  = sumMoney(vt, t => t.price);
+    const due  = sumMoney(vt.filter(t => !t.paid), t => t.price);
+    grandTotal = money(grandTotal + tot);
+    grandDue   = money(grandDue + due);
     h += `<td style="text-align:center">
       <div class="vt-amount">${fmtMoney(tot)}</div>
       <div class="vt-sub">
@@ -772,8 +773,8 @@ function billData() {
   const vn = getVendors().find(v => v.id === billVnId) || {};
   const events = getEvents();
   const unpaidOnly = document.getElementById('bill-unpaid-only').checked;
-  // Today's local date as YYYY-MM-DD — events before this are in the past and irrelevant to a bill.
-  const todayStr = new Date().toLocaleDateString('en-CA');
+  // Events before today are in the past and irrelevant to a bill.
+  const today = todayStr();
   let lines = getTables()
     .filter(t => t.vendorId === billVnId)
     .map(t => {
@@ -781,12 +782,12 @@ function billData() {
       return { event: ev.name || 'Event', date: ev.date || '', location: ev.location || '', price: +t.price || 0, paid: !!t.paid };
     })
     // Hide past-dated events; keep undated events so nothing is silently dropped.
-    .filter(l => !l.date || l.date >= todayStr)
+    .filter(l => !l.date || l.date >= today)
     .sort((a,b) => (a.date||'9999').localeCompare(b.date||'9999'));
   if (unpaidOnly) lines = lines.filter(l => !l.paid);
-  const total = lines.reduce((s,l) => s + l.price, 0);
-  const due   = lines.filter(l => !l.paid).reduce((s,l) => s + l.price, 0);
-  return { vn, lines, total, paidAmt: total - due, due, unpaidOnly };
+  const total = sumMoney(lines, l => l.price);
+  const due   = sumMoney(lines.filter(l => !l.paid), l => l.price);
+  return { vn, lines, total, paidAmt: money(total - due), due, unpaidOnly };
 }
 
 function renderBill() {
@@ -1004,9 +1005,9 @@ function renderROI() {
     const netAfterTables = grossProfit - tableCost;
     const roiPct  = tableCost > 0 ? (netAfterTables / tableCost * 100) : null;
 
-    totalTableCost += tableCost;
-    totalRevenue   += revenue;
-    totalNet       += netAfterTables;
+    totalTableCost = money(totalTableCost + tableCost);
+    totalRevenue   = money(totalRevenue + revenue);
+    totalNet       = money(totalNet + netAfterTables);
 
     const badgeCls  = roiPct === null ? '' : roiPct >= 100 ? 'badge-green' : roiPct >= 0 ? 'badge-yellow' : 'badge-red';
     const badgeTxt  = roiPct === null ? '— no tables' : roiPct >= 100 ? '💰 Strong ROI' : roiPct >= 0 ? '📊 Break-even' : '❌ Loss';

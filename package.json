@@ -1,0 +1,14 @@
+{
+  "name": "business-dashboard",
+  "version": "1.0.0",
+  "description": "Vault & Pine Collective — Business Command Center (static PWA)",
+  "private": true,
+  "scripts": {
+    "test": "node --test",
+    "format": "prettier --write \"*.{js,json,css}\"",
+    "format:check": "prettier --check \"*.{js,json,css}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.3.0"
+  }
+}
