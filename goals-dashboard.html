@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="styles.css">
+<script src="util.js"></script>
 <script src="shared.js" defer></script>
 <script src="supabase-sync.js" defer></script>
 <title>Goals & Objectives Dashboard</title>
@@ -511,7 +512,8 @@ function dueDateClass(d) {
   return '';
 }
 function esc(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  // Core &<> escaping shared via util.js; keep the quote-escaping this page relied on.
+  return VPCUtil.esc(s || '').replace(/"/g,'&quot;');
 }
 
 // ── Goal CRUD ─────────────────────────────────────────────────────────

@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="styles.css">
+<script src="util.js"></script>
 <script src="shared.js" defer></script>
 <script src="supabase-sync.js" defer></script>
 <title>Vault &amp; Pine Collective</title>
@@ -1367,7 +1368,7 @@ function vpcFabAction() {
 //  SHARED UTILITIES
 // ══════════════════════════════════════════════════════════════
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
-function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function esc(s) { return VPCUtil.esc(s || '').replace(/"/g,'&quot;'); }
 function fmt$(n) { return '$' + Number(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
 function fmtDate(d) { if (!d) return ''; const [y,m,day] = d.split('-'); return `${m}/${day}/${y.slice(2)}`; }
 function monthKey(d) { return d.slice(0, 7); }

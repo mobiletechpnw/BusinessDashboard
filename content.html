@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="styles.css">
+<script src="util.js"></script>
 <script src="shared.js" defer></script>
 <script src="supabase-sync.js" defer></script>
 <title>Content Planner — VPC</title>
@@ -484,7 +485,7 @@ function getContent() { return JSON.parse(localStorage.getItem(CONTENT_KEY) || '
 function saveContentData(arr) { localStorage.setItem(CONTENT_KEY, JSON.stringify(arr)); }
 
 // ── UTILS ──────────────────────────────────────────
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function esc(s) { return VPCUtil.esc(s || ''); }
 function fmtDate(d) {
   if (!d) return '—';
   const [y,m,day] = d.split('-');

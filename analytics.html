@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="styles.css">
+<script src="util.js"></script>
 <script src="shared.js" defer></script>
 <script src="supabase-sync.js" defer></script>
 <title>Business Intelligence · VPC</title>
@@ -314,7 +315,7 @@ const fmtK = n  => n >= 1000 ? '$' + (n/1000).toFixed(1) + 'k' : fmt(n);
 const pct  = (a, b) => b ? ((a / b) * 100).toFixed(1) + '%' : '—';
 const clr  = (margin) => margin >= 60 ? 'var(--green)' : margin >= 40 ? 'var(--yellow)' : 'var(--red)';
 // XSS-safe HTML escaping for any user-supplied string inserted into innerHTML
-const esc  = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const esc  = s => VPCUtil.esc(s || '').replace(/"/g,'&quot;');
 
 function getRaw() {
   return {

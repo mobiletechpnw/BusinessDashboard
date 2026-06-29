@@ -151,6 +151,7 @@ footer { text-align:center; padding:20px; border-top:1px solid var(--border); fo
   .header-actions { flex-direction:column; align-items:center; }
 }
 </style>
+<script src="util.js"></script>
 </head>
 <body>
 
@@ -274,7 +275,7 @@ const getVendors = () => _sharedData ? (_sharedData.vendors || []) : JSON.parse(
 const getTables  = () => _sharedData ? (_sharedData.tables  || []) : JSON.parse(localStorage.getItem('vpc_tables_v1')  || '[]');
 
 const fmtDate = d => d ? new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}) : '';
-const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const esc = s => VPCUtil.esc(s || '');
 
 let viewMode   = 'calendar';
 let filterMode = 'all';
