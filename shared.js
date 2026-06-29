@@ -782,9 +782,18 @@ window.SENSEI_TIPS = SENSEI_TIPS;
 
 // ── PWA ───────────────────────────────────────────
 function registerSW() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
-  }
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+
+  // When a freshly-installed worker takes control, reload once so the page
+  // is running the new code/markup immediately (network-first SW already
+  // fetched it) instead of one refresh behind. Guarded so it fires at most once.
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloaded) return;
+    reloaded = true;
+    window.location.reload();
+  });
 }
 
 // ── INIT ──────────────────────────────────────────
