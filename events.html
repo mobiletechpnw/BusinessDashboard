@@ -772,12 +772,16 @@ function billData() {
   const vn = getVendors().find(v => v.id === billVnId) || {};
   const events = getEvents();
   const unpaidOnly = document.getElementById('bill-unpaid-only').checked;
+  // Today's local date as YYYY-MM-DD — events before this are in the past and irrelevant to a bill.
+  const todayStr = new Date().toLocaleDateString('en-CA');
   let lines = getTables()
     .filter(t => t.vendorId === billVnId)
     .map(t => {
       const ev = events.find(e => e.id === t.eventId) || {};
       return { event: ev.name || 'Event', date: ev.date || '', location: ev.location || '', price: +t.price || 0, paid: !!t.paid };
     })
+    // Hide past-dated events; keep undated events so nothing is silently dropped.
+    .filter(l => !l.date || l.date >= todayStr)
     .sort((a,b) => (a.date||'9999').localeCompare(b.date||'9999'));
   if (unpaidOnly) lines = lines.filter(l => !l.paid);
   const total = lines.reduce((s,l) => s + l.price, 0);
