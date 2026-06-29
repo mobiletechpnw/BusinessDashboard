@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="styles.css">
+<script src="util.js"></script>
 <script src="shared.js" defer></script>
 <script src="supabase-sync.js" defer></script>
 <title>Financial Guru · VPC</title>
@@ -1239,7 +1240,7 @@ function renderSubAudit() {
     <table class="sub-table">
       <thead><tr><th>Bill</th><th class="num">Monthly</th><th class="num">Yearly</th></tr></thead>
       <tbody>${rows.map(r => `
-        <tr><td>${r.name || r.category || 'Recurring'}</td>
+        <tr><td>${VPCUtil.esc(r.name || r.category || 'Recurring')}</td>
         <td class="num">${fmt$(r.amount || 0)}</td>
         <td class="num" style="color:var(--yellow);font-weight:700">${fmt$((r.amount || 0) * 12)}</td></tr>`).join('')}
       </tbody>
@@ -1397,7 +1398,7 @@ function renderNetWorth() {
   const renderList = (items, kind) => items.length
     ? items.map(x => `
       <div class="nw-row">
-        <span class="nw-row-name">${x.name}</span>
+        <span class="nw-row-name">${VPCUtil.esc(x.name)}</span>
         <span class="nw-row-amt" style="color:${kind === 'asset' ? 'var(--green)' : 'var(--red)'}">${fmt$(x.amount)}</span>
         <button class="nw-row-del" onclick="deleteNwItem('${kind}','${x.id}')" title="Remove">✕</button>
       </div>`).join('')

@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="styles.css">
+<script src="util.js"></script>
 <script src="shared.js" defer></script>
 <script src="supabase-sync.js" defer></script>
 <title>Daily Review · VPC</title>
@@ -460,7 +461,7 @@ function renderGoals() {
       const dueText = diff === null ? '' : diff < 0 ? `${-diff}d overdue` : diff === 0 ? 'Today' : `${diff}d left`;
       return `<div class="goal-item">
         <div class="goal-check ${diff !== null && diff < 0 ? 'overdue' : 'active'}"></div>
-        <div class="goal-name">${g.title}</div>
+        <div class="goal-name">${VPCUtil.esc(g.title)}</div>
         ${dueText ? `<span class="goal-due" style="color:${dueColor}">${dueText}</span>` : ''}
       </div>`;
     }).join('');
@@ -594,7 +595,7 @@ function renderEvents() {
       const urgency = diff === 0 ? 'color:var(--yellow);font-weight:700' : diff < 0 ? 'color:var(--red)' : 'color:var(--text2)';
       return `<div class="event-item">
         <span class="event-date" style="${urgency}">${fmtDate(e.start||e.date)} ${diff===0?'(today)':diff===1?'(tomorrow)':''}</span>
-        <span style="flex:1">${e.name}</span>
+        <span style="flex:1">${VPCUtil.esc(e.name)}</span>
         ${e.boothCost ? `<span style="font-size:0.72rem;color:var(--text2)">${fmt(e.boothCost)}</span>` : ''}
       </div>`;
     }).join('');
@@ -625,8 +626,8 @@ function renderObjectivesDue() {
         const diff = dueDiff(o.due);
         const color = diff < 0 ? 'var(--red)' : diff === 0 ? 'var(--yellow)' : 'var(--accent)';
         return `<div style="background:var(--surface2);border-radius:8px;padding:12px 14px;border-left:3px solid ${color}">
-          <div style="font-size:0.82rem;font-weight:600">${o.text}</div>
-          <div style="font-size:0.7rem;color:var(--text2);margin-top:4px">${o.goalTitle} · <span style="color:${color}">${diff<0?-diff+'d overdue':diff===0?'Due today':diff+'d left'}</span></div>
+          <div style="font-size:0.82rem;font-weight:600">${VPCUtil.esc(o.text)}</div>
+          <div style="font-size:0.7rem;color:var(--text2);margin-top:4px">${VPCUtil.esc(o.goalTitle)} · <span style="color:${color}">${diff<0?-diff+'d overdue':diff===0?'Due today':diff+'d left'}</span></div>
         </div>`;
       }).join('') + '</div>';
   } catch(e) { el.innerHTML = '<div class="empty-msg">Could not load objectives.</div>'; }

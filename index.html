@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="styles.css">
+<script src="util.js"></script>
 <script src="shared.js" defer></script>
 <script src="supabase-sync.js" defer></script>
 <title>Business Command Center</title>
@@ -761,8 +762,8 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
   else dEl.innerHTML = upcoming.map(o => {
     const m = o.notes.match(/(\d{1,2}\/\d{1,2})/);
     return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--glass-border);">
-      <div><div style="color:var(--text);font-weight:600;font-size:0.8rem">${o.customer}</div>
-      <div style="font-size:0.7rem;color:var(--text2)">${o.product}</div></div>
+      <div><div style="color:var(--text);font-weight:600;font-size:0.8rem">${VPCUtil.esc(o.customer)}</div>
+      <div style="font-size:0.7rem;color:var(--text2)">${VPCUtil.esc(o.product)}</div></div>
       <div style="font-size:0.7rem;font-weight:700;color:var(--yellow);background:rgba(251,191,36,0.08);padding:3px 8px;border-radius:6px;white-space:nowrap;">📅 ${m?m[1]:''}</div>
     </div>`;
   }).join('');

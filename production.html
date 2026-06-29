@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="styles.css">
+<script src="util.js"></script>
 <script src="shared.js" defer></script>
 <script src="supabase-sync.js" defer></script>
 <title>Production · VPC</title>
@@ -591,7 +592,7 @@ function renderInventory() {
   const outItems = inv.filter(i => (i.stock||0) === 0);
 
   // Alert banner
-  const allAlerts = [...outItems.map(i => `<strong>${i.name}</strong> is OUT`), ...lowItems.map(i => `<strong>${i.name}</strong> is low (${i.stock} left)`)];
+  const allAlerts = [...outItems.map(i => `<strong>${VPCUtil.esc(i.name)}</strong> is OUT`), ...lowItems.map(i => `<strong>${VPCUtil.esc(i.name)}</strong> is low (${i.stock} left)`)];
   if (allAlerts.length > 0) {
     $('low-stock-banner').classList.remove('hidden');
     $('low-stock-text').innerHTML = allAlerts.join(' · ');
@@ -626,7 +627,7 @@ function renderInventory() {
     return `
       <div class="inv-card ${cardCls}">
         <div class="inv-product">
-          <span>${item.icon || '📦'} ${item.name}</span>
+          <span>${item.icon || '📦'} ${VPCUtil.esc(item.name)}</span>
           <button class="btn btn-red btn-sm" onclick="removeInvItem('${item.id}')" title="Remove">✕</button>
         </div>
         <div class="inv-count-row">

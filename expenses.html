@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="styles.css">
+<script src="util.js"></script>
 <script src="shared.js" defer></script>
 <script src="supabase-sync.js" defer></script>
 <title>Expenses · VPC</title>
@@ -543,8 +544,8 @@ function renderEntries() {
         <div class="expense-row">
           <div class="cat-icon" style="background:${c.color}22;color:${c.color}">${c.icon}</div>
           <div class="exp-desc">
-            <div class="exp-name">${e.description || e.category}</div>
-            <div class="exp-meta">${e.category}${e.notes ? ' · ' + e.notes : ''}</div>
+            <div class="exp-name">${VPCUtil.esc(e.description || e.category)}</div>
+            <div class="exp-meta">${VPCUtil.esc(e.category)}${e.notes ? ' · ' + VPCUtil.esc(e.notes) : ''}</div>
           </div>
           <div class="exp-amount" style="color:var(--red)">${fmt(e.amount)}</div>
           <div class="exp-actions">
@@ -682,8 +683,8 @@ function renderRecurring() {
       <div class="rec-row">
         <div class="cat-icon" style="background:${c.color}22;color:${c.color}">${c.icon}</div>
         <div class="rec-info">
-          <div class="rec-name">${r.name}</div>
-          <div class="rec-meta">${r.category} · ${freqLabel(r.frequency)} · <span style="color:${isToday?'var(--yellow)':isPast?'var(--text2)':'var(--accent)'}">${dueLabel}</span></div>
+          <div class="rec-name">${VPCUtil.esc(r.name)}</div>
+          <div class="rec-meta">${VPCUtil.esc(r.category)} · ${freqLabel(r.frequency)} · <span style="color:${isToday?'var(--yellow)':isPast?'var(--text2)':'var(--accent)'}">${dueLabel}</span></div>
         </div>
         <div class="rec-amount">${fmt(r.amount)}/${freqShort(r.frequency)}</div>
         <div class="rec-actions">
