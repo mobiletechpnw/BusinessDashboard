@@ -574,6 +574,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   localStorage.setItem = function (key, value) {
     _setItem(key, value);
     if (!SYNC_KEYS.includes(key) || VpcSync._pulling) return;
+    // Stamp the freshness marker synchronously on every user write. The push to
+    // the cloud is debounced (~800ms), so without this an autoSync/visibility
+    // pull firing in that window would see a stale __ts, judge local as older
+    // than the cloud, and overwrite the just-made edit — making new events,
+    // tables, or edits vanish from the view until a manual refresh.
+    _setItem(`${key}__ts`, Date.now().toString());
     clearTimeout(_syncTimers.get(key));
     _syncTimers.set(key, setTimeout(() => {
       _syncTimers.delete(key);
