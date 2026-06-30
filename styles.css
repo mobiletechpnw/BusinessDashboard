@@ -605,3 +605,30 @@ button.loading {
   .header-right { gap: 4px; }
   .home-link, .back-link { padding: 5px 8px; font-size: 0.65rem; }
 }
+
+/* ═══════════════════════════════════════════════════
+   MOBILE AUDIT FIXES — 2026-06-30
+═══════════════════════════════════════════════════ */
+
+/* Prevent any stray-wide child from making the whole page scroll/wobble
+   horizontally on phones. `clip` is used where supported because (unlike
+   `hidden`) it never establishes a scroll container, so position:sticky
+   bars keep working; `hidden` is the fallback for older engines. */
+html, body {
+  overflow-x: hidden;
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+/* iOS Safari auto-zooms the viewport whenever a focused form control has a
+   font-size below 16px (and then won't zoom back). Every page's inputs are
+   0.78–0.9rem, so force 16px on touch-width screens. !important is needed to
+   beat the per-page `.field input` rules. Checkbox/radio/range excluded —
+   font-size doesn't apply and we don't want to touch their box sizing. */
+@media (max-width: 700px) {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}

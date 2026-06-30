@@ -281,6 +281,14 @@ footer a { color: var(--accent); text-decoration: none; }
   .span-12x2 { grid-column: span 12; grid-row: span 3; }
   .kpi-value { font-size: 1.4rem; }
   .tile { border-radius: 16px; padding: 18px; }
+  /* Let tiles grow with their content instead of a fixed row height that
+     clips text on small screens. */
+  .bento { grid-auto-rows: minmax(84px, auto); }
+  .tile { height: auto; }
+}
+@media (max-width: 420px) {
+  /* The last two-up tiles go full width on the narrowest phones. */
+  .span-3x1 { grid-column: span 12; }
 }
 </style>
 </head>
