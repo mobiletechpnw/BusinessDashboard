@@ -1138,7 +1138,7 @@
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px">
       <div>
         <div style="font-size:1rem;font-weight:800">Pokémon Pins Tracker</div>
-        <div style="font-size:0.78rem;color:var(--text2);margin-top:3px">240 pins purchased · $228 total cost ($0.95/ea) · Sell price tracked per sale</div>
+        <div style="font-size:0.78rem;color:var(--text2);margin-top:3px" id="pinSubtitle">240 pins purchased · $228 total cost ($0.95/ea) · Sell price tracked per sale</div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn-ghost" onclick="openPinRestockModal()">+ Restock</button>
@@ -3938,6 +3938,8 @@ function renderPinStatBar() {
   document.getElementById('pinSold').textContent      = t.qty;
   document.getElementById('pinRemaining').textContent = t.remaining;
   document.getElementById('pinInventoryDate').textContent = 'As of ' + new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const sub = document.getElementById('pinSubtitle');
+  if (sub) sub.textContent = `${t.totalEffective} pins purchased · ${fmt$(t.totalCost)} inventory cost · Sell price tracked per sale`;
 }
 
 function renderPinInventoryGrid() {
