@@ -300,7 +300,7 @@ main { max-width: 1300px; margin: 0 auto; padding: 28px 24px; }
 @media (max-width: 700px) {
   header {
     padding: 0 14px;
-    min-height: 52px;
+    min-height: 48px;
     flex-wrap: nowrap;
     gap: 6px;
     overflow: hidden;
@@ -324,7 +324,7 @@ main { max-width: 1300px; margin: 0 auto; padding: 28px 24px; }
 /* ── Tab bars scroll horizontally on mobile ── */
 @media (max-width: 700px) {
   .tab-bar {
-    top: 92px;  /* 52px header + 40px dash-nav */
+    top: 77px;  /* 48px header + 29px shrunk dash-nav (measured) */
     padding: 0 8px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -510,8 +510,8 @@ button.loading {
 .dash-nav-link:hover { color: var(--text); }
 .dash-nav-link.active { color: var(--accent); border-bottom-color: var(--accent); }
 @media (max-width: 700px) {
-  .dash-nav { padding: 0 8px; top: 52px; }
-  .dash-nav-link { padding: 10px 12px; font-size: 0.72rem; }
+  .dash-nav { padding: 0 8px; top: 48px; }
+  .dash-nav-link { padding: 6px 12px; font-size: 0.72rem; }
 }
 
 /* ── Smart back-link ── */
