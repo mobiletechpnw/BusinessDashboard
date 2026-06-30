@@ -610,6 +610,13 @@
 
     <!-- Insights -->
     <div class="panel" id="panel-insights">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-size:1rem;font-weight:800;display:flex;align-items:center;gap:7px">🤖 Smart Insights</div>
+          <div id="insightMeta" style="font-size:.72rem;color:var(--text2);margin-top:3px">Live analysis of your current sales data.</div>
+        </div>
+        <button class="btn-secondary" onclick="renderInsights()" style="padding:7px 14px;font-size:.78rem">↻ Refresh</button>
+      </div>
       <div class="insight-grid" id="insightGrid"></div>
     </div>
 
@@ -1974,48 +1981,179 @@ function renderProjections() {
 }
 
 // ── Insights ──
+// Live, data-driven engine: every card below is computed from the CURRENT
+// order data each time it runs, so insights refresh automatically whenever an
+// order is added, edited, deleted, or synced. Each generator returns a card
+// only when its condition is actually met, so the mix adapts to the data.
 function renderInsights() {
-  const orders  = getOrders();
-  const custMap = byCustomer(orders);
-  const monthly = byMonth(orders);
-  const winback = Object.entries(custMap)
-    .filter(([, d]) => daysSince(d.lastDate) > 45 && d.lastDate < '2026-04-01')
-    .sort((a,b) => b[1].revenue - a[1].revenue).slice(0, 5);
-  const mikeReferrals = orders.filter(o => (o.referredBy || '').toLowerCase().includes('mike'));
-  const mikeRev  = mikeReferrals.reduce((s,o) => s + o.salePrice, 0);
-  const aprRev   = monthly['2026-04']?.revenue || 0;
-  const mayRev   = monthly['2026-05']?.revenue || 0;
-  const dip      = ((aprRev - mayRev) / aprRev * 100).toFixed(0);
-  const insights = [
-    { type:'opportunity', cls:'good',
-      title:'🟢 June already at $270 in 2 days',
-      body:`Yash (Silver Clash TCG) ordered <strong>3 sets</strong> on day one of June. At this pace, June projects to <strong>${fmt$(270/2*30)}</strong> — which would beat April's record of <strong>$1,236</strong>. Stay on delivery schedule.` },
-    { type:'win-back', cls:'warn',
-      title:`⚠️ ${winback.length} customers haven't re-ordered in 45+ days`,
-      body:`<strong>Win-back targets:</strong> ${winback.map(([n,d]) => `${n} (last: ${fmtDate(d.lastDate)}, spent ${fmt$(d.revenue)})`).join(', ')}. A quick follow-up could unlock $90–$270 per customer.` },
-    { type:'referral network', cls:'',
-      title:`📣 Mike is your #1 referral machine — ${mikeReferrals.length} orders (${fmt$(mikeRev)})`,
-      body:`Mike referred: Izeah-Baichu, Tyler (×2), Chris (Pokemon Go), and Baichu. That's <strong>${fmt$(mikeRev)}</strong> in revenue. Consider a formal referral perk.` },
-    { type:'pricing', cls:'',
-      title:'💰 You have $40 headroom under the competitor',
-      body:`Standard set is <strong>$90 (pre-order)</strong> and <strong>$100 (same-day)</strong>. Competitor charges <strong>$130</strong>. Test raising same-day to <strong>$110–$115</strong> for new customers — still $15–$20 under market.` },
-    { type:'rental expansion', cls:'action',
-      title:'🔑 Expand the rental model — only done once so far',
-      body:`The rental at $40/day (Nahk) was near-free profit on a $21.33 asset. Proactively offer rental as a trial for hesitant buyers. Target: 2 rentals/month = ~$80/month extra profit.` },
-    { type:'volume pricing', cls:'good',
-      title:'📦 Multi-set bulk orders are emerging — formalize a bundle',
-      body:`Max ordered 3 sets at $75; Yash ordered 3 at $90. Consider a <strong>3-set bundle at $260–$265</strong> — small savings for customer, 3× order volume for you.` },
-    { type:'may dip analysis', cls:'warn',
-      title:`📉 May dipped ${dip}% from April — understand why`,
-      body:`April: <strong>${fmt$(aprRev)} (14 orders)</strong>. May: <strong>${fmt$(mayRev)} (8 orders)</strong>. June's strong start suggests demand is still there.` },
-    { type:'social media', cls:'action',
-      title:'📱 Instagram channel not yet tracked — worth developing',
-      body:`Jonathan came in via Instagram (<strong>@jlin730</strong>). Your customers are TCG vendors active on social media. One post from a vendor showing your risers could bring 5–10 leads.` },
-    { type:'filament cost', cls:'good',
-      title:'✅ Filament cost has dropped ~15% since launch',
-      body:`Early rolls cost ~$15.25 (Dec 2025). Current Overture/Elegoo PLA runs ~$10.91–$11.35/roll, reducing per-set COGS from ~$27 to <strong>$21.33</strong>. Lock in bulk orders to protect this margin.` },
-  ];
-  document.getElementById('insightGrid').innerHTML = insights.map(ins => `
+  const grid = document.getElementById('insightGrid');
+  const meta = document.getElementById('insightMeta');
+  if (!grid) return;
+  const orders = getOrders();
+
+  if (meta) {
+    const n = orders.length;
+    meta.textContent = n
+      ? `Live · analyzing ${n} order${n === 1 ? '' : 's'} · updated ${new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`
+      : 'Live analysis of your current sales data.';
+  }
+
+  if (!orders.length) {
+    grid.innerHTML = `
+      <div class="insight-card">
+        <div class="insight-type">getting started</div>
+        <div class="insight-title">📭 No orders to analyze yet</div>
+        <div class="insight-body">Log your first order and live, data-driven insights will appear here automatically.</div>
+      </div>`;
+    return;
+  }
+
+  const custMap   = byCustomer(orders);
+  const monthly   = byMonth(orders);
+  const months    = Object.keys(monthly).sort();
+  const totalRev  = orders.reduce((s, o) => s + o.salePrice, 0);
+  const totalProf = orders.reduce((s, o) => s + (o.salePrice - o.cogs), 0);
+  const margin    = totalRev > 0 ? totalProf / totalRev * 100 : 0;
+  const aov       = totalRev / orders.length;
+  const custName  = c => c.split(' - ')[0].split(' (')[0];
+  const out       = [];   // collected insight cards
+
+  // ── Cash flow: orders not fully paid (highest priority) ──
+  (() => {
+    const open = orders.filter(o => o.payStatus === 'unpaid' || o.payStatus === 'partial');
+    if (!open.length) return;
+    const amt   = open.reduce((s, o) => s + o.salePrice, 0);
+    const names = [...new Set(open.map(o => custName(o.customer)))];
+    out.push({ priority: 0, cls: 'action', type: 'cash flow',
+      title: `💳 ${open.length} order${open.length === 1 ? '' : 's'} not fully paid — up to ${fmt$(amt)} outstanding`,
+      body: `Awaiting payment from <strong>${names.slice(0, 4).map(esc).join(', ')}</strong>${names.length > 4 ? `, and ${names.length - 4} more` : ''}. Collecting on open receivables is the fastest cash you'll bring in.` });
+  })();
+
+  // ── Fulfillment backlog: orders still in progress ──
+  (() => {
+    const open = orders.filter(o => o.fulfillStatus === 'in_progress' || o.fulfillStatus === 'pending');
+    if (!open.length) return;
+    const names = [...new Set(open.map(o => custName(o.customer)))];
+    out.push({ priority: 1, cls: 'action', type: 'fulfillment',
+      title: `🛠️ ${open.length} order${open.length === 1 ? '' : 's'} still in progress`,
+      body: `Open builds for <strong>${names.slice(0, 4).map(esc).join(', ')}</strong>${names.length > 4 ? ', and more' : ''}. Staying on schedule protects reviews and repeat business.` });
+  })();
+
+  // ── Current-month pace vs your record ──
+  (() => {
+    const moOrders  = orders.filter(o => o.date.startsWith(THIS_MONTH));
+    const moRev     = moOrders.reduce((s, o) => s + o.salePrice, 0);
+    const dayOfMo   = NOW.getDate();
+    const daysInMo  = new Date(NOW.getFullYear(), NOW.getMonth() + 1, 0).getDate();
+    const projected = dayOfMo > 0 ? moRev / dayOfMo * daysInMo : 0;
+    const moName    = monthShort(THIS_MONTH);
+    const best      = months.filter(m => m !== THIS_MONTH)
+      .reduce((b, m) => monthly[m].revenue > b.rev ? { mk: m, rev: monthly[m].revenue } : b, { mk: null, rev: 0 });
+
+    if (moOrders.length === 0) {
+      if (dayOfMo >= 10) {
+        out.push({ priority: 2, cls: 'warn', type: 'current month',
+          title: `🐢 No orders logged yet in ${moName}`,
+          body: `It's day ${dayOfMo} of ${daysInMo} with nothing on the books for ${moName}. Reach out to recent buyers or post an update to get the month moving.` });
+      }
+      return;
+    }
+    const beatsBest = best.mk && projected > best.rev;
+    out.push({ priority: 2, cls: beatsBest ? 'good' : '', type: 'current-month pace',
+      title: `${beatsBest ? '🚀' : '📅'} ${moName}: ${fmt$(moRev)} so far — pacing to ${fmt$(projected)}`,
+      body: `<strong>${moOrders.length} order${moOrders.length === 1 ? '' : 's'}</strong> through day ${dayOfMo} of ${daysInMo}. At this rate ${moName} projects to <strong>${fmt$(projected)}</strong>${best.mk ? (beatsBest
+        ? ` — ahead of your record month ${monthLabel(best.mk)} (${fmt$(best.rev)}). Keep delivery on track.`
+        : `, vs your best month ${monthLabel(best.mk)} at ${fmt$(best.rev)}.`) : '.'}` });
+  })();
+
+  // ── Win-back: customers gone quiet for 45+ days ──
+  (() => {
+    const winback = Object.entries(custMap)
+      .filter(([, d]) => d.lastDate && d.lastDate < TODAY && daysSince(d.lastDate) > 45)
+      .sort((a, b) => b[1].revenue - a[1].revenue)
+      .slice(0, 5);
+    if (!winback.length) return;
+    const upside = winback.reduce((s, [, d]) => s + d.revenue / d.orders, 0);
+    out.push({ priority: 3, cls: 'warn', type: 'win-back',
+      title: `⚠️ ${winback.length} customer${winback.length === 1 ? '' : 's'} haven't re-ordered in 45+ days`,
+      body: `<strong>Top win-back targets:</strong> ${winback.map(([n, d]) => `${esc(n)} (last ${fmtDate(d.lastDate)}, ${fmt$(d.revenue)})`).join(', ')}. A quick follow-up could recover ~<strong>${fmt$(upside)}</strong> in repeat revenue.` });
+  })();
+
+  // ── Last completed month vs the one before ──
+  (() => {
+    const lm = LAST_MONTH, pm = addMonthKey(THIS_MONTH, -2);
+    if (!monthly[lm] || !monthly[pm]) return;
+    const lr = monthly[lm].revenue, pr = monthly[pm].revenue;
+    const chg = pr > 0 ? (lr - pr) / pr * 100 : 0;
+    const up = lr >= pr;
+    out.push({ priority: 4, cls: up ? 'good' : 'warn', type: 'monthly trend',
+      title: `${up ? '📈' : '📉'} ${monthShort(lm)} ${up ? 'grew' : 'dipped'} ${Math.abs(chg).toFixed(0)}% vs ${monthShort(pm)}`,
+      body: `${monthLabel(lm)}: <strong>${fmt$(lr)}</strong> (${monthly[lm].count} orders). ${monthLabel(pm)}: <strong>${fmt$(pr)}</strong> (${monthly[pm].count} orders). ${up ? 'Momentum is positive — keep doing what worked.' : 'Worth a look at what changed: pricing, outreach, or seasonality.'}` });
+  })();
+
+  // ── Top referral source ──
+  (() => {
+    const skip = new Set(['', 'me', 'self', 'myself', '1st buyer', 'first buyer', 'n/a', 'na', 'none', '-']);
+    const refs = {};
+    orders.forEach(o => {
+      const r = (o.referredBy || '').trim();
+      if (skip.has(r.toLowerCase())) return;
+      (refs[r] = refs[r] || { count: 0, rev: 0 });
+      refs[r].count++; refs[r].rev += o.salePrice;
+    });
+    const top = Object.entries(refs).sort((a, b) => b[1].count - a[1].count || b[1].rev - a[1].rev)[0];
+    if (!top || top[1].count < 2) return;
+    out.push({ priority: 5, cls: '', type: 'referral engine',
+      title: `📣 ${esc(top[0])} is your top referral source — ${top[1].count} orders`,
+      body: `Referrals tied to <strong>${esc(top[0])}</strong> have driven <strong>${fmt$(top[1].rev)}</strong> across ${top[1].count} orders. A formal referral perk could keep that pipeline flowing.` });
+  })();
+
+  // ── #1 customer & revenue concentration ──
+  (() => {
+    const top = Object.entries(custMap).sort((a, b) => b[1].revenue - a[1].revenue)[0];
+    if (!top) return;
+    const share = totalRev > 0 ? top[1].revenue / totalRev * 100 : 0;
+    const concentrated = share >= 15;
+    out.push({ priority: 6, cls: concentrated ? 'warn' : 'good', type: 'top customer',
+      title: `🏆 ${esc(top[0])} is your #1 customer — ${fmt$(top[1].revenue)}`,
+      body: `${esc(top[0])} has spent <strong>${fmt$(top[1].revenue)}</strong> across ${top[1].orders} order${top[1].orders === 1 ? '' : 's'} (${share.toFixed(0)}% of all revenue). ${concentrated ? 'That\'s meaningful concentration — keep them close while you diversify the base.' : 'A strong anchor account worth nurturing.'}` });
+  })();
+
+  // ── Repeat-customer / loyalty rate ──
+  (() => {
+    const total  = Object.keys(custMap).length;
+    if (total < 3) return;
+    const repeat = Object.values(custMap).filter(d => d.orders >= 2).length;
+    const rate   = repeat / total * 100;
+    const good   = rate >= 30;
+    out.push({ priority: 7, cls: good ? 'good' : 'action', type: 'loyalty',
+      title: `${good ? '🔁' : '👋'} ${repeat} of ${total} customers are repeat buyers (${rate.toFixed(0)}%)`,
+      body: good
+        ? `A healthy <strong>${rate.toFixed(0)}%</strong> of customers have ordered more than once — repeat business is your cheapest growth.`
+        : `Only <strong>${rate.toFixed(0)}%</strong> of customers have ordered twice. A simple post-delivery check-in could lift repeat rate and revenue.` });
+  })();
+
+  // ── Bulk orders → bundle opportunity ──
+  (() => {
+    const bulk = orders.filter(o => (o.sets || 0) >= 2);
+    if (bulk.length < 2) return;
+    const totSets = bulk.reduce((s, o) => s + o.sets, 0);
+    const bulkRev = bulk.reduce((s, o) => s + o.salePrice, 0);
+    const perSet  = totSets > 0 ? bulkRev / totSets : 0;
+    out.push({ priority: 8, cls: 'good', type: 'bundling',
+      title: `📦 ${bulk.length} multi-set orders — formalize a bundle`,
+      body: `Bulk buyers average <strong>${fmt$(perSet)}/set</strong> across ${totSets} sets. Packaging a multi-set bundle at a small discount could grow order size and lock in volume.` });
+  })();
+
+  // ── Profitability snapshot ──
+  (() => {
+    out.push({ priority: 9, cls: margin >= 60 ? 'good' : '', type: 'profitability',
+      title: `💰 ${margin.toFixed(0)}% gross margin · ${fmt$(aov)} avg order`,
+      body: `Across ${orders.length} orders you've booked <strong>${fmt$(totalRev)}</strong> in revenue and <strong>${fmt$(totalProf)}</strong> in profit. ${margin >= 60 ? 'Margins are strong — protect them by locking in low filament costs.' : 'There may be room to nudge pricing or trim COGS to widen margin.'}` });
+  })();
+
+  out.sort((a, b) => a.priority - b.priority);
+  grid.innerHTML = out.map(ins => `
     <div class="insight-card ${ins.cls}">
       <div class="insight-type">${ins.type}</div>
       <div class="insight-title">${ins.title}</div>
@@ -2134,6 +2272,9 @@ document.querySelectorAll('.tab').forEach(t => {
     document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
     t.classList.add('active');
     document.getElementById('panel-' + t.dataset.tab).classList.add('active');
+    // Recompute live insights each time the tab is opened so they always
+    // reflect the latest order data (and refresh the "updated" timestamp).
+    if (t.dataset.tab === 'insights') renderInsights();
   });
 });
 
