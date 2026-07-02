@@ -1,3 +1,4 @@
 .vercel
 *.backup-*.html
 node_modules
+tests/screenshots/

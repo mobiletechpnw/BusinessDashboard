@@ -5,10 +5,12 @@
   "private": true,
   "scripts": {
     "test": "node --test",
-    "format": "prettier --write \"*.{js,json,css}\"",
-    "format:check": "prettier --check \"*.{js,json,css}\""
+    "test:e2e": "node tests/e2e-pages.js",
+    "format": "prettier --write \"{*,tests/*}.{js,json,css}\"",
+    "format:check": "prettier --check \"{*,tests/*}.{js,json,css}\""
   },
   "devDependencies": {
+    "playwright": "1.56.1",
     "prettier": "^3.3.0"
   }
 }
