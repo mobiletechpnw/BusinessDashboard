@@ -155,6 +155,17 @@ function seedData(monthOffsets) {
   };
 }
 
+// Explicit empty state: the storage keys exist but hold no records, so the
+// app's first-run seeding must NOT kick in. Exercises every empty-data guard
+// (charts, KPIs, insights) — the state a user reaches by deleting everything.
+function emptyData() {
+  return {
+    vp_orders_v2: '[]',
+    riser_filament_v1: '[]',
+    riser_filament_seed_migrated_v1: '1',
+  };
+}
+
 // Console noise that is EXPECTED because we abort all external requests.
 function isOfflineNoise(text) {
   return /Failed to load resource|net::ERR_FAILED|ERR_INTERNET_DISCONNECTED/i.test(text);
@@ -186,7 +197,7 @@ async function runProfile(browser, { name, viewport, mobile, seeded }) {
       );
       if (seed) for (const [k, v] of Object.entries(seed)) localStorage.setItem(k, v);
     },
-    seeded ? seedData() : null
+    seeded === 'empty' ? emptyData() : seeded ? seedData() : null
   );
 
   const dir = path.join(SHOTS, name);
@@ -272,6 +283,12 @@ async function runProfile(browser, { name, viewport, mobile, seeded }) {
   const profiles = [
     { name: 'desktop-fresh', viewport: { width: 1360, height: 900 }, mobile: false, seeded: false },
     { name: 'desktop-seeded', viewport: { width: 1360, height: 900 }, mobile: false, seeded: true },
+    {
+      name: 'desktop-empty',
+      viewport: { width: 1360, height: 900 },
+      mobile: false,
+      seeded: 'empty',
+    },
     { name: 'mobile-fresh', viewport: { width: 375, height: 812 }, mobile: true, seeded: false },
     { name: 'mobile-seeded', viewport: { width: 375, height: 812 }, mobile: true, seeded: true },
   ];

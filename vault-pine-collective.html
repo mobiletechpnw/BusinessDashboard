@@ -1550,19 +1550,15 @@ let orderPage = 0;
 // One-time seed: load the built-in HISTORICAL baseline + any previously-logged
 // custom orders into the unified store. After this, ALL orders are editable.
 function initOrders() {
+  // First run on a device only: seed the baseline + any legacy v1 orders.
+  // After that, localStorage (synced to Supabase) is the single source of
+  // truth. Deliberately NO auto-merge of HISTORICAL into an existing store —
+  // the old merge resurrected deleted orders on every page load. Restoring
+  // the baseline is now only done explicitly via the "Reset 47" data tool.
   if (!localStorage.getItem(LS_ORDERS)) {
     const legacy = JSON.parse(localStorage.getItem(LS_ORDERS_V1) || '[]');
     const seeded = [...HISTORICAL.map(o => ({ ...o })), ...legacy];
     localStorage.setItem(LS_ORDERS, JSON.stringify(seeded));
-    return;
-  }
-  // Merge in any new built-in HISTORICAL orders added since the user's last
-  // seed (e.g. newly-added months) without touching their existing edits.
-  const arr = rawOrders();
-  const ids = new Set(arr.map(o => o.id));
-  const missing = HISTORICAL.filter(o => !ids.has(o.id)).map(o => ({ ...o }));
-  if (missing.length) {
-    localStorage.setItem(LS_ORDERS, JSON.stringify([...arr, ...missing]));
   }
 }
 function rawOrders() { return JSON.parse(localStorage.getItem(LS_ORDERS) || '[]'); }
@@ -1650,6 +1646,11 @@ function renderMonthlyChart() {
   const orders  = getOrders();
   const monthly = byMonth(orders);
   const months  = Object.keys(monthly).sort();
+  if (!months.length) {
+    document.getElementById('monthlyChartWrap').innerHTML =
+      '<div style="color:var(--text2);font-size:.82rem;padding:18px 0">No orders yet — the chart appears with your first logged order.</div>';
+    return;
+  }
   const maxRev  = Math.max(...months.map(m => monthly[m].revenue));
   const H = 220, pad = 44, barW = 32, gap = 58;
   const stride = barW * 2 + gap;                          // full horizontal span of one month (two bars + gap)
@@ -1867,6 +1868,13 @@ function renderCustomers() {
   const orders  = getOrders();
   const custMap = byCustomer(orders);
   const sorted  = Object.entries(custMap).sort((a,b) => b[1].revenue - a[1].revenue);
+  if (!sorted.length) {
+    const emptyMsg = '<div style="color:var(--text2);font-size:.82rem;padding:14px 0">Customer stats appear with your first logged order.</div>';
+    document.getElementById('topCustChart').innerHTML  = emptyMsg;
+    document.getElementById('referralChart').innerHTML = emptyMsg;
+    document.getElementById('custTbody').innerHTML     = '';
+    return;
+  }
   const top8    = sorted.slice(0, 8);
   const maxRev  = top8[0][1].revenue;
 
@@ -1935,7 +1943,6 @@ function renderProjections() {
     const d = new Date(y, m - 1 + n, 1);
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
   }
-  const futureMonths = [1,2,3,4,5,6].map(n => addMonths(lastMonth, n));
   const scenarios = [
     { label:'Conservative', sets:8,  price:90, color:'#8892b066' },
     { label:'Moderate',     sets:12, price:90, color:'var(--accent)' },
@@ -1951,6 +1958,14 @@ function renderProjections() {
       <td class="num green">${fmt$(moRev*12)}</td>
     </tr>`;
   }).join('');
+
+  // The scenario table above is static; the chart below needs real history.
+  if (!months.length) {
+    document.getElementById('projChartWrap').innerHTML =
+      '<div style="color:var(--text2);font-size:.82rem;padding:18px 0">Projections appear once you have order history to project from.</div>';
+    return;
+  }
+  const futureMonths = [1,2,3,4,5,6].map(n => addMonths(lastMonth, n));
 
   const allMonths = [...months, ...futureMonths];
   const W = Math.max(allMonths.length * 80, 700), H = 230, pad = 50, gap = 60;
@@ -2702,9 +2717,29 @@ const FILAMENT_HISTORICAL = [
 ];
 const LS_FILAMENT_KEY = 'riser_filament_v1';
 
-function getFilament() {
+// One-time migration: the built-in purchase history used to live only in this
+// file and was prepended at read time, which meant it never synced to
+// Supabase. Write it into localStorage once so storage (and the cloud) carry
+// the full history; getFilament() then reads storage only. Dedup by id makes
+// this safe even if two devices migrate before their first sync.
+const LS_FILAMENT_MIGRATED = 'riser_filament_seed_migrated_v1';
+function initFilament() {
+  if (localStorage.getItem(LS_FILAMENT_MIGRATED)) return;
   const extra = JSON.parse(localStorage.getItem(LS_FILAMENT_KEY) || '[]');
-  return [...FILAMENT_HISTORICAL, ...extra].map(f => ({ ...f, perRoll: f.total / f.qty })).sort((a,b) => a.date.localeCompare(b.date));
+  const have = new Set(extra.map(f => f.id));
+  const merged = [...FILAMENT_HISTORICAL.filter(f => !have.has(f.id)).map(f => ({ ...f })), ...extra];
+  localStorage.setItem(LS_FILAMENT_KEY, JSON.stringify(merged));
+  localStorage.setItem(LS_FILAMENT_MIGRATED, '1');
+}
+function getFilament() {
+  const raw = JSON.parse(localStorage.getItem(LS_FILAMENT_KEY) || '[]');
+  const seen = new Set();
+  const arr = raw.filter(f => {
+    if (f.id && seen.has(f.id)) return false;
+    if (f.id) seen.add(f.id);
+    return true;
+  });
+  return arr.map(f => ({ ...f, perRoll: f.total / f.qty })).sort((a,b) => a.date.localeCompare(b.date));
 }
 function saveFilamentEntry(f) {
   const arr = JSON.parse(localStorage.getItem(LS_FILAMENT_KEY) || '[]');
@@ -2718,10 +2753,10 @@ function renderFilament() {
   const totalSpend = items.reduce((s,f) => s + f.total, 0);
   const totalRolls = items.reduce((s,f) => s + f.qty, 0);
   const realRolls = real.reduce((s,f) => s + f.qty, 0);
-  const avgPerRoll = real.reduce((s,f) => s + f.total, 0) / realRolls;
+  const avgPerRoll = realRolls ? real.reduce((s,f) => s + f.total, 0) / realRolls : 0;
   const latestPR = real[real.length - 1]?.perRoll ?? 0;
   const firstPR = real[0]?.perRoll ?? 0;
-  const savingPct = ((firstPR - latestPR) / firstPR * 100).toFixed(0);
+  const savingPct = firstPR ? ((firstPR - latestPR) / firstPR * 100).toFixed(0) : '0';
   const totalRev = allOrders.reduce((s,o) => s + o.salePrice, 0);
   document.getElementById('filamentKpis').innerHTML = [
     { val: fmt$(totalSpend),       label: 'Total Filament Spend',    sub: `${totalRolls} rolls purchased` },
@@ -2741,6 +2776,11 @@ function renderFilament() {
 }
 
 function renderFilamentTrend(items) {
+  if (items.length < 2) {
+    document.getElementById('filamentTrendChart').innerHTML =
+      '<div style="color:var(--text2);font-size:.82rem;padding:14px 0">The trend appears once you have two or more purchases.</div>';
+    return;
+  }
   const W = 420, H = 180, pad = 44;
   const prs = items.map(f => f.perRoll);
   const maxPR = Math.max(...prs) * 1.1;
@@ -2783,6 +2823,11 @@ function renderFilamentMonthly(items) {
     monthMap[mk].total += f.total; monthMap[mk].rolls += f.qty;
   });
   const months = Object.keys(monthMap).sort();
+  if (!months.length) {
+    document.getElementById('filamentMonthlyChart').innerHTML =
+      '<div style="color:var(--text2);font-size:.82rem;padding:14px 0">No purchases logged yet.</div>';
+    return;
+  }
   const maxVal = Math.max(...months.map(m => monthMap[m].total));
   const W = Math.max(months.length * 70, 380), H = 160, pad = 40, barW = 28;
   let bars = '', axes = '';
@@ -2804,6 +2849,11 @@ function renderFilamentMonthly(items) {
 }
 
 function renderFilamentBrands(items) {
+  if (!items.length) {
+    document.getElementById('filamentBrandChart').innerHTML =
+      '<div style="color:var(--text2);font-size:.82rem;padding:14px 0">Brand stats appear with your first purchase.</div>';
+    return;
+  }
   const brandMap = {};
   items.forEach(f => {
     if (!brandMap[f.brand]) brandMap[f.brand] = { total: 0, rolls: 0, purchases: 0, priceHistory: [] };
@@ -2831,6 +2881,11 @@ function renderFilamentBrands(items) {
 }
 
 function renderFilamentRatio(items, orders) {
+  if (!items.length && !orders.length) {
+    document.getElementById('filamentRatioChart').innerHTML =
+      '<div style="color:var(--text2);font-size:.82rem;padding:14px 0">The cost-vs-revenue ratio appears once you have purchases and orders.</div>';
+    return;
+  }
   const filMonthly = {}, revMonthly = {};
   items.forEach(f => { const mk = f.date.slice(0,7); if (!filMonthly[mk]) filMonthly[mk] = 0; filMonthly[mk] += f.total; });
   orders.forEach(o => { const mk = o.date.slice(0,7); if (!revMonthly[mk]) revMonthly[mk] = 0; revMonthly[mk] += o.salePrice; });
@@ -2875,7 +2930,7 @@ function renderFilamentTable(items) {
     <td style="color:var(--text2)">Total — ${items.length} purchases</td>
     <td class="num">${totalRolls} rolls</td>
     <td class="num" style="color:var(--accent2)">${fmt$(totalSpend)}</td>
-    <td class="num" style="color:var(--text2)">${fmt$(totalSpend/totalRolls)} avg</td>
+    <td class="num" style="color:var(--text2)">${totalRolls ? fmt$(totalSpend/totalRolls) + ' avg' : '—'}</td>
     <td colspan="2"></td>
   </tr>`;
 }
@@ -4181,6 +4236,7 @@ document.getElementById('headerDate').textContent =
   NOW.toLocaleDateString('en-US', {weekday:'short', year:'numeric', month:'long', day:'numeric'});
 
 initOrders();
+initFilament();
 loadGoals();
 renderSalesAll();
 renderGoals();
