@@ -13,7 +13,10 @@ test('money rounds to cents and kills float drift', () => {
 
 test('sumMoney totals are cent-accurate', () => {
   assert.strictEqual(U.sumMoney([0.1, 0.2]), 0.3);
-  assert.strictEqual(U.sumMoney([{ p: 1.1 }, { p: 2.2 }], x => x.p), 3.3);
+  assert.strictEqual(
+    U.sumMoney([{ p: 1.1 }, { p: 2.2 }], (x) => x.p),
+    3.3
+  );
   assert.strictEqual(U.sumMoney([]), 0);
 });
 

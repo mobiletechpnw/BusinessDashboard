@@ -17,7 +17,11 @@
   ],
   "shortcuts": [
     { "name": "Daily Review", "url": "/review.html", "description": "Morning briefing" },
-    { "name": "Sales Dashboard", "url": "/vault-pine-collective.html", "description": "Open sales tracker" },
+    {
+      "name": "Sales Dashboard",
+      "url": "/vault-pine-collective.html",
+      "description": "Open sales tracker"
+    },
     { "name": "Goals", "url": "/goals-dashboard.html", "description": "View goals" },
     { "name": "Analytics", "url": "/analytics.html", "description": "Business analytics" }
   ]
