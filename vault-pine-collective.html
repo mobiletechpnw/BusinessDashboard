@@ -1651,7 +1651,9 @@ function renderMonthlyChart() {
   const monthly = byMonth(orders);
   const months  = Object.keys(monthly).sort();
   const maxRev  = Math.max(...months.map(m => monthly[m].revenue));
-  const W = Math.max(months.length * 90, 600), H = 220, pad = 44, barW = 32, gap = 58;
+  const H = 220, pad = 44, barW = 32, gap = 58;
+  const stride = barW * 2 + gap;                          // full horizontal span of one month (two bars + gap)
+  const W = Math.max(pad + months.length * stride, 600);  // width MUST track the stride or the last months clip
   let bars = '', axes = '';
   [0, 0.25, 0.5, 0.75, 1].forEach(pct => {
     const y = pad + (H - pad * 2) * (1 - pct);
@@ -1660,7 +1662,7 @@ function renderMonthlyChart() {
              <text x="${pad-6}" y="${y+4}" fill="#8892b0" font-size="9" text-anchor="end">$${val>=1000?(val/1000).toFixed(0)+'k':val}</text>`;
   });
   months.forEach((mk, i) => {
-    const x = pad + i * (barW * 2 + gap);
+    const x = pad + i * stride;
     const m = monthly[mk];
     const rH = Math.max(2, (m.revenue / maxRev) * (H - pad * 2));
     const pH = Math.max(2, (m.profit  / maxRev) * (H - pad * 2));
