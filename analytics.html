@@ -645,7 +645,9 @@ function renderTrends() {
       const profH  = Math.max((m.profit / maxRev) * 160, 2);
       const label  = k.slice(5); // MM
       const months = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      const lbl    = months[parseInt(label)] || label;
+      // Include the 2-digit year ("Dec 25") — month alone turns ambiguous once
+      // the data spans more than a year.
+      const lbl    = (months[parseInt(label)] || label) + ' ' + k.slice(2, 4);
       return `
         <div class="bar-col">
           <div class="bar-val">${fmtK(m.rev)}</div>

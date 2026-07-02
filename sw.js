@@ -1,8 +1,8 @@
-const CACHE = 'vpc-v9';
+const CACHE = 'vpc-v10';
 
 // Static assets that rarely change → safe to serve cache-first.
 const STATIC_ASSETS = [
-  '/styles.css', '/manifest.json',
+  '/styles.css', '/manifest.json', '/icon.svg',
 ];
 
 // App shell — precached so the app still opens offline, but served
@@ -13,6 +13,7 @@ const SHELL = [
   '/sales-dashboard.html', '/goals-dashboard.html',
   '/expenses.html', '/events.html', '/review.html', '/analytics.html',
   '/production.html', '/content.html', '/guru.html', '/vendor-calendar.html',
+  '/login.html', '/reset-password.html',
   '/util.js', '/shared.js', '/supabase-sync.js',
 ];
 

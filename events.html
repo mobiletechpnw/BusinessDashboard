@@ -273,7 +273,9 @@ main { padding:0 0 24px; }
 
 <main>
   <div id="panel-matrix">
-    <div id="matrix-wrap">
+    <div id="matrix-wrap"></div>
+    <!-- Kept OUTSIDE #matrix-wrap: renderMatrix() clears the wrap's innerHTML,
+         which would destroy this node and crash the empty-data path. -->
     <div class="empty-state" id="empty-state">
       <div class="empty-icon">🗓️</div>
       <div class="empty-title" id="empty-title">No data yet</div>
@@ -283,7 +285,8 @@ main { padding:0 0 24px; }
         <button class="btn-primary" onclick="openEventModal()">+ Add Event</button>
       </div>
     </div>
-  </div>
+  </div><!-- /#panel-matrix — this close was missing, so the parser nested
+       #panel-roi inside #panel-matrix and the ROI tab rendered invisible. -->
 
   <div id="panel-roi" style="display:none">
     <div id="roi-kpis" class="kpi-strip" style="margin-bottom:20px;grid-template-columns:repeat(4,1fr)"></div>
