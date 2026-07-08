@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f1117">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="styles.css">
+<script src="util.js"></script>
+<script src="shared.js" defer></script>
+<script src="supabase-sync.js" defer></script>
+<title>Instagram Growth — VPC</title>
+<style>
+  body { min-height: 100vh; }
+
+  header {
+    background: rgba(13, 15, 22, 0.72);
+    backdrop-filter: blur(20px) saturate(1.3);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    min-height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+  }
+  header h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.3px; }
+  header h1 span { color: var(--accent); }
+  .header-stats { display: flex; gap: 20px; align-items: center; }
+  .stat { text-align: center; display: flex; align-items: baseline; gap: 6px; }
+  .stat-num { font-size: 1.1rem; font-weight: 800; color: var(--accent); }
+  .stat-label { font-size: 0.66rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  main { max-width: 1200px; margin: 0 auto; padding: 28px 24px; }
+
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .top-bar-left { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .handle-input {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); padding: 8px 12px; font-size: 0.85rem;
+    outline: none; transition: border-color 0.15s; width: 180px;
+  }
+  .handle-input:focus { border-color: var(--accent); }
+  .handle-input::placeholder { color: var(--text2); }
+
+  button {
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 9px 16px;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #7d9bff; }
+  .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-icon { padding: 6px 10px; font-size: 1rem; }
+
+  /* Metric cards */
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  .metric {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+  }
+  .metric-label { font-size: 0.7rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  .metric-value { font-size: 1.7rem; font-weight: 800; margin-top: 6px; letter-spacing: -0.5px; }
+  .metric-sub { font-size: 0.74rem; color: var(--text2); margin-top: 4px; }
+  .delta { font-weight: 700; }
+  .delta.up { color: var(--green); }
+  .delta.down { color: var(--red); }
+  .delta.flat { color: var(--text2); }
+
+  /* Panels */
+  .gpanel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 22px;
+  }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
+  .panel-title { font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .panel-sub { font-size: 0.76rem; color: var(--text2); }
+
+  /* Chart */
+  .chart-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .chart { display: block; }
+  .range-group { display: flex; gap: 6px; }
+  .range-btn { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); padding: 6px 12px; font-size: 0.75rem; }
+  .range-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* Goal editor */
+  .goal-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .goal-input {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); padding: 8px 12px; font-size: 0.9rem;
+    outline: none; width: 130px; transition: border-color 0.15s;
+  }
+  .goal-input:focus { border-color: var(--accent); }
+  .goal-bar-bg { flex: 1; min-width: 140px; background: var(--surface2); border-radius: 99px; height: 8px; overflow: hidden; }
+  .goal-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.4s; }
+
+  /* Snapshot table */
+  .snap-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .snap-table th {
+    text-align: left; font-size: 0.68rem; color: var(--text2); text-transform: uppercase;
+    letter-spacing: 0.4px; font-weight: 600; padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap;
+  }
+  .snap-table td { padding: 9px 10px; border-bottom: 1px solid #1e2138; white-space: nowrap; }
+  .snap-table tr:last-child td { border-bottom: none; }
+  .snap-table tr:hover td { background: var(--surface2); }
+  .snap-num { font-variant-numeric: tabular-nums; }
+  .snap-actions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.12s; }
+  .snap-table tr:hover .snap-actions { opacity: 1; }
+  .icon-btn { background: none; border: none; color: var(--text2); padding: 4px 6px; font-size: 0.85rem; border-radius: 5px; cursor: pointer; }
+  .icon-btn:hover { background: var(--surface2); color: var(--text); }
+  .table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* Automation panel */
+  .auto-status { display: inline-flex; align-items: center; gap: 7px; font-size: 0.8rem; font-weight: 700; padding: 4px 12px; border-radius: 99px; }
+  .auto-status.manual { background: #3b2e12; color: var(--yellow); }
+  .auto-status.connected { background: #123b20; color: var(--green); }
+  .auto-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .auto-steps { font-size: 0.84rem; color: var(--text2); line-height: 1.7; margin-top: 6px; }
+  .auto-steps ol { margin: 8px 0 0 18px; }
+  .auto-steps code { background: var(--surface2); padding: 1px 6px; border-radius: 5px; font-size: 0.8rem; color: var(--text); }
+  details.auto-details summary { cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--accent); }
+  details.auto-details[open] summary { margin-bottom: 10px; }
+
+  /* Empty state */
+  .empty { text-align: center; padding: 50px 20px; color: var(--text2); }
+  .empty .icon { font-size: 3rem; margin-bottom: 14px; }
+  .empty h3 { font-size: 1.1rem; color: var(--text); margin-bottom: 8px; }
+  .empty p { font-size: 0.85rem; }
+
+  /* Modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7); z-index: 200;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 28px; width: 460px; max-width: 95vw;
+  }
+  .modal h2 { font-size: 1.1rem; margin-bottom: 20px; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 0.78rem; color: var(--text2); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+  .field input, .field textarea {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); padding: 10px 12px; font-size: 0.88rem;
+    outline: none; font-family: inherit; transition: border-color 0.15s;
+  }
+  .field input:focus, .field textarea:focus { border-color: var(--accent); }
+  .field textarea { resize: vertical; min-height: 60px; }
+  .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--surface); border: 1px solid var(--accent);
+    color: var(--text); padding: 12px 20px; border-radius: 9px;
+    font-size: 0.85rem; z-index: 300;
+    transform: translateY(80px); opacity: 0;
+    transition: all 0.25s;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  @media (max-width: 700px) {
+    main { padding: 12px 10px; }
+    header { padding: 0 12px; min-height: 52px; }
+    header h1 { font-size: 1.05rem; }
+    .header-stats { gap: 8px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+    .header-stats::-webkit-scrollbar { display: none; }
+    .stat-label { font-size: 0.6rem; }
+    .top-bar { flex-direction: column; align-items: stretch; }
+    .handle-input { width: 100%; }
+    .top-bar > .btn-primary { display: none; }
+  }
+  @media (max-width: 480px) {
+    .modal { border-radius: 16px 16px 0 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Instagram <span>Growth</span></h1>
+  <div class="header-stats">
+    <a href="index.html" style="font-size:0.72rem;color:var(--text2);text-decoration:none;padding:5px 12px;border:1px solid var(--border);border-radius:6px;transition:all 0.15s;white-space:nowrap;align-self:center;" onmouseover="this.style.color='var(--accent)';this.style.borderColor='var(--accent)'" onmouseout="this.style.color='var(--text2)';this.style.borderColor='var(--border)'">⌂ Home</a>
+    <div class="stat"><div class="stat-num" id="statFollowers">0</div><div class="stat-label">Followers</div></div>
+    <div class="stat"><div class="stat-num" id="statWeek">—</div><div class="stat-label">7-Day</div></div>
+    <div class="stat"><div class="stat-num" id="statGoalPct">0%</div><div class="stat-label">To Goal</div></div>
+  </div>
+</header>
+
+<nav class="dash-nav">
+  <a href="index.html" class="dash-nav-link">⌂ Home</a>
+  <a href="vault-pine-collective.html" class="dash-nav-link">📊 Sales Hub</a>
+  <a href="goals-dashboard.html" class="dash-nav-link">🎯 Goals</a>
+  <a href="expenses.html" class="dash-nav-link">💸 Expenses</a>
+  <a href="analytics.html" class="dash-nav-link">📈 Analytics</a>
+  <a href="production.html" class="dash-nav-link">🖨️ Production</a>
+  <a href="events.html" class="dash-nav-link">🎪 Events</a>
+  <a href="content.html" class="dash-nav-link">📱 Content</a>
+  <a href="growth.html" class="dash-nav-link active">🚀 Growth</a>
+  <a href="review.html" class="dash-nav-link">📋 Review</a>
+  <a href="guru.html" class="dash-nav-link">🥋 Guru</a>
+</nav>
+
+<main>
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <input class="handle-input" id="handleInput" placeholder="@yourhandle" onchange="saveHandle()" />
+      <span class="panel-sub" id="lastLogged"></span>
+    </div>
+    <button class="btn-primary" onclick="openSnapModal()">+ Log Snapshot</button>
+  </div>
+
+  <!-- Metric cards -->
+  <div class="metrics" id="metrics"></div>
+
+  <!-- Goal -->
+  <div class="gpanel">
+    <div class="panel-head">
+      <div class="panel-title">🎯 Follower Goal</div>
+      <div class="panel-sub" id="goalEta"></div>
+    </div>
+    <div class="goal-row">
+      <input class="goal-input" id="goalInput" type="number" min="0" placeholder="1000" onchange="saveGoal()" />
+      <div class="goal-bar-bg"><div class="goal-bar-fill" id="goalBar" style="width:0%"></div></div>
+      <span class="panel-sub" id="goalText">Set a target follower count.</span>
+    </div>
+  </div>
+
+  <!-- Chart -->
+  <div class="gpanel">
+    <div class="panel-head">
+      <div class="panel-title">📈 Follower Growth</div>
+      <div class="range-group" id="rangeGroup">
+        <button class="range-btn" data-range="30">30d</button>
+        <button class="range-btn" data-range="90">90d</button>
+        <button class="range-btn active" data-range="all">All</button>
+      </div>
+    </div>
+    <div class="chart-wrap" id="chartWrap"></div>
+  </div>
+
+  <!-- Snapshots -->
+  <div class="gpanel">
+    <div class="panel-head">
+      <div class="panel-title">🗓️ Snapshots</div>
+      <div class="panel-sub">Log your numbers weekly for the cleanest trend.</div>
+    </div>
+    <div class="table-scroll">
+      <table class="snap-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Followers</th>
+            <th>Change</th>
+            <th>Following</th>
+            <th>Posts</th>
+            <th>Reach</th>
+            <th>Note</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="snapBody"></tbody>
+      </table>
+    </div>
+    <div id="snapEmpty"></div>
+  </div>
+
+  <!-- Automation -->
+  <div class="gpanel">
+    <div class="panel-head">
+      <div class="panel-title">🔌 Auto-Sync</div>
+      <span class="auto-status manual" id="autoStatus"><span class="auto-dot"></span>Manual tracking</span>
+    </div>
+    <p class="panel-sub" id="autoSummary">
+      You're logging numbers by hand — reliable and zero setup. To pull follower counts automatically,
+      connect the Instagram Graph API through a small serverless endpoint (scaffolded in this repo).
+    </p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+      <button class="btn-ghost" onclick="openEndpointModal()">Configure endpoint</button>
+      <button class="btn-ghost" id="fetchNowBtn" onclick="fetchNow()" style="display:none">↻ Fetch now</button>
+    </div>
+    <details class="auto-details" style="margin-top:16px">
+      <summary>How the automated sync works &amp; how to turn it on</summary>
+      <div class="auto-steps">
+        Because this dashboard is static (no server), a browser can't safely hold an Instagram token.
+        The included <code>api/instagram-followers.js</code> serverless function holds the token server-side,
+        calls the Graph API, and returns just the numbers. Turn it on with:
+        <ol>
+          <li>Convert your account to <strong>Business/Creator</strong> and <strong>link it to a Facebook Page</strong> (your current gap).</li>
+          <li>Create a Meta Developer app and get a long-lived token with <code>instagram_manage_insights</code>.</li>
+          <li>Deploy the function to Vercel with the token as an env var.</li>
+          <li>Paste the deployed URL into <em>Configure endpoint</em> above.</li>
+        </ol>
+        Full walkthrough: <code>docs/INSTAGRAM_SETUP.md</code>.
+      </div>
+    </details>
+  </div>
+</main>
+
+<!-- Snapshot Modal -->
+<div class="modal-overlay" id="snapModal">
+  <div class="modal">
+    <h2 id="snapModalTitle">Log Snapshot</h2>
+    <div class="field-grid">
+      <div class="field">
+        <label>Date</label>
+        <input type="date" id="sDate" />
+      </div>
+      <div class="field">
+        <label>Followers</label>
+        <input type="number" id="sFollowers" min="0" inputmode="numeric" placeholder="0" />
+      </div>
+    </div>
+    <div class="field-grid">
+      <div class="field">
+        <label>Following</label>
+        <input type="number" id="sFollowing" min="0" inputmode="numeric" placeholder="optional" />
+      </div>
+      <div class="field">
+        <label>Posts</label>
+        <input type="number" id="sPosts" min="0" inputmode="numeric" placeholder="optional" />
+      </div>
+    </div>
+    <div class="field">
+      <label>Reach (last 7d, optional)</label>
+      <input type="number" id="sReach" min="0" inputmode="numeric" placeholder="optional" />
+    </div>
+    <div class="field">
+      <label>Note (optional)</label>
+      <textarea id="sNote" placeholder="e.g. Reel hit Explore, market weekend…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeSnapModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveSnap()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Endpoint Modal -->
+<div class="modal-overlay" id="endpointModal">
+  <div class="modal">
+    <h2>Auto-Sync Endpoint</h2>
+    <div class="field">
+      <label>Serverless endpoint URL</label>
+      <input type="url" id="endpointUrl" placeholder="https://your-app.vercel.app/api/instagram-followers" />
+    </div>
+    <p class="panel-sub">Must return JSON like <code>{"followers":340,"following":210,"posts":45}</code>. Leave blank to stay on manual tracking.</p>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeEndpointModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveEndpoint()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<button class="fab" onclick="openSnapModal()" title="Log Snapshot" aria-label="Log Snapshot">＋</button>
+
+<script>
+// ── Data ────────────────────────────────────────────────────────────
+const KEY = 'vpc_growth_v1';
+let data = { handle: '', goal: null, endpoint: '', snapshots: [] };
+let range = 'all';
+
+function load() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(KEY));
+    if (raw && typeof raw === 'object') {
+      data = Object.assign({ handle: '', goal: null, endpoint: '', snapshots: [] }, raw);
+      if (!Array.isArray(data.snapshots)) data.snapshots = [];
+    }
+  } catch { data = { handle: '', goal: null, endpoint: '', snapshots: [] }; }
+}
+function save() { localStorage.setItem(KEY, JSON.stringify(data)); }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+// snapshots sorted ascending by date
+function sorted() { return [...data.snapshots].sort((a, b) => a.date.localeCompare(b.date)); }
+
+// ── Metrics ──────────────────────────────────────────────────────────
+function daysBetween(a, b) { return Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 86400000); }
+
+// followers as of N days before the latest snapshot (nearest snapshot at/before target)
+function followersAgo(days) {
+  const s = sorted();
+  if (!s.length) return null;
+  const latest = s[s.length - 1].date;
+  const target = new Date(latest + 'T00:00:00');
+  target.setDate(target.getDate() - days);
+  const t = target.toISOString().slice(0, 10);
+  let pick = null;
+  for (const snap of s) { if (snap.date <= t) pick = snap; }
+  return pick ? pick.followers : s[0].followers;
+}
+
+function deltaHTML(cur, prev, showPct) {
+  if (prev == null || cur == null) return '<span class="delta flat">—</span>';
+  const d = cur - prev;
+  const cls = d > 0 ? 'up' : d < 0 ? 'down' : 'flat';
+  const sign = d > 0 ? '+' : '';
+  const pct = showPct && prev > 0 ? ` (${sign}${(d / prev * 100).toFixed(1)}%)` : '';
+  return `<span class="delta ${cls}">${d > 0 ? '▲' : d < 0 ? '▼' : '±'} ${sign}${d.toLocaleString()}${pct}</span>`;
+}
+
+function computeMetrics() {
+  const s = sorted();
+  const current = s.length ? s[s.length - 1].followers : null;
+  const week = current == null ? null : current - followersAgo(7);
+  const month = current == null ? null : current - followersAgo(30);
+  // avg daily growth over the full logged span
+  let avgDaily = null, spanDays = 0;
+  if (s.length >= 2) {
+    spanDays = Math.max(1, daysBetween(s[0].date, s[s.length - 1].date));
+    avgDaily = (s[s.length - 1].followers - s[0].followers) / spanDays;
+  }
+  return { current, week, month, avgDaily, spanDays, s };
+}
+
+// ── Render ───────────────────────────────────────────────────────────
+function render() {
+  const m = computeMetrics();
+  renderHeader(m);
+  renderMetrics(m);
+  renderGoal(m);
+  drawChart();
+  renderTable();
+  renderAuto();
+  document.getElementById('handleInput').value = data.handle || '';
+  document.getElementById('goalInput').value = data.goal || '';
+  const s = m.s;
+  document.getElementById('lastLogged').textContent = s.length ? `Last logged ${fmtDate(s[s.length - 1].date)}` : '';
+}
+
+function renderHeader(m) {
+  document.getElementById('statFollowers').textContent = m.current == null ? '0' : m.current.toLocaleString();
+  const wEl = document.getElementById('statWeek');
+  if (m.week == null) { wEl.textContent = '—'; wEl.style.color = ''; }
+  else { wEl.textContent = (m.week >= 0 ? '+' : '') + m.week.toLocaleString(); wEl.style.color = m.week > 0 ? 'var(--green)' : m.week < 0 ? 'var(--red)' : ''; }
+  const pct = (data.goal && m.current != null) ? Math.min(100, Math.round(m.current / data.goal * 100)) : 0;
+  document.getElementById('statGoalPct').textContent = data.goal ? pct + '%' : '—';
+}
+
+function renderMetrics(m) {
+  const cards = [
+    { label: 'Current Followers', value: m.current == null ? '—' : m.current.toLocaleString(), sub: m.s.length ? `across ${m.s.length} snapshot${m.s.length > 1 ? 's' : ''}` : 'log your first snapshot' },
+    { label: 'Past 7 Days', value: metricDelta(m.week), sub: 'vs ~1 week ago', cls: deltaCls(m.week) },
+    { label: 'Past 30 Days', value: metricDelta(m.month), sub: 'vs ~1 month ago', cls: deltaCls(m.month) },
+    { label: 'Avg / Day', value: m.avgDaily == null ? '—' : (m.avgDaily >= 0 ? '+' : '') + m.avgDaily.toFixed(1), sub: m.spanDays ? `over ${m.spanDays} days` : 'need 2+ snapshots', cls: deltaCls(m.avgDaily) },
+  ];
+  document.getElementById('metrics').innerHTML = cards.map(c => `
+    <div class="metric">
+      <div class="metric-label">${c.label}</div>
+      <div class="metric-value ${c.cls || ''}">${c.value}</div>
+      <div class="metric-sub">${c.sub}</div>
+    </div>`).join('');
+}
+function metricDelta(v) { if (v == null) return '—'; return (v > 0 ? '+' : '') + v.toLocaleString(); }
+function deltaCls(v) { if (v == null) return ''; return v > 0 ? 'delta up' : v < 0 ? 'delta down' : ''; }
+
+function renderGoal(m) {
+  const bar = document.getElementById('goalBar');
+  const txt = document.getElementById('goalText');
+  const eta = document.getElementById('goalEta');
+  if (!data.goal || m.current == null) {
+    bar.style.width = '0%';
+    txt.textContent = data.goal ? 'Log a snapshot to track progress.' : 'Set a target follower count.';
+    eta.textContent = '';
+    return;
+  }
+  const pct = Math.min(100, m.current / data.goal * 100);
+  bar.style.width = pct.toFixed(1) + '%';
+  const remaining = data.goal - m.current;
+  if (remaining <= 0) {
+    txt.textContent = `🎉 Goal reached — ${m.current.toLocaleString()} / ${data.goal.toLocaleString()}`;
+    eta.textContent = '';
+    return;
+  }
+  txt.textContent = `${m.current.toLocaleString()} / ${data.goal.toLocaleString()} — ${remaining.toLocaleString()} to go`;
+  if (m.avgDaily && m.avgDaily > 0) {
+    const days = Math.ceil(remaining / m.avgDaily);
+    const eod = new Date(); eod.setDate(eod.getDate() + days);
+    eta.textContent = `At current pace: ~${days} days (≈ ${eod.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })})`;
+  } else {
+    eta.textContent = m.avgDaily != null ? 'Growth is flat/negative — no ETA yet.' : 'Log more snapshots for an ETA.';
+  }
+}
+
+// ── Chart ────────────────────────────────────────────────────────────
+function drawChart() {
+  const wrap = document.getElementById('chartWrap');
+  let s = sorted();
+  if (range !== 'all') {
+    const n = parseInt(range, 10);
+    const latest = s.length ? s[s.length - 1].date : null;
+    if (latest) {
+      const cut = new Date(latest + 'T00:00:00'); cut.setDate(cut.getDate() - n);
+      const c = cut.toISOString().slice(0, 10);
+      s = s.filter(x => x.date >= c);
+    }
+  }
+  if (s.length < 2) {
+    wrap.innerHTML = `<div class="empty"><div class="icon">📉</div><h3>Not enough data yet</h3><p>Log at least two snapshots to see your growth curve.</p></div>`;
+    return;
+  }
+
+  const W = Math.max(680, s.length * 46), H = 260, pad = 40, padR = 16, padB = 30;
+  const vals = s.map(x => x.followers);
+  let maxV = Math.max(...vals, data.goal || 0);
+  let minV = Math.min(...vals);
+  // pad the range a touch
+  const span = Math.max(1, maxV - minV);
+  maxV = maxV + span * 0.1;
+  minV = Math.max(0, minV - span * 0.1);
+  const range2 = Math.max(1, maxV - minV);
+
+  const pxX = i => pad + (W - pad - padR) * (s.length === 1 ? 0.5 : i / (s.length - 1));
+  const pxY = v => pad * 0.4 + (H - pad * 0.4 - padB) * (1 - (v - minV) / range2);
+
+  let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" style="min-width:${W}px;height:${H}px">`;
+  // gridlines
+  [0, 0.25, 0.5, 0.75, 1].forEach(p => {
+    const v = minV + range2 * p, y = pxY(v);
+    svg += `<line x1="${pad}" x2="${W - padR}" y1="${y}" y2="${y}" stroke="#2e3350" stroke-width="1"/>
+            <text x="${pad - 6}" y="${y + 4}" fill="#8892b0" font-size="9" text-anchor="end">${fmtK(Math.round(v))}</text>`;
+  });
+  // goal line
+  if (data.goal && data.goal >= minV && data.goal <= maxV) {
+    const gy = pxY(data.goal);
+    svg += `<line x1="${pad}" x2="${W - padR}" y1="${gy}" y2="${gy}" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="5,3"/>
+            <text x="${W - padR}" y="${gy - 5}" fill="#a78bfa" font-size="9" text-anchor="end">Goal ${fmtK(data.goal)}</text>`;
+  }
+  // area + line
+  const pts = s.map((x, i) => `${pxX(i)},${pxY(x.followers)}`).join(' ');
+  const areaPts = `${pad},${pxY(minV)} ${pts} ${pxX(s.length - 1)},${pxY(minV)}`;
+  svg += `<polygon points="${areaPts}" fill="url(#grGrad)" opacity="0.25"/>`;
+  svg += `<defs><linearGradient id="grGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6c8cff"/><stop offset="1" stop-color="#6c8cff" stop-opacity="0"/></linearGradient></defs>`;
+  svg += `<polyline points="${pts}" fill="none" stroke="#6c8cff" stroke-width="2.5" stroke-linejoin="round"/>`;
+  s.forEach((x, i) => {
+    svg += `<circle cx="${pxX(i)}" cy="${pxY(x.followers)}" r="3.5" fill="#6c8cff"><title>${fmtDate(x.date)}: ${x.followers.toLocaleString()}</title></circle>`;
+  });
+  // x labels — thin out if crowded
+  const step = Math.ceil(s.length / 8);
+  s.forEach((x, i) => {
+    if (i % step !== 0 && i !== s.length - 1) return;
+    svg += `<text x="${pxX(i)}" y="${H - padB + 18}" fill="#8892b0" font-size="9" text-anchor="middle">${shortDate(x.date)}</text>`;
+  });
+  svg += '</svg>';
+  wrap.innerHTML = svg;
+}
+
+// ── Table ────────────────────────────────────────────────────────────
+function renderTable() {
+  const s = sorted().reverse(); // newest first for the table
+  const body = document.getElementById('snapBody');
+  const empty = document.getElementById('snapEmpty');
+  if (!s.length) {
+    body.innerHTML = '';
+    empty.innerHTML = `<div class="empty"><div class="icon">📸</div><h3>No snapshots yet</h3><p>Tap “Log Snapshot” and drop in your current follower count to start the trend.</p></div>`;
+    return;
+  }
+  empty.innerHTML = '';
+  body.innerHTML = s.map((x, idx) => {
+    const prev = s[idx + 1]; // previous chronologically (list is newest-first)
+    return `<tr>
+      <td>${fmtDate(x.date)}</td>
+      <td class="snap-num"><strong>${x.followers.toLocaleString()}</strong></td>
+      <td class="snap-num">${prev ? deltaHTML(x.followers, prev.followers, false) : '<span class="delta flat">—</span>'}</td>
+      <td class="snap-num">${x.following != null ? x.following.toLocaleString() : '—'}</td>
+      <td class="snap-num">${x.posts != null ? x.posts.toLocaleString() : '—'}</td>
+      <td class="snap-num">${x.reach != null ? x.reach.toLocaleString() : '—'}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis" title="${esc(x.note || '')}">${esc(x.note || '')}</td>
+      <td><div class="snap-actions">
+        <button class="icon-btn" title="Edit" onclick="openSnapModal('${x.id}')">✏️</button>
+        <button class="icon-btn" title="Delete" onclick="deleteSnap('${x.id}')">🗑</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Automation ───────────────────────────────────────────────────────
+function renderAuto() {
+  const connected = !!(data.endpoint && data.endpoint.trim());
+  const el = document.getElementById('autoStatus');
+  const fetchBtn = document.getElementById('fetchNowBtn');
+  if (connected) {
+    el.className = 'auto-status connected';
+    el.innerHTML = '<span class="auto-dot"></span>Endpoint connected';
+    fetchBtn.style.display = '';
+    document.getElementById('autoSummary').textContent = 'An endpoint is configured. Use “Fetch now” to pull the latest follower count and log it as today’s snapshot.';
+  } else {
+    el.className = 'auto-status manual';
+    el.innerHTML = '<span class="auto-dot"></span>Manual tracking';
+    fetchBtn.style.display = 'none';
+  }
+}
+
+async function fetchNow() {
+  if (!data.endpoint) return;
+  const btn = document.getElementById('fetchNowBtn');
+  btn.disabled = true; btn.textContent = '↻ Fetching…';
+  try {
+    const res = await fetch(data.endpoint, { headers: { 'Accept': 'application/json' } });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const j = await res.json();
+    const followers = Number(j.followers ?? j.followers_count ?? j.follower_count);
+    if (!Number.isFinite(followers)) throw new Error('No follower count in response');
+    const today = new Date().toISOString().slice(0, 10);
+    upsertSnapshot({
+      date: today,
+      followers,
+      following: numOrNull(j.following ?? j.follows_count),
+      posts: numOrNull(j.posts ?? j.media_count),
+      reach: numOrNull(j.reach),
+      note: 'Auto-synced',
+    });
+    toast(`Synced: ${followers.toLocaleString()} followers`);
+  } catch (e) {
+    toast('Fetch failed: ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = '↻ Fetch now';
+  }
+}
+function numOrNull(v) { const n = Number(v); return Number.isFinite(n) ? n : null; }
+
+// Insert or update the snapshot for a given date
+function upsertSnapshot(snap) {
+  const existing = data.snapshots.find(x => x.date === snap.date);
+  if (existing) { Object.assign(existing, snap, { id: existing.id }); }
+  else { data.snapshots.push(Object.assign({ id: uid() }, snap)); }
+  save(); render();
+}
+
+// ── Snapshot CRUD ────────────────────────────────────────────────────
+let editSnapId = null;
+function openSnapModal(id) {
+  editSnapId = id || null;
+  document.getElementById('snapModalTitle').textContent = id ? 'Edit Snapshot' : 'Log Snapshot';
+  const s = id ? data.snapshots.find(x => x.id === id) : null;
+  document.getElementById('sDate').value = s ? s.date : new Date().toISOString().slice(0, 10);
+  document.getElementById('sFollowers').value = s && s.followers != null ? s.followers : '';
+  document.getElementById('sFollowing').value = s && s.following != null ? s.following : '';
+  document.getElementById('sPosts').value = s && s.posts != null ? s.posts : '';
+  document.getElementById('sReach').value = s && s.reach != null ? s.reach : '';
+  document.getElementById('sNote').value = s ? (s.note || '') : '';
+  document.getElementById('snapModal').classList.add('open');
+  setTimeout(() => document.getElementById('sFollowers').focus(), 50);
+}
+function closeSnapModal() { document.getElementById('snapModal').classList.remove('open'); }
+
+function saveSnap() {
+  const date = document.getElementById('sDate').value;
+  const followers = parseInt(document.getElementById('sFollowers').value, 10);
+  if (!date) { toast('Pick a date.'); return; }
+  if (!Number.isFinite(followers) || followers < 0) { toast('Enter a follower count.'); return; }
+  const snap = {
+    date,
+    followers,
+    following: intOrNull('sFollowing'),
+    posts: intOrNull('sPosts'),
+    reach: intOrNull('sReach'),
+    note: document.getElementById('sNote').value.trim(),
+  };
+  if (editSnapId) {
+    const x = data.snapshots.find(v => v.id === editSnapId);
+    // if the date changed onto another snapshot, keep it simple: just update in place
+    Object.assign(x, snap);
+  } else {
+    const dup = data.snapshots.find(x => x.date === date);
+    if (dup) { Object.assign(dup, snap); }
+    else data.snapshots.push(Object.assign({ id: uid() }, snap));
+  }
+  save();
+  if (typeof auditLog === 'function') auditLog(editSnapId ? 'EDIT_GROWTH_SNAPSHOT' : 'ADD_GROWTH_SNAPSHOT', KEY, `${followers} followers @ ${date}`);
+  closeSnapModal(); render();
+  toast(editSnapId ? 'Snapshot updated.' : 'Snapshot logged!');
+}
+function intOrNull(id) { const v = parseInt(document.getElementById(id).value, 10); return Number.isFinite(v) ? v : null; }
+
+function deleteSnap(id) {
+  if (!confirm('Delete this snapshot?')) return;
+  data.snapshots = data.snapshots.filter(x => x.id !== id);
+  save();
+  if (typeof auditLog === 'function') auditLog('DELETE_GROWTH_SNAPSHOT', KEY, 'Snapshot deleted');
+  render(); toast('Snapshot deleted.');
+}
+
+// ── Handle / Goal / Endpoint ─────────────────────────────────────────
+function saveHandle() {
+  let h = document.getElementById('handleInput').value.trim();
+  if (h && !h.startsWith('@')) h = '@' + h;
+  data.handle = h; save();
+}
+function saveGoal() {
+  const g = parseInt(document.getElementById('goalInput').value, 10);
+  data.goal = Number.isFinite(g) && g > 0 ? g : null;
+  save(); render();
+}
+function openEndpointModal() {
+  document.getElementById('endpointUrl').value = data.endpoint || '';
+  document.getElementById('endpointModal').classList.add('open');
+}
+function closeEndpointModal() { document.getElementById('endpointModal').classList.remove('open'); }
+function saveEndpoint() {
+  data.endpoint = document.getElementById('endpointUrl').value.trim();
+  save(); closeEndpointModal(); render();
+  toast(data.endpoint ? 'Endpoint saved.' : 'Endpoint cleared — manual mode.');
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────
+function fmtDate(d) { if (!d) return ''; const [y, m, day] = d.split('-'); return `${m}/${day}/${y.slice(2)}`; }
+function shortDate(d) { const [, m, day] = d.split('-'); return `${parseInt(m, 10)}/${parseInt(day, 10)}`; }
+function fmtK(v) { return v >= 10000 ? (v / 1000).toFixed(0) + 'k' : v >= 1000 ? (v / 1000).toFixed(1) + 'k' : String(v); }
+function esc(s) { return VPCUtil.esc(s || '').replace(/"/g, '&quot;'); }
+
+// ── Range buttons ────────────────────────────────────────────────────
+document.getElementById('rangeGroup').addEventListener('click', e => {
+  const btn = e.target.closest('.range-btn');
+  if (!btn) return;
+  document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  range = btn.dataset.range;
+  drawChart();
+});
+
+// ── Modal keyboard / backdrop close ──────────────────────────────────
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSnapModal(); closeEndpointModal(); } });
+document.getElementById('snapModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeSnapModal(); });
+document.getElementById('endpointModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeEndpointModal(); });
+document.getElementById('sFollowers').addEventListener('keydown', e => { if (e.key === 'Enter') saveSnap(); });
+
+// ── Toast ────────────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+// ── Init ─────────────────────────────────────────────────────────────
+load();
+render();
+window.renderAll = () => { load(); render(); };
+</script>
+</body>
+</html>
