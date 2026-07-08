@@ -202,7 +202,32 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
   .modal-actions{flex-direction:column-reverse;}
   .modal-actions button{width:100%;}
   .day-col{min-height:100px;}
+  .plan-hero{flex-direction:column;}
+  .plan-hero-actions{width:100%;}
+  .plan-hero-actions .btn-primary{width:100%;}
+  .plan-week{grid-template-columns:1fr;}
 }
+
+/* ── Plan tab ── */
+.plan-hero{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:26px;}
+.plan-hero-actions{display:flex;flex-direction:column;flex-shrink:0;}
+.plan-section-title{font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.6px;color:var(--text2);margin:0 0 12px;}
+.plan-pillars{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(220px,100%),1fr));gap:12px;margin-bottom:26px;}
+.pillar-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;border-left:3px solid var(--pillar,var(--accent));}
+.pillar-icon{font-size:1.3rem;margin-bottom:6px;}
+.pillar-name{font-size:0.9rem;font-weight:700;margin-bottom:3px;}
+.pillar-goal{font-size:0.72rem;font-weight:700;color:var(--pillar,var(--accent));text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;}
+.pillar-desc{font-size:0.78rem;color:var(--text2);line-height:1.5;}
+.plan-week{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:26px;}
+.week-day{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;}
+.week-day-name{font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.4px;color:var(--text2);margin-bottom:8px;}
+.week-day-type{font-size:0.72rem;font-weight:700;padding:3px 0;border-radius:6px;margin-bottom:4px;}
+.week-day-focus{font-size:0.68rem;color:var(--text2);line-height:1.35;}
+.plan-arc{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(240px,100%),1fr));gap:12px;}
+.arc-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.arc-week{font-size:0.72rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;}
+.arc-theme{font-size:0.95rem;font-weight:700;margin-bottom:8px;}
+.arc-desc{font-size:0.78rem;color:var(--text2);line-height:1.5;}
 </style>
 </head>
 <body>
@@ -213,6 +238,7 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
     <nav class="header-tabs">
       <div class="h-tab active" data-tab="calendar">📅 Calendar</div>
       <div class="h-tab" data-tab="queue">📋 Queue</div>
+      <div class="h-tab" data-tab="plan">🗓️ Plan</div>
       <div class="h-tab" data-tab="templates">⚡ Templates</div>
       <div class="h-tab" data-tab="canva">🎨 Canva</div>
     </nav>
@@ -267,6 +293,33 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
       <div id="status-filters" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
     </div>
     <div class="content-grid" id="queue-grid"></div>
+  </div>
+
+  <!-- ── PLAN ── -->
+  <div class="section" id="tab-plan">
+    <div class="plan-hero">
+      <div class="plan-hero-main">
+        <div style="font-size:1.1rem;font-weight:800;margin-bottom:6px;">🗓️ The Content Engine</div>
+        <div style="font-size:0.85rem;color:var(--text2);line-height:1.6;max-width:640px;">
+          A repeatable 4-week posting system built for growth. It loads <strong style="color:var(--text)">28 ready-to-shoot posts</strong>
+          — captions written, dates set, formats chosen — straight onto your calendar. Reels lead each week for reach,
+          stories drive engagement, and posts convert. Reload it any time to schedule the next month.
+        </div>
+      </div>
+      <div class="plan-hero-actions">
+        <button class="btn-primary" onclick="loadContentPlan()">📥 Load Next 4 Weeks</button>
+        <button class="btn-ghost" onclick="clearContentPlan()" style="margin-top:8px;">Remove loaded plan</button>
+      </div>
+    </div>
+
+    <div class="plan-section-title">The 5 content pillars</div>
+    <div class="plan-pillars" id="plan-pillars"></div>
+
+    <div class="plan-section-title">Your weekly rhythm</div>
+    <div class="plan-week" id="plan-week"></div>
+
+    <div class="plan-section-title">The 4-week arc</div>
+    <div class="plan-arc" id="plan-arc"></div>
   </div>
 
   <!-- ── CANVA ── -->
@@ -480,6 +533,229 @@ const TEMPLATES = [
     caption: '📌 PINS ARE IN STOCK!\n\n🎮 Characters: \n💰 $5 each\n📍 Find us at shows or DM to order\n\n#PokemonTCG #PokemonPins #VaultAndPine',
   },
 ];
+
+// ── CONTENT ENGINE: pillars, weekly rhythm, 4-week arc ──────────────
+const PILLARS = [
+  { icon: '🎬', name: 'Product & Process', goal: 'Reach', color: '#6c8cff', desc: 'Reels of risers, Jet Tags & pins being made and shown off. Satisfying, shareable — this is what non-followers find on Explore.' },
+  { icon: '🎪', name: 'Show & Booth', goal: 'Convert', color: '#34d399', desc: 'Announcements, countdowns, table locators and live-from-the-booth stories. Turns the local card community into buyers.' },
+  { icon: '✨', name: 'Card Spotlights', goal: 'Engage', color: '#a78bfa', desc: 'PC showcases, grails and this-or-that polls. Personal, comment-driving content that bonds you to the collector community.' },
+  { icon: '📦', name: 'Drops & Restocks', goal: 'Sell', color: '#fbbf24', desc: 'Sealed product, new pins/tags and month-end bundles. Clear price + CTA aimed at your warm audience.' },
+  { icon: '🤝', name: 'Community & Education', goal: 'Loyalty', color: '#f87171', desc: 'Q&A, UGC features, how-to carousels and giveaways. Builds saves, trust and a following that sticks around.' },
+];
+
+const WEEK_RHYTHM = [
+  { day: 'Mon', type: 'Reel',   focus: 'Product / process',    color: '#6c8cff' },
+  { day: 'Tue', type: 'Story',  focus: 'Poll / this-or-that',  color: '#a78bfa' },
+  { day: 'Wed', type: 'Post',   focus: 'Spotlight / community', color: '#a78bfa' },
+  { day: 'Thu', type: 'Story',  focus: 'Behind the scenes',    color: '#f87171' },
+  { day: 'Fri', type: 'Reel',   focus: 'Drop / restock',       color: '#fbbf24' },
+  { day: 'Sat', type: 'Story',  focus: 'Show / weekend order',  color: '#34d399' },
+  { day: 'Sun', type: 'Post',   focus: 'Educational / recap',  color: '#f87171' },
+];
+
+const PLAN_ARC = [
+  { week: 'Week 1', theme: 'Foundation', desc: 'Introduce the brand, show the full range, and set the tone. Get the algorithm used to your posting rhythm.' },
+  { week: 'Week 2', theme: 'Show Week', desc: 'A full market mini-campaign: announce → hype → live from the booth → recap. Re-date this week to your real show.' },
+  { week: 'Week 3', theme: 'Drops & Products', desc: 'Push the money-makers — riser timelapses, a pin drop, restocks and sealed. Convert the reach you built.' },
+  { week: 'Week 4', theme: 'Community', desc: 'Turn viewers into a following with UGC features, a Q&A, a blooper, and a giveaway teaser that primes your next spike.' },
+];
+
+// The plan itself: w = week (0-3), d = day (0=Mon … 6=Sun).
+const CONTENT_PLAN = [
+  // ── Week 1 — Foundation ──
+  { w: 0, d: 0, time: '18:00', category: 'custom', type: 'reel', platforms: ['instagram', 'tiktok'],
+    title: 'Brand intro — Meet Vault & Pine',
+    caption: `👋 Meet Vault & Pine Collective.\n\nWe make custom 3D-printed Pokémon display risers, Jet Tags & pins — built by collectors, for collectors.\n\nFollow along for drops, show pickups & setup inspo 👇\n\n#PokemonTCG #VaultAndPine #PokemonCommunity #CardCollector`,
+    notes: `PILLAR: Product & Process (Reach). Hook in first 3s: open on your best-looking display shelf, THEN cut to your face. Trending audio, under 20s.` },
+  { w: 0, d: 1, time: '17:00', category: 'custom', type: 'story', platforms: ['instagram'],
+    title: 'Poll — What do you collect?',
+    caption: `What's your main collection? 👇\n\n🅰️ Pokémon\n🅱️ Sports\n\n(Vote on the sticker!)`,
+    notes: `PILLAR: Community (Engage). Poll sticker. Reply to voters in DMs within the first hour to boost reach.` },
+  { w: 0, d: 2, time: '12:00', category: 'product', type: 'post', platforms: ['instagram'],
+    title: 'Riser demo — Your slabs deserve better',
+    caption: `🖨️ Your slabs deserve better than a stack.\n\nOur custom 3D-printed risers angle your cards perfectly for display or content shots.\n\n✅ Fits standard slabs & toploaders\n✅ Made to order in any color\n✅ DM to order\n\n#PokemonTCG #CardDisplay #SlabDisplay #VaultAndPine`,
+    notes: `PILLAR: Product & Process. Carousel — slide 1 finished setup, slides 2-3 angles/colors. Built for saves.` },
+  { w: 0, d: 3, time: '19:00', category: 'custom', type: 'story', platforms: ['instagram'],
+    title: 'BTS — Packing orders',
+    caption: `Packing up today's orders 📦✨ Tap to see what's shipping out!`,
+    notes: `PILLAR: Community (Trust). Raw phone video of you packing. Add a product tag + location sticker.` },
+  { w: 0, d: 4, time: '18:00', category: 'product', type: 'reel', platforms: ['instagram', 'tiktok'],
+    title: 'Jet Tag showcase',
+    caption: `🏷️ Jet Tags = the easiest way to personalize your setup.\n\nPick your character, we print it. $5 each, at shows or by DM.\n\nWhich one should we make next? 👇\n\n#PokemonTCG #JetTags #PokemonAccessories #VaultAndPine`,
+    notes: `PILLAR: Product & Process (Reach). Fan out 5-6 tags, satisfying close-ups. The "which next?" ask drives comments.` },
+  { w: 0, d: 5, time: '11:00', category: 'show-schedule', type: 'story', platforms: ['instagram'],
+    title: 'Weekend DM orders open',
+    caption: `🛒 Open for DM orders all weekend!\n\nRisers • Jet Tags • Pins\nTap to message us 👇`,
+    notes: `PILLAR: Drops (Convert). Add the DM/message sticker. Low effort, keeps you top-of-feed on a busy day.` },
+  { w: 0, d: 6, time: '12:00', category: 'custom', type: 'post', platforms: ['instagram'],
+    title: 'Carousel — 3 ways to display graded cards',
+    caption: `📚 3 ways to display your graded cards (that aren't a shoebox):\n\n1️⃣ Angled risers for depth\n2️⃣ Wall grids for the grails\n3️⃣ Rotating stands for content\n\nSave this for your next setup 👇\n\n#PokemonTCG #CardDisplay #CollectorTips`,
+    notes: `PILLAR: Education (Saves). 4-slide carousel. "Save this" CTA drives the save signal. Slide 1 needs a bold title.` },
+
+  // ── Week 2 — Show Week (RE-DATE to your real show) ──
+  { w: 1, d: 0, time: '12:00', category: 'show-schedule', type: 'post', platforms: ['instagram', 'facebook'],
+    title: '[SHOW] Announcement',
+    caption: `🚨 WE'RE VENDING AT [SHOW NAME]!\n\n📅 [DATE]\n📍 [VENUE]\n🏷️ Table #[__]\n\nRisers, Jet Tags, pins & sealed — come say hi!\n\nTag someone you're bringing 👇\n\n#PokemonTCG #CardShow #VaultAndPine`,
+    notes: `PILLAR: Show & Booth (Convert). ⚠️ RE-DATE this whole week to your real show. Cross-posted to Facebook for local reach.` },
+  { w: 1, d: 1, time: '17:00', category: 'show-schedule', type: 'story', platforms: ['instagram'],
+    title: '[SHOW] Countdown',
+    caption: `⏳ [X] DAYS until [SHOW NAME]!\n\nDrop a 🔥 if we'll see you there.`,
+    notes: `PILLAR: Show & Booth. Countdown sticker set to show day.` },
+  { w: 1, d: 2, time: '18:00', category: 'product', type: 'reel', platforms: ['instagram', 'tiktok'],
+    title: '[SHOW] Table preview reel',
+    caption: `👀 Sneak peek at what we're bringing to [SHOW NAME] this weekend...\n\nWhich would you grab first? 👇\n\n#PokemonTCG #CardShow #VaultAndPine`,
+    notes: `PILLAR: Show & Booth (Reach). Reel panning across packed inventory. Trending audio. Pre-show hype + FOMO.` },
+  { w: 1, d: 3, time: '17:00', category: 'show-schedule', type: 'story', platforms: ['instagram'],
+    title: '[SHOW] Table locator',
+    caption: `📍 FIND US TOMORROW at [SHOW NAME]\nTable #[__]\n\nSee you there! 🎉`,
+    notes: `PILLAR: Show & Booth. Post the night before + morning of. Add a venue map screenshot if available.` },
+  { w: 1, d: 4, time: '19:00', category: 'product', type: 'story', platforms: ['instagram'],
+    title: 'Final hype + sealed loaded',
+    caption: `🔥 Loading up for tomorrow — including fresh SEALED product.\n\nFirst come, first served at the table. Who's coming? 👇`,
+    notes: `PILLAR: Drops (Convert). Urgency the night before. Show the sealed boxes stacked.` },
+  { w: 1, d: 5, time: '10:00', category: 'show-schedule', type: 'story', platforms: ['instagram'],
+    title: 'LIVE from the booth',
+    caption: `🎪 WE'RE LIVE at [SHOW NAME]! Table #[__]\n\nCome through 👋 Tap for a booth tour!`,
+    notes: `PILLAR: Show & Booth. Post MULTIPLE frames through the day — booth, crowd, sales. Your best trust-builder.` },
+  { w: 1, d: 6, time: '12:00', category: 'show-schedule', type: 'post', platforms: ['instagram'],
+    title: '[SHOW] Recap + thank you',
+    caption: `🙏 THANK YOU [SHOW NAME]!\n\nMeeting this community never gets old. Missed us? Everything's available by DM 👇\n\nWho did we meet this weekend? Tag yourself!\n\n#PokemonTCG #CardShow #VaultAndPine`,
+    notes: `PILLAR: Show & Booth (Convert). Carousel of booth + customer photos (with permission). Tagged customers reshare = free reach.` },
+
+  // ── Week 3 — Drops & Products ──
+  { w: 2, d: 0, time: '18:00', category: 'product', type: 'reel', platforms: ['instagram', 'tiktok'],
+    title: 'Riser print timelapse',
+    caption: `🖨️ From spool to shelf — watch a riser come to life.\n\nEvery one made to order. Yours in any color 👇\n\n#PokemonTCG #3DPrinting #CardDisplay #SatisfyingVideo`,
+    notes: `PILLAR: Product & Process (Reach). THE money reel — print timelapse is peak satisfying/shareable. Show the finished product FIRST, then the timelapse. Make it loop.` },
+  { w: 2, d: 1, time: '17:00', category: 'product', type: 'story', platforms: ['instagram'],
+    title: 'This-or-that — new pin design',
+    caption: `New pins dropping this week 📌\n\nWhich design wins? 🅰️ vs 🅱️\n(Vote 👇 — the winner goes into production!)`,
+    notes: `PILLAR: Drops (Engage). Poll sticker + genuine product research. Actually let the vote decide.` },
+  { w: 2, d: 2, time: '12:00', category: 'product', type: 'post', platforms: ['instagram'],
+    title: 'Pin drop — in stock',
+    caption: `📌 PINS ARE IN.\n\n🎮 [Characters]\n💰 $5 each / 3 for $12\n📍 Shows or DM to order\n\nGrab your mains before they're gone 👇\n\n#PokemonTCG #PokemonPins #EnamelPins #VaultAndPine`,
+    notes: `PILLAR: Drops (Sell). Clear price + bundle + CTA. Pin this to your grid for the week.` },
+  { w: 2, d: 3, time: '17:00', category: 'product', type: 'story', platforms: ['instagram'],
+    title: 'Jet Tag restock alert',
+    caption: `🏷️ RESTOCKED: your most-requested Jet Tags are back.\n\nTap to claim yours 👇`,
+    notes: `PILLAR: Drops (Sell). Scarcity language + message sticker.` },
+  { w: 2, d: 4, time: '18:00', category: 'product', type: 'reel', platforms: ['instagram', 'tiktok'],
+    title: 'Mail day / sealed restock',
+    caption: `📦 Mail day! Restocking sealed for the shelf + your collections.\n\nDM to reserve before the next show 👇\n\n#PokemonTCG #SealedProduct #MailDay #PokemonCards`,
+    notes: `PILLAR: Drops (Reach + Sell). Unboxing energy — sealed reveals do numbers. Quick cuts, trending audio.` },
+  { w: 2, d: 5, time: '11:00', category: 'product', type: 'story', platforms: ['instagram'],
+    title: 'Weekend order reminder',
+    caption: `🛒 Weekend orders are open!\nRisers • Pins • Tags • Sealed\nTap to message 👇`,
+    notes: `PILLAR: Drops (Convert). Recurring Saturday habit that keeps the DM pipeline warm.` },
+  { w: 2, d: 6, time: '12:00', category: 'card-spotlight', type: 'post', platforms: ['instagram'],
+    title: 'PC Showcase — grail',
+    caption: `✨ PC SHOWCASE\n\n🃏 [Card]\n📅 [Set]\n💎 [Grade]\n💬 [Why it means something]\n\nWhat's the one card you'll never sell? 👇\n\n#PokemonTCG #PersonalCollection #Grail #CardSpotlight`,
+    notes: `PILLAR: Card Spotlights (Engage). Personal story = connection. The question drives comments. One clean, well-lit shot.` },
+
+  // ── Week 4 — Community ──
+  { w: 3, d: 0, time: '18:00', category: 'custom', type: 'reel', platforms: ['instagram', 'tiktok'],
+    title: 'UGC — your setups',
+    caption: `😍 YOUR setups using our risers are unreal.\n\nTag us in your display and you might be featured next 👇\n\n#PokemonTCG #CardDisplay #VaultAndPine #CollectorCommunity`,
+    notes: `PILLAR: Community (Reach). Stitch customer photos/clips (with permission). UGC = social proof + those customers reshare.` },
+  { w: 3, d: 1, time: '17:00', category: 'custom', type: 'story', platforms: ['instagram'],
+    title: 'Q&A sticker — Ask us anything',
+    caption: `🎤 Ask us anything!\n\n3D printing? Display tips? Show life?\nDrop your Q's 👇`,
+    notes: `PILLAR: Community (Engage). Q&A sticker. Answer as story replies through the day for lots of impressions.` },
+  { w: 3, d: 2, time: '12:00', category: 'card-spotlight', type: 'post', platforms: ['instagram'],
+    title: 'Rate this setup 1-10',
+    caption: `Rate this display setup 1-10 👇\n\n(Built with our angled risers 😏)\n\n#PokemonTCG #CardDisplay #SetupInspo #VaultAndPine`,
+    notes: `PILLAR: Card Spotlights (Engage). Rating = low-effort comment magnet that subtly features the product.` },
+  { w: 3, d: 3, time: '17:00', category: 'product', type: 'story', platforms: ['instagram'],
+    title: 'Print fail blooper',
+    caption: `😅 Not every print is a winner...\n\nThe spaghetti we deal with so you don't have to 🍝\nTap for the fail 👇`,
+    notes: `PILLAR: Product & Process (Trust). Bloopers humanize the brand and over-perform. Keep it light and funny.` },
+  { w: 3, d: 4, time: '12:00', category: 'product', type: 'post', platforms: ['instagram'],
+    title: 'Month-end bundle deal',
+    caption: `🎁 MONTH-END BUNDLE\n\n1 riser + 2 Jet Tags + 1 pin = [$__] (save [$__])\n\nThis week only — DM "BUNDLE" to grab one 👇\n\n#PokemonTCG #PokemonDeals #VaultAndPine`,
+    notes: `PILLAR: Drops (Sell). Urgency + easy DM keyword. Bundles raise average order value.` },
+  { w: 3, d: 5, time: '11:00', category: 'custom', type: 'story', platforms: ['instagram'],
+    title: 'Giveaway teaser',
+    caption: `👀 Something's coming...\n\nA giveaway to say thank you. Follow + turn on notifications so you don't miss it 🔔`,
+    notes: `PILLAR: Community (Growth). Teasing a follow-gated giveaway primes your next growth spike. Keep the prize a mystery.` },
+  { w: 3, d: 6, time: '12:00', category: 'custom', type: 'post', platforms: ['instagram'],
+    title: 'Monthly recap + what\'s next',
+    caption: `📅 What a month.\n\nNew drops, [SHOW NAME], and the best community in the hobby. Here's what's coming next 👇\n\nWhat do you want to see more of? Comment below!\n\n#PokemonTCG #VaultAndPine #PokemonCommunity`,
+    notes: `PILLAR: Community (Connect). Recap carousel + forward look. The question feeds next month's content ideas.` },
+];
+
+// ── PLAN RENDERING ─────────────────────────────────
+function renderPlan() {
+  const pil = document.getElementById('plan-pillars');
+  if (pil) pil.innerHTML = PILLARS.map(p => `
+    <div class="pillar-card" style="--pillar:${p.color}">
+      <div class="pillar-icon">${p.icon}</div>
+      <div class="pillar-name">${esc(p.name)}</div>
+      <div class="pillar-goal">${esc(p.goal)}</div>
+      <div class="pillar-desc">${esc(p.desc)}</div>
+    </div>`).join('');
+
+  const wk = document.getElementById('plan-week');
+  if (wk) wk.innerHTML = WEEK_RHYTHM.map(d => `
+    <div class="week-day">
+      <div class="week-day-name">${d.day}</div>
+      <div class="week-day-type" style="color:${d.color}">${d.type}</div>
+      <div class="week-day-focus">${esc(d.focus)}</div>
+    </div>`).join('');
+
+  const arc = document.getElementById('plan-arc');
+  if (arc) arc.innerHTML = PLAN_ARC.map(a => `
+    <div class="arc-card">
+      <div class="arc-week">${esc(a.week)}</div>
+      <div class="arc-theme">${esc(a.theme)}</div>
+      <div class="arc-desc">${esc(a.desc)}</div>
+    </div>`).join('');
+}
+
+// Monday of the upcoming week (today if it's already Monday).
+function upcomingMonday() {
+  const d = new Date(); d.setHours(0, 0, 0, 0);
+  const delta = (1 - d.getDay() + 7) % 7; // 0 if Monday, else days until next Monday
+  d.setDate(d.getDate() + delta);
+  return d;
+}
+
+function loadContentPlan() {
+  const mon = upcomingMonday();
+  const monISO = mon.toISOString().slice(0, 10);
+  const stamp = monISO.replace(/-/g, '');
+  if (!confirm(`Load your 4-week content plan starting Monday ${fmtDate(monISO)}?\n\nThis schedules 28 posts (captions + formats included). Week 2 is a show campaign — you'll re-date it to your real show.`)) return;
+  const arr = getContent();
+  let added = 0, updated = 0;
+  CONTENT_PLAN.forEach(p => {
+    const d = new Date(mon); d.setDate(d.getDate() + p.w * 7 + p.d);
+    const iso = d.toISOString().slice(0, 10);
+    const id = `plan-${stamp}-w${p.w}-d${p.d}`;
+    const item = {
+      id, category: p.category, type: p.type, title: p.title,
+      date: iso, time: p.time, status: 'scheduled',
+      platforms: p.platforms.slice(), caption: p.caption, notes: p.notes, canvaUrl: '',
+    };
+    const idx = arr.findIndex(x => x.id === id);
+    if (idx >= 0) { arr[idx] = item; updated++; } else { arr.push(item); added++; }
+  });
+  saveContentData(arr);
+  if (typeof auditLog === 'function') auditLog('LOAD_CONTENT_PLAN', 'vpc_content_v1', `${added} added, ${updated} updated`);
+  renderAll();
+  document.querySelector('.h-tab[data-tab="calendar"]').click();
+  alert(`✅ Plan loaded — starts Monday ${fmtDate(monISO)}.\n\n${added} posts added${updated ? `, ${updated} updated` : ''}. Open the Calendar (navigate with Next →) to see them. Remember to re-date Week 2 to your real show.`);
+}
+
+function clearContentPlan() {
+  const arr = getContent();
+  const kept = arr.filter(x => !(typeof x.id === 'string' && x.id.startsWith('plan-')));
+  const removed = arr.length - kept.length;
+  if (!removed) { alert('No loaded plan posts to remove.'); return; }
+  if (!confirm(`Remove ${removed} loaded plan post(s)?\n\nThis only removes posts loaded from the plan — content you created yourself is untouched.`)) return;
+  saveContentData(kept);
+  if (typeof auditLog === 'function') auditLog('CLEAR_CONTENT_PLAN', 'vpc_content_v1', `${removed} removed`);
+  renderAll();
+  alert(`Removed ${removed} plan post(s).`);
+}
 
 // ── DATA ───────────────────────────────────────────
 function getContent() { return JSON.parse(localStorage.getItem(CONTENT_KEY) || '[]'); }
@@ -778,6 +1054,7 @@ function renderAll() {
   renderQueueFilters();
   renderQueue();
   renderTemplates();
+  renderPlan();
   renderCanva();
 }
 window.renderAll = renderAll;
