@@ -52,6 +52,9 @@ const SYNC_KEYS = [
   // ── Content Planner ─────────────────────────────────────
   'vpc_content_v1',
 
+  // ── Instagram Growth tracker ────────────────────────────
+  'vpc_growth_v1',
+
   // ── Production / 3-D Printing ───────────────────────────
   'vpc_print_queue_v1',
   'vpc_inventory_v1',

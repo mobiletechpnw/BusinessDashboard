@@ -313,6 +313,7 @@ footer a { color: var(--accent); text-decoration: none; }
   <a href="production.html" class="dash-nav-link">🖨️ Production</a>
   <a href="events.html" class="dash-nav-link">🎪 Events</a>
   <a href="content.html" class="dash-nav-link">📱 Content</a>
+  <a href="growth.html" class="dash-nav-link">🚀 Growth</a>
   <a href="review.html" class="dash-nav-link">📋 Review</a>
   <a href="guru.html" class="dash-nav-link">🥋 Guru</a>
 </nav>
@@ -496,6 +497,21 @@ footer a { color: var(--accent); text-decoration: none; }
       <div class="tile-desc">Announcements, drops, and spotlights — calendar and queue.</div>
       <div class="tile-foot">
         <span class="tile-arrow">Open Planner <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
+      </div>
+    </a>
+
+    <!-- Instagram Growth · 4x2 -->
+    <a class="tile span-4x2" href="growth.html" style="--tile-accent:#ec4899;">
+      <div class="tile-orb"></div>
+      <div class="tile-head">
+        <div class="tile-icon">🚀</div>
+        <div class="tile-badge">Growth</div>
+      </div>
+      <div class="tile-title">Instagram Growth</div>
+      <div class="tile-desc">Track followers over time, growth pace, and progress to goal.</div>
+      <div class="tile-foot">
+        <span class="tile-arrow">Track Followers <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
+        <span class="tile-stat" id="growth-stat">—</span>
       </div>
     </a>
 
@@ -708,6 +724,14 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
     const doneLessons = Object.keys(guru.completed || {}).length;
     document.getElementById('guru-stat').innerHTML = `<strong>${doneLessons}/25</strong> lessons`;
     if (doneLessons === 0) document.getElementById('guru-badge').textContent = 'New';
+  } catch(e) {}
+
+  // Instagram Growth — current followers
+  try {
+    const g = JSON.parse(localStorage.getItem('vpc_growth_v1') || '{"snapshots":[]}');
+    const snaps = (g.snapshots || []).slice().sort((a,b) => a.date.localeCompare(b.date));
+    const el = document.getElementById('growth-stat');
+    if (el) el.innerHTML = snaps.length ? `<strong>${(snaps[snaps.length-1].followers||0).toLocaleString()}</strong> followers` : `<strong>—</strong> log #1`;
   } catch(e) {}
 
   // Events

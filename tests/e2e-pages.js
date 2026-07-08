@@ -30,6 +30,7 @@ const PAGES = [
   'production.html',
   'review.html',
   'content.html',
+  'growth.html',
   'events.html',
   'vendor-calendar.html',
 ];
@@ -152,6 +153,40 @@ function seedData(monthOffsets) {
     vpc_tables_v1: JSON.stringify([
       { id: 't1', eventId: 'e1', vendorId: 'v1', price: 100, paid: true },
     ]),
+    vpc_growth_v1: JSON.stringify({
+      handle: '@vaultpine',
+      goal: 1000,
+      endpoint: '',
+      snapshots: [
+        {
+          id: 'g1',
+          date: mk(-2, 1),
+          followers: 120,
+          following: 180,
+          posts: 20,
+          reach: 400,
+          note: '',
+        },
+        {
+          id: 'g2',
+          date: mk(-1, 1),
+          followers: 210,
+          following: 190,
+          posts: 28,
+          reach: 900,
+          note: 'Reel hit Explore',
+        },
+        {
+          id: 'g3',
+          date: mk(0, 1),
+          followers: 340,
+          following: 205,
+          posts: 36,
+          reach: 1500,
+          note: '',
+        },
+      ],
+    }),
   };
 }
 
