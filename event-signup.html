@@ -191,7 +191,10 @@ async function submitSignup(e) {
     if (!res.ok) {
       const body = await res.text().catch(() => '');
       console.warn('[signup] rejected:', res.status, body);
-      showErr(`Sorry — your request couldn't be sent (error ${res.status}). Please contact the organizer directly.`);
+      let detail = '';
+      try { const j = JSON.parse(body); detail = j.message || j.hint || j.details || ''; }
+      catch { detail = (body || '').slice(0, 200); }
+      showErr(`Sorry — your request couldn't be sent (error ${res.status}${detail ? ': ' + detail : ''}). Please contact the organizer directly.`);
       btn.disabled = false;
       btn.textContent = 'Send Sign-Up Request';
       return false;
