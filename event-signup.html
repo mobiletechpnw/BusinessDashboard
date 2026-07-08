@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f1117">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>Vendor Sign-Up — Vault &amp; Pine Collective</title>
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+:root {
+  --bg:#0d0f16; --surface:rgba(255,255,255,.04); --border:rgba(255,255,255,.08);
+  --accent:#6c8cff; --accent2:#a78bfa; --green:#34d399; --yellow:#fbbf24;
+  --red:#f87171; --text:#e2e8f0; --text2:#8892b0; --radius:12px;
+}
+html, body {
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--bg); color:var(--text); overflow-x:hidden; max-width:100%;
+}
+body {
+  min-height:100vh;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 20% 10%, rgba(108,140,255,.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(167,139,250,.08) 0%, transparent 60%);
+  padding:16px;
+}
+.wrap { max-width:520px; margin:32px auto; }
+.logo { display:inline-flex; align-items:center; gap:10px; margin-bottom:20px; }
+.logo-icon { width:42px; height:42px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; }
+.logo-name { font-size:1.05rem; font-weight:800; letter-spacing:-.3px; }
+.logo-name span { color:var(--accent); }
+
+.card { background:#141720; border:1px solid var(--border); border-radius:18px; padding:26px; box-shadow:0 24px 80px rgba(0,0,0,.5); }
+.tag { font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--accent2); margin-bottom:10px; }
+.ev-name { font-size:1.45rem; font-weight:800; letter-spacing:-.4px; line-height:1.25; margin-bottom:8px; }
+.ev-meta { font-size:.82rem; color:var(--text2); display:flex; flex-wrap:wrap; gap:12px; margin-bottom:8px; }
+.intro { font-size:.85rem; color:var(--text2); line-height:1.6; margin:14px 0 20px; }
+
+.field { margin-bottom:16px; }
+.field label { display:block; font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--text2); margin-bottom:6px; }
+.field .opt { color:var(--text2); text-transform:none; letter-spacing:0; font-weight:500; }
+input, textarea {
+  width:100%; background:rgba(255,255,255,.03); border:1px solid var(--border);
+  border-radius:9px; padding:11px 13px; color:var(--text); font-size:.95rem; font-family:inherit;
+}
+input:focus, textarea:focus { outline:none; border-color:var(--accent); }
+textarea { resize:vertical; min-height:74px; }
+
+.btn-primary { width:100%; background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff; border:none; border-radius:9px; padding:13px; font-size:.92rem; font-weight:700; cursor:pointer; transition:all .2s; box-shadow:0 2px 12px rgba(108,140,255,.3); }
+.btn-primary:hover { opacity:.92; transform:translateY(-1px); }
+.btn-primary:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+.note { font-size:.72rem; color:var(--text2); text-align:center; margin-top:14px; line-height:1.5; }
+.msg { border-radius:9px; padding:12px 14px; font-size:.85rem; margin-bottom:16px; display:none; }
+.msg.err  { display:block; background:rgba(248,113,113,.12); border:1px solid rgba(248,113,113,.35); color:var(--red); }
+.success { text-align:center; padding:20px 0; }
+.success-icon { font-size:3rem; margin-bottom:10px; }
+.success-title { font-size:1.2rem; font-weight:800; margin-bottom:8px; }
+.success-sub { font-size:.85rem; color:var(--text2); line-height:1.6; }
+footer { text-align:center; padding:22px; font-size:.7rem; color:var(--text2); }
+</style>
+<script src="util.js"></script>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="logo">
+    <div class="logo-icon">🎪</div>
+    <div class="logo-name">Vault <span>&amp;</span> Pine Collective</div>
+  </div>
+
+  <div class="card" id="card">
+    <div class="tag">🪑 Vendor Table Sign-Up</div>
+    <div class="ev-name" id="ev-name">Loading…</div>
+    <div class="ev-meta" id="ev-meta"></div>
+    <p class="intro">Interested in a table at this event? Send your request below and we'll be in touch to confirm.</p>
+
+    <div class="msg err" id="err"></div>
+
+    <form id="signup-form" onsubmit="return submitSignup(event)">
+      <div class="field">
+        <label>Business / Vendor Name</label>
+        <input type="text" id="f-name" maxlength="120" placeholder="Your business or your name" required>
+      </div>
+      <div class="field">
+        <label>Table Preference</label>
+        <input type="text" id="f-table" maxlength="120" placeholder="e.g. 1 table, 2 tables, corner spot">
+      </div>
+      <div class="field">
+        <label>Contact <span class="opt">(optional, so we can reach you)</span></label>
+        <input type="text" id="f-contact" maxlength="160" placeholder="Email or phone">
+      </div>
+      <div class="field">
+        <label>Notes / Message</label>
+        <textarea id="f-notes" maxlength="1000" placeholder="What you sell, questions, special requests…"></textarea>
+      </div>
+      <button type="submit" class="btn-primary" id="submit-btn">Send Sign-Up Request</button>
+    </form>
+  </div>
+
+  <div class="card" id="success-card" style="display:none">
+    <div class="success">
+      <div class="success-icon">✅</div>
+      <div class="success-title">Request sent!</div>
+      <div class="success-sub">Thanks — your table request for <strong id="s-ev"></strong> has been received. We'll reach out to confirm your spot.</div>
+    </div>
+  </div>
+
+  <p class="note" id="foot-note">Your details are sent privately to the event organizer.</p>
+</div>
+
+<footer>Vault &amp; Pine Collective &nbsp;·&nbsp; Vendor sign-up</footer>
+
+<script>
+const PUB_SUPABASE_URL = 'https://cqvnspbdfmgwcutezmqe.supabase.co';
+const PUB_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxdm5zcGJkZm1nd2N1dGV6bXFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NjI3MDUsImV4cCI6MjA5NjEzODcwNX0.0GGjc6i8VwgJgDUFNwcNzEy4r0_sAo57I5iMMPi7dII';
+
+const esc = s => VPCUtil.esc(s || '');
+const fmtDate = d => d ? new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}) : '';
+
+// The share link embeds only the event's public-facing basics (id, name, date,
+// location) — never bookings or prices — so private events can collect sign-ups
+// without ever appearing on the public calendar.
+let _event = null;
+let _calId = 'vault-pine';
+(function loadEvent() {
+  const param = new URLSearchParams(location.search).get('d');
+  if (!param) { showFatal('This sign-up link is missing its event details. Ask the organizer for a fresh link.'); return; }
+  try {
+    const data = JSON.parse(decodeURIComponent(escape(atob(param))));
+    _event = data.event || null;
+    if (data.calId) _calId = data.calId;
+  } catch (e) { /* handled below */ }
+  if (!_event || !_event.id || !_event.name) {
+    showFatal('This sign-up link looks invalid or corrupted. Ask the organizer for a fresh link.');
+    return;
+  }
+  document.getElementById('ev-name').textContent = _event.name;
+  let meta = '';
+  if (_event.date)     meta += `<span>📅 ${esc(fmtDate(_event.date))}</span>`;
+  if (_event.location) meta += `<span>📍 ${esc(_event.location)}</span>`;
+  document.getElementById('ev-meta').innerHTML = meta;
+  document.getElementById('s-ev').textContent = _event.name;
+})();
+
+function showFatal(msg) {
+  document.getElementById('ev-name').textContent = 'Sign-up unavailable';
+  document.getElementById('ev-meta').innerHTML = '';
+  const f = document.getElementById('signup-form');
+  if (f) f.style.display = 'none';
+  const err = document.getElementById('err');
+  err.textContent = msg;
+  err.classList.add('err');
+  err.style.display = 'block';
+}
+
+async function submitSignup(e) {
+  e.preventDefault();
+  if (!_event) return false;
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { showErr('Please enter your business or name.'); return false; }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  hideErr();
+
+  const row = {
+    cal_id:     _calId,
+    event_id:   _event.id,
+    event_name: _event.name,
+    name,
+    table_pref: document.getElementById('f-table').value.trim(),
+    contact:    document.getElementById('f-contact').value.trim(),
+    notes:      document.getElementById('f-notes').value.trim(),
+    status:     'pending',
+  };
+
+  try {
+    const res = await fetch(`${PUB_SUPABASE_URL}/rest/v1/event_signups`, {
+      method:  'POST',
+      headers: {
+        'apikey':        PUB_SUPABASE_KEY,
+        'Authorization': `Bearer ${PUB_SUPABASE_KEY}`,
+        'Content-Type':  'application/json',
+        'Prefer':        'return=minimal',
+      },
+      body: JSON.stringify(row),
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      console.warn('[signup] rejected:', res.status, body);
+      showErr(`Sorry — your request couldn't be sent (error ${res.status}). Please contact the organizer directly.`);
+      btn.disabled = false;
+      btn.textContent = 'Send Sign-Up Request';
+      return false;
+    }
+    document.getElementById('card').style.display = 'none';
+    document.getElementById('success-card').style.display = '';
+    document.getElementById('foot-note').style.display = 'none';
+  } catch (err) {
+    console.warn('[signup] error:', err.message);
+    showErr('Network error — please check your connection and try again.');
+    btn.disabled = false;
+    btn.textContent = 'Send Sign-Up Request';
+  }
+  return false;
+}
+
+function showErr(msg) { const e = document.getElementById('err'); e.textContent = msg; e.style.display = 'block'; }
+function hideErr() { document.getElementById('err').style.display = 'none'; }
+</script>
+</body>
+</html>

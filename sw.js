@@ -1,4 +1,4 @@
-const CACHE = 'vpc-v10';
+const CACHE = 'vpc-v11';
 
 // Static assets that rarely change → safe to serve cache-first.
 const STATIC_ASSETS = ['/styles.css', '/manifest.json', '/icon.svg'];
@@ -20,6 +20,7 @@ const SHELL = [
   '/content.html',
   '/guru.html',
   '/vendor-calendar.html',
+  '/event-signup.html',
   '/login.html',
   '/reset-password.html',
   '/util.js',
