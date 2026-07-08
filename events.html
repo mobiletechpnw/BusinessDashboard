@@ -396,8 +396,21 @@ async function generateShareLink() {
     return;
   }
 
-  // Push the latest snapshot now, then copy the fixed public URL.
-  await publishPublicCalendar();
+  // Push the latest snapshot now, then copy the fixed public URL. Surface the
+  // result: if the write is rejected, the shared calendar would silently stay
+  // stale (e.g. showing events but no vendors), so the owner needs to know.
+  const result = await publishPublicCalendar();
+  if (result && !result.ok && (result.reason === 'rejected' || result.reason === 'error')) {
+    alert(
+      'The shared calendar could NOT be updated — vendors may see stale or missing data.\n\n' +
+      `Reason: ${result.reason === 'rejected' ? `server rejected the update (${result.status})` : 'network/error'}\n` +
+      (result.body ? `Details: ${String(result.body).slice(0, 300)}\n\n` : '\n') +
+      'The link is still copied, but ask for this to be checked.'
+    );
+  } else if (result && result.ok) {
+    const c = result.counts;
+    showToastMsg(`✅ Shared calendar updated — ${c.tables} booking(s) across ${c.events} event(s).`);
+  }
 
   const url = window.location.href.replace(/\/[^\/]*(\?.*)?$/, '/vendor-calendar.html');
 
@@ -1092,10 +1105,13 @@ function schedulePublicPublish() {
   _pubTimer = setTimeout(publishPublicCalendar, 1500);
 }
 
+// Returns { ok, reason?, status?, counts? } so callers (the Share button) can
+// tell whether the shared snapshot actually updated. `reason: 'skipped'` means
+// we deliberately did not publish (see guard below) — not a failure.
 async function publishPublicCalendar() {
   try {
     const session = window.VpcAuth ? await window.VpcAuth.getValid() : null;
-    if (!session?.access_token) return; // not signed in — skip silently
+    if (!session?.access_token) return { ok: false, reason: 'not-signed-in' };
 
     const events  = getEvents();
     const vendors = getVendors();
@@ -1110,17 +1126,18 @@ async function publishPublicCalendar() {
     // updating, so the calendar looks "alive" while the bookings silently vanish).
     // No events at all, or events with zero vendors AND zero tables, is that
     // partially-loaded signature: skip rather than publish a stripped snapshot.
-    if (!events.length) return;
-    if (!vendors.length && !tables.length) return;
+    if (!events.length) return { ok: false, reason: 'skipped' };
+    if (!vendors.length && !tables.length) return { ok: false, reason: 'skipped' };
 
+    const publicTables = tables.map(({ id, eventId, vendorId, paid }) => ({ id, eventId, vendorId, paid }));
     const payload = {
       events,
       vendors,
       // strip prices — only names + paid status are public
-      tables: tables.map(({ id, eventId, vendorId, paid }) => ({ id, eventId, vendorId, paid })),
+      tables: publicTables,
     };
 
-    await fetch(`${PUB_SUPABASE_URL}/rest/v1/public_calendar`, {
+    const res = await fetch(`${PUB_SUPABASE_URL}/rest/v1/public_calendar`, {
       method:  'POST',
       headers: {
         'apikey':        PUB_SUPABASE_KEY,
@@ -1130,8 +1147,23 @@ async function publishPublicCalendar() {
       },
       body: JSON.stringify({ id: PUB_CAL_ID, data: payload, updated_at: new Date().toISOString() }),
     });
+
+    if (!res.ok) {
+      // The write was rejected (e.g. row-level-security on public_calendar, or a
+      // schema issue). The shared calendar keeps whatever it had before — usually
+      // stale. Surface it instead of failing silently so it can be diagnosed.
+      const body = await res.text().catch(() => '');
+      console.warn(`[public calendar] publish rejected: ${res.status} — ${body}`);
+      return { ok: false, reason: 'rejected', status: res.status, body };
+    }
+
+    return {
+      ok: true,
+      counts: { events: events.length, vendors: vendors.length, tables: publicTables.length },
+    };
   } catch (e) {
     console.warn('[public calendar] publish skipped:', e.message);
+    return { ok: false, reason: 'error', body: e.message };
   }
 }
 
