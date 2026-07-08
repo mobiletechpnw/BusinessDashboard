@@ -1097,11 +1097,27 @@ async function publishPublicCalendar() {
     const session = window.VpcAuth ? await window.VpcAuth.getValid() : null;
     if (!session?.access_token) return; // not signed in — skip silently
 
+    const events  = getEvents();
+    const vendors = getVendors();
+    const tables  = getTables();
+
+    // Guard against clobbering the live shared snapshot with a half-loaded store.
+    // This auto-publish fires on every render and on page load, and it does a
+    // full replace of the public `data` blob. So if this page is opened on a
+    // device/session before cloud sync has repopulated vendors & tables — or with
+    // cleared storage — it would otherwise overwrite the public calendar and wipe
+    // the vendor names + Paid/Unpaid badges that vendors rely on (events would keep
+    // updating, so the calendar looks "alive" while the bookings silently vanish).
+    // No events at all, or events with zero vendors AND zero tables, is that
+    // partially-loaded signature: skip rather than publish a stripped snapshot.
+    if (!events.length) return;
+    if (!vendors.length && !tables.length) return;
+
     const payload = {
-      events:  getEvents(),
-      vendors: getVendors(),
+      events,
+      vendors,
       // strip prices — only names + paid status are public
-      tables:  getTables().map(({ id, eventId, vendorId, paid }) => ({ id, eventId, vendorId, paid })),
+      tables: tables.map(({ id, eventId, vendorId, paid }) => ({ id, eventId, vendorId, paid })),
     };
 
     await fetch(`${PUB_SUPABASE_URL}/rest/v1/public_calendar`, {
