@@ -174,6 +174,9 @@ main { padding:0 0 24px; }
 .paid-big-toggle.is-paid:hover { background:rgba(52,211,153,.18); }
 .paid-big-toggle.is-unpaid { border-color:var(--yellow); color:var(--yellow); background:rgba(251,191,36,.08); }
 .paid-big-toggle.is-unpaid:hover { background:rgba(251,191,36,.18); }
+.paid-big-toggle.is-private { border-color:var(--accent2); color:var(--accent2); background:rgba(167,139,250,.08); }
+.paid-big-toggle.is-private:hover { background:rgba(167,139,250,.18); }
+.ev-private-badge { display:inline-block; font-size:.58rem; font-weight:700; padding:2px 8px; border-radius:10px; text-transform:uppercase; letter-spacing:.3px; margin-top:7px; margin-left:6px; background:rgba(167,139,250,.18); color:var(--accent2); border:1px solid rgba(167,139,250,.35); }
 
 /* BILL MODAL */
 .bill-filter { display:flex; align-items:center; gap:8px; font-size:.78rem; color:var(--text2); margin-bottom:14px; cursor:pointer; user-select:none; }
@@ -320,6 +323,10 @@ main { padding:0 0 24px; }
       <label>Approval Status</label>
       <button class="paid-big-toggle" id="ev-approved-toggle" onclick="flipEvApproved()"></button>
     </div>
+    <div class="field">
+      <label>Visibility</label>
+      <button class="paid-big-toggle" id="ev-private-toggle" onclick="flipEvPrivate()"></button>
+    </div>
     <div class="modal-actions">
       <button class="btn-danger" id="ev-delete-btn" onclick="deleteEvent()" style="display:none">Delete Event</button>
       <button class="btn-ghost" onclick="closeModal('event-modal')">Cancel</button>
@@ -410,7 +417,10 @@ async function generateShareLink() {
     );
   } else if (result && result.ok) {
     const c = result.counts;
-    showToastMsg(`✅ Shared calendar updated — ${c.tables} booking(s) across ${c.events} event(s).`);
+    showToastMsg(
+      `✅ Shared calendar updated — ${c.tables} booking(s) across ${c.events} event(s).` +
+      (c.hidden ? ` ${c.hidden} private event(s) hidden.` : '')
+    );
   }
 
   const url = window.location.href.replace(/\/[^\/]*(\?.*)?$/, '/vendor-calendar.html');
@@ -532,6 +542,7 @@ function renderMatrix() {
           title="${ev.approved ? 'Tap to mark as unapproved' : 'Tap to mark as approved'}">
           ${ev.approved ? '✓ Approved' : '○ Unapproved'}
         </span>
+        ${ev.private ? `<span class="ev-private-badge" title="Hidden from the shared vendor calendar">🔒 Private</span>` : ''}
       </div>
       <button class="ev-edit-btn" onclick="openEventModal('${ev.id}')">✏️ Edit</button>
     </td>`;
@@ -621,17 +632,19 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 );
 
 // ── EVENT MODAL ──────────────────────────────────────
-let editEvId = null, evApproved = false;
+let editEvId = null, evApproved = false, evPrivate = false;
 function openEventModal(id) {
   editEvId = id || null;
   const ev = id ? getEvents().find(x => x.id === id) : null;
   evApproved = ev?.approved || false;
+  evPrivate  = ev?.private  || false;
   document.getElementById('ev-modal-title').textContent = ev ? 'Edit Event' : 'New Event';
   document.getElementById('ev-name').value     = ev?.name     || '';
   document.getElementById('ev-date').value     = ev?.date     || '';
   document.getElementById('ev-location').value = ev?.location || '';
   document.getElementById('ev-delete-btn').style.display = ev ? '' : 'none';
   updateEvApprovedToggle();
+  updateEvPrivateToggle();
   openModal('event-modal');
   setTimeout(() => document.getElementById('ev-name').focus(), 80);
 }
@@ -649,6 +662,22 @@ function flipEvApproved() {
   evApproved = !evApproved;
   updateEvApprovedToggle();
 }
+// Private ("ghost") events are visible to you here but stripped from the public
+// vendor calendar on publish — for planning tentative events before you commit.
+function updateEvPrivateToggle() {
+  const btn = document.getElementById('ev-private-toggle');
+  if (evPrivate) {
+    btn.textContent = '🔒 Private — hidden from shared calendar (tap to make Public)';
+    btn.className   = 'paid-big-toggle is-private';
+  } else {
+    btn.textContent = '🌐 Public — shown on shared calendar (tap to make Private)';
+    btn.className   = 'paid-big-toggle is-paid';
+  }
+}
+function flipEvPrivate() {
+  evPrivate = !evPrivate;
+  updateEvPrivateToggle();
+}
 function toggleEventApproved(id) {
   const arr = getEvents();
   const ev  = arr.find(x => x.id === id);
@@ -661,7 +690,7 @@ function toggleEventApproved(id) {
 function saveEvent() {
   const name = document.getElementById('ev-name').value.trim();
   if (!name) { alert('Event name is required.'); return; }
-  const item = { id: editEvId || uid(), name, date: document.getElementById('ev-date').value, location: document.getElementById('ev-location').value.trim(), approved: evApproved };
+  const item = { id: editEvId || uid(), name, date: document.getElementById('ev-date').value, location: document.getElementById('ev-location').value.trim(), approved: evApproved, private: evPrivate };
   const arr  = getEvents();
   const idx  = arr.findIndex(x => x.id === item.id);
   idx >= 0 ? arr[idx] = item : arr.push(item);
@@ -1130,12 +1159,23 @@ async function publishPublicCalendar() {
     if (!events.length) return { ok: false, reason: 'skipped' };
     if (!vendors.length && !tables.length) return { ok: false, reason: 'skipped' };
 
-    const publicTables = tables.map(({ id, eventId, vendorId, paid }) => ({ id, eventId, vendorId, paid }));
+    // Ghost/private events are for your own planning — never leak them publicly.
+    // Drop private events, then drop any tables tied to them, then keep only the
+    // vendors still referenced by a public table so a vendor booked solely to a
+    // private event isn't exposed either.
+    const publicEvents   = events.filter(e => !e.private);
+    const publicEventIds = new Set(publicEvents.map(e => e.id));
+    const publicTables   = tables
+      .filter(t => publicEventIds.has(t.eventId))
+      .map(({ id, eventId, vendorId, paid }) => ({ id, eventId, vendorId, paid }));
+    const referencedVendorIds = new Set(publicTables.map(t => t.vendorId));
+    const publicVendors  = vendors.filter(v => referencedVendorIds.has(v.id));
+
     const payload = {
-      events,
-      vendors,
+      events:  publicEvents,
+      vendors: publicVendors,
       // strip prices — only names + paid status are public
-      tables: publicTables,
+      tables:  publicTables,
     };
 
     const res = await fetch(`${PUB_SUPABASE_URL}/rest/v1/public_calendar`, {
@@ -1160,7 +1200,12 @@ async function publishPublicCalendar() {
 
     return {
       ok: true,
-      counts: { events: events.length, vendors: vendors.length, tables: publicTables.length },
+      counts: {
+        events:  publicEvents.length,
+        vendors: publicVendors.length,
+        tables:  publicTables.length,
+        hidden:  events.length - publicEvents.length,
+      },
     };
   } catch (e) {
     console.warn('[public calendar] publish skipped:', e.message);
