@@ -33,6 +33,7 @@ const PAGES = [
   'growth.html',
   'events.html',
   'vendor-calendar.html',
+  'event-signup.html',
 ];
 
 const MIME = {

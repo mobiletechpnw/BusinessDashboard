@@ -127,3 +127,101 @@ GRANT SELECT ON public.app_data TO anon;  -- anon is blocked by RLS anyway
 --    vpc_pipeline_v1              — upcoming delivery pipeline entries
 --
 -- ══════════════════════════════════════════════════════════════════
+
+
+-- ══════════════════════════════════════════════════════════════════
+--  public_calendar: the read-only snapshot the shared vendor calendar
+--  (vendor-calendar.html) reads. events.html publishes to it on edit.
+--  One row, id = 'vault-pine'. Public can READ; only the signed-in
+--  owner can WRITE. If publishing silently fails, it's almost always
+--  because these write policies are missing — re-run this block.
+-- ══════════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS public.public_calendar (
+  id         TEXT        PRIMARY KEY,
+  data       JSONB,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.public_calendar ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "public_calendar_read"   ON public.public_calendar;
+DROP POLICY IF EXISTS "public_calendar_insert" ON public.public_calendar;
+DROP POLICY IF EXISTS "public_calendar_update" ON public.public_calendar;
+
+-- Anyone (no login) can read the shared calendar snapshot.
+CREATE POLICY "public_calendar_read"
+  ON public.public_calendar FOR SELECT
+  TO anon, authenticated
+  USING (true);
+
+-- Only signed-in users (the owner) can create/replace the snapshot.
+CREATE POLICY "public_calendar_insert"
+  ON public.public_calendar FOR INSERT
+  TO authenticated
+  WITH CHECK (true);
+
+CREATE POLICY "public_calendar_update"
+  ON public.public_calendar FOR UPDATE
+  TO authenticated
+  USING (true) WITH CHECK (true);
+
+GRANT SELECT ON public.public_calendar TO anon;
+GRANT SELECT, INSERT, UPDATE ON public.public_calendar TO authenticated;
+
+
+-- ══════════════════════════════════════════════════════════════════
+--  event_signups: vendor table-request sign-ups submitted from the
+--  public event-signup.html page. Anyone with a sign-up link can
+--  INSERT a request; only the signed-in owner can read / manage them.
+--  (Anon cannot SELECT, so vendors can never see each other's entries.)
+-- ══════════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS public.event_signups (
+  id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  cal_id     TEXT        NOT NULL DEFAULT 'vault-pine',
+  event_id   TEXT        NOT NULL,
+  event_name TEXT,
+  name       TEXT        NOT NULL,
+  table_pref TEXT,
+  contact    TEXT,
+  notes      TEXT,
+  status     TEXT        NOT NULL DEFAULT 'pending',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.event_signups ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "event_signups_insert" ON public.event_signups;
+DROP POLICY IF EXISTS "event_signups_select" ON public.event_signups;
+DROP POLICY IF EXISTS "event_signups_update" ON public.event_signups;
+DROP POLICY IF EXISTS "event_signups_delete" ON public.event_signups;
+
+-- Anyone with a sign-up link can submit a request.
+CREATE POLICY "event_signups_insert"
+  ON public.event_signups FOR INSERT
+  TO anon, authenticated
+  WITH CHECK (true);
+
+-- Only the signed-in owner can read / manage submitted requests.
+CREATE POLICY "event_signups_select"
+  ON public.event_signups FOR SELECT
+  TO authenticated
+  USING (true);
+
+CREATE POLICY "event_signups_update"
+  ON public.event_signups FOR UPDATE
+  TO authenticated
+  USING (true) WITH CHECK (true);
+
+CREATE POLICY "event_signups_delete"
+  ON public.event_signups FOR DELETE
+  TO authenticated
+  USING (true);
+
+CREATE INDEX IF NOT EXISTS event_signups_cal_event_idx
+  ON public.event_signups (cal_id, event_id, status);
+
+GRANT INSERT ON public.event_signups TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.event_signups TO authenticated;
+-- ══════════════════════════════════════════════════════════════════
