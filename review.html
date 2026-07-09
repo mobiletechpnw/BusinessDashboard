@@ -52,6 +52,9 @@
   .section-full { grid-column: 1 / -1; }
 
   .panel {
+    /* Global styles.css defines `.panel { display:none }` for tab panels;
+       these briefing cards are always visible, so restore display here. */
+    display: block;
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 20px;
   }
