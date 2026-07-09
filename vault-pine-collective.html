@@ -418,19 +418,7 @@
   </div>
 </header>
 
-<nav class="dash-nav">
-  <a href="index.html" class="dash-nav-link">⌂ Home</a>
-  <a href="vault-pine-collective.html" class="dash-nav-link active">📊 Sales Hub</a>
-  <a href="goals-dashboard.html" class="dash-nav-link">🎯 Goals</a>
-  <a href="expenses.html" class="dash-nav-link">💸 Expenses</a>
-  <a href="analytics.html" class="dash-nav-link">📈 Analytics</a>
-  <a href="production.html" class="dash-nav-link">🖨️ Production</a>
-  <a href="events.html" class="dash-nav-link">🎪 Events</a>
-  <a href="content.html" class="dash-nav-link">📱 Content</a>
-  <a href="growth.html" class="dash-nav-link">🚀 Growth</a>
-  <a href="review.html" class="dash-nav-link">📋 Review</a>
-  <a href="guru.html" class="dash-nav-link">🥋 Guru</a>
-</nav>
+<nav class="dash-nav"></nav>
 
 <!-- ══════════════════════════════════════════ SALES SECTION ══ -->
 <div class="section active" id="section-sales">
@@ -4244,7 +4232,9 @@ renderGoals();
 renderExpensesAll();
 
 // ── EVENT TRACKER ──
-const EV_KEY = 'vp_events_v1';
+// NOTE: this page's own events store, separate from the Events page
+// (VPCUtil.KEYS.events). See the eventsLegacy note in util.js.
+const EV_KEY = VPCUtil.KEYS.eventsLegacy;
 let editEvId = null;
 function getEvents() { return JSON.parse(localStorage.getItem(EV_KEY) || '[]'); }
 function saveEvents(arr) { localStorage.setItem(EV_KEY, JSON.stringify(arr)); }

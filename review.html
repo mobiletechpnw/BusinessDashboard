@@ -52,9 +52,6 @@
   .section-full { grid-column: 1 / -1; }
 
   .panel {
-    /* Global styles.css defines `.panel { display:none }` for tab panels;
-       these briefing cards are always visible, so restore display here. */
-    display: block;
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 20px;
   }
@@ -229,19 +226,7 @@
   <a class="home-link" href="index.html">⌂ Home</a>
 </header>
 
-<nav class="dash-nav">
-  <a href="index.html" class="dash-nav-link">⌂ Home</a>
-  <a href="vault-pine-collective.html" class="dash-nav-link">📊 Sales Hub</a>
-  <a href="goals-dashboard.html" class="dash-nav-link">🎯 Goals</a>
-  <a href="expenses.html" class="dash-nav-link">💸 Expenses</a>
-  <a href="analytics.html" class="dash-nav-link">📈 Analytics</a>
-  <a href="production.html" class="dash-nav-link">🖨️ Production</a>
-  <a href="events.html" class="dash-nav-link">🎪 Events</a>
-  <a href="content.html" class="dash-nav-link">📱 Content</a>
-  <a href="growth.html" class="dash-nav-link">🚀 Growth</a>
-  <a href="review.html" class="dash-nav-link active">📋 Review</a>
-  <a href="guru.html" class="dash-nav-link">🥋 Guru</a>
-</nav>
+<nav class="dash-nav"></nav>
 
 <main>
   <div class="review-header">
@@ -585,7 +570,7 @@ function renderRevenue() {
 function renderEvents() {
   const el = $('events-summary');
   try {
-    const events = JSON.parse(localStorage.getItem('vp_events_v1')||localStorage.getItem('vpc_events_v1')||'[]');
+    const events = JSON.parse(localStorage.getItem(VPCUtil.KEYS.events)||'[]');
     const today = new Date(); today.setHours(0,0,0,0);
     const upcoming = events.filter(e => {
       const d = new Date((e.start||e.date||'')+'T00:00:00');

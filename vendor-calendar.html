@@ -268,7 +268,7 @@ async function loadPublicData() {
 }
 
 const getEvents  = () => {
-  const arr = _sharedData ? (_sharedData.events || []) : JSON.parse(localStorage.getItem('vpc_events_v1') || '[]');
+  const arr = _sharedData ? (_sharedData.events || []) : JSON.parse(localStorage.getItem(VPCUtil.KEYS.events) || '[]');
   return arr.sort((a,b) => (a.date||'9999').localeCompare(b.date||'9999'));
 };
 const getVendors = () => _sharedData ? (_sharedData.vendors || []) : JSON.parse(localStorage.getItem('vpc_vendors_v1') || '[]');

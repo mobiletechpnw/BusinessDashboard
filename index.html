@@ -304,19 +304,7 @@ footer a { color: var(--accent); text-decoration: none; }
   </div>
 </header>
 
-<nav class="dash-nav">
-  <a href="index.html" class="dash-nav-link active">⌂ Home</a>
-  <a href="vault-pine-collective.html" class="dash-nav-link">📊 Sales Hub</a>
-  <a href="goals-dashboard.html" class="dash-nav-link">🎯 Goals</a>
-  <a href="expenses.html" class="dash-nav-link">💸 Expenses</a>
-  <a href="analytics.html" class="dash-nav-link">📈 Analytics</a>
-  <a href="production.html" class="dash-nav-link">🖨️ Production</a>
-  <a href="events.html" class="dash-nav-link">🎪 Events</a>
-  <a href="content.html" class="dash-nav-link">📱 Content</a>
-  <a href="growth.html" class="dash-nav-link">🚀 Growth</a>
-  <a href="review.html" class="dash-nav-link">📋 Review</a>
-  <a href="guru.html" class="dash-nav-link">🥋 Guru</a>
-</nav>
+<nav class="dash-nav"></nav>
 
 <section class="hero">
   <div class="hero-inner">
@@ -736,7 +724,7 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
 
   // Events
   try {
-    const events = JSON.parse(localStorage.getItem('vp_events_v1')||localStorage.getItem('vpc_events_v1')||'[]');
+    const events = JSON.parse(localStorage.getItem(VPCUtil.KEYS.events)||'[]');
     const today = new Date(); today.setHours(0,0,0,0);
     const up = events.filter(e => new Date((e.start||e.date||'')+'T00:00:00') >= today);
     document.getElementById('events-stat').innerHTML = `<strong>${up.length}</strong> upcoming`;

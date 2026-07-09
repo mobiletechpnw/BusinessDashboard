@@ -42,3 +42,12 @@ test('escAttr also escapes quotes for attribute context', () => {
   assert.strictEqual(U.escAttr('" onerror="x'), '&quot; onerror=&quot;x');
   assert.strictEqual(U.escAttr("it's"), 'it&#39;s');
 });
+
+test('KEYS registry pins the canonical storage key names', () => {
+  // Events is the one pages historically disagreed on — lock it explicitly.
+  assert.strictEqual(U.KEYS.events, 'vpc_events_v1');
+  assert.strictEqual(U.KEYS.orders, 'vp_orders_v2');
+  // Renaming a value silently orphans real users' localStorage data, so the
+  // registry is frozen: writes to it must be no-ops, not accidental edits.
+  assert.ok(Object.isFrozen(U.KEYS));
+});

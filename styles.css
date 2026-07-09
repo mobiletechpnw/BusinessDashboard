@@ -507,11 +507,13 @@ main {
   margin: 0 auto;
   padding: 28px 24px;
 }
-.panel {
+/* Tab panels are hidden until their tab gets `.active`. Scoped to the
+   tab-panel id convention (tab-* / panel-*) that every tabset here follows,
+   so any other page can reuse `.panel` for always-visible cards without
+   being silently hidden by this global rule. */
+.panel[id^='tab-']:not(.active),
+.panel[id^='panel-']:not(.active) {
   display: none;
-}
-.panel.active {
-  display: block;
 }
 
 /* ════════════════════════════════════════════

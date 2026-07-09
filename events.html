@@ -260,19 +260,7 @@ main { padding:0 0 24px; }
   </div>
 </header>
 
-<nav class="dash-nav">
-  <a href="index.html" class="dash-nav-link">⌂ Home</a>
-  <a href="vault-pine-collective.html" class="dash-nav-link">📊 Sales Hub</a>
-  <a href="goals-dashboard.html" class="dash-nav-link">🎯 Goals</a>
-  <a href="expenses.html" class="dash-nav-link">💸 Expenses</a>
-  <a href="analytics.html" class="dash-nav-link">📈 Analytics</a>
-  <a href="production.html" class="dash-nav-link">🖨️ Production</a>
-  <a href="events.html" class="dash-nav-link active">🎪 Events</a>
-  <a href="content.html" class="dash-nav-link">📱 Content</a>
-  <a href="growth.html" class="dash-nav-link">🚀 Growth</a>
-  <a href="review.html" class="dash-nav-link">📋 Review</a>
-  <a href="guru.html" class="dash-nav-link">🥋 Guru</a>
-</nav>
+<nav class="dash-nav"></nav>
 
 <div class="stat-bar">
   <div class="stat-cell"><div class="stat-val" id="st-events">0</div><div class="stat-lbl">Events</div></div>
@@ -477,10 +465,10 @@ function showToastMsg(msg) {
   setTimeout(() => t.remove(), 3500);
 }
 
-// ── STORAGE ─────────────────────────────────────────
-const EV_KEY  = 'vpc_events_v1';
-const VN_KEY  = 'vpc_vendors_v1';
-const TBL_KEY = 'vpc_tables_v1';
+// ── STORAGE ── (canonical names live in VPCUtil.KEYS — do not hardcode)
+const EV_KEY  = VPCUtil.KEYS.events;
+const VN_KEY  = VPCUtil.KEYS.vendors;
+const TBL_KEY = VPCUtil.KEYS.tables;
 const uid     = () => Math.random().toString(36).slice(2, 10);
 
 const getEvents  = () => JSON.parse(localStorage.getItem(EV_KEY)  || '[]');
@@ -716,7 +704,7 @@ function toggleEventApproved(id) {
   if (!ev) return;
   ev.approved = !ev.approved;
   setEvents(arr);
-  if (typeof auditLog === 'function') auditLog('TOGGLE_EVENT_APPROVAL', 'vpc_events_v1', `${ev.name}: ${ev.approved ? 'approved' : 'unapproved'}`);
+  if (typeof auditLog === 'function') auditLog('TOGGLE_EVENT_APPROVAL', EV_KEY, `${ev.name}: ${ev.approved ? 'approved' : 'unapproved'}`);
   renderAll();
 }
 function saveEvent() {
@@ -727,7 +715,7 @@ function saveEvent() {
   const idx  = arr.findIndex(x => x.id === item.id);
   idx >= 0 ? arr[idx] = item : arr.push(item);
   setEvents(arr);
-  if (typeof auditLog === 'function') auditLog(editEvId ? 'EDIT_EVENT' : 'ADD_EVENT', 'vpc_events_v1', document.getElementById('ev-name')?.value || '');
+  if (typeof auditLog === 'function') auditLog(editEvId ? 'EDIT_EVENT' : 'ADD_EVENT', EV_KEY, document.getElementById('ev-name')?.value || '');
   closeModal('event-modal');
   renderAll();
 }
@@ -735,7 +723,7 @@ function deleteEvent() {
   if (!confirm('Delete this event and all its table entries?')) return;
   setEvents(getEvents().filter(x => x.id !== editEvId));
   setTables(getTables().filter(t => t.eventId !== editEvId));
-  if (typeof auditLog === 'function') auditLog('DELETE_EVENT', 'vpc_events_v1', 'Event deleted');
+  if (typeof auditLog === 'function') auditLog('DELETE_EVENT', EV_KEY, 'Event deleted');
   closeModal('event-modal');
   renderAll();
 }
