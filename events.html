@@ -753,7 +753,7 @@ function saveVendor() {
   const idx  = arr.findIndex(x => x.id === item.id);
   idx >= 0 ? arr[idx] = item : arr.push(item);
   setVendors(arr);
-  if (typeof auditLog === 'function') auditLog(editVnId ? 'EDIT_VENDOR' : 'ADD_VENDOR', 'vpc_vendors_v1', document.getElementById('vn-name')?.value || '');
+  if (typeof auditLog === 'function') auditLog(editVnId ? 'EDIT_VENDOR' : 'ADD_VENDOR', VPCUtil.KEYS.vendors, document.getElementById('vn-name')?.value || '');
   closeModal('vendor-modal');
   renderAll();
 }
@@ -817,7 +817,7 @@ function saveCellEntry() {
   };
   idx >= 0 ? arr[idx] = item : arr.push(item);
   setTables(arr);
-  if (typeof auditLog === 'function') auditLog('SAVE_TABLE_ENTRY', 'vpc_tables_v1', 'Table booking updated');
+  if (typeof auditLog === 'function') auditLog('SAVE_TABLE_ENTRY', VPCUtil.KEYS.tables, 'Table booking updated');
   closeModal('cell-modal');
   renderAll();
 }
@@ -1028,10 +1028,10 @@ function renderROI() {
   const events  = getEvents().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   const tables  = getTables();
   const vendors = getVendors();
-  const orders  = JSON.parse(localStorage.getItem('vp_orders_v2') || '[]');
-  const jt      = JSON.parse(localStorage.getItem('vp_jettags_v1') || '[]');
-  const pins    = JSON.parse(localStorage.getItem('vp_pins_v1') || '[]');
-  const costs   = JSON.parse(localStorage.getItem('vpc_costs_v1') || '{}');
+  const orders  = JSON.parse(localStorage.getItem(VPCUtil.KEYS.orders) || '[]');
+  const jt      = JSON.parse(localStorage.getItem(VPCUtil.KEYS.jetTags) || '[]');
+  const pins    = JSON.parse(localStorage.getItem(VPCUtil.KEYS.pins) || '[]');
+  const costs   = JSON.parse(localStorage.getItem(VPCUtil.KEYS.costs) || '{}');
   const jtCost  = costs.jettag ?? 0.862;
   const pinCost = costs.pin    ?? 0.95;
 
@@ -1343,7 +1343,7 @@ async function acceptSignup(id) {
     tables.push({ id: uid(), eventId: s.event_id, vendorId: v.id, price: 0, paid: false });
     setTables(tables);
   }
-  if (typeof auditLog === 'function') auditLog('ACCEPT_SIGNUP', 'vpc_tables_v1', `${s.name} → ${s.event_name || s.event_id}`);
+  if (typeof auditLog === 'function') auditLog('ACCEPT_SIGNUP', VPCUtil.KEYS.tables, `${s.name} → ${s.event_name || s.event_id}`);
 
   const ok = await deleteSignupRow(id);
   if (!ok) alert('Added the booking, but the request could not be cleared from the list — it may reappear on refresh.');

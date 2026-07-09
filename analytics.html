@@ -331,7 +331,7 @@ function saveCosts() {
     pin:    parseFloat($('cost-pin').value)    || PIN_COST_DEFAULT,
   };
   localStorage.setItem(COSTS_KEY, JSON.stringify(costs));
-  if (typeof auditLog === 'function') auditLog('SAVE_COSTS', 'vpc_costs_v1', 'Cost config updated');
+  if (typeof auditLog === 'function') auditLog('SAVE_COSTS', VPCUtil.KEYS.costs, 'Cost config updated');
   renderAll();
   toast('Costs saved — margins recalculated!');
 }
@@ -696,9 +696,9 @@ function renderTrends() {
 // ════════════════════════════════
 // P&L TAB
 // ════════════════════════════════
-const getExpenses2 = () => { try { return JSON.parse(localStorage.getItem('vp_expenses_v1') || '[]'); } catch { return []; } };
+const getExpenses2 = () => { try { return JSON.parse(localStorage.getItem(VPCUtil.KEYS.expensesLegacy) || '[]'); } catch { return []; } };
 const getVpcEvents = () => { try { return JSON.parse(localStorage.getItem(EV_KEY)  || '[]'); } catch { return []; } };
-const getVpcTables = () => { try { return JSON.parse(localStorage.getItem('vpc_tables_v1')  || '[]'); } catch { return []; } };
+const getVpcTables = () => { try { return JSON.parse(localStorage.getItem(VPCUtil.KEYS.tables)  || '[]'); } catch { return []; } };
 
 function populatePnlPeriods() {
   const { orders, jt, pins } = getRaw();

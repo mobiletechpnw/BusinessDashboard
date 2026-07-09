@@ -355,7 +355,7 @@
 
 <script>
 // ── Data ────────────────────────────────────────────────────────────
-const KEY = 'goals_dashboard_v1';
+const KEY = VPCUtil.KEYS.goals;
 let data = { goals: [] };
 let filter = 'all';
 let sort = 'created';
@@ -548,7 +548,7 @@ function saveGoal() {
     });
   }
   save();
-  if (typeof auditLog === 'function') auditLog(editGoalId ? 'EDIT_GOAL' : 'ADD_GOAL', 'goals_dashboard_v1', document.getElementById('gTitle')?.value || '');
+  if (typeof auditLog === 'function') auditLog(editGoalId ? 'EDIT_GOAL' : 'ADD_GOAL', VPCUtil.KEYS.goals, document.getElementById('gTitle')?.value || '');
   closeGoalModal(); render();
   toast(editGoalId ? 'Goal updated.' : 'Goal added!');
 }
@@ -563,7 +563,7 @@ function deleteGoal(id) {
   if (!confirm('Delete this goal and all its objectives?')) return;
   data.goals = data.goals.filter(x => x.id !== id);
   save();
-  if (typeof auditLog === 'function') auditLog('DELETE_GOAL', 'goals_dashboard_v1', `Goal deleted`);
+  if (typeof auditLog === 'function') auditLog('DELETE_GOAL', VPCUtil.KEYS.goals, `Goal deleted`);
   render(); toast('Goal deleted.');
 }
 
@@ -602,7 +602,7 @@ function saveObj() {
     g.objectives.push({ id: uid(), text, due: document.getElementById('oDue').value || null, priority, done: false });
   }
   save();
-  if (typeof auditLog === 'function') auditLog('SAVE_OBJECTIVE', 'goals_dashboard_v1', document.getElementById('oText')?.value || '');
+  if (typeof auditLog === 'function') auditLog('SAVE_OBJECTIVE', VPCUtil.KEYS.goals, document.getElementById('oText')?.value || '');
   closeObjModal(); render(); toast(editObjId ? 'Objective updated.' : 'Objective added!');
 }
 

@@ -271,8 +271,8 @@ const getEvents  = () => {
   const arr = _sharedData ? (_sharedData.events || []) : JSON.parse(localStorage.getItem(VPCUtil.KEYS.events) || '[]');
   return arr.sort((a,b) => (a.date||'9999').localeCompare(b.date||'9999'));
 };
-const getVendors = () => _sharedData ? (_sharedData.vendors || []) : JSON.parse(localStorage.getItem('vpc_vendors_v1') || '[]');
-const getTables  = () => _sharedData ? (_sharedData.tables  || []) : JSON.parse(localStorage.getItem('vpc_tables_v1')  || '[]');
+const getVendors = () => _sharedData ? (_sharedData.vendors || []) : JSON.parse(localStorage.getItem(VPCUtil.KEYS.vendors) || '[]');
+const getTables  = () => _sharedData ? (_sharedData.tables  || []) : JSON.parse(localStorage.getItem(VPCUtil.KEYS.tables)  || '[]');
 
 const fmtDate = d => d ? new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}) : '';
 const esc = s => VPCUtil.esc(s || '');

@@ -84,6 +84,10 @@
     vendors: 'vpc_vendors_v1',
     tables: 'vpc_tables_v1',
     expenses: 'vpc_personal_expenses_v1',
+    // The Sales Hub keeps its own separate expense list under this older key
+    // (also read by analytics), distinct from the Expenses page's `expenses`.
+    // Like eventsLegacy, unifying it would need a data migration.
+    expensesLegacy: 'vp_expenses_v1',
     expenseBudget: 'vpc_expense_budget_v1',
     recurringExpenses: 'vpc_recurring_expenses_v1',
     costs: 'vpc_costs_v1',

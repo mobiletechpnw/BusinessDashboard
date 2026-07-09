@@ -1530,7 +1530,7 @@ function deleteDelivery(id) {
   renderPipeline();
 }
 
-const LS_ORDERS    = 'vp_orders_v2';      // unified, fully-editable order store
+const LS_ORDERS    = VPCUtil.KEYS.orders;      // unified, fully-editable order store
 const LS_ORDERS_V1 = 'riser_orders_v1';   // legacy custom-orders store (pre-migration)
 let sortCol = 'date', sortDir = -1, orderMonthFilter = 'all';
 const ORDER_PAGE_SIZE = 50;
@@ -2240,7 +2240,7 @@ function saveNewOrder() {
   } else {
     saveOrder({ id: uid(), ...fields });
   }
-  if (typeof auditLog === 'function') auditLog(wasEditing ? 'EDIT_ORDER' : 'ADD_ORDER', 'vp_orders_v2', `${document.getElementById('aoCustomer')?.value || ''}`);
+  if (typeof auditLog === 'function') auditLog(wasEditing ? 'EDIT_ORDER' : 'ADD_ORDER', VPCUtil.KEYS.orders, `${document.getElementById('aoCustomer')?.value || ''}`);
   closeAddOrder(); renderSalesAll();
   toast(wasEditing ? 'Order updated.' : `Order logged: ${fmt$(sale)} from ${cust}`);
 }
@@ -2248,7 +2248,7 @@ function saveNewOrder() {
 function deleteOrder(id) {
   if (!confirm('Delete this order? This cannot be undone.')) return;
   localStorage.setItem(LS_ORDERS, JSON.stringify(rawOrders().filter(x => x.id !== id)));
-  if (typeof auditLog === 'function') auditLog('DELETE_ORDER', 'vp_orders_v2', `Order deleted`);
+  if (typeof auditLog === 'function') auditLog('DELETE_ORDER', VPCUtil.KEYS.orders, `Order deleted`);
   renderSalesAll();
   toast('Order deleted.');
 }
@@ -2704,7 +2704,7 @@ const FILAMENT_HISTORICAL = [
   { id:'f24', date:'2026-04-22', qty:4, total:43.63, brand:'Overture', notes:'PLA' },
   { id:'f25', date:'2026-04-30', qty:4, total:50.14, brand:'Elegoo',   notes:'PLA OG' },
 ];
-const LS_FILAMENT_KEY = 'riser_filament_v1';
+const LS_FILAMENT_KEY = VPCUtil.KEYS.filament;
 
 // One-time migration: the built-in purchase history used to live only in this
 // file and was prepended at read time, which meant it never synced to
@@ -2945,7 +2945,7 @@ document.getElementById('addFilamentModal').addEventListener('click', e => { if 
 // ══════════════════════════════════════════════════════════════
 //  GOALS
 // ══════════════════════════════════════════════════════════════
-const GOALS_KEY = 'goals_dashboard_v1';
+const GOALS_KEY = VPCUtil.KEYS.goals;
 let goalsData = { goals: [] };
 let goalFilter = 'all', goalSort = 'created';
 let editGoalId = null, editObjId = null, editObjGoalId = null;
@@ -3167,7 +3167,7 @@ document.getElementById('oText').addEventListener('keydown', e => { if (e.key===
 // ══════════════════════════════════════════════════════════════
 //  EXPENSES
 // ══════════════════════════════════════════════════════════════
-const EXP_KEY = 'vp_expenses_v1';
+const EXP_KEY = VPCUtil.KEYS.expensesLegacy;
 const EXP_CATS = [
   { name:'Filament / Materials', color:'#fb923c', type:'variable' },
   { name:'Equipment / Printer',  color:'#a78bfa', type:'variable' },
@@ -3584,7 +3584,7 @@ function exportOrdersCSV() {
 // ══════════════════════════════════════════════════════════════
 //  JET TAGS — DATA & LOGIC
 // ══════════════════════════════════════════════════════════════
-const JT_KEY         = 'vp_jettags_v1';
+const JT_KEY         = VPCUtil.KEYS.jetTags;
 const JT_RESTOCK_KEY = 'vp_jettags_restock_v1';
 
 const JT_INVENTORY = [
@@ -3907,7 +3907,7 @@ renderJtAll();
 // ══════════════════════════════════════════════════════════════
 //  PINS — DATA & LOGIC
 // ══════════════════════════════════════════════════════════════
-const PIN_KEY         = 'vp_pins_v1';
+const PIN_KEY         = VPCUtil.KEYS.pins;
 const PIN_RESTOCK_KEY = 'vp_pins_restock_v1';
 
 const PIN_INVENTORY = [
