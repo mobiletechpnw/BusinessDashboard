@@ -710,10 +710,15 @@ function toggleEventApproved(id) {
 function saveEvent() {
   const name = document.getElementById('ev-name').value.trim();
   if (!name) { alert('Event name is required.'); return; }
-  const item = { id: editEvId || uid(), name, date: document.getElementById('ev-date').value, location: document.getElementById('ev-location').value.trim(), approved: evApproved, private: evPrivate };
+  const date = document.getElementById('ev-date').value;
+  // `start` mirrors `date` so the Sales Hub (which reads/sorts on `start`)
+  // shows events created here.
+  const item = { id: editEvId || uid(), name, date, start: date, location: document.getElementById('ev-location').value.trim(), approved: evApproved, private: evPrivate };
   const arr  = getEvents();
   const idx  = arr.findIndex(x => x.id === item.id);
-  idx >= 0 ? arr[idx] = item : arr.push(item);
+  // Merge, not replace, so Sales-Hub fields (boothCost, end, notes) survive
+  // an edit made here.
+  idx >= 0 ? arr[idx] = { ...arr[idx], ...item } : arr.push(item);
   setEvents(arr);
   if (typeof auditLog === 'function') auditLog(editEvId ? 'EDIT_EVENT' : 'ADD_EVENT', EV_KEY, document.getElementById('ev-name')?.value || '');
   closeModal('event-modal');

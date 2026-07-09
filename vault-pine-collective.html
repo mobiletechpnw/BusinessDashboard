@@ -4232,9 +4232,9 @@ renderGoals();
 renderExpensesAll();
 
 // ── EVENT TRACKER ──
-// NOTE: this page's own events store, separate from the Events page
-// (VPCUtil.KEYS.events). See the eventsLegacy note in util.js.
-const EV_KEY = VPCUtil.KEYS.eventsLegacy;
+// Shares one event list with the Events page. util.js merges the old
+// per-page store (KEYS.eventsLegacy) into this canonical one on first load.
+const EV_KEY = VPCUtil.KEYS.events;
 let editEvId = null;
 function getEvents() { return JSON.parse(localStorage.getItem(EV_KEY) || '[]'); }
 function saveEvents(arr) { localStorage.setItem(EV_KEY, JSON.stringify(arr)); }
@@ -4260,7 +4260,7 @@ function evCalcRevenue(ev) {
 }
 
 function renderEvAll() {
-  const events = getEvents().sort((a, b) => b.start.localeCompare(a.start));
+  const events = getEvents().sort((a, b) => (b.start || '').localeCompare(a.start || ''));
   let totalRev = 0, totalProfit = 0, totalCost = 0, bestName = '—', bestRev = 0;
   const rows = events.map(ev => {
     const r = evCalcRevenue(ev);
@@ -4318,7 +4318,7 @@ function openEvModal(id) {
   document.getElementById('evModalTitle').textContent = ev ? 'Edit Event' : 'Log Event';
   document.getElementById('evName').value = ev ? ev.name : '';
   document.getElementById('evLocation').value = ev ? (ev.location || '') : '';
-  document.getElementById('evStart').value = ev ? ev.start : TODAY;
+  document.getElementById('evStart').value = ev ? (ev.start || ev.date || '') : TODAY;
   document.getElementById('evEnd').value = ev ? (ev.end || '') : '';
   document.getElementById('evCost').value = ev ? (ev.boothCost || 0) : 0;
   document.getElementById('evNotes').value = ev ? (ev.notes || '') : '';
@@ -4329,18 +4329,22 @@ function closeEvModal() { document.getElementById('evModal').classList.remove('o
 function saveEvent() {
   const name = document.getElementById('evName').value.trim();
   if (!name) { toast('Event name is required.'); return; }
+  const start = document.getElementById('evStart').value;
   const ev = {
     id: editEvId || Math.random().toString(36).slice(2),
     name,
     location: document.getElementById('evLocation').value.trim(),
-    start: document.getElementById('evStart').value,
+    start,
+    date: start, // mirror so the Events page (which reads `date`) shows it too
     end: document.getElementById('evEnd').value || null,
     boothCost: parseFloat(document.getElementById('evCost').value) || 0,
     notes: document.getElementById('evNotes').value.trim(),
   };
   const arr = getEvents();
   const idx = arr.findIndex(e => e.id === ev.id);
-  if (idx >= 0) arr[idx] = ev; else arr.push(ev);
+  // Merge, not replace, so fields the Events page owns (approved, private)
+  // survive an edit made here.
+  if (idx >= 0) arr[idx] = { ...arr[idx], ...ev }; else arr.push(ev);
   saveEvents(arr); closeEvModal(); renderEvAll();
   toast(editEvId ? 'Event updated.' : 'Event logged!');
 }
