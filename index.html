@@ -304,19 +304,7 @@ footer a { color: var(--accent); text-decoration: none; }
   </div>
 </header>
 
-<nav class="dash-nav">
-  <a href="index.html" class="dash-nav-link active">⌂ Home</a>
-  <a href="vault-pine-collective.html" class="dash-nav-link">📊 Sales Hub</a>
-  <a href="goals-dashboard.html" class="dash-nav-link">🎯 Goals</a>
-  <a href="expenses.html" class="dash-nav-link">💸 Expenses</a>
-  <a href="analytics.html" class="dash-nav-link">📈 Analytics</a>
-  <a href="production.html" class="dash-nav-link">🖨️ Production</a>
-  <a href="events.html" class="dash-nav-link">🎪 Events</a>
-  <a href="content.html" class="dash-nav-link">📱 Content</a>
-  <a href="growth.html" class="dash-nav-link">🚀 Growth</a>
-  <a href="review.html" class="dash-nav-link">📋 Review</a>
-  <a href="guru.html" class="dash-nav-link">🥋 Guru</a>
-</nav>
+<nav class="dash-nav"></nav>
 
 <section class="hero">
   <div class="hero-inner">
@@ -579,10 +567,10 @@ document.getElementById('hdate').textContent =
   // Try to build a health summary
   let healthLine = 'Everything that matters today, in one glance.';
   try {
-    const orders = JSON.parse(localStorage.getItem('vp_orders_v2') || '[]');
+    const orders = JSON.parse(localStorage.getItem(VPCUtil.KEYS.orders) || '[]');
     const thisMonth = _now.toISOString().slice(0,7);
     const mRev = orders.filter(o=>(o.date||'').startsWith(thisMonth)).reduce((s,o)=>s+(o.salePrice||0),0);
-    const goals = JSON.parse(localStorage.getItem('goals_dashboard_v1') || '{"goals":[]}').goals || [];
+    const goals = JSON.parse(localStorage.getItem(VPCUtil.KEYS.goals) || '{"goals":[]}').goals || [];
     const active = goals.filter(x=>!x.done).length;
     const today2 = new Date(); today2.setHours(0,0,0,0);
     const overdue = goals.filter(x=>!x.done && x.due && new Date(x.due+'T00:00:00') < today2).length;
@@ -610,7 +598,7 @@ async function pushAllAndDismiss() {
 }
 document.addEventListener('DOMContentLoaded', () => {
   if (!localStorage.getItem('vpc_sync_banner_dismissed')
-      && localStorage.getItem('vp_orders_v2')
+      && localStorage.getItem(VPCUtil.KEYS.orders)
       && !localStorage.getItem('vpc_last_sync_at')) {
     document.getElementById('sync-banner').classList.add('show');
   }
@@ -645,9 +633,9 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
 (function loadData() {
   let orders = [], jtSales = [], pinSales = [];
   try {
-    orders   = JSON.parse(localStorage.getItem('vp_orders_v2') || '[]');
-    jtSales  = JSON.parse(localStorage.getItem('vp_jettags_v1') || '[]');
-    pinSales = JSON.parse(localStorage.getItem('vp_pins_v1') || '[]');
+    orders   = JSON.parse(localStorage.getItem(VPCUtil.KEYS.orders) || '[]');
+    jtSales  = JSON.parse(localStorage.getItem(VPCUtil.KEYS.jetTags) || '[]');
+    pinSales = JSON.parse(localStorage.getItem(VPCUtil.KEYS.pins) || '[]');
   } catch(e) {}
   const now = new Date(), thisMonth = now.toISOString().slice(0,7);
 
@@ -702,7 +690,7 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
 
   // Goals
   try {
-    const g = JSON.parse(localStorage.getItem('goals_dashboard_v1') || '{"goals":[]}');
+    const g = JSON.parse(localStorage.getItem(VPCUtil.KEYS.goals) || '{"goals":[]}');
     const today = new Date(); today.setHours(0,0,0,0);
     const active  = (g.goals||[]).filter(x=>!x.done);
     const done    = (g.goals||[]).filter(x=>x.done);
@@ -720,7 +708,7 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
 
   // Financial Guru — lesson progress
   try {
-    const guru = JSON.parse(localStorage.getItem('vpc_guru_v1') || '{"completed":{}}');
+    const guru = JSON.parse(localStorage.getItem(VPCUtil.KEYS.guru) || '{"completed":{}}');
     const doneLessons = Object.keys(guru.completed || {}).length;
     document.getElementById('guru-stat').innerHTML = `<strong>${doneLessons}/25</strong> lessons`;
     if (doneLessons === 0) document.getElementById('guru-badge').textContent = 'New';
@@ -728,7 +716,7 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
 
   // Instagram Growth — current followers
   try {
-    const g = JSON.parse(localStorage.getItem('vpc_growth_v1') || '{"snapshots":[]}');
+    const g = JSON.parse(localStorage.getItem(VPCUtil.KEYS.growth) || '{"snapshots":[]}');
     const snaps = (g.snapshots || []).slice().sort((a,b) => a.date.localeCompare(b.date));
     const el = document.getElementById('growth-stat');
     if (el) el.innerHTML = snaps.length ? `<strong>${(snaps[snaps.length-1].followers||0).toLocaleString()}</strong> followers` : `<strong>—</strong> log #1`;
@@ -736,7 +724,7 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
 
   // Events
   try {
-    const events = JSON.parse(localStorage.getItem('vp_events_v1')||localStorage.getItem('vpc_events_v1')||'[]');
+    const events = JSON.parse(localStorage.getItem(VPCUtil.KEYS.events)||'[]');
     const today = new Date(); today.setHours(0,0,0,0);
     const up = events.filter(e => new Date((e.start||e.date||'')+'T00:00:00') >= today);
     document.getElementById('events-stat').innerHTML = `<strong>${up.length}</strong> upcoming`;
@@ -745,9 +733,9 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
   // Expenses
   try {
     const prefix = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-    const exps   = JSON.parse(localStorage.getItem('vpc_personal_expenses_v1')||'[]');
+    const exps   = JSON.parse(localStorage.getItem(VPCUtil.KEYS.expenses)||'[]');
     const spent  = exps.filter(e=>(e.date||'').startsWith(prefix)).reduce((s,e)=>s+(e.amount||0),0);
-    const budget = JSON.parse(localStorage.getItem('vpc_expense_budget_v1')||'{"total":0}').total;
+    const budget = JSON.parse(localStorage.getItem(VPCUtil.KEYS.expenseBudget)||'{"total":0}').total;
     document.getElementById('expense-stat').innerHTML = `<strong>${fmt(spent)}</strong> this month`;
     if (budget > 0 && spent > budget) {
       const b = document.getElementById('expense-badge');
@@ -839,15 +827,15 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
   const week  = new Date(today); week.setDate(week.getDate()+7);
   const now = new Date(), prefix = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   try {
-    const g = JSON.parse(localStorage.getItem('goals_dashboard_v1')||'{"goals":[]}');
+    const g = JSON.parse(localStorage.getItem(VPCUtil.KEYS.goals)||'{"goals":[]}');
     const od = (g.goals||[]).filter(x=>!x.done && x.due && new Date(x.due+'T00:00:00') < today);
     if (od.length) alerts.push({ type:'danger', icon:'⚠️', text:`${od.length} goal${od.length>1?'s':''} overdue`, url:'goals-dashboard.html', label:'View' });
     const soon = (g.goals||[]).filter(x=>!x.done && x.due && new Date(x.due+'T00:00:00') <= week && new Date(x.due+'T00:00:00') >= today);
     if (soon.length) alerts.push({ type:'warning', icon:'⏰', text:`${soon.length} goal${soon.length>1?'s':''} due within 7 days`, url:'goals-dashboard.html', label:'Manage' });
   } catch(e) {}
   try {
-    const budget = JSON.parse(localStorage.getItem('vpc_expense_budget_v1')||'{"total":0}');
-    const exps   = JSON.parse(localStorage.getItem('vpc_personal_expenses_v1')||'[]');
+    const budget = JSON.parse(localStorage.getItem(VPCUtil.KEYS.expenseBudget)||'{"total":0}');
+    const exps   = JSON.parse(localStorage.getItem(VPCUtil.KEYS.expenses)||'[]');
     const spent  = exps.filter(e=>(e.date||'').startsWith(prefix)).reduce((s,e)=>s+(e.amount||0),0);
     if (budget.total > 0) {
       const pct = spent/budget.total*100;
@@ -857,8 +845,8 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
   } catch(e) {}
   // Jet Tags low stock
   try {
-    const jt = JSON.parse(localStorage.getItem('vp_jettags_v1')||'[]');
-    const jtInv = JSON.parse(localStorage.getItem('vp_jt_inventory_v1')||'null');
+    const jt = JSON.parse(localStorage.getItem(VPCUtil.KEYS.jetTags)||'[]');
+    const jtInv = JSON.parse(localStorage.getItem(VPCUtil.KEYS.jetTagInventory)||'null');
     if (jtInv) {
       const soldMap = {};
       jt.forEach(s => (s.chars||[]).forEach(c => { soldMap[c] = (soldMap[c]||0) + (s.qty||1); }));
@@ -868,8 +856,8 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
   } catch(e) {}
   // Pins low stock
   try {
-    const pins = JSON.parse(localStorage.getItem('vp_pins_v1')||'[]');
-    const pinInv = JSON.parse(localStorage.getItem('vp_pin_inventory_v1')||'null');
+    const pins = JSON.parse(localStorage.getItem(VPCUtil.KEYS.pins)||'[]');
+    const pinInv = JSON.parse(localStorage.getItem(VPCUtil.KEYS.pinInventory)||'null');
     if (pinInv) {
       const soldMap = {};
       pins.forEach(s => (s.chars||[]).forEach(c => { soldMap[c] = (soldMap[c]||0) + (s.qty||1); }));

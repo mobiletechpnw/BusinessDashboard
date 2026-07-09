@@ -309,19 +309,7 @@
   </div>
 </header>
 
-<nav class="dash-nav">
-  <a href="index.html" class="dash-nav-link">⌂ Home</a>
-  <a href="vault-pine-collective.html" class="dash-nav-link">📊 Sales Hub</a>
-  <a href="goals-dashboard.html" class="dash-nav-link">🎯 Goals</a>
-  <a href="expenses.html" class="dash-nav-link">💸 Expenses</a>
-  <a href="analytics.html" class="dash-nav-link">📈 Analytics</a>
-  <a href="production.html" class="dash-nav-link">🖨️ Production</a>
-  <a href="events.html" class="dash-nav-link">🎪 Events</a>
-  <a href="content.html" class="dash-nav-link">📱 Content</a>
-  <a href="growth.html" class="dash-nav-link">🚀 Growth</a>
-  <a href="review.html" class="dash-nav-link">📋 Review</a>
-  <a href="guru.html" class="dash-nav-link active">🥋 Guru</a>
-</nav>
+<nav class="dash-nav"></nav>
 
 <main>
 
@@ -795,7 +783,7 @@ const LESSONS = [
 /* ════════════════════════════════════════════════
    STATE
 ════════════════════════════════════════════════ */
-const GURU_KEY = 'vpc_guru_v1';
+const GURU_KEY = VPCUtil.KEYS.guru;
 function loadGuru() {
   try { return JSON.parse(localStorage.getItem(GURU_KEY)) || { completed: {} }; }
   catch(e) { return { completed: {} }; }
@@ -943,11 +931,11 @@ function computeHealth() {
   const now = new Date();
   const monthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-  const expenses  = readJSON('vpc_personal_expenses_v1', []);
-  const recurring = readJSON('vpc_recurring_expenses_v1', []);
-  const budget    = readJSON('vpc_expense_budget_v1', { total: 0 });
-  const orders    = readJSON('vp_orders_v2', []);
-  const goals     = (readJSON('goals_dashboard_v1', { goals: [] }).goals) || [];
+  const expenses  = readJSON(VPCUtil.KEYS.expenses, []);
+  const recurring = readJSON(VPCUtil.KEYS.recurringExpenses, []);
+  const budget    = readJSON(VPCUtil.KEYS.expenseBudget, { total: 0 });
+  const orders    = readJSON(VPCUtil.KEYS.orders, []);
+  const goals     = (readJSON(VPCUtil.KEYS.goals, { goals: [] }).goals) || [];
 
   const spentMonth = expenses.filter(e => (e.date || '').startsWith(monthPrefix)).reduce((s, e) => s + (e.amount || 0), 0);
   const weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate() - 7);
@@ -1115,13 +1103,13 @@ function renderHealth() {
 ════════════════════════════════════════════════ */
 function computeMilestones() {
   const g = loadGuru();
-  const expenses  = readJSON('vpc_personal_expenses_v1', []);
-  const recurring = readJSON('vpc_recurring_expenses_v1', []);
-  const budget    = readJSON('vpc_expense_budget_v1', { total: 0 });
-  const orders    = readJSON('vp_orders_v2', []);
-  const jt        = readJSON('vp_jettags_v1', []);
-  const pins      = readJSON('vp_pins_v1', []);
-  const goals     = (readJSON('goals_dashboard_v1', { goals: [] }).goals) || [];
+  const expenses  = readJSON(VPCUtil.KEYS.expenses, []);
+  const recurring = readJSON(VPCUtil.KEYS.recurringExpenses, []);
+  const budget    = readJSON(VPCUtil.KEYS.expenseBudget, { total: 0 });
+  const orders    = readJSON(VPCUtil.KEYS.orders, []);
+  const jt        = readJSON(VPCUtil.KEYS.jetTags, []);
+  const pins      = readJSON(VPCUtil.KEYS.pins, []);
+  const goals     = (readJSON(VPCUtil.KEYS.goals, { goals: [] }).goals) || [];
 
   const totalRev  = orders.reduce((s, o) => s + (o.salePrice || 0), 0)
                   + jt.reduce((s, x) => s + (x.revenue || 0), 0)
@@ -1227,7 +1215,7 @@ function calcSplit() {
 }
 
 function renderSubAudit() {
-  const recurring = readJSON('vpc_recurring_expenses_v1', []);
+  const recurring = readJSON(VPCUtil.KEYS.recurringExpenses, []);
   const el = document.getElementById('sub-audit');
   if (!recurring.length) {
     el.innerHTML = `<div class="tool-result">No recurring bills logged yet.
@@ -1254,7 +1242,7 @@ function renderSubAudit() {
 /* ════════════════════════════════════════════════
    NET WORTH TRACKER
 ════════════════════════════════════════════════ */
-const NW_KEY     = 'vpc_networth_v1';
+const NW_KEY     = VPCUtil.KEYS.networth;
 const INCOME_KEY = 'vpc_income_v1';
 
 function loadNw() {
@@ -1415,7 +1403,7 @@ function renderNetWorth() {
   if (income > 0) {
     const now = new Date();
     const prefix = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-    const spent = readJSON('vpc_personal_expenses_v1', []).filter(e => (e.date||'').startsWith(prefix)).reduce((s,e)=>s+(e.amount||0),0);
+    const spent = readJSON(VPCUtil.KEYS.expenses, []).filter(e => (e.date||'').startsWith(prefix)).reduce((s,e)=>s+(e.amount||0),0);
     const saved = income - spent;
     const rate = income > 0 ? (saved / income * 100) : 0;
     rateEl.innerHTML = `<span style="color:${rate >= 20 ? 'var(--green)' : rate >= 0 ? 'var(--yellow)' : 'var(--red)'}">${rate.toFixed(0)}%</span><br><span style="font-size:0.6rem;font-weight:500;color:var(--text2)">savings rate</span>`;
@@ -1431,9 +1419,9 @@ function mPfx(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStar
 function monthLabel(d) { return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }); }
 
 function monthMetrics(prefix) {
-  const orders = readJSON('vp_orders_v2', []);
-  const jt = readJSON('vp_jettags_v1', []), pins = readJSON('vp_pins_v1', []);
-  const exps = readJSON('vpc_personal_expenses_v1', []);
+  const orders = readJSON(VPCUtil.KEYS.orders, []);
+  const jt = readJSON(VPCUtil.KEYS.jetTags, []), pins = readJSON(VPCUtil.KEYS.pins, []);
+  const exps = readJSON(VPCUtil.KEYS.expenses, []);
   const mo = orders.filter(o => (o.date || '').startsWith(prefix));
   const orderRev = mo.reduce((s, o) => s + (o.salePrice || 0), 0);
   const cogs = mo.reduce((s, o) => s + (o.cogs || 0), 0);
@@ -1442,7 +1430,7 @@ function monthMetrics(prefix) {
     + pins.filter(x => (x.date || '').startsWith(prefix)).reduce((s, x) => s + (x.revenue || 0), 0);
   const expenses = exps.filter(e => (e.date || '').startsWith(prefix)).reduce((s, e) => s + (e.amount || 0), 0);
   const margin = orderRev > 0 ? (orderRev - cogs) / orderRev * 100 : null;
-  const snaps = (readJSON('vpc_networth_v1', { snapshots: [] }).snapshots || []).filter(s => s.date.startsWith(prefix));
+  const snaps = (readJSON(VPCUtil.KEYS.networth, { snapshots: [] }).snapshots || []).filter(s => s.date.startsWith(prefix));
   const netWorth = snaps.length ? snaps[snaps.length - 1].net : null;
   const sh = (loadGuru().scoreHistory || []).find(h => h.month === prefix);
   return { revenue, expenses, profit: orderRev - cogs, margin, netWorth, orders: mo.length, score: sh ? sh.score : null };

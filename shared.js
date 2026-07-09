@@ -16,6 +16,7 @@ const DASH_NAV = [
   ['production.html', '🖨️', 'Production'],
   ['events.html', '🎪', 'Events'],
   ['content.html', '📱', 'Content'],
+  ['growth.html', '🚀', 'Growth'],
   ['review.html', '📋', 'Review'],
   ['guru.html', '🥋', 'Guru'],
 ];
@@ -92,8 +93,9 @@ function injectCursorGlow() {
 // ── GLOBAL SEARCH ──────────────────────────────────
 function buildSearchIndex() {
   const results = [];
+  const K = VPCUtil.KEYS;
   // Orders
-  const orders = JSON.parse(localStorage.getItem('vp_orders_v2') || '[]');
+  const orders = JSON.parse(localStorage.getItem(K.orders) || '[]');
   orders.forEach((o) =>
     results.push({
       type: 'Order',
@@ -104,7 +106,7 @@ function buildSearchIndex() {
     })
   );
   // Jet Tags
-  const jt = JSON.parse(localStorage.getItem('vp_jettags_v1') || '[]');
+  const jt = JSON.parse(localStorage.getItem(K.jetTags) || '[]');
   jt.forEach((s) =>
     results.push({
       type: 'Jet Tag Sale',
@@ -115,7 +117,7 @@ function buildSearchIndex() {
     })
   );
   // Pins
-  const pins = JSON.parse(localStorage.getItem('vp_pins_v1') || '[]');
+  const pins = JSON.parse(localStorage.getItem(K.pins) || '[]');
   pins.forEach((s) =>
     results.push({
       type: 'Pin Sale',
@@ -125,8 +127,9 @@ function buildSearchIndex() {
       url: 'vault-pine-collective.html',
     })
   );
-  // Events
-  const events = JSON.parse(localStorage.getItem('vp_events_v1') || '[]');
+  // Events — Events page writes KEYS.events; search once read the wrong key
+  // (vp_events_v1, never written) and silently indexed nothing.
+  const events = JSON.parse(localStorage.getItem(K.events) || '[]');
   events.forEach((ev) =>
     results.push({
       type: 'Event',
@@ -138,8 +141,7 @@ function buildSearchIndex() {
   );
   // Goals
   try {
-    const goals =
-      JSON.parse(localStorage.getItem('goals_dashboard_v1') || '{"goals":[]}').goals || [];
+    const goals = JSON.parse(localStorage.getItem(K.goals) || '{"goals":[]}').goals || [];
     goals.forEach((g) => {
       results.push({
         type: 'Goal',
@@ -161,7 +163,7 @@ function buildSearchIndex() {
   } catch (e) {}
   // Expenses
   try {
-    const exps = JSON.parse(localStorage.getItem('vpc_personal_expenses_v1') || '[]');
+    const exps = JSON.parse(localStorage.getItem(K.expenses) || '[]');
     exps.forEach((e) =>
       results.push({
         type: 'Expense',
@@ -171,7 +173,7 @@ function buildSearchIndex() {
         url: 'expenses.html',
       })
     );
-    const recs = JSON.parse(localStorage.getItem('vpc_recurring_expenses_v1') || '[]');
+    const recs = JSON.parse(localStorage.getItem(K.recurringExpenses) || '[]');
     recs.forEach((r) =>
       results.push({
         type: 'Recurring',

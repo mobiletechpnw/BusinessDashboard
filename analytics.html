@@ -157,19 +157,7 @@
   <a class="home-link" href="index.html">⌂ Home</a>
 </header>
 
-<nav class="dash-nav">
-  <a href="index.html" class="dash-nav-link">⌂ Home</a>
-  <a href="vault-pine-collective.html" class="dash-nav-link">📊 Sales Hub</a>
-  <a href="goals-dashboard.html" class="dash-nav-link">🎯 Goals</a>
-  <a href="expenses.html" class="dash-nav-link">💸 Expenses</a>
-  <a href="analytics.html" class="dash-nav-link active">📈 Analytics</a>
-  <a href="production.html" class="dash-nav-link">🖨️ Production</a>
-  <a href="events.html" class="dash-nav-link">🎪 Events</a>
-  <a href="content.html" class="dash-nav-link">📱 Content</a>
-  <a href="growth.html" class="dash-nav-link">🚀 Growth</a>
-  <a href="review.html" class="dash-nav-link">📋 Review</a>
-  <a href="guru.html" class="dash-nav-link">🥋 Guru</a>
-</nav>
+<nav class="dash-nav"></nav>
 
 <div class="tab-bar">
   <div class="tab active" data-tab="margins" onclick="switchTab('margins')">💰 Margins</div>
@@ -299,12 +287,12 @@
 </footer>
 
 <script>
-// ── Data Keys ──
-const LS_ORDERS  = 'vp_orders_v2';
-const JT_KEY     = 'vp_jettags_v1';
-const PIN_KEY    = 'vp_pins_v1';
-const EV_KEY     = 'vp_events_v1';
-const COSTS_KEY  = 'vpc_costs_v1';
+// ── Data Keys ── (canonical names live in VPCUtil.KEYS — do not hardcode)
+const LS_ORDERS  = VPCUtil.KEYS.orders;
+const JT_KEY     = VPCUtil.KEYS.jetTags;
+const PIN_KEY    = VPCUtil.KEYS.pins;
+const EV_KEY     = VPCUtil.KEYS.events;
+const COSTS_KEY  = VPCUtil.KEYS.costs;
 
 const JT_COST_DEFAULT  = 0.862;
 const PIN_COST_DEFAULT = 0.95;
@@ -343,7 +331,7 @@ function saveCosts() {
     pin:    parseFloat($('cost-pin').value)    || PIN_COST_DEFAULT,
   };
   localStorage.setItem(COSTS_KEY, JSON.stringify(costs));
-  if (typeof auditLog === 'function') auditLog('SAVE_COSTS', 'vpc_costs_v1', 'Cost config updated');
+  if (typeof auditLog === 'function') auditLog('SAVE_COSTS', VPCUtil.KEYS.costs, 'Cost config updated');
   renderAll();
   toast('Costs saved — margins recalculated!');
 }
@@ -708,9 +696,9 @@ function renderTrends() {
 // ════════════════════════════════
 // P&L TAB
 // ════════════════════════════════
-const getExpenses2 = () => { try { return JSON.parse(localStorage.getItem('vp_expenses_v1') || '[]'); } catch { return []; } };
-const getVpcEvents = () => { try { return JSON.parse(localStorage.getItem('vpc_events_v1')  || '[]'); } catch { return []; } };
-const getVpcTables = () => { try { return JSON.parse(localStorage.getItem('vpc_tables_v1')  || '[]'); } catch { return []; } };
+const getExpenses2 = () => { try { return JSON.parse(localStorage.getItem(VPCUtil.KEYS.expensesLegacy) || '[]'); } catch { return []; } };
+const getVpcEvents = () => { try { return JSON.parse(localStorage.getItem(EV_KEY)  || '[]'); } catch { return []; } };
+const getVpcTables = () => { try { return JSON.parse(localStorage.getItem(VPCUtil.KEYS.tables)  || '[]'); } catch { return []; } };
 
 function populatePnlPeriods() {
   const { orders, jt, pins } = getRaw();

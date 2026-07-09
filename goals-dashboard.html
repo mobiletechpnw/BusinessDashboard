@@ -263,19 +263,7 @@
   </div>
 </header>
 
-<nav class="dash-nav">
-  <a href="index.html" class="dash-nav-link">⌂ Home</a>
-  <a href="vault-pine-collective.html" class="dash-nav-link">📊 Sales Hub</a>
-  <a href="goals-dashboard.html" class="dash-nav-link active">🎯 Goals</a>
-  <a href="expenses.html" class="dash-nav-link">💸 Expenses</a>
-  <a href="analytics.html" class="dash-nav-link">📈 Analytics</a>
-  <a href="production.html" class="dash-nav-link">🖨️ Production</a>
-  <a href="events.html" class="dash-nav-link">🎪 Events</a>
-  <a href="content.html" class="dash-nav-link">📱 Content</a>
-  <a href="growth.html" class="dash-nav-link">🚀 Growth</a>
-  <a href="review.html" class="dash-nav-link">📋 Review</a>
-  <a href="guru.html" class="dash-nav-link">🥋 Guru</a>
-</nav>
+<nav class="dash-nav"></nav>
 
 <main>
   <div class="top-bar">
@@ -367,7 +355,7 @@
 
 <script>
 // ── Data ────────────────────────────────────────────────────────────
-const KEY = 'goals_dashboard_v1';
+const KEY = VPCUtil.KEYS.goals;
 let data = { goals: [] };
 let filter = 'all';
 let sort = 'created';
@@ -560,7 +548,7 @@ function saveGoal() {
     });
   }
   save();
-  if (typeof auditLog === 'function') auditLog(editGoalId ? 'EDIT_GOAL' : 'ADD_GOAL', 'goals_dashboard_v1', document.getElementById('gTitle')?.value || '');
+  if (typeof auditLog === 'function') auditLog(editGoalId ? 'EDIT_GOAL' : 'ADD_GOAL', VPCUtil.KEYS.goals, document.getElementById('gTitle')?.value || '');
   closeGoalModal(); render();
   toast(editGoalId ? 'Goal updated.' : 'Goal added!');
 }
@@ -575,7 +563,7 @@ function deleteGoal(id) {
   if (!confirm('Delete this goal and all its objectives?')) return;
   data.goals = data.goals.filter(x => x.id !== id);
   save();
-  if (typeof auditLog === 'function') auditLog('DELETE_GOAL', 'goals_dashboard_v1', `Goal deleted`);
+  if (typeof auditLog === 'function') auditLog('DELETE_GOAL', VPCUtil.KEYS.goals, `Goal deleted`);
   render(); toast('Goal deleted.');
 }
 
@@ -614,7 +602,7 @@ function saveObj() {
     g.objectives.push({ id: uid(), text, due: document.getElementById('oDue').value || null, priority, done: false });
   }
   save();
-  if (typeof auditLog === 'function') auditLog('SAVE_OBJECTIVE', 'goals_dashboard_v1', document.getElementById('oText')?.value || '');
+  if (typeof auditLog === 'function') auditLog('SAVE_OBJECTIVE', VPCUtil.KEYS.goals, document.getElementById('oText')?.value || '');
   closeObjModal(); render(); toast(editObjId ? 'Objective updated.' : 'Objective added!');
 }
 

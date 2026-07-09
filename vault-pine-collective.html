@@ -418,19 +418,7 @@
   </div>
 </header>
 
-<nav class="dash-nav">
-  <a href="index.html" class="dash-nav-link">⌂ Home</a>
-  <a href="vault-pine-collective.html" class="dash-nav-link active">📊 Sales Hub</a>
-  <a href="goals-dashboard.html" class="dash-nav-link">🎯 Goals</a>
-  <a href="expenses.html" class="dash-nav-link">💸 Expenses</a>
-  <a href="analytics.html" class="dash-nav-link">📈 Analytics</a>
-  <a href="production.html" class="dash-nav-link">🖨️ Production</a>
-  <a href="events.html" class="dash-nav-link">🎪 Events</a>
-  <a href="content.html" class="dash-nav-link">📱 Content</a>
-  <a href="growth.html" class="dash-nav-link">🚀 Growth</a>
-  <a href="review.html" class="dash-nav-link">📋 Review</a>
-  <a href="guru.html" class="dash-nav-link">🥋 Guru</a>
-</nav>
+<nav class="dash-nav"></nav>
 
 <!-- ══════════════════════════════════════════ SALES SECTION ══ -->
 <div class="section active" id="section-sales">
@@ -1542,7 +1530,7 @@ function deleteDelivery(id) {
   renderPipeline();
 }
 
-const LS_ORDERS    = 'vp_orders_v2';      // unified, fully-editable order store
+const LS_ORDERS    = VPCUtil.KEYS.orders;      // unified, fully-editable order store
 const LS_ORDERS_V1 = 'riser_orders_v1';   // legacy custom-orders store (pre-migration)
 let sortCol = 'date', sortDir = -1, orderMonthFilter = 'all';
 const ORDER_PAGE_SIZE = 50;
@@ -2252,7 +2240,7 @@ function saveNewOrder() {
   } else {
     saveOrder({ id: uid(), ...fields });
   }
-  if (typeof auditLog === 'function') auditLog(wasEditing ? 'EDIT_ORDER' : 'ADD_ORDER', 'vp_orders_v2', `${document.getElementById('aoCustomer')?.value || ''}`);
+  if (typeof auditLog === 'function') auditLog(wasEditing ? 'EDIT_ORDER' : 'ADD_ORDER', VPCUtil.KEYS.orders, `${document.getElementById('aoCustomer')?.value || ''}`);
   closeAddOrder(); renderSalesAll();
   toast(wasEditing ? 'Order updated.' : `Order logged: ${fmt$(sale)} from ${cust}`);
 }
@@ -2260,7 +2248,7 @@ function saveNewOrder() {
 function deleteOrder(id) {
   if (!confirm('Delete this order? This cannot be undone.')) return;
   localStorage.setItem(LS_ORDERS, JSON.stringify(rawOrders().filter(x => x.id !== id)));
-  if (typeof auditLog === 'function') auditLog('DELETE_ORDER', 'vp_orders_v2', `Order deleted`);
+  if (typeof auditLog === 'function') auditLog('DELETE_ORDER', VPCUtil.KEYS.orders, `Order deleted`);
   renderSalesAll();
   toast('Order deleted.');
 }
@@ -2716,7 +2704,7 @@ const FILAMENT_HISTORICAL = [
   { id:'f24', date:'2026-04-22', qty:4, total:43.63, brand:'Overture', notes:'PLA' },
   { id:'f25', date:'2026-04-30', qty:4, total:50.14, brand:'Elegoo',   notes:'PLA OG' },
 ];
-const LS_FILAMENT_KEY = 'riser_filament_v1';
+const LS_FILAMENT_KEY = VPCUtil.KEYS.filament;
 
 // One-time migration: the built-in purchase history used to live only in this
 // file and was prepended at read time, which meant it never synced to
@@ -2957,7 +2945,7 @@ document.getElementById('addFilamentModal').addEventListener('click', e => { if 
 // ══════════════════════════════════════════════════════════════
 //  GOALS
 // ══════════════════════════════════════════════════════════════
-const GOALS_KEY = 'goals_dashboard_v1';
+const GOALS_KEY = VPCUtil.KEYS.goals;
 let goalsData = { goals: [] };
 let goalFilter = 'all', goalSort = 'created';
 let editGoalId = null, editObjId = null, editObjGoalId = null;
@@ -3179,7 +3167,7 @@ document.getElementById('oText').addEventListener('keydown', e => { if (e.key===
 // ══════════════════════════════════════════════════════════════
 //  EXPENSES
 // ══════════════════════════════════════════════════════════════
-const EXP_KEY = 'vp_expenses_v1';
+const EXP_KEY = VPCUtil.KEYS.expensesLegacy;
 const EXP_CATS = [
   { name:'Filament / Materials', color:'#fb923c', type:'variable' },
   { name:'Equipment / Printer',  color:'#a78bfa', type:'variable' },
@@ -3596,7 +3584,7 @@ function exportOrdersCSV() {
 // ══════════════════════════════════════════════════════════════
 //  JET TAGS — DATA & LOGIC
 // ══════════════════════════════════════════════════════════════
-const JT_KEY         = 'vp_jettags_v1';
+const JT_KEY         = VPCUtil.KEYS.jetTags;
 const JT_RESTOCK_KEY = 'vp_jettags_restock_v1';
 
 const JT_INVENTORY = [
@@ -3919,7 +3907,7 @@ renderJtAll();
 // ══════════════════════════════════════════════════════════════
 //  PINS — DATA & LOGIC
 // ══════════════════════════════════════════════════════════════
-const PIN_KEY         = 'vp_pins_v1';
+const PIN_KEY         = VPCUtil.KEYS.pins;
 const PIN_RESTOCK_KEY = 'vp_pins_restock_v1';
 
 const PIN_INVENTORY = [
@@ -4244,7 +4232,9 @@ renderGoals();
 renderExpensesAll();
 
 // ── EVENT TRACKER ──
-const EV_KEY = 'vp_events_v1';
+// Shares one event list with the Events page. util.js merges the old
+// per-page store (KEYS.eventsLegacy) into this canonical one on first load.
+const EV_KEY = VPCUtil.KEYS.events;
 let editEvId = null;
 function getEvents() { return JSON.parse(localStorage.getItem(EV_KEY) || '[]'); }
 function saveEvents(arr) { localStorage.setItem(EV_KEY, JSON.stringify(arr)); }
@@ -4270,7 +4260,7 @@ function evCalcRevenue(ev) {
 }
 
 function renderEvAll() {
-  const events = getEvents().sort((a, b) => b.start.localeCompare(a.start));
+  const events = getEvents().sort((a, b) => (b.start || '').localeCompare(a.start || ''));
   let totalRev = 0, totalProfit = 0, totalCost = 0, bestName = '—', bestRev = 0;
   const rows = events.map(ev => {
     const r = evCalcRevenue(ev);
@@ -4328,7 +4318,7 @@ function openEvModal(id) {
   document.getElementById('evModalTitle').textContent = ev ? 'Edit Event' : 'Log Event';
   document.getElementById('evName').value = ev ? ev.name : '';
   document.getElementById('evLocation').value = ev ? (ev.location || '') : '';
-  document.getElementById('evStart').value = ev ? ev.start : TODAY;
+  document.getElementById('evStart').value = ev ? (ev.start || ev.date || '') : TODAY;
   document.getElementById('evEnd').value = ev ? (ev.end || '') : '';
   document.getElementById('evCost').value = ev ? (ev.boothCost || 0) : 0;
   document.getElementById('evNotes').value = ev ? (ev.notes || '') : '';
@@ -4339,18 +4329,22 @@ function closeEvModal() { document.getElementById('evModal').classList.remove('o
 function saveEvent() {
   const name = document.getElementById('evName').value.trim();
   if (!name) { toast('Event name is required.'); return; }
+  const start = document.getElementById('evStart').value;
   const ev = {
     id: editEvId || Math.random().toString(36).slice(2),
     name,
     location: document.getElementById('evLocation').value.trim(),
-    start: document.getElementById('evStart').value,
+    start,
+    date: start, // mirror so the Events page (which reads `date`) shows it too
     end: document.getElementById('evEnd').value || null,
     boothCost: parseFloat(document.getElementById('evCost').value) || 0,
     notes: document.getElementById('evNotes').value.trim(),
   };
   const arr = getEvents();
   const idx = arr.findIndex(e => e.id === ev.id);
-  if (idx >= 0) arr[idx] = ev; else arr.push(ev);
+  // Merge, not replace, so fields the Events page owns (approved, private)
+  // survive an edit made here.
+  if (idx >= 0) arr[idx] = { ...arr[idx], ...ev }; else arr.push(ev);
   saveEvents(arr); closeEvModal(); renderEvAll();
   toast(editEvId ? 'Event updated.' : 'Event logged!');
 }

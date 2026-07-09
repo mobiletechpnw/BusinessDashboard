@@ -226,19 +226,7 @@
   <a class="home-link" href="index.html">⌂ Home</a>
 </header>
 
-<nav class="dash-nav">
-  <a href="index.html" class="dash-nav-link">⌂ Home</a>
-  <a href="vault-pine-collective.html" class="dash-nav-link">📊 Sales Hub</a>
-  <a href="goals-dashboard.html" class="dash-nav-link">🎯 Goals</a>
-  <a href="expenses.html" class="dash-nav-link">💸 Expenses</a>
-  <a href="analytics.html" class="dash-nav-link">📈 Analytics</a>
-  <a href="production.html" class="dash-nav-link">🖨️ Production</a>
-  <a href="events.html" class="dash-nav-link">🎪 Events</a>
-  <a href="content.html" class="dash-nav-link">📱 Content</a>
-  <a href="growth.html" class="dash-nav-link">🚀 Growth</a>
-  <a href="review.html" class="dash-nav-link active">📋 Review</a>
-  <a href="guru.html" class="dash-nav-link">🥋 Guru</a>
-</nav>
+<nav class="dash-nav"></nav>
 
 <main>
   <div class="review-header">
@@ -370,7 +358,7 @@ function renderAlerts() {
 
   // Overdue goals
   try {
-    const g = JSON.parse(localStorage.getItem('goals_dashboard_v1') || '{"goals":[]}');
+    const g = JSON.parse(localStorage.getItem(VPCUtil.KEYS.goals) || '{"goals":[]}');
     const od = (g.goals||[]).filter(x => !x.done && x.due && new Date(x.due+'T00:00:00') < today);
     if (od.length) alerts.push({ type:'danger', icon:'⚠', text:`${od.length} goal${od.length>1?'s':''} overdue — immediate attention needed`, url:'goals-dashboard.html', label:'View Goals' });
     const soon = (g.goals||[]).filter(x => !x.done && x.due && new Date(x.due+'T00:00:00') <= week && new Date(x.due+'T00:00:00') >= today);
@@ -379,8 +367,8 @@ function renderAlerts() {
 
   // Budget check
   try {
-    const budget = JSON.parse(localStorage.getItem('vpc_expense_budget_v1')||'{"total":0}');
-    const exps = JSON.parse(localStorage.getItem('vpc_personal_expenses_v1')||'[]');
+    const budget = JSON.parse(localStorage.getItem(VPCUtil.KEYS.expenseBudget)||'{"total":0}');
+    const exps = JSON.parse(localStorage.getItem(VPCUtil.KEYS.expenses)||'[]');
     const total = exps.filter(e => (e.date||'').startsWith(thisMonth)).reduce((s,e)=>s+(e.amount||0),0);
     if (budget.total > 0) {
       const pct = total / budget.total * 100;
@@ -393,7 +381,7 @@ function renderAlerts() {
 
   // Recurring bills due this week
   try {
-    const recs = JSON.parse(localStorage.getItem('vpc_recurring_expenses_v1')||'[]');
+    const recs = JSON.parse(localStorage.getItem(VPCUtil.KEYS.recurringExpenses)||'[]');
     const todayDay = now.getDate();
     const dueThisWeek = recs.filter(r => r.day >= todayDay && r.day <= todayDay + 7);
     if (dueThisWeek.length) {
@@ -417,7 +405,7 @@ function renderAlerts() {
 function renderGoals() {
   const el = $('goals-summary');
   try {
-    const g = JSON.parse(localStorage.getItem('goals_dashboard_v1') || '{"goals":[]}');
+    const g = JSON.parse(localStorage.getItem(VPCUtil.KEYS.goals) || '{"goals":[]}');
     const goals = g.goals || [];
     if (!goals.length) { el.innerHTML = '<div class="empty-msg">No goals yet. <a href="goals-dashboard.html" style="color:var(--accent)">Add one →</a></div>'; return []; }
 
@@ -477,10 +465,10 @@ function renderExpenses() {
   try {
     const now = new Date();
     const prefix = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-    const exps = JSON.parse(localStorage.getItem('vpc_personal_expenses_v1')||'[]');
+    const exps = JSON.parse(localStorage.getItem(VPCUtil.KEYS.expenses)||'[]');
     const month = exps.filter(e => (e.date||'').startsWith(prefix));
     const total = month.reduce((s,e)=>s+(e.amount||0),0);
-    const budget = JSON.parse(localStorage.getItem('vpc_expense_budget_v1')||'{"total":0}').total;
+    const budget = JSON.parse(localStorage.getItem(VPCUtil.KEYS.expenseBudget)||'{"total":0}').total;
 
     // Top categories
     const cats = {};
@@ -545,9 +533,9 @@ function renderExpenses() {
 function renderRevenue() {
   const el = $('revenue-summary');
   try {
-    const orders = JSON.parse(localStorage.getItem('vp_orders_v2')||'[]');
-    const jtSales = JSON.parse(localStorage.getItem('vp_jettags_v1')||'[]');
-    const pinSales = JSON.parse(localStorage.getItem('vp_pins_v1')||'[]');
+    const orders = JSON.parse(localStorage.getItem(VPCUtil.KEYS.orders)||'[]');
+    const jtSales = JSON.parse(localStorage.getItem(VPCUtil.KEYS.jetTags)||'[]');
+    const pinSales = JSON.parse(localStorage.getItem(VPCUtil.KEYS.pins)||'[]');
     const now = new Date();
     const thisMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
 
@@ -582,7 +570,7 @@ function renderRevenue() {
 function renderEvents() {
   const el = $('events-summary');
   try {
-    const events = JSON.parse(localStorage.getItem('vp_events_v1')||localStorage.getItem('vpc_events_v1')||'[]');
+    const events = JSON.parse(localStorage.getItem(VPCUtil.KEYS.events)||'[]');
     const today = new Date(); today.setHours(0,0,0,0);
     const upcoming = events.filter(e => {
       const d = new Date((e.start||e.date||'')+'T00:00:00');
@@ -610,7 +598,7 @@ function renderObjectivesDue() {
   try {
     const today = new Date(); today.setHours(0,0,0,0);
     const week  = new Date(today); week.setDate(week.getDate()+7);
-    const g = JSON.parse(localStorage.getItem('goals_dashboard_v1')||'{"goals":[]}');
+    const g = JSON.parse(localStorage.getItem(VPCUtil.KEYS.goals)||'{"goals":[]}');
     const due = [];
     (g.goals||[]).forEach(goal => {
       if (goal.done) return;
@@ -637,7 +625,7 @@ function renderObjectivesDue() {
 // ════════════════════════════════════════════════
 //  WEEKLY MONEY RITUAL
 // ════════════════════════════════════════════════
-const RITUAL_KEY = 'vpc_ritual_v1';
+const RITUAL_KEY = VPCUtil.KEYS.ritual;
 
 function isoWeek(d) {
   const dt = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
@@ -676,16 +664,16 @@ function ritualSteps() {
   // live data for sublabels
   let logSub = 'Catch anything you spent but didn\'t record', budgetSub = 'No budget set yet', marginSub = 'No sales data yet', goalsSub = 'No goals yet', nwSub = 'No net worth logged yet';
   try {
-    const exps = JSON.parse(localStorage.getItem('vpc_personal_expenses_v1')||'[]');
+    const exps = JSON.parse(localStorage.getItem(VPCUtil.KEYS.expenses)||'[]');
     const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate()-7);
     const cnt = exps.filter(e => e.date && new Date(e.date+'T00:00:00') >= weekAgo).length;
     logSub = `${cnt} expense${cnt!==1?'s':''} logged in the last 7 days`;
-    const budget = JSON.parse(localStorage.getItem('vpc_expense_budget_v1')||'{"total":0}').total;
+    const budget = JSON.parse(localStorage.getItem(VPCUtil.KEYS.expenseBudget)||'{"total":0}').total;
     const spent = exps.filter(e=>(e.date||'').startsWith(prefix)).reduce((s,e)=>s+(e.amount||0),0);
     if (budget>0) budgetSub = `${Math.round(spent/budget*100)}% of ${fmt(budget)} budget used`;
   } catch(e) {}
   try {
-    const orders = JSON.parse(localStorage.getItem('vp_orders_v2')||'[]');
+    const orders = JSON.parse(localStorage.getItem(VPCUtil.KEYS.orders)||'[]');
     if (orders.length) {
       const rev = orders.reduce((s,o)=>s+(o.salePrice||0),0), cogs = orders.reduce((s,o)=>s+(o.cogs||0),0);
       const m = rev>0 ? (rev-cogs)/rev*100 : 0;
@@ -693,14 +681,14 @@ function ritualSteps() {
     }
   } catch(e) {}
   try {
-    const g = JSON.parse(localStorage.getItem('goals_dashboard_v1')||'{"goals":[]}').goals||[];
+    const g = JSON.parse(localStorage.getItem(VPCUtil.KEYS.goals)||'{"goals":[]}').goals||[];
     const today = new Date(); today.setHours(0,0,0,0);
     const active = g.filter(x=>!x.done);
     const od = active.filter(x=>x.due && new Date(x.due+'T00:00:00')<today).length;
     if (g.length) goalsSub = `${active.length} active${od?` · ${od} overdue`:''}`;
   } catch(e) {}
   try {
-    const nw = JSON.parse(localStorage.getItem('vpc_networth_v1')||'{"assets":[],"liabilities":[]}');
+    const nw = JSON.parse(localStorage.getItem(VPCUtil.KEYS.networth)||'{"assets":[],"liabilities":[]}');
     const a = (nw.assets||[]).reduce((s,x)=>s+(x.amount||0),0), l = (nw.liabilities||[]).reduce((s,x)=>s+(x.amount||0),0);
     if ((nw.assets||[]).length||(nw.liabilities||[]).length) nwSub = `Net worth ${fmt(a-l)} — capture this week's number`;
   } catch(e) {}
@@ -723,7 +711,7 @@ function toggleRitualStep(id) {
 
 function ritualSaveSnapshot() {
   let d;
-  try { d = JSON.parse(localStorage.getItem('vpc_networth_v1')); } catch(e) {}
+  try { d = JSON.parse(localStorage.getItem(VPCUtil.KEYS.networth)); } catch(e) {}
   if (!d || (!(d.assets||[]).length && !(d.liabilities||[]).length)) {
     location.href = 'guru.html#networth'; return;
   }
@@ -733,9 +721,9 @@ function ritualSaveSnapshot() {
   d.snapshots.push({ date: today, net: a - l });
   d.snapshots.sort((x,y)=>x.date.localeCompare(y.date));
   if (d.snapshots.length > 60) d.snapshots = d.snapshots.slice(-60);
-  localStorage.setItem('vpc_networth_v1', JSON.stringify(d));
+  localStorage.setItem(VPCUtil.KEYS.networth, JSON.stringify(d));
   const r = loadRitual(); r.weekState.checked['snapshot'] = true; saveRitual(r);
-  if (window.auditLog) auditLog('snapshot', 'vpc_networth_v1', `Net worth ${fmt(a-l)} (ritual)`);
+  if (window.auditLog) auditLog('snapshot', VPCUtil.KEYS.networth, `Net worth ${fmt(a-l)} (ritual)`);
   showToast('📸 Snapshot saved — net worth ' + fmt(a - l));
   renderRitual();
 }
@@ -835,7 +823,7 @@ function toggleNarrate() {
 
   // Goals
   try {
-    const g = JSON.parse(localStorage.getItem('goals_dashboard_v1')||'{"goals":[]}');
+    const g = JSON.parse(localStorage.getItem(VPCUtil.KEYS.goals)||'{"goals":[]}');
     const active = (g.goals||[]).filter(x=>!x.done);
     const done = (g.goals||[]).filter(x=>x.done);
     text += `You have ${active.length} active goal${active.length!==1?'s':''} and ${done.length} completed. `;
@@ -845,9 +833,9 @@ function toggleNarrate() {
   try {
     const mn = now;
     const prefix = `${mn.getFullYear()}-${String(mn.getMonth()+1).padStart(2,'0')}`;
-    const total = JSON.parse(localStorage.getItem('vpc_personal_expenses_v1')||'[]')
+    const total = JSON.parse(localStorage.getItem(VPCUtil.KEYS.expenses)||'[]')
       .filter(e=>(e.date||'').startsWith(prefix)).reduce((s,e)=>s+(e.amount||0),0);
-    const budget = JSON.parse(localStorage.getItem('vpc_expense_budget_v1')||'{"total":0}').total;
+    const budget = JSON.parse(localStorage.getItem(VPCUtil.KEYS.expenseBudget)||'{"total":0}').total;
     text += `Personal expenses this month total $${total.toFixed(0)}`;
     if (budget > 0) text += `, with $${Math.max(0, budget-total).toFixed(0)} remaining of your $${budget} budget`;
     text += '. ';
