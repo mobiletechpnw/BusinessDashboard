@@ -146,6 +146,21 @@ main { padding:0 0 24px; }
   white-space:nowrap; vertical-align:middle;
 }
 
+/* ── SECTION DIVIDER ROWS (upcoming / past-owed / past-paid) ── */
+.matrix tr.matrix-section td {
+  background:var(--surface2); padding:8px 14px; text-align:left;
+  font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.6px;
+  border-top:2px solid var(--border); border-bottom:1px solid var(--border);
+}
+.matrix tr.matrix-section.owed td { color:var(--yellow); }
+.matrix-past-toggle {
+  background:none; border:none; cursor:pointer; padding:2px 0;
+  font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.6px;
+  color:var(--text2); display:inline-flex; align-items:center; gap:7px;
+}
+.matrix-past-toggle:hover { color:var(--accent); }
+.matrix td.td-event.is-past .ev-name { color:var(--text2); }
+
 /* ── FOOTER ROW ── */
 .matrix tfoot td {
   background:var(--surface2); border-top:2px solid var(--border);
@@ -497,7 +512,7 @@ function renderStats() {
 
 // ── MATRIX ───────────────────────────────────────────
 function renderMatrix() {
-  const events  = getEvents().sort((a,b) => (a.date||'9999').localeCompare(b.date||'9999'));
+  const events  = getEvents();
   const vendors = getVendors();
   const tables  = getTables();
   const wrap    = document.getElementById('matrix-wrap');
@@ -524,6 +539,34 @@ function renderMatrix() {
   const scMap = {};
   _signups.forEach(s => { scMap[s.event_id] = (scMap[s.event_id] || 0) + 1; });
 
+  // ── PARTITION: keep the grid focused on what's actionable ──
+  // The event list only grows, so a show from months ago would otherwise sit at
+  // the top forever. We split events into three buckets:
+  //   • upcoming  — today, future, or undated (still being planned)
+  //   • pastOwed  — already happened BUT a vendor still owes money (a finished
+  //                 show is not a paid show, so these stay surfaced)
+  //   • pastPaid  — already happened AND fully settled → collapsed behind a toggle
+  // Undated events sort last within "upcoming" (they're plans without a date yet).
+  const today = todayStr();
+  const owedByEvent = {};
+  tables.forEach(t => { if (!t.paid) owedByEvent[t.eventId] = true; });
+
+  const upcoming = [], pastOwed = [], pastPaid = [];
+  events.forEach(ev => {
+    if (!ev.date || ev.date >= today) upcoming.push(ev);
+    else if (owedByEvent[ev.id])      pastOwed.push(ev);
+    else                              pastPaid.push(ev);
+  });
+  upcoming.sort((a, b) => (a.date || '9999').localeCompare(b.date || '9999'));
+  pastOwed.sort((a, b) => (b.date || '').localeCompare(a.date || '')); // most recent first
+  pastPaid.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+  // If nothing is visible by default (every event is past & paid), auto-expand so
+  // the grid is never mysteriously empty.
+  const forceShowPast = !upcoming.length && !pastOwed.length;
+  const showPast      = matrixShowPast || forceShowPast;
+  const colSpan       = vendors.length + 2; // event col + vendor cols + total col
+
   let h = `<div class="table-scroll"><table class="matrix">`;
 
   // ── THEAD ──
@@ -543,10 +586,11 @@ function renderMatrix() {
   h += `</tr></thead>`;
 
   // ── TBODY ──
-  h += `<tbody>`;
-  events.forEach(ev => {
-    h += `<tr>`;
-    h += `<td class="td-event">
+  // One event = one row. `isPast` dims the event name so finished shows read as
+  // secondary even while surfaced (e.g. a past show that still owes money).
+  const rowFor = (ev, isPast) => {
+    let row = `<tr>`;
+    row += `<td class="td-event${isPast ? ' is-past' : ''}">
       <div class="ev-name">${esc(ev.name)}</div>
       <div class="ev-meta">
         ${ev.date     ? `📅 ${fmtDate(ev.date)}<br>` : ''}
@@ -573,7 +617,7 @@ function renderMatrix() {
       if (t) {
         evTotal = money(evTotal + (+t.price || 0));
         const stateClass = t.paid ? 'is-paid' : 'is-unpaid';
-        h += `<td class="cell ${stateClass}" onclick="openCellModal('${ev.id}','${v.id}')">
+        row += `<td class="cell ${stateClass}" onclick="openCellModal('${ev.id}','${v.id}')">
           <div class="cell-inner">
             <div class="cell-price-val">${fmtMoney(t.price)}</div>
             <div class="cell-row">
@@ -587,7 +631,7 @@ function renderMatrix() {
           </div>
         </td>`;
       } else {
-        h += `<td class="cell is-empty" onclick="openCellModal('${ev.id}','${v.id}')">
+        row += `<td class="cell is-empty" onclick="openCellModal('${ev.id}','${v.id}')">
           <div class="cell-inner">
             <div class="cell-add">＋ Add table</div>
           </div>
@@ -595,9 +639,34 @@ function renderMatrix() {
       }
     });
 
-    h += `<td class="td-event-total">${fmtMoney(evTotal)}</td>`;
-    h += `</tr>`;
-  });
+    row += `<td class="td-event-total">${fmtMoney(evTotal)}</td>`;
+    row += `</tr>`;
+    return row;
+  };
+
+  h += `<tbody>`;
+
+  // Upcoming + undated: the shows you're actively booking and collecting on.
+  upcoming.forEach(ev => { h += rowFor(ev, false); });
+
+  // Past but unpaid: a finished show still owes money — never hide these.
+  if (pastOwed.length) {
+    h += `<tr class="matrix-section owed"><td colspan="${colSpan}">⚠ Past events — money still owed</td></tr>`;
+    pastOwed.forEach(ev => { h += rowFor(ev, true); });
+  }
+
+  // Past & fully settled: collapsed behind a toggle so history stays reachable
+  // (it still feeds the ROI tab) without cluttering the day-to-day grid.
+  if (pastPaid.length) {
+    const n = pastPaid.length;
+    h += `<tr class="matrix-section"><td colspan="${colSpan}">
+      <button class="matrix-past-toggle" onclick="toggleMatrixPast()">
+        ${showPast ? '▾ Hide' : '▸ Show'} ${n} past event${n > 1 ? 's' : ''} (all paid)
+      </button>
+    </td></tr>`;
+    if (showPast) pastPaid.forEach(ev => { h += rowFor(ev, true); });
+  }
+
   h += `</tbody>`;
 
   // ── TFOOT ──
@@ -1014,6 +1083,15 @@ function printBill() {
 
 // ── TAB SWITCHING ─────────────────────────────────────
 let currentEvTab = 'matrix';
+
+// Collapsed by default: the Matrix opens on upcoming + still-owed shows, with
+// fully-settled past events tucked behind a toggle. Persisted here so it survives
+// the re-renders triggered by cloud sync / marking a table paid.
+let matrixShowPast = false;
+function toggleMatrixPast() {
+  matrixShowPast = !matrixShowPast;
+  renderMatrix();
+}
 
 function switchEvTab(tab) {
   currentEvTab = tab;
