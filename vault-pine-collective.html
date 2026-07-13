@@ -1327,7 +1327,7 @@
         <button class="btn-secondary" onclick="document.getElementById('importFile').click()">⬆ Restore from File</button>
         <input type="file" id="importFile" accept="application/json,.json" style="display:none" onchange="importBackup(this.files[0])">
       </div>
-      <div style="font-size:0.75rem;color:var(--text2);margin-top:10px">Backup includes all orders, goals, expenses, Jet Tags, Pins, Events, and settings.</div>
+      <div style="font-size:0.75rem;color:var(--text2);margin-top:10px">Backup covers every page: orders, goals, events &amp; tables, expenses, Jet Tags, Pins, content, production, growth, net worth, and settings.</div>
     </div>
 
     <div class="card">
@@ -3496,26 +3496,36 @@ function downloadBlob(filename, text, mime) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+// Everything worth backing up. VpcSync.SYNC_KEYS is the single source of
+// truth (the cloud-synced set); the explicit list is a fallback so the button
+// still works if supabase-sync.js ever fails to load. The v3 exporter dumped
+// only this page's own stores and silently missed vendors & tables, the
+// Expenses page, content, production, growth, and net worth.
+function backupKeys() {
+  const synced = (window.VpcSync && window.VpcSync.SYNC_KEYS) || [];
+  const local  = [LS_ORDERS, GOALS_KEY, EXP_KEY, JT_KEY, JT_RESTOCK_KEY,
+                  PIN_KEY, PIN_RESTOCK_KEY, EV_KEY, LS_PRINTER_CREDITS,
+                  LS_GOAL_KEY, LS_FILAMENT_KEY];
+  return [...new Set([...synced, ...local])];
+}
+
 function exportBackup() {
+  // v4 format: raw localStorage strings keyed by store name. Raw (not parsed)
+  // so restore is byte-exact and never mangles a store it doesn't understand.
+  const stores = {};
+  backupKeys().forEach((k) => {
+    const v = localStorage.getItem(k);
+    if (v !== null) stores[k] = v;
+  });
   const data = {
     _app: 'Vault & Pine Collective',
-    _version: 3,
+    _version: 4,
     exportedAt: new Date().toISOString(),
-    orders:         JSON.parse(localStorage.getItem(LS_ORDERS)           || '[]'),
-    goals:          JSON.parse(localStorage.getItem(GOALS_KEY)            || '{"goals":[]}'),
-    expenses:       JSON.parse(localStorage.getItem(EXP_KEY)              || '[]'),
-    jettags:        JSON.parse(localStorage.getItem(JT_KEY)               || '[]'),
-    jtRestocks:     JSON.parse(localStorage.getItem(JT_RESTOCK_KEY)       || '[]'),
-    pins:           JSON.parse(localStorage.getItem(PIN_KEY)              || '[]'),
-    pinRestocks:    JSON.parse(localStorage.getItem(PIN_RESTOCK_KEY)      || '[]'),
-    events:         JSON.parse(localStorage.getItem(EV_KEY)               || '[]'),
-    printerCredits: JSON.parse(localStorage.getItem(LS_PRINTER_CREDITS)   || '{}'),
-    monthlyGoal:    localStorage.getItem(LS_GOAL_KEY),
-    filament:       JSON.parse(localStorage.getItem(LS_FILAMENT_KEY)      || '[]'),
+    stores,
   };
   downloadBlob(`vault-pine-backup-${TODAY}.json`, JSON.stringify(data, null, 2), 'application/json');
   localStorage.setItem('vp_last_backup', Date.now());
-  toast('Full backup downloaded (includes Jet Tags, Pins, Events & all settings).');
+  toast(`Full backup downloaded — ${Object.keys(stores).length} data stores across every page.`);
 }
 
 function importBackup(file) {
@@ -3524,10 +3534,28 @@ function importBackup(file) {
   reader.onload = () => {
     let d;
     try { d = JSON.parse(reader.result); } catch { toast('Could not read that file — not valid JSON.'); return; }
-    if (!d || (d.orders === undefined && d.goals === undefined && d.expenses === undefined && d.jettags === undefined && d.pins === undefined)) {
+    const isV4 = d && d.stores && typeof d.stores === 'object';
+    const isV3 = d && (d.orders !== undefined || d.goals !== undefined || d.expenses !== undefined || d.jettags !== undefined || d.pins !== undefined);
+    if (!isV4 && !isV3) {
       toast('That file is not a Vault & Pine backup.'); return;
     }
-    if (!confirm('Restore this backup? It replaces your currently saved data (orders, goals, expenses, Jet Tags, Pins, Events & settings).')) return;
+    if (!confirm('Restore this backup? It replaces your currently saved data across every page (orders, events & tables, expenses, content, production, growth, net worth & settings).')) return;
+    if (isV4) {
+      // Restoring through localStorage.setItem stamps fresh sync timestamps
+      // (see the setItem hook in supabase-sync.js), so the restored data also
+      // pushes to the cloud instead of being clobbered by the next pull.
+      Object.entries(d.stores).forEach(([k, v]) => {
+        if (typeof v === 'string') localStorage.setItem(k, v);
+      });
+      toast('Restored ✓ — reloading…');
+      // Restored stores span every page's modules; a reload re-reads them all.
+      // Waits past the sync layer's 800ms push debounce so uploads start
+      // before the reload; the fresh __ts stamps protect anything still
+      // in flight from being overwritten by the post-reload pull.
+      setTimeout(() => location.reload(), 1500);
+      return;
+    }
+    // Legacy v3 backups: fixed field set covering only this page's stores.
     if (d.orders         !== undefined) localStorage.setItem(LS_ORDERS,           JSON.stringify(d.orders));
     if (d.goals          !== undefined) localStorage.setItem(GOALS_KEY,            JSON.stringify(d.goals));
     if (d.expenses       !== undefined) localStorage.setItem(EXP_KEY,              JSON.stringify(d.expenses));

@@ -130,6 +130,50 @@ GRANT SELECT ON public.app_data TO anon;  -- anon is blocked by RLS anyway
 
 
 -- ══════════════════════════════════════════════════════════════════
+--  OWNER LOCK — who counts as "the owner" of the shared tables.
+--
+--  Supabase auth allows public sign-ups (login.html has a Sign Up tab),
+--  so "TO authenticated" is NOT the same as "the owner": any stranger
+--  who creates an account is `authenticated`. The shared tables below
+--  (public_calendar, event_signups) used to trust every authenticated
+--  user, which let an arbitrary account read vendor sign-ups (names,
+--  emails, phones) or overwrite the public calendar snapshot.
+--
+--  app_owners lists the auth users allowed to manage those tables.
+--  Clients can never read or write it (RLS on, zero policies); the
+--  SECURITY DEFINER helper is_owner() is the only access path.
+--
+--  ALSO RECOMMENDED (dashboard setting, not SQL): disable public
+--  sign-ups under Authentication → Sign In / Providers → Email →
+--  "Allow new users to sign up" so strangers can't create accounts
+--  at all. The policies below protect you either way.
+-- ══════════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS public.app_owners (
+  uid UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE
+);
+
+ALTER TABLE public.app_owners ENABLE ROW LEVEL SECURITY;
+-- Intentionally NO policies: deny-all for anon/authenticated clients.
+
+CREATE OR REPLACE FUNCTION public.is_owner()
+RETURNS BOOLEAN
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (SELECT 1 FROM public.app_owners WHERE uid = auth.uid());
+$$;
+
+GRANT EXECUTE ON FUNCTION public.is_owner() TO anon, authenticated;
+
+-- Seed with the owner's account. Matches by sign-in email — adjust if
+-- your Supabase account uses a different address. Safe to re-run.
+INSERT INTO public.app_owners (uid)
+SELECT id FROM auth.users WHERE email = 'mobiletechpnw@gmail.com'
+ON CONFLICT (uid) DO NOTHING;
+
+
+-- ══════════════════════════════════════════════════════════════════
 --  public_calendar: the read-only snapshot the shared vendor calendar
 --  (vendor-calendar.html) reads. events.html publishes to it on edit.
 --  One row, id = 'vault-pine'. Public can READ; only the signed-in
@@ -155,16 +199,16 @@ CREATE POLICY "public_calendar_read"
   TO anon, authenticated
   USING (true);
 
--- Only signed-in users (the owner) can create/replace the snapshot.
+-- Only the owner (see app_owners above) can create/replace the snapshot.
 CREATE POLICY "public_calendar_insert"
   ON public.public_calendar FOR INSERT
   TO authenticated
-  WITH CHECK (true);
+  WITH CHECK (public.is_owner());
 
 CREATE POLICY "public_calendar_update"
   ON public.public_calendar FOR UPDATE
   TO authenticated
-  USING (true) WITH CHECK (true);
+  USING (public.is_owner()) WITH CHECK (public.is_owner());
 
 GRANT SELECT ON public.public_calendar TO anon;
 GRANT SELECT, INSERT, UPDATE ON public.public_calendar TO authenticated;
@@ -203,21 +247,23 @@ CREATE POLICY "event_signups_insert"
   TO anon, authenticated
   WITH CHECK (true);
 
--- Only the signed-in owner can read / manage submitted requests.
+-- Only the owner (see app_owners above) can read / manage requests.
+-- Sign-ups hold vendor PII (names, emails, phones) — "any authenticated
+-- user" is not good enough while account sign-up is open.
 CREATE POLICY "event_signups_select"
   ON public.event_signups FOR SELECT
   TO authenticated
-  USING (true);
+  USING (public.is_owner());
 
 CREATE POLICY "event_signups_update"
   ON public.event_signups FOR UPDATE
   TO authenticated
-  USING (true) WITH CHECK (true);
+  USING (public.is_owner()) WITH CHECK (public.is_owner());
 
 CREATE POLICY "event_signups_delete"
   ON public.event_signups FOR DELETE
   TO authenticated
-  USING (true);
+  USING (public.is_owner());
 
 CREATE INDEX IF NOT EXISTS event_signups_cal_event_idx
   ON public.event_signups (cal_id, event_id, status);
