@@ -1304,7 +1304,7 @@ function deleteNwItem(kind, id) {
 function takeSnapshot() {
   const { net } = nwTotals();
   const d = loadNw();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = VPCUtil.todayStr(); // local date — UTC flips to tomorrow in the evening
   d.snapshots = (d.snapshots || []).filter(s => s.date !== today); // one per day
   d.snapshots.push({ date: today, net });
   d.snapshots.sort((a, b) => a.date.localeCompare(b.date));

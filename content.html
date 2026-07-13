@@ -709,14 +709,14 @@ function upcomingMonday() {
 
 function loadContentPlan() {
   const mon = upcomingMonday();
-  const monISO = mon.toISOString().slice(0, 10);
+  const monISO = mon.toLocaleDateString('en-CA');
   const stamp = monISO.replace(/-/g, '');
   if (!confirm(`Load your 4-week content plan starting Monday ${fmtDate(monISO)}?\n\nThis schedules 28 posts (captions + formats included). Week 2 is a show campaign — you'll re-date it to your real show.`)) return;
   const arr = getContent();
   let added = 0, updated = 0;
   CONTENT_PLAN.forEach(p => {
     const d = new Date(mon); d.setDate(d.getDate() + p.w * 7 + p.d);
-    const iso = d.toISOString().slice(0, 10);
+    const iso = d.toLocaleDateString('en-CA');
     const id = `plan-${stamp}-w${p.w}-d${p.d}`;
     const item = {
       id, category: p.category, type: p.type, title: p.title,
@@ -767,7 +767,7 @@ const PLAT_ICONS = {instagram:'📸',tiktok:'🎵',twitter:'🐦',facebook:'👥
 function renderStats() {
   const all = getContent();
   const now = new Date();
-  const month = now.toISOString().slice(0,7);
+  const month = VPCUtil.todayStr().slice(0,7); // local month — UTC rolls over early in the evening
   const weekStart = new Date(now); weekStart.setDate(now.getDate()-now.getDay());
   const weekEnd   = new Date(weekStart); weekEnd.setDate(weekStart.getDate()+6);
   document.getElementById('st-total').textContent      = all.length;
@@ -790,7 +790,7 @@ function getWeekDates(offset=0) {
 
 function renderCalendar() {
   const days = getWeekDates(weekOffset);
-  const today = new Date().toISOString().slice(0,10);
+  const today = VPCUtil.todayStr();
   const all = getContent();
   const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
@@ -799,7 +799,7 @@ function renderCalendar() {
     days[6].toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 
   document.getElementById('week-grid').innerHTML = days.map(day => {
-    const iso = day.toISOString().slice(0,10);
+    const iso = day.toLocaleDateString('en-CA');
     const isToday = iso === today;
     const dayItems = all.filter(c => c.date === iso);
     const chips = dayItems.map(c => `
@@ -983,7 +983,7 @@ function markPosted(id) {
   const item = arr.find(x => x.id === id);
   if (!item) return;
   item.status = 'posted';
-  if (!item.date) item.date = new Date().toISOString().slice(0,10);
+  if (!item.date) item.date = VPCUtil.todayStr();
   saveContentData(arr);
   renderAll();
 }

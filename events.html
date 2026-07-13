@@ -913,7 +913,9 @@ function billData() {
   const vn = getVendors().find(v => v.id === billVnId) || {};
   const events = getEvents();
   const unpaidOnly = document.getElementById('bill-unpaid-only').checked;
-  // Events before today are in the past and irrelevant to a bill.
+  // Past events drop off a bill only once they're PAID. A finished show with an
+  // outstanding balance is still a debt — hiding it made bills claim "all
+  // settled" while the matrix footer showed money due. Undated lines always stay.
   const today = todayStr();
   let lines = getTables()
     .filter(t => t.vendorId === billVnId)
@@ -921,8 +923,7 @@ function billData() {
       const ev = events.find(e => e.id === t.eventId) || {};
       return { event: ev.name || 'Event', date: ev.date || '', location: ev.location || '', price: +t.price || 0, paid: !!t.paid };
     })
-    // Hide past-dated events; keep undated events so nothing is silently dropped.
-    .filter(l => !l.date || l.date >= today)
+    .filter(l => !l.date || l.date >= today || !l.paid)
     .sort((a,b) => (a.date||'9999').localeCompare(b.date||'9999'));
   if (unpaidOnly) lines = lines.filter(l => !l.paid);
   const total = sumMoney(lines, l => l.price);

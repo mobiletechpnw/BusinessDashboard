@@ -177,10 +177,10 @@ footer { text-align:center; padding:20px; border-top:1px solid var(--border); fo
 </div>
 
 <div class="filter-bar">
-  <div class="filter-chip active" data-filter="all"      onclick="setFilter('all')">All Events</div>
+  <div class="filter-chip active" data-filter="upcoming" onclick="setFilter('upcoming')">Upcoming</div>
+  <div class="filter-chip"        data-filter="all"      onclick="setFilter('all')">All Events</div>
   <div class="filter-chip"        data-filter="approved" onclick="setFilter('approved')">✓ Confirmed</div>
   <div class="filter-chip"        data-filter="pending"  onclick="setFilter('pending')">○ Pending</div>
-  <div class="filter-chip"        data-filter="upcoming" onclick="setFilter('upcoming')">Upcoming</div>
 </div>
 
 <!-- CALENDAR VIEW -->
@@ -278,7 +278,10 @@ const fmtDate = d => d ? new Date(d+'T12:00:00').toLocaleDateString('en-US',{wee
 const esc = s => VPCUtil.esc(s || '');
 
 let viewMode   = 'calendar';
-let filterMode = 'all';
+// Vendors open this page to find the NEXT show, so the list defaults to
+// Upcoming instead of making them scroll past months of finished events.
+// "All Events" is still one tap away.
+let filterMode = 'upcoming';
 const today    = new Date();
 let curYear    = today.getFullYear();
 let curMonth   = today.getMonth();
@@ -290,12 +293,17 @@ function setFilter(f) {
   render();
 }
 
-function filteredEvents() {
+// `includePast` lets the month-grid opt out of the Upcoming time filter: a
+// calendar navigated to March should still show March's events, past or not.
+// Confirmed/Pending filters apply to both views.
+function filteredEvents({ includePast = false } = {}) {
   const all      = getEvents();
-  const todayStr = today.toISOString().slice(0,10);
+  // Local date, not toISOString(): UTC flips to tomorrow in the evening (PT),
+  // which made an event happening TODAY drop off the Upcoming list.
+  const todayStr = VPCUtil.todayStr();
   if (filterMode === 'approved') return all.filter(e => e.approved);
   if (filterMode === 'pending')  return all.filter(e => !e.approved);
-  if (filterMode === 'upcoming') return all.filter(e => (e.date||'') >= todayStr);
+  if (filterMode === 'upcoming') return includePast ? all : all.filter(e => (e.date||'') >= todayStr);
   return all;
 }
 
@@ -326,14 +334,14 @@ function renderCalendar() {
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   document.getElementById('month-label').textContent = `${MONTHS[curMonth]} ${curYear}`;
 
-  const events = filteredEvents();
+  const events = filteredEvents({ includePast: true });
   const byDate = {};
   events.forEach(e => { if (e.date) (byDate[e.date] = byDate[e.date]||[]).push(e); });
 
   const firstDay    = new Date(curYear, curMonth, 1).getDay();
   const daysInMonth = new Date(curYear, curMonth+1, 0).getDate();
   const daysInPrev  = new Date(curYear, curMonth, 0).getDate();
-  const todayStr    = today.toISOString().slice(0,10);
+  const todayStr    = VPCUtil.todayStr();
 
   let h = '', cellCount = 0;
 

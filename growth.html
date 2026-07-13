@@ -620,7 +620,7 @@ async function fetchNow() {
     const j = await res.json();
     const followers = Number(j.followers ?? j.followers_count ?? j.follower_count);
     if (!Number.isFinite(followers)) throw new Error('No follower count in response');
-    const today = new Date().toISOString().slice(0, 10);
+    const today = VPCUtil.todayStr(); // local date — UTC flips to tomorrow in the evening
     upsertSnapshot({
       date: today,
       followers,
@@ -652,7 +652,7 @@ function openSnapModal(id) {
   editSnapId = id || null;
   document.getElementById('snapModalTitle').textContent = id ? 'Edit Snapshot' : 'Log Snapshot';
   const s = id ? data.snapshots.find(x => x.id === id) : null;
-  document.getElementById('sDate').value = s ? s.date : new Date().toISOString().slice(0, 10);
+  document.getElementById('sDate').value = s ? s.date : VPCUtil.todayStr();
   document.getElementById('sFollowers').value = s && s.followers != null ? s.followers : '';
   document.getElementById('sFollowing').value = s && s.following != null ? s.following : '';
   document.getElementById('sPosts').value = s && s.posts != null ? s.posts : '';

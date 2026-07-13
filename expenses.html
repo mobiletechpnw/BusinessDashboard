@@ -403,7 +403,9 @@ let viewYear, viewMonth; // 0-based month
 let editExpId  = null;
 let editRecId  = null;
 
-function todayStr() { return new Date().toISOString().slice(0,10); }
+// Local date, not toISOString(): UTC flips to tomorrow in the evening (PT),
+// which stamped late-night expenses with the next day's date.
+function todayStr() { return VPCUtil.todayStr(); }
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 const $ = id => document.getElementById(id);
 const fmt = n => '$' + Math.abs(n).toFixed(2);

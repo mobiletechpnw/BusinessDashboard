@@ -568,7 +568,7 @@ document.getElementById('hdate').textContent =
   let healthLine = 'Everything that matters today, in one glance.';
   try {
     const orders = JSON.parse(localStorage.getItem(VPCUtil.KEYS.orders) || '[]');
-    const thisMonth = _now.toISOString().slice(0,7);
+    const thisMonth = VPCUtil.todayStr().slice(0,7); // local month — UTC rolls over early in the evening
     const mRev = orders.filter(o=>(o.date||'').startsWith(thisMonth)).reduce((s,o)=>s+(o.salePrice||0),0);
     const goals = JSON.parse(localStorage.getItem(VPCUtil.KEYS.goals) || '{"goals":[]}').goals || [];
     const active = goals.filter(x=>!x.done).length;
@@ -637,7 +637,7 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
     jtSales  = JSON.parse(localStorage.getItem(VPCUtil.KEYS.jetTags) || '[]');
     pinSales = JSON.parse(localStorage.getItem(VPCUtil.KEYS.pins) || '[]');
   } catch(e) {}
-  const now = new Date(), thisMonth = now.toISOString().slice(0,7);
+  const now = new Date(), thisMonth = VPCUtil.todayStr().slice(0,7);
 
   const riserRev = orders.reduce((s,o)=>s+(o.salePrice||0),0);
   const totalRev = riserRev + jtSales.reduce((s,x)=>s+(x.revenue||0),0) + pinSales.reduce((s,x)=>s+(x.revenue||0),0);
