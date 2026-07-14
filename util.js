@@ -97,6 +97,10 @@
     guru: 'vpc_guru_v1',
     ritual: 'vpc_ritual_v1',
     cardInventory: 'vpc_card_inventory_v1',
+    // Weekly Singles/Slabs/Sealed bucket totals — one snapshot per weekend.
+    // This is what inventory.html tracks now; `cardInventory` above is the
+    // retired per-item list, kept so existing data stays synced and backed up.
+    cardInventoryWeekly: 'vpc_card_inv_weekly_v1',
   });
 
   // ── Crew table claims ──────────────────────────────

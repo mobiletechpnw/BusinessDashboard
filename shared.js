@@ -140,18 +140,19 @@ function buildSearchIndex() {
       url: 'vault-pine-collective.html',
     })
   );
-  // Card inventory (Singles / Slabs / Sealed)
+  // Card inventory — weekly Singles / Slabs / Sealed bucket totals
   try {
-    const inv = JSON.parse(localStorage.getItem(K.cardInventory) || '[]');
-    inv.forEach((it) =>
+    const snaps = JSON.parse(localStorage.getItem(K.cardInventoryWeekly) || '[]');
+    snaps.forEach((s) => {
+      const total = (+s.singles || 0) + (+s.slabs || 0) + (+s.sealed || 0);
       results.push({
-        type: 'Inventory',
+        type: 'Inventory Week',
         icon: '🃏',
-        title: it.name || 'Inventory item',
-        sub: `${it.cat || ''} · qty ${it.qty || 1} · $${(+it.value || 0).toFixed(2)} ea${it.notes ? ' · ' + it.notes : ''}`,
+        title: `Inventory — ${s.date}`,
+        sub: `total $${total.toFixed(2)} · singles $${(+s.singles || 0).toFixed(2)} · slabs $${(+s.slabs || 0).toFixed(2)} · sealed $${(+s.sealed || 0).toFixed(2)}${s.note ? ' · ' + s.note : ''}`,
         url: 'inventory.html',
-      })
-    );
+      });
+    });
   } catch (e) {}
   // Goals
   try {

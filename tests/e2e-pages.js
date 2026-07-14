@@ -155,26 +155,17 @@ function seedData(monthOffsets) {
     vpc_tables_v1: JSON.stringify([
       { id: 't1', eventId: 'e1', vendorId: 'v1', price: 100, qty: 2, paid: true },
     ]),
-    vpc_card_inventory_v1: JSON.stringify([
+    vpc_card_inv_weekly_v1: JSON.stringify([
+      { id: 'w1', date: mk(-2, 7), singles: 300, slabs: 450, sealed: 200, note: '' },
       {
-        id: 'i1',
-        name: 'Charizard ex 199/165',
-        cat: 'singles',
-        qty: 2,
-        cost: 80,
-        value: 120,
-        notes: 'NM',
+        id: 'w2',
+        date: mk(-1, 7),
+        singles: 340,
+        slabs: 500,
+        sealed: 260,
+        note: 'Bought a collection',
       },
-      { id: 'i2', name: 'PSA 10 Pikachu', cat: 'slabs', qty: 1, cost: 150, value: 260, notes: '' },
-      {
-        id: 'i3',
-        name: 'Surging Sparks ETB',
-        cat: 'sealed',
-        qty: 3,
-        cost: 45,
-        value: 65,
-        notes: '',
-      },
+      { id: 'w3', date: mk(0, 7), singles: 420, slabs: 505, sealed: 300, note: '' },
     ]),
     vpc_growth_v1: JSON.stringify({
       handle: '@vaultpine',
@@ -329,23 +320,34 @@ async function runProfile(browser, { name, viewport, mobile, seeded }) {
     await pg.close();
   }
 
-  // Inventory: every category filter must re-render without errors, and the
-  // seeded profile must show all three seeded items under "All".
+  // Inventory: the weekly log must render — seeded profile shows all three
+  // logged weekends plus the growth chart, other profiles show the empty
+  // state — and the log modal must open and close cleanly.
   {
     const pg = await ctx.newPage();
     const errs = [];
     pg.on('pageerror', (e) => errs.push(`pageerror: ${e.message}`));
     await pg.goto(BASE + 'inventory.html', { waitUntil: 'domcontentloaded', timeout: 15000 });
     await pg.waitForTimeout(400);
-    for (const cat of ['singles', 'slabs', 'sealed', 'all']) {
-      await pg.click(`.filter-pill[data-cat="${cat}"]`);
-      await pg.waitForTimeout(150);
-    }
     if (seeded === true) {
       const rows = await pg.evaluate(() => document.querySelectorAll('table.inv tbody tr').length);
-      if (rows !== 3) errs.push(`expected 3 seeded inventory rows, saw ${rows}`);
+      if (rows !== 3) errs.push(`expected 3 logged weekends, saw ${rows}`);
+      const hasChart = await pg.evaluate(() => !!document.querySelector('#chart-wrap svg'));
+      if (!hasChart) errs.push('growth chart did not render with 3 snapshots');
+    } else {
+      const emptyVisible = await pg.evaluate(
+        () => document.getElementById('empty-state')?.offsetParent !== null
+      );
+      if (!emptyVisible) errs.push('empty state not visible with no data');
     }
-    await pg.screenshot({ path: path.join(dir, 'inventory-filters.png') });
+    await pg.evaluate(() => openSnapModal());
+    await pg.waitForTimeout(150);
+    const modalOpen = await pg.evaluate(() =>
+      document.getElementById('snap-modal').classList.contains('open')
+    );
+    if (!modalOpen) errs.push('log modal did not open');
+    await pg.screenshot({ path: path.join(dir, 'inventory-log-modal.png') });
+    await pg.evaluate(() => closeModal());
     for (const e of errs) failures.push(`[${name}] inventory: ${e}`);
     await pg.close();
   }

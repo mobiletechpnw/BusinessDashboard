@@ -52,7 +52,8 @@ const SYNC_KEYS = [
   'vp_pin_inventory_v1', // per-character purchased counts (drives low-stock alerts)
 
   // ── Card Inventory (Singles / Slabs / Sealed) ───────────
-  'vpc_card_inventory_v1',
+  'vpc_card_inventory_v1', // legacy per-item list — kept so old data stays synced
+  'vpc_card_inv_weekly_v1', // weekly bucket totals (what inventory.html tracks now)
 
   // ── Content Planner ─────────────────────────────────────
   'vpc_content_v1',

@@ -46,43 +46,40 @@
   .cat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
   .cat-card {
     background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:var(--radius,12px);
-    padding:18px 20px; cursor:pointer; transition:border-color .2s, transform .2s; user-select:none;
+    padding:18px 20px;
   }
-  .cat-card:hover { border-color:rgba(108,140,255,.4); transform:translateY(-2px); }
-  .cat-card.active { border-color:var(--accent); background:rgba(108,140,255,.07); }
   .cat-head { display:flex; align-items:center; gap:8px; font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--text2); }
   .cat-value { font-size:1.45rem; font-weight:800; letter-spacing:-.5px; margin-top:8px; }
   .cat-sub { font-size:.72rem; color:var(--text2); margin-top:3px; }
   .cat-bar { height:5px; border-radius:99px; background:var(--surface2,rgba(255,255,255,.06)); margin-top:12px; overflow:hidden; }
   .cat-bar-fill { height:100%; border-radius:99px; transition:width .4s ease; }
 
-  /* ── Filter row ── */
-  .filter-row { display:flex; align-items:center; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
-  .filter-pill { background:none; border:1px solid var(--border); color:var(--text2); border-radius:99px; padding:6px 14px; font-size:.76rem; font-weight:600; cursor:pointer; font-family:inherit; transition:all .15s; }
-  .filter-pill:hover { color:var(--text); border-color:var(--accent); }
-  .filter-pill.active { background:rgba(108,140,255,.14); border-color:var(--accent); color:var(--accent); }
-  .filter-spacer { flex:1; }
-  .inv-search { background:var(--surface2,rgba(255,255,255,.05)); border:1px solid var(--border); border-radius:8px; color:var(--text); padding:7px 12px; font-size:.8rem; font-family:inherit; outline:none; width:200px; max-width:100%; }
-  .inv-search:focus { border-color:var(--accent); }
+  /* ── Panels ── */
+  .gpanel { background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:var(--radius,12px); padding:18px 20px; margin-bottom:20px; }
+  .panel-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; gap:12px; flex-wrap:wrap; }
+  .panel-title { font-size:.95rem; font-weight:800; display:flex; align-items:center; gap:8px; }
+  .panel-sub { font-size:.74rem; color:var(--text2); }
 
-  /* ── Items table ── */
+  /* ── Chart ── */
+  .chart-wrap { width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .chart { display:block; }
+  .chart-empty { text-align:center; padding:40px 16px; color:var(--text2); font-size:.84rem; }
+  .legend { display:flex; gap:14px; flex-wrap:wrap; }
+  .lg-chip { display:inline-flex; align-items:center; gap:6px; font-size:.72rem; color:var(--text2); font-weight:600; }
+  .lg-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+
+  /* ── Weekly log table ── */
   .table-scroll { overflow-x:auto; }
   table.inv { width:100%; border-collapse:collapse; font-size:.84rem; }
   table.inv th { text-align:left; font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:var(--text2); padding:8px 10px; border-bottom:1px solid var(--border); white-space:nowrap; }
-  table.inv td { padding:11px 10px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  table.inv td { padding:11px 10px; border-bottom:1px solid var(--border); vertical-align:middle; white-space:nowrap; }
   table.inv tbody tr { cursor:pointer; transition:background .12s; }
   table.inv tbody tr:hover { background:rgba(255,255,255,.03); }
-  .num { text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
-  .inv-name { font-weight:700; }
-  .inv-notes { font-size:.7rem; color:var(--text2); margin-top:2px; max-width:340px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .cat-chip { font-size:.64rem; font-weight:700; padding:3px 9px; border-radius:99px; white-space:nowrap; }
-  .chip-singles { background:rgba(108,140,255,.14); color:var(--accent); }
-  .chip-slabs   { background:rgba(251,191,36,.14); color:var(--yellow); }
-  .chip-sealed  { background:rgba(167,139,250,.16); color:var(--accent2,#a78bfa); }
+  .num { text-align:right; font-variant-numeric:tabular-nums; }
+  .snap-note { max-width:220px; overflow:hidden; text-overflow:ellipsis; color:var(--text2); font-size:.76rem; }
   .gain-pos { color:var(--green); font-weight:700; }
   .gain-neg { color:var(--red); font-weight:700; }
   .gain-flat { color:var(--text2); }
-  tfoot td { font-weight:800; border-top:2px solid var(--border); border-bottom:none; }
 
   /* ── Empty state ── */
   .empty-state { text-align:center; padding:70px 20px; display:none; }
@@ -94,18 +91,20 @@
   .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; z-index:400; padding:16px; }
   .modal-overlay.open { display:flex; }
   .modal { background:#141720; border:1px solid var(--border); border-radius:16px; padding:24px; width:440px; max-width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 24px 80px rgba(0,0,0,.5); }
-  .modal h2 { font-size:1.05rem; font-weight:800; margin:0 0 18px; }
+  .modal h2 { font-size:1.05rem; font-weight:800; margin:0 0 4px; }
+  .modal-hint { font-size:.74rem; color:var(--text2); margin:0 0 18px; }
   .field { margin-bottom:15px; }
   .field label { display:block; font-size:.72rem; color:var(--text2); font-weight:700; text-transform:uppercase; letter-spacing:.4px; margin-bottom:6px; }
   .field input, .field textarea { width:100%; background:var(--surface2,rgba(255,255,255,.05)); border:1px solid var(--border); border-radius:8px; color:var(--text); padding:10px 12px; font-size:.88rem; outline:none; font-family:inherit; box-sizing:border-box; }
   .field input:focus, .field textarea:focus { border-color:var(--accent); }
   .field textarea { resize:vertical; min-height:60px; }
-  .field-2col { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-  .cat-pills { display:flex; gap:8px; }
-  .cat-pill { flex:1; background:var(--surface2,rgba(255,255,255,.05)); border:1px solid var(--border); border-radius:8px; padding:10px 6px; color:var(--text2); font-size:.8rem; font-weight:700; cursor:pointer; font-family:inherit; text-align:center; transition:all .15s; }
-  .cat-pill:hover { border-color:var(--accent); color:var(--text); }
-  .cat-pill.selected { background:rgba(108,140,255,.16); border-color:var(--accent); color:var(--text); }
+  .modal-total { display:flex; justify-content:space-between; align-items:center; background:var(--surface2,rgba(255,255,255,.05)); border:1px solid var(--border); border-radius:8px; padding:10px 12px; font-size:.82rem; color:var(--text2); margin-bottom:15px; }
+  .modal-total b { font-size:1rem; color:var(--green); font-variant-numeric:tabular-nums; }
   .modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:20px; flex-wrap:wrap; }
+
+  /* ── Toast ── */
+  .toast { position:fixed; bottom:24px; right:24px; background:#141720; border:1px solid var(--accent); color:var(--text); padding:12px 20px; border-radius:9px; font-size:.85rem; z-index:500; transform:translateY(80px); opacity:0; transition:all .25s; }
+  .toast.show { transform:translateY(0); opacity:1; }
 
   .fab { display:none; }
 
@@ -130,7 +129,7 @@
   <div class="brand">Card <span>Inventory</span></div>
   <div class="header-right">
     <a href="index.html" class="back-link">⌂ Home</a>
-    <button class="btn-primary" onclick="openItemModal()">+ Add Item</button>
+    <button class="btn-primary" onclick="openSnapModal()">+ Log Weekend</button>
   </div>
 </header>
 
@@ -139,292 +138,365 @@
 <div class="stat-bar">
   <div class="stat-cell">
     <div class="stat-val" style="color:var(--green)" id="st-value">$0.00</div>
-    <div class="stat-lbl">Market Value</div>
-    <div class="stat-sub" id="st-units">0 items</div>
+    <div class="stat-lbl">Total Inventory</div>
+    <div class="stat-sub" id="st-value-sub">no weekends logged yet</div>
   </div>
   <div class="stat-cell">
-    <div class="stat-val" id="st-cost">$0.00</div>
-    <div class="stat-lbl">Cost Basis</div>
-    <div class="stat-sub">what you paid</div>
+    <div class="stat-val" id="st-change">—</div>
+    <div class="stat-lbl">Vs Last Week</div>
+    <div class="stat-sub" id="st-change-sub">need 2+ entries</div>
   </div>
   <div class="stat-cell">
-    <div class="stat-val" id="st-gain">$0.00</div>
-    <div class="stat-lbl">Unrealized Gain</div>
-    <div class="stat-sub" id="st-gain-pct">—</div>
+    <div class="stat-val" id="st-growth">—</div>
+    <div class="stat-lbl">All-Time Growth</div>
+    <div class="stat-sub" id="st-growth-sub">since your first log</div>
   </div>
   <div class="stat-cell">
-    <div class="stat-val" style="color:var(--accent)" id="st-top">—</div>
-    <div class="stat-lbl">Biggest Bucket</div>
-    <div class="stat-sub" id="st-top-sub">by market value</div>
+    <div class="stat-val" style="color:var(--accent)" id="st-weeks">0</div>
+    <div class="stat-lbl">Weekends Logged</div>
+    <div class="stat-sub" id="st-weeks-sub">log after each weekend</div>
   </div>
 </div>
 
 <main>
   <div class="cat-grid" id="cat-grid"></div>
 
-  <div class="filter-row">
-    <button class="filter-pill active" data-cat="all" onclick="setFilter('all')">All</button>
-    <button class="filter-pill" data-cat="singles" onclick="setFilter('singles')">🃏 Singles</button>
-    <button class="filter-pill" data-cat="slabs" onclick="setFilter('slabs')">🏆 Slabs</button>
-    <button class="filter-pill" data-cat="sealed" onclick="setFilter('sealed')">📦 Sealed</button>
-    <div class="filter-spacer"></div>
-    <input type="search" class="inv-search" id="inv-search" placeholder="Search items…" oninput="renderTable()">
+  <div class="gpanel" id="chart-panel">
+    <div class="panel-head">
+      <div class="panel-title">📈 Inventory Growth</div>
+      <div class="legend">
+        <span class="lg-chip"><span class="lg-dot" style="background:#34d399"></span>Total</span>
+        <span class="lg-chip"><span class="lg-dot" style="background:#6c8cff"></span>Singles</span>
+        <span class="lg-chip"><span class="lg-dot" style="background:#fbbf24"></span>Slabs</span>
+        <span class="lg-chip"><span class="lg-dot" style="background:#a78bfa"></span>Sealed</span>
+      </div>
+    </div>
+    <div class="chart-wrap" id="chart-wrap"></div>
   </div>
 
-  <div class="table-scroll" id="table-wrap"></div>
+  <div class="gpanel" id="log-panel">
+    <div class="panel-head">
+      <div class="panel-title">🗓️ Weekly Log</div>
+      <div class="panel-sub">One entry per weekend — tap a row to edit.</div>
+    </div>
+    <div class="table-scroll" id="table-wrap"></div>
+  </div>
 
   <div class="empty-state" id="empty-state">
     <div class="empty-icon">🃏</div>
-    <div class="empty-title" id="empty-title">No inventory yet</div>
-    <div class="empty-sub" id="empty-sub">Add your singles, slabs, and sealed product to see what your collection-for-sale is worth at a glance.</div>
-    <button class="btn-primary" onclick="openItemModal()">+ Add First Item</button>
+    <div class="empty-title">No weekends logged yet</div>
+    <div class="empty-sub">After each weekend, drop in what your Singles, Slabs, and Sealed are worth in total. Two entries in, you'll have a growth curve.</div>
+    <button class="btn-primary" onclick="openSnapModal()">+ Log First Weekend</button>
   </div>
 </main>
 
-<!-- ── ITEM MODAL ── -->
-<div class="modal-overlay" id="item-modal">
+<!-- ── LOG MODAL ── -->
+<div class="modal-overlay" id="snap-modal">
   <div class="modal">
-    <h2 id="im-title">Add Inventory Item</h2>
+    <h2 id="im-title">Log Weekend Totals</h2>
+    <p class="modal-hint">Bucket totals only — no need to list individual cards.</p>
     <div class="field">
-      <label>Item Name</label>
-      <input type="text" id="im-name" maxlength="140" placeholder="e.g. Charizard ex 199/165 · PSA 10 Pikachu · Surging Sparks ETB">
+      <label>Date</label>
+      <input type="date" id="im-date">
     </div>
     <div class="field">
-      <label>Category</label>
-      <div class="cat-pills">
-        <button type="button" class="cat-pill" data-cat="singles" onclick="pickCat('singles')">🃏 Singles</button>
-        <button type="button" class="cat-pill" data-cat="slabs" onclick="pickCat('slabs')">🏆 Slabs</button>
-        <button type="button" class="cat-pill" data-cat="sealed" onclick="pickCat('sealed')">📦 Sealed</button>
-      </div>
-    </div>
-    <div class="field-2col">
-      <div class="field">
-        <label>Quantity</label>
-        <input type="number" id="im-qty" min="1" step="1" value="1">
-      </div>
-      <div class="field">
-        <label>Paid ($ each)</label>
-        <input type="number" id="im-cost" min="0" step="0.01" placeholder="0.00">
-      </div>
+      <label>🃏 Singles — total ($)</label>
+      <input type="number" id="im-singles" min="0" step="0.01" inputmode="decimal" placeholder="0.00">
     </div>
     <div class="field">
-      <label>Market Value ($ each)</label>
-      <input type="number" id="im-value" min="0" step="0.01" placeholder="0.00">
+      <label>🏆 Slabs — total ($)</label>
+      <input type="number" id="im-slabs" min="0" step="0.01" inputmode="decimal" placeholder="0.00">
     </div>
     <div class="field">
-      <label>Notes (optional)</label>
-      <textarea id="im-notes" maxlength="500" placeholder="Set, condition, where it's stored, comps…"></textarea>
+      <label>📦 Sealed — total ($)</label>
+      <input type="number" id="im-sealed" min="0" step="0.01" inputmode="decimal" placeholder="0.00">
+    </div>
+    <div class="modal-total">Weekend total <b id="im-total">$0.00</b></div>
+    <div class="field">
+      <label>Note (optional)</label>
+      <textarea id="im-note" maxlength="500" placeholder="e.g. bought a collection, big show sales…"></textarea>
     </div>
     <div class="modal-actions">
-      <button class="btn-danger" id="im-delete-btn" onclick="deleteItem()" style="display:none">Delete</button>
+      <button class="btn-danger" id="im-delete-btn" onclick="deleteSnap()" style="display:none">Delete</button>
       <button class="btn-ghost" onclick="closeModal()">Cancel</button>
-      <button class="btn-primary" onclick="saveItem()">Save</button>
+      <button class="btn-primary" onclick="saveSnap()">Save</button>
     </div>
   </div>
 </div>
 
-<button class="fab" onclick="openItemModal()" title="Add Item">＋</button>
+<button class="fab" onclick="openSnapModal()" title="Log Weekend">＋</button>
+<div class="toast" id="toast"></div>
 
 <script>
 // ── STORAGE ── (canonical name lives in VPCUtil.KEYS — do not hardcode)
-const INV_KEY = VPCUtil.KEYS.cardInventory;
+const SNAP_KEY = VPCUtil.KEYS.cardInventoryWeekly;
 const uid = () => Math.random().toString(36).slice(2, 10);
-const getInv = () => { try { const v = JSON.parse(localStorage.getItem(INV_KEY) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
-const setInv = v => localStorage.setItem(INV_KEY, JSON.stringify(v));
+const getSnaps = () => { try { const v = JSON.parse(localStorage.getItem(SNAP_KEY) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
+const setSnaps = v => localStorage.setItem(SNAP_KEY, JSON.stringify(v));
 
-const { esc, escAttr, fmtMoney, money, sumMoney, todayStr } = VPCUtil;
+const { esc, fmtMoney, fmtDate, money, todayStr } = VPCUtil;
 
 // The three buckets are fixed on purpose — Singles / Slabs / Sealed is how
-// card inventory is actually carried to (and priced at) shows.
+// card inventory is actually carried to (and priced at) shows. One snapshot
+// per date: the bucket TOTALS as of that weekend, no per-item records.
 const CATS = {
-  singles: { icon: '🃏', label: 'Singles', color: 'var(--accent)',  fill: 'linear-gradient(90deg,#6c8cff,#8ba4ff)' },
-  slabs:   { icon: '🏆', label: 'Slabs',   color: 'var(--yellow)',  fill: 'linear-gradient(90deg,#fbbf24,#fcd34d)' },
-  sealed:  { icon: '📦', label: 'Sealed',  color: '#a78bfa',        fill: 'linear-gradient(90deg,#a78bfa,#c4b5fd)' },
+  singles: { icon: '🃏', label: 'Singles', color: 'var(--accent)', hex: '#6c8cff', fill: 'linear-gradient(90deg,#6c8cff,#8ba4ff)' },
+  slabs:   { icon: '🏆', label: 'Slabs',   color: 'var(--yellow)', hex: '#fbbf24', fill: 'linear-gradient(90deg,#fbbf24,#fcd34d)' },
+  sealed:  { icon: '📦', label: 'Sealed',  color: '#a78bfa',       hex: '#a78bfa', fill: 'linear-gradient(90deg,#a78bfa,#c4b5fd)' },
 };
-const catOf = it => (CATS[it.cat] ? it.cat : 'singles'); // tolerate bad data
 
-// Per-item totals. qty defaults to 1 so a sparse record still counts.
-const itemQty   = it => Math.max(1, Math.round(+it.qty) || 1);
-const itemValue = it => money(itemQty(it) * (+it.value || 0));
-const itemCost  = it => money(itemQty(it) * (+it.cost  || 0));
-
-// ── STATE ──
-let filterCat = 'all';
+const catVal = (s, c) => money(+s[c] || 0);
+const snapTotal = s => money(catVal(s, 'singles') + catVal(s, 'slabs') + catVal(s, 'sealed'));
+const sorted = () => getSnaps().slice().sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
 
 // ── RENDER ──
-function totals() {
-  const inv = getInv();
-  const t = { value: 0, cost: 0, count: inv.length, units: 0, byCat: {} };
-  Object.keys(CATS).forEach(c => { t.byCat[c] = { value: 0, cost: 0, count: 0 }; });
-  inv.forEach(it => {
-    const c = t.byCat[catOf(it)];
-    const v = itemValue(it), k = itemCost(it);
-    c.value = money(c.value + v); c.cost = money(c.cost + k); c.count++;
-    t.value = money(t.value + v); t.cost = money(t.cost + k); t.units += itemQty(it);
-  });
-  return t;
+function deltaHTML(cur, prev) {
+  if (prev == null || cur == null) return '<span class="gain-flat">—</span>';
+  const d = money(cur - prev);
+  const cls = d > 0 ? 'gain-pos' : d < 0 ? 'gain-neg' : 'gain-flat';
+  return `<span class="${cls}">${d > 0 ? '▲' : d < 0 ? '▼' : '±'} ${d >= 0 ? '+' : '−'}${fmtMoney(Math.abs(d))}</span>`;
 }
+const pctStr = (d, base) => base > 0 ? `${d >= 0 ? '+' : ''}${((d / base) * 100).toFixed(1)}%` : '';
 
 function renderStats() {
-  const t = totals();
-  document.getElementById('st-value').textContent = fmtMoney(t.value);
-  document.getElementById('st-units').textContent = `${t.count} item${t.count === 1 ? '' : 's'} · ${t.units} unit${t.units === 1 ? '' : 's'}`;
-  document.getElementById('st-cost').textContent = fmtMoney(t.cost);
+  const s = sorted();
+  const latest = s[s.length - 1] || null;
+  const prev = s[s.length - 2] || null;
+  const first = s[0] || null;
 
-  const gain = money(t.value - t.cost);
-  const g = document.getElementById('st-gain');
-  g.textContent = `${gain >= 0 ? '+' : '−'}${fmtMoney(Math.abs(gain))}`;
-  g.style.color = gain > 0 ? 'var(--green)' : gain < 0 ? 'var(--red)' : 'var(--text2)';
-  document.getElementById('st-gain-pct').textContent =
-    t.cost > 0 ? `${gain >= 0 ? '+' : ''}${((gain / t.cost) * 100).toFixed(1)}% vs cost` : '—';
+  document.getElementById('st-value').textContent = latest ? fmtMoney(snapTotal(latest)) : '$0.00';
+  document.getElementById('st-value-sub').textContent = latest ? `as of ${fmtDate(latest.date)}` : 'no weekends logged yet';
 
-  const top = Object.entries(t.byCat).sort((a, b) => b[1].value - a[1].value)[0];
-  const hasAny = top && top[1].value > 0;
-  document.getElementById('st-top').textContent = hasAny ? `${CATS[top[0]].icon} ${CATS[top[0]].label}` : '—';
-  document.getElementById('st-top-sub').textContent = hasAny ? `${fmtMoney(top[1].value)} of market value` : 'by market value';
+  const ch = document.getElementById('st-change');
+  if (prev) {
+    const d = money(snapTotal(latest) - snapTotal(prev));
+    ch.textContent = `${d >= 0 ? '+' : '−'}${fmtMoney(Math.abs(d))}`;
+    ch.style.color = d > 0 ? 'var(--green)' : d < 0 ? 'var(--red)' : 'var(--text2)';
+    const pct = pctStr(d, snapTotal(prev));
+    document.getElementById('st-change-sub').textContent = `${pct ? pct + ' ' : ''}vs ${fmtDate(prev.date)}`;
+  } else {
+    ch.textContent = '—'; ch.style.color = '';
+    document.getElementById('st-change-sub').textContent = 'need 2+ entries';
+  }
+
+  const gr = document.getElementById('st-growth');
+  if (first && s.length >= 2) {
+    const d = money(snapTotal(latest) - snapTotal(first));
+    gr.textContent = `${d >= 0 ? '+' : '−'}${fmtMoney(Math.abs(d))}`;
+    gr.style.color = d > 0 ? 'var(--green)' : d < 0 ? 'var(--red)' : 'var(--text2)';
+    const pct = pctStr(d, snapTotal(first));
+    document.getElementById('st-growth-sub').textContent = `${pct ? pct + ' ' : ''}since ${fmtDate(first.date)}`;
+  } else {
+    gr.textContent = '—'; gr.style.color = '';
+    document.getElementById('st-growth-sub').textContent = 'since your first log';
+  }
+
+  document.getElementById('st-weeks').textContent = s.length;
+  if (s.length >= 2) {
+    const avg = money((snapTotal(latest) - snapTotal(first)) / (s.length - 1));
+    document.getElementById('st-weeks-sub').textContent = `avg ${avg >= 0 ? '+' : '−'}${fmtMoney(Math.abs(avg))} per week`;
+  } else {
+    document.getElementById('st-weeks-sub').textContent = 'log after each weekend';
+  }
 }
 
 function renderCatCards() {
-  const t = totals();
+  const s = sorted();
+  const latest = s[s.length - 1] || null;
+  const prev = s[s.length - 2] || null;
+  const total = latest ? snapTotal(latest) : 0;
   document.getElementById('cat-grid').innerHTML = Object.entries(CATS).map(([key, c]) => {
-    const b = t.byCat[key];
-    const share = t.value > 0 ? (b.value / t.value) * 100 : 0;
-    return `<div class="cat-card${filterCat === key ? ' active' : ''}" onclick="setFilter(filterCat === '${key}' ? 'all' : '${key}')">
+    const v = latest ? catVal(latest, key) : 0;
+    const share = total > 0 ? (v / total) * 100 : 0;
+    const d = prev ? `${deltaHTML(v, catVal(prev, key))} vs last log` : `${share.toFixed(0)}% of total`;
+    return `<div class="cat-card">
       <div class="cat-head"><span>${c.icon}</span> ${c.label}</div>
-      <div class="cat-value" style="color:${c.color}">${fmtMoney(b.value)}</div>
-      <div class="cat-sub">${b.count} item${b.count === 1 ? '' : 's'} · ${share.toFixed(0)}% of value${b.cost > 0 ? ` · paid ${fmtMoney(b.cost)}` : ''}</div>
+      <div class="cat-value" style="color:${c.color}">${fmtMoney(v)}</div>
+      <div class="cat-sub">${prev ? `${share.toFixed(0)}% of total · ` : ''}${d}</div>
       <div class="cat-bar"><div class="cat-bar-fill" style="width:${share}%;background:${c.fill}"></div></div>
     </div>`;
   }).join('');
 }
 
-function setFilter(cat) {
-  filterCat = cat;
-  document.querySelectorAll('.filter-pill').forEach(p => p.classList.toggle('active', p.dataset.cat === cat));
-  renderCatCards();
-  renderTable();
+// ── CHART ── (one $ axis, zero-based; category colors match the rest of the app)
+const shortDate = d => { const p = String(d || '').split('-'); return p.length === 3 ? `${+p[1]}/${+p[2]}` : ''; };
+const fmtAxis = v => v >= 1000 ? '$' + (v / 1000).toFixed(v >= 10000 ? 0 : 1) + 'k' : '$' + Math.round(v);
+
+function drawChart() {
+  const wrap = document.getElementById('chart-wrap');
+  const s = sorted();
+  if (s.length < 2) {
+    wrap.innerHTML = '<div class="chart-empty">📉 Log at least two weekends to see your growth curve.</div>';
+    return;
+  }
+  const SERIES = [
+    { key: 'total',   label: 'Total',   color: '#34d399', w: 3 },
+    { key: 'singles', label: 'Singles', color: '#6c8cff', w: 2 },
+    { key: 'slabs',   label: 'Slabs',   color: '#fbbf24', w: 2 },
+    { key: 'sealed',  label: 'Sealed',  color: '#a78bfa', w: 2 },
+  ];
+  const val = (snap, key) => key === 'total' ? snapTotal(snap) : catVal(snap, key);
+
+  const W = Math.max(660, s.length * 54 + 150), H = 280, padL = 52, padR = 96, padT = 16, padB = 34;
+  const maxV = Math.max(...s.map(snapTotal), 1) * 1.08;
+  const X = i => padL + (W - padL - padR) * (i / (s.length - 1));
+  const Y = v => padT + (H - padT - padB) * (1 - v / maxV);
+
+  let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" style="min-width:${W}px;height:${H}px" role="img" aria-label="Inventory growth by week">`;
+  [0, .25, .5, .75, 1].forEach(p => {
+    const v = maxV * p, y = Y(v);
+    svg += `<line x1="${padL}" x2="${W - padR}" y1="${y}" y2="${y}" stroke="rgba(255,255,255,.07)" stroke-width="1"/>
+            <text x="${padL - 8}" y="${y + 3.5}" fill="#8892b0" font-size="10" text-anchor="end">${fmtAxis(v)}</text>`;
+  });
+
+  let hits = ''; // hover targets rendered last so they sit on top of every line
+  SERIES.forEach(se => {
+    const pts = s.map((x, i) => `${X(i)},${Y(val(x, se.key))}`).join(' ');
+    svg += `<polyline points="${pts}" fill="none" stroke="${se.color}" stroke-width="${se.w}" stroke-linejoin="round" stroke-linecap="round"${se.key === 'total' ? '' : ' opacity=".9"'}/>`;
+    s.forEach((x, i) => {
+      const v = val(x, se.key);
+      svg += `<circle cx="${X(i)}" cy="${Y(v)}" r="${se.key === 'total' ? 3.5 : 3}" fill="${se.color}"/>`;
+      hits += `<circle cx="${X(i)}" cy="${Y(v)}" r="9" fill="transparent"><title>${se.label} — ${fmtMoney(v)} · ${fmtDate(x.date)}</title></circle>`;
+    });
+  });
+
+  // Direct labels at each line's end, pushed apart so close lines stay readable.
+  const last = s[s.length - 1];
+  const ends = SERIES.map(se => ({ se, y: Y(val(last, se.key)) })).sort((a, b) => a.y - b.y);
+  for (let i = 1; i < ends.length; i++) if (ends[i].y - ends[i - 1].y < 13) ends[i].y = ends[i - 1].y + 13;
+  ends.forEach(e => {
+    svg += `<circle cx="${W - padR + 10}" cy="${e.y - 3.5}" r="3" fill="${e.se.color}"/>
+            <text x="${W - padR + 17}" y="${e.y}" fill="#8892b0" font-size="10">${e.se.label}</text>`;
+  });
+
+  const step = Math.ceil(s.length / 9);
+  s.forEach((x, i) => {
+    if (i % step !== 0 && i !== s.length - 1) return;
+    svg += `<text x="${X(i)}" y="${H - padB + 18}" fill="#8892b0" font-size="10" text-anchor="middle">${shortDate(x.date)}</text>`;
+  });
+
+  svg += hits + '</svg>';
+  wrap.innerHTML = svg;
 }
 
 function renderTable() {
-  const wrap = document.getElementById('table-wrap');
+  const s = sorted().reverse(); // newest first
   const empty = document.getElementById('empty-state');
-  const q = (document.getElementById('inv-search').value || '').trim().toLowerCase();
-  const all = getInv();
-
-  if (!all.length) {
-    wrap.innerHTML = '';
-    empty.style.display = 'block';
-    document.getElementById('empty-title').textContent = 'No inventory yet';
-    document.getElementById('empty-sub').textContent = 'Add your singles, slabs, and sealed product to see what your collection-for-sale is worth at a glance.';
-    return;
-  }
-
-  let items = all.filter(it => (filterCat === 'all' || catOf(it) === filterCat));
-  if (q) items = items.filter(it => `${it.name || ''} ${it.notes || ''}`.toLowerCase().includes(q));
-  items.sort((a, b) => itemValue(b) - itemValue(a));
-
-  if (!items.length) {
-    wrap.innerHTML = '';
-    empty.style.display = 'block';
-    document.getElementById('empty-title').textContent = 'Nothing matches';
-    document.getElementById('empty-sub').textContent = q ? 'No items match that search in this category.' : `No ${filterCat} tracked yet — add one with the + button.`;
-    return;
-  }
-  empty.style.display = 'none';
+  const hasData = s.length > 0;
+  document.getElementById('chart-panel').style.display = hasData ? '' : 'none';
+  document.getElementById('log-panel').style.display = hasData ? '' : 'none';
+  empty.style.display = hasData ? 'none' : 'block';
+  if (!hasData) return;
 
   let h = `<table class="inv"><thead><tr>
-    <th>Item</th><th>Category</th>
-    <th class="num">Qty</th><th class="num">Paid (ea)</th><th class="num">Market (ea)</th>
-    <th class="num">Total Value</th><th class="num">Gain</th>
+    <th>Date</th>
+    <th class="num">🃏 Singles</th><th class="num">🏆 Slabs</th><th class="num">📦 Sealed</th>
+    <th class="num">Total</th><th class="num">Change</th><th>Note</th>
   </tr></thead><tbody>`;
-  items.forEach(it => {
-    const c = CATS[catOf(it)];
-    const gain = money(itemValue(it) - itemCost(it));
-    const gCls = gain > 0 ? 'gain-pos' : gain < 0 ? 'gain-neg' : 'gain-flat';
-    h += `<tr onclick="openItemModal('${escAttr(it.id)}')">
-      <td><div class="inv-name">${esc(it.name || 'Unnamed item')}</div>${it.notes ? `<div class="inv-notes">${esc(it.notes)}</div>` : ''}</td>
-      <td><span class="cat-chip chip-${catOf(it)}">${c.icon} ${c.label}</span></td>
-      <td class="num">${itemQty(it)}</td>
-      <td class="num">${fmtMoney(it.cost)}</td>
-      <td class="num">${fmtMoney(it.value)}</td>
-      <td class="num" style="font-weight:800">${fmtMoney(itemValue(it))}</td>
-      <td class="num ${gCls}">${gain >= 0 ? '+' : '−'}${fmtMoney(Math.abs(gain))}</td>
+  s.forEach((x, idx) => {
+    const prev = s[idx + 1]; // previous chronologically (list is newest-first)
+    h += `<tr onclick="openSnapModal('${esc(x.id)}')">
+      <td style="font-weight:700">${fmtDate(x.date)}</td>
+      <td class="num">${fmtMoney(catVal(x, 'singles'))}</td>
+      <td class="num">${fmtMoney(catVal(x, 'slabs'))}</td>
+      <td class="num">${fmtMoney(catVal(x, 'sealed'))}</td>
+      <td class="num" style="font-weight:800">${fmtMoney(snapTotal(x))}</td>
+      <td class="num">${prev ? deltaHTML(snapTotal(x), snapTotal(prev)) : '<span class="gain-flat">—</span>'}</td>
+      <td><div class="snap-note" title="${esc(x.note || '').replace(/"/g, '&quot;')}">${esc(x.note || '')}</div></td>
     </tr>`;
   });
-  const vTot = sumMoney(items, itemValue);
-  const gTot = money(vTot - sumMoney(items, itemCost));
-  h += `</tbody><tfoot><tr>
-    <td colspan="5">${filterCat === 'all' ? 'Everything' : CATS[filterCat].label}${q ? ' (filtered)' : ''}</td>
-    <td class="num">${fmtMoney(vTot)}</td>
-    <td class="num ${gTot > 0 ? 'gain-pos' : gTot < 0 ? 'gain-neg' : 'gain-flat'}">${gTot >= 0 ? '+' : '−'}${fmtMoney(Math.abs(gTot))}</td>
-  </tr></tfoot></table>`;
-  wrap.innerHTML = h;
+  h += '</tbody></table>';
+  document.getElementById('table-wrap').innerHTML = h;
 }
 
-function renderAll() { renderStats(); renderCatCards(); renderTable(); }
+function renderAll() { renderStats(); renderCatCards(); drawChart(); renderTable(); }
 window.renderAll = renderAll; // cloud sync calls this after pulling new data
 
 // ── MODAL ──
-let editId = null, pickedCat = 'singles';
+let editId = null;
 
-function openItemModal(id) {
+function openSnapModal(id) {
   editId = id || null;
-  const it = id ? getInv().find(x => x.id === id) : null;
-  document.getElementById('im-title').textContent = it ? 'Edit Inventory Item' : 'Add Inventory Item';
-  document.getElementById('im-name').value  = it?.name  || '';
-  document.getElementById('im-qty').value   = it ? itemQty(it) : 1;
-  document.getElementById('im-cost').value  = it?.cost  ?? '';
-  document.getElementById('im-value').value = it?.value ?? '';
-  document.getElementById('im-notes').value = it?.notes || '';
-  document.getElementById('im-delete-btn').style.display = it ? '' : 'none';
-  // New items default to the bucket currently being viewed — one less tap.
-  pickCat(it ? catOf(it) : (filterCat !== 'all' ? filterCat : 'singles'));
-  document.getElementById('item-modal').classList.add('open');
-  setTimeout(() => document.getElementById('im-name').focus(), 80);
+  const s0 = id ? getSnaps().find(x => x.id === id) : null;
+  document.getElementById('im-title').textContent = s0 ? 'Edit Weekend Log' : 'Log Weekend Totals';
+  document.getElementById('im-date').value = s0 ? s0.date : todayStr();
+  document.getElementById('im-singles').value = s0 ? catVal(s0, 'singles') : '';
+  document.getElementById('im-slabs').value = s0 ? catVal(s0, 'slabs') : '';
+  document.getElementById('im-sealed').value = s0 ? catVal(s0, 'sealed') : '';
+  document.getElementById('im-note').value = s0?.note || '';
+  document.getElementById('im-delete-btn').style.display = s0 ? '' : 'none';
+  updateModalTotal();
+  document.getElementById('snap-modal').classList.add('open');
+  setTimeout(() => document.getElementById('im-singles').focus(), 80);
 }
 
-function pickCat(cat) {
-  pickedCat = cat;
-  document.querySelectorAll('.cat-pill').forEach(p => p.classList.toggle('selected', p.dataset.cat === cat));
+function updateModalTotal() {
+  const t = ['im-singles', 'im-slabs', 'im-sealed']
+    .reduce((sum, id) => sum + (parseFloat(document.getElementById(id).value) || 0), 0);
+  document.getElementById('im-total').textContent = fmtMoney(money(t));
 }
 
-function closeModal() { document.getElementById('item-modal').classList.remove('open'); }
-document.getElementById('item-modal').addEventListener('click', e => {
-  if (e.target === document.getElementById('item-modal')) closeModal();
+function closeModal() { document.getElementById('snap-modal').classList.remove('open'); }
+document.getElementById('snap-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('snap-modal')) closeModal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+['im-singles', 'im-slabs', 'im-sealed'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('input', updateModalTotal);
+  el.addEventListener('keydown', e => { if (e.key === 'Enter') saveSnap(); });
 });
 
-function saveItem() {
-  const name = document.getElementById('im-name').value.trim();
-  if (!name) { alert('Item name is required.'); return; }
-  const qty   = Math.max(1, Math.round(parseFloat(document.getElementById('im-qty').value) || 1));
-  const cost  = Math.max(0, parseFloat(document.getElementById('im-cost').value)  || 0);
-  const value = Math.max(0, parseFloat(document.getElementById('im-value').value) || 0);
-  const item = {
-    id: editId || uid(),
-    name,
-    cat: pickedCat,
-    qty,
-    cost:  money(cost),
-    value: money(value),
-    notes: document.getElementById('im-notes').value.trim(),
+function saveSnap() {
+  const date = document.getElementById('im-date').value;
+  if (!date) { toast('Pick a date.'); return; }
+  const read = id => {
+    const raw = document.getElementById(id).value.trim();
+    return raw === '' ? null : Math.max(0, parseFloat(raw) || 0);
+  };
+  const singles = read('im-singles'), slabs = read('im-slabs'), sealed = read('im-sealed');
+  if (singles == null && slabs == null && sealed == null) { toast('Enter at least one bucket total.'); return; }
+
+  const arr = getSnaps();
+  const snapId = editId || uid();
+  // One entry per date — logging the same weekend twice replaces it, but never silently.
+  const clash = arr.find(x => x.id !== snapId && x.date === date);
+  if (clash && !confirm(`You already logged ${fmtDate(date)} — replace that entry?`)) return;
+
+  const snap = {
+    id: snapId,
+    date,
+    singles: money(singles || 0),
+    slabs: money(slabs || 0),
+    sealed: money(sealed || 0),
+    note: document.getElementById('im-note').value.trim(),
     updated: todayStr(),
   };
-  const arr = getInv();
-  const idx = arr.findIndex(x => x.id === item.id);
-  idx >= 0 ? arr[idx] = { ...arr[idx], ...item } : arr.push(item);
-  setInv(arr);
-  if (typeof auditLog === 'function') auditLog(editId ? 'EDIT_INVENTORY_ITEM' : 'ADD_INVENTORY_ITEM', INV_KEY, name);
+  setSnaps([...arr.filter(x => x.id !== snapId && x.date !== date), snap]);
+  if (typeof auditLog === 'function') auditLog(editId ? 'EDIT_INV_SNAPSHOT' : 'ADD_INV_SNAPSHOT', SNAP_KEY, `${fmtMoney(snapTotal(snap))} @ ${date}`);
   closeModal();
   renderAll();
+  toast(editId ? 'Entry updated.' : 'Weekend logged!');
 }
 
-function deleteItem() {
+function deleteSnap() {
   if (!editId) return;
-  if (!confirm('Delete this inventory item?')) return;
-  setInv(getInv().filter(x => x.id !== editId));
-  if (typeof auditLog === 'function') auditLog('DELETE_INVENTORY_ITEM', INV_KEY, 'Item deleted');
+  if (!confirm('Delete this weekend entry?')) return;
+  setSnaps(getSnaps().filter(x => x.id !== editId));
+  if (typeof auditLog === 'function') auditLog('DELETE_INV_SNAPSHOT', SNAP_KEY, 'Weekend entry deleted');
   closeModal();
   renderAll();
+  toast('Entry deleted.');
+}
+
+// ── Toast ──
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
 }
 
 renderAll();
