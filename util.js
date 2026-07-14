@@ -96,7 +96,27 @@
     growth: 'vpc_growth_v1',
     guru: 'vpc_guru_v1',
     ritual: 'vpc_ritual_v1',
+    cardInventory: 'vpc_card_inventory_v1',
   });
+
+  // ── Crew table claims ──────────────────────────────
+  // A sign-up's table_pref holds a table claim ("1 table", "½ table",
+  // "2 tables", or legacy free text like "corner spot please"). Parse it to
+  // a numeric table count so a claim can be auto-priced when the block is
+  // booked; null when no quantity can be read (the booking then starts at $0
+  // exactly like before, so legacy sign-ups keep working).
+  const parseClaimQty = (s) => {
+    const str = String(s == null ? '' : s)
+      .trim()
+      .toLowerCase();
+    if (!str) return null;
+    if (/half|½|(?:^|[^\d.])1\s*\/\s*2/.test(str)) return 0.5;
+    const m = str.match(/(\d+(?:\.\d+)?)/);
+    if (!m) return null;
+    const n = parseFloat(m[1]);
+    // Guard against garbage like phone numbers pasted into the field.
+    return n > 0 && n <= 50 ? n : null;
+  };
 
   // ── Event-store unification ────────────────────────
   // Two pages historically kept SEPARATE event lists: the Events page under
@@ -158,6 +178,7 @@
     esc,
     escAttr,
     KEYS,
+    parseClaimQty,
     normalizeEvent,
     mergeEvents,
     migrateEventStores,

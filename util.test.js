@@ -100,3 +100,21 @@ test('mergeEvents tolerates empty / malformed input', () => {
   assert.deepStrictEqual(U.mergeEvents(null, null), []);
   assert.deepStrictEqual(U.mergeEvents(undefined, [{ id: 'x', start: '2026-01-01' }]).length, 1);
 });
+
+test('parseClaimQty reads table claims from sign-up prefs', () => {
+  assert.strictEqual(U.parseClaimQty('1 table'), 1);
+  assert.strictEqual(U.parseClaimQty('2 tables'), 2);
+  assert.strictEqual(U.parseClaimQty('½ table'), 0.5);
+  assert.strictEqual(U.parseClaimQty('half a table'), 0.5);
+  assert.strictEqual(U.parseClaimQty('1/2 table'), 0.5);
+  assert.strictEqual(U.parseClaimQty('1.5'), 1.5);
+  assert.strictEqual(U.parseClaimQty('  3  '), 3);
+});
+
+test('parseClaimQty rejects unreadable or absurd claims', () => {
+  assert.strictEqual(U.parseClaimQty('corner spot please'), null);
+  assert.strictEqual(U.parseClaimQty(''), null);
+  assert.strictEqual(U.parseClaimQty(null), null);
+  assert.strictEqual(U.parseClaimQty('call me at 5551234567'), null);
+  assert.strictEqual(U.parseClaimQty('0'), null);
+});

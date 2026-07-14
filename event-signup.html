@@ -51,6 +51,16 @@ textarea { resize:vertical; min-height:74px; }
 .btn-primary:hover { opacity:.92; transform:translateY(-1px); }
 .btn-primary:disabled { opacity:.5; cursor:not-allowed; transform:none; }
 
+.claim-pills { display:flex; gap:8px; flex-wrap:wrap; }
+.claim-pill {
+  flex:1 1 auto; min-width:86px; background:rgba(255,255,255,.03); border:1px solid var(--border);
+  border-radius:9px; padding:11px 10px; color:var(--text2); font-size:.88rem; font-weight:700;
+  font-family:inherit; cursor:pointer; transition:all .15s; text-align:center;
+}
+.claim-pill:hover { border-color:var(--accent); color:var(--text); }
+.claim-pill.selected { background:rgba(108,140,255,.16); border-color:var(--accent); color:var(--text); box-shadow:0 0 0 1px var(--accent) inset; }
+.claim-cost { font-size:.8rem; color:var(--green); font-weight:600; margin-top:9px; line-height:1.5; }
+
 .note { font-size:.72rem; color:var(--text2); text-align:center; margin-top:14px; line-height:1.5; }
 .msg { border-radius:9px; padding:12px 14px; font-size:.85rem; margin-bottom:16px; display:none; }
 .msg.err  { display:block; background:rgba(248,113,113,.12); border:1px solid rgba(248,113,113,.35); color:var(--red); }
@@ -71,12 +81,12 @@ footer { text-align:center; padding:22px; font-size:.7rem; color:var(--text2); }
   </div>
 
   <div class="card" id="card">
-    <div class="tag">🪑 Vendor Table Sign-Up</div>
+    <div class="tag">🪑 Crew Table Claim</div>
     <div class="ev-name" id="ev-name">Loading…</div>
     <div class="ev-meta" id="ev-meta"></div>
-    <p class="intro">Interested in a table at this event? Send your request below and we'll be in touch to confirm.</p>
+    <p class="intro">Claim your spot — we book the block together so the whole crew sits together, then settle up once the tables are confirmed.</p>
 
-    <div class="msg err" id="err"></div>
+    <div class="msg err" id="err" style="display:none"></div>
 
     <form id="signup-form" onsubmit="return submitSignup(event)">
       <div class="field">
@@ -84,8 +94,14 @@ footer { text-align:center; padding:22px; font-size:.7rem; color:var(--text2); }
         <input type="text" id="f-name" maxlength="120" placeholder="Your business or your name" required>
       </div>
       <div class="field">
-        <label>Table Preference</label>
-        <input type="text" id="f-table" maxlength="120" placeholder="e.g. 1 table, 2 tables, corner spot">
+        <label>How many tables?</label>
+        <div class="claim-pills" id="claim-pills">
+          <button type="button" class="claim-pill" data-qty="0.5">½ table</button>
+          <button type="button" class="claim-pill selected" data-qty="1">1 table</button>
+          <button type="button" class="claim-pill" data-qty="2">2 tables</button>
+          <button type="button" class="claim-pill" data-qty="3">3 tables</button>
+        </div>
+        <div class="claim-cost" id="claim-cost" style="display:none"></div>
       </div>
       <div class="field">
         <label>Contact <span class="opt">(optional, so we can reach you)</span></label>
@@ -95,7 +111,7 @@ footer { text-align:center; padding:22px; font-size:.7rem; color:var(--text2); }
         <label>Notes / Message</label>
         <textarea id="f-notes" maxlength="1000" placeholder="What you sell, questions, special requests…"></textarea>
       </div>
-      <button type="submit" class="btn-primary" id="submit-btn">Send Sign-Up Request</button>
+      <button type="submit" class="btn-primary" id="submit-btn">Claim My Spot</button>
     </form>
   </div>
 
@@ -103,7 +119,7 @@ footer { text-align:center; padding:22px; font-size:.7rem; color:var(--text2); }
     <div class="success">
       <div class="success-icon">✅</div>
       <div class="success-title">Request sent!</div>
-      <div class="success-sub">Thanks — your table request for <strong id="s-ev"></strong> has been received. We'll reach out to confirm your spot.</div>
+      <div class="success-sub">Thanks — your claim for <strong id="s-ev"></strong> is in. We'll confirm your table once the crew block is booked.</div>
     </div>
   </div>
 
@@ -120,8 +136,8 @@ const esc = s => VPCUtil.esc(s || '');
 const fmtDate = d => d ? new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}) : '';
 
 // The share link embeds only the event's public-facing basics (id, name, date,
-// location) — never bookings or prices — so private events can collect sign-ups
-// without ever appearing on the public calendar.
+// location, per-table price) — never bookings or other vendors' details — so
+// private events can collect sign-ups without appearing on the public calendar.
 let _event = null;
 let _calId = 'vault-pine';
 (function loadEvent() {
@@ -140,9 +156,36 @@ let _calId = 'vault-pine';
   let meta = '';
   if (_event.date)     meta += `<span>📅 ${esc(fmtDate(_event.date))}</span>`;
   if (_event.location) meta += `<span>📍 ${esc(_event.location)}</span>`;
+  if (+_event.tablePrice > 0) meta += `<span>💵 $${(+_event.tablePrice).toFixed(2)}/table</span>`;
   document.getElementById('ev-meta').innerHTML = meta;
   document.getElementById('s-ev').textContent = _event.name;
 })();
+
+// ── Table claim pills ──
+// The claim is stored in table_pref as a human-readable label ("2 tables")
+// that the Events page parses back to a number (VPCUtil.parseClaimQty) to
+// auto-price the booking. Older links without a tablePrice still work — the
+// cost line just stays hidden.
+let _claimQty = 1, _claimLabel = '1 table';
+document.querySelectorAll('.claim-pill').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.claim-pill').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    _claimQty   = parseFloat(btn.dataset.qty);
+    _claimLabel = btn.textContent.trim();
+    updateClaimCost();
+  });
+});
+updateClaimCost(); // initial estimate for the default "1 table" selection
+
+function updateClaimCost() {
+  const el = document.getElementById('claim-cost');
+  const unit = _event && +_event.tablePrice > 0 ? +_event.tablePrice : null;
+  if (!unit) { el.style.display = 'none'; return; }
+  const cost = Math.round(_claimQty * unit * 100) / 100;
+  el.textContent = `≈ $${cost.toFixed(2)} for your claim — you settle up once the block is booked.`;
+  el.style.display = 'block';
+}
 
 function showFatal(msg) {
   document.getElementById('ev-name').textContent = 'Sign-up unavailable';
@@ -171,7 +214,7 @@ async function submitSignup(e) {
     event_id:   _event.id,
     event_name: _event.name,
     name,
-    table_pref: document.getElementById('f-table').value.trim(),
+    table_pref: _claimLabel,
     contact:    document.getElementById('f-contact').value.trim(),
     notes:      document.getElementById('f-notes').value.trim(),
     status:     'pending',
@@ -193,7 +236,7 @@ async function submitSignup(e) {
       console.warn('[signup] rejected:', res.status, body);
       showErr(`Sorry — your request couldn't be sent (error ${res.status}). Please contact the organizer directly.`);
       btn.disabled = false;
-      btn.textContent = 'Send Sign-Up Request';
+      btn.textContent = 'Claim My Spot';
       return false;
     }
     document.getElementById('card').style.display = 'none';
@@ -203,7 +246,7 @@ async function submitSignup(e) {
     console.warn('[signup] error:', err.message);
     showErr('Network error — please check your connection and try again.');
     btn.disabled = false;
-    btn.textContent = 'Send Sign-Up Request';
+    btn.textContent = 'Claim My Spot';
   }
   return false;
 }
