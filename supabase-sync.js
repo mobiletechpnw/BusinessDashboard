@@ -51,6 +51,9 @@ const SYNC_KEYS = [
   'vp_pins_restock_v1',
   'vp_pin_inventory_v1', // per-character purchased counts (drives low-stock alerts)
 
+  // ── Card Inventory (Singles / Slabs / Sealed) ───────────
+  'vpc_card_inventory_v1',
+
   // ── Content Planner ─────────────────────────────────────
   'vpc_content_v1',
 

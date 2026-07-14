@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f1117">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="styles.css">
+<script src="util.js"></script>
+<script src="shared.js" defer></script>
+<script src="supabase-sync.js" defer></script>
+<title>Card Inventory · VPC</title>
+<style>
+  body { min-height:100vh; display:flex; flex-direction:column; }
+
+  /* ── Header ── */
+  header {
+    background:var(--surface); border-bottom:1px solid var(--border);
+    padding:0 32px; display:flex; align-items:center;
+    justify-content:space-between; min-height:58px;
+    position:sticky; top:0; z-index:200;
+  }
+  .brand { font-size:1.05rem; font-weight:800; }
+  .brand span { color:var(--accent); }
+  .header-right { display:flex; align-items:center; gap:10px; }
+  .back-link { font-size:.8rem; color:var(--text2); text-decoration:none; padding:6px 12px; border:1px solid var(--border); border-radius:6px; transition:all .15s; }
+  .back-link:hover { color:var(--text); border-color:var(--accent); }
+  .btn-primary { background:var(--accent); color:#fff; border:none; border-radius:8px; padding:9px 16px; font-size:.82rem; font-weight:700; cursor:pointer; font-family:inherit; transition:opacity .15s; }
+  .btn-primary:hover { opacity:.9; }
+  .btn-ghost { background:none; color:var(--text2); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-size:.8rem; font-weight:600; cursor:pointer; font-family:inherit; transition:all .15s; }
+  .btn-ghost:hover { color:var(--text); border-color:var(--accent); }
+  .btn-danger { background:rgba(248,113,113,.12); color:var(--red); border:1px solid rgba(248,113,113,.35); border-radius:8px; padding:9px 16px; font-size:.82rem; font-weight:700; cursor:pointer; font-family:inherit; }
+
+  /* ── KPI strip ── */
+  .stat-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--border); border-bottom:1px solid var(--border); }
+  .stat-cell { background:var(--surface); padding:16px 22px; }
+  .stat-val { font-size:1.5rem; font-weight:800; letter-spacing:-.5px; line-height:1; }
+  .stat-lbl { font-size:.65rem; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; margin-top:5px; }
+  .stat-sub { font-size:.72rem; margin-top:3px; color:var(--text2); }
+
+  main { flex:1; padding:20px 24px 60px; max-width:1200px; width:100%; margin:0 auto; box-sizing:border-box; }
+
+  /* ── Category cards ── */
+  .cat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+  .cat-card {
+    background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:var(--radius,12px);
+    padding:18px 20px; cursor:pointer; transition:border-color .2s, transform .2s; user-select:none;
+  }
+  .cat-card:hover { border-color:rgba(108,140,255,.4); transform:translateY(-2px); }
+  .cat-card.active { border-color:var(--accent); background:rgba(108,140,255,.07); }
+  .cat-head { display:flex; align-items:center; gap:8px; font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--text2); }
+  .cat-value { font-size:1.45rem; font-weight:800; letter-spacing:-.5px; margin-top:8px; }
+  .cat-sub { font-size:.72rem; color:var(--text2); margin-top:3px; }
+  .cat-bar { height:5px; border-radius:99px; background:var(--surface2,rgba(255,255,255,.06)); margin-top:12px; overflow:hidden; }
+  .cat-bar-fill { height:100%; border-radius:99px; transition:width .4s ease; }
+
+  /* ── Filter row ── */
+  .filter-row { display:flex; align-items:center; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+  .filter-pill { background:none; border:1px solid var(--border); color:var(--text2); border-radius:99px; padding:6px 14px; font-size:.76rem; font-weight:600; cursor:pointer; font-family:inherit; transition:all .15s; }
+  .filter-pill:hover { color:var(--text); border-color:var(--accent); }
+  .filter-pill.active { background:rgba(108,140,255,.14); border-color:var(--accent); color:var(--accent); }
+  .filter-spacer { flex:1; }
+  .inv-search { background:var(--surface2,rgba(255,255,255,.05)); border:1px solid var(--border); border-radius:8px; color:var(--text); padding:7px 12px; font-size:.8rem; font-family:inherit; outline:none; width:200px; max-width:100%; }
+  .inv-search:focus { border-color:var(--accent); }
+
+  /* ── Items table ── */
+  .table-scroll { overflow-x:auto; }
+  table.inv { width:100%; border-collapse:collapse; font-size:.84rem; }
+  table.inv th { text-align:left; font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:var(--text2); padding:8px 10px; border-bottom:1px solid var(--border); white-space:nowrap; }
+  table.inv td { padding:11px 10px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  table.inv tbody tr { cursor:pointer; transition:background .12s; }
+  table.inv tbody tr:hover { background:rgba(255,255,255,.03); }
+  .num { text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .inv-name { font-weight:700; }
+  .inv-notes { font-size:.7rem; color:var(--text2); margin-top:2px; max-width:340px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .cat-chip { font-size:.64rem; font-weight:700; padding:3px 9px; border-radius:99px; white-space:nowrap; }
+  .chip-singles { background:rgba(108,140,255,.14); color:var(--accent); }
+  .chip-slabs   { background:rgba(251,191,36,.14); color:var(--yellow); }
+  .chip-sealed  { background:rgba(167,139,250,.16); color:var(--accent2,#a78bfa); }
+  .gain-pos { color:var(--green); font-weight:700; }
+  .gain-neg { color:var(--red); font-weight:700; }
+  .gain-flat { color:var(--text2); }
+  tfoot td { font-weight:800; border-top:2px solid var(--border); border-bottom:none; }
+
+  /* ── Empty state ── */
+  .empty-state { text-align:center; padding:70px 20px; display:none; }
+  .empty-icon { font-size:2.6rem; margin-bottom:12px; }
+  .empty-title { font-size:1.05rem; font-weight:800; margin-bottom:6px; }
+  .empty-sub { font-size:.82rem; color:var(--text2); line-height:1.6; max-width:420px; margin:0 auto 18px; }
+
+  /* ── Modal ── */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; z-index:400; padding:16px; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:#141720; border:1px solid var(--border); border-radius:16px; padding:24px; width:440px; max-width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 24px 80px rgba(0,0,0,.5); }
+  .modal h2 { font-size:1.05rem; font-weight:800; margin:0 0 18px; }
+  .field { margin-bottom:15px; }
+  .field label { display:block; font-size:.72rem; color:var(--text2); font-weight:700; text-transform:uppercase; letter-spacing:.4px; margin-bottom:6px; }
+  .field input, .field textarea { width:100%; background:var(--surface2,rgba(255,255,255,.05)); border:1px solid var(--border); border-radius:8px; color:var(--text); padding:10px 12px; font-size:.88rem; outline:none; font-family:inherit; box-sizing:border-box; }
+  .field input:focus, .field textarea:focus { border-color:var(--accent); }
+  .field textarea { resize:vertical; min-height:60px; }
+  .field-2col { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .cat-pills { display:flex; gap:8px; }
+  .cat-pill { flex:1; background:var(--surface2,rgba(255,255,255,.05)); border:1px solid var(--border); border-radius:8px; padding:10px 6px; color:var(--text2); font-size:.8rem; font-weight:700; cursor:pointer; font-family:inherit; text-align:center; transition:all .15s; }
+  .cat-pill:hover { border-color:var(--accent); color:var(--text); }
+  .cat-pill.selected { background:rgba(108,140,255,.16); border-color:var(--accent); color:var(--text); }
+  .modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:20px; flex-wrap:wrap; }
+
+  .fab { display:none; }
+
+  @media(max-width:820px) {
+    .cat-grid { grid-template-columns:1fr; }
+    .stat-bar { grid-template-columns:repeat(2,1fr); }
+    header { padding:0 14px; }
+    main { padding:16px 12px 90px; }
+    .header-right .btn-primary { display:none; }
+    .fab { display:flex; position:fixed; bottom:calc(24px + env(safe-area-inset-bottom)); right:24px; z-index:300; width:54px; height:54px; border-radius:50%; background:var(--accent); color:#fff; border:none; align-items:center; justify-content:center; font-size:1.5rem; box-shadow:0 4px 20px rgba(108,140,255,.5); cursor:pointer; }
+  }
+  @media(max-width:480px) {
+    .modal { position:fixed; bottom:0; left:0; right:0; width:100%; border-radius:16px 16px 0 0; max-height:85vh; }
+    .modal-actions { flex-direction:column-reverse; align-items:stretch; }
+    .modal-actions button { width:100%; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">Card <span>Inventory</span></div>
+  <div class="header-right">
+    <a href="index.html" class="back-link">⌂ Home</a>
+    <button class="btn-primary" onclick="openItemModal()">+ Add Item</button>
+  </div>
+</header>
+
+<nav class="dash-nav"></nav>
+
+<div class="stat-bar">
+  <div class="stat-cell">
+    <div class="stat-val" style="color:var(--green)" id="st-value">$0.00</div>
+    <div class="stat-lbl">Market Value</div>
+    <div class="stat-sub" id="st-units">0 items</div>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-val" id="st-cost">$0.00</div>
+    <div class="stat-lbl">Cost Basis</div>
+    <div class="stat-sub">what you paid</div>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-val" id="st-gain">$0.00</div>
+    <div class="stat-lbl">Unrealized Gain</div>
+    <div class="stat-sub" id="st-gain-pct">—</div>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-val" style="color:var(--accent)" id="st-top">—</div>
+    <div class="stat-lbl">Biggest Bucket</div>
+    <div class="stat-sub" id="st-top-sub">by market value</div>
+  </div>
+</div>
+
+<main>
+  <div class="cat-grid" id="cat-grid"></div>
+
+  <div class="filter-row">
+    <button class="filter-pill active" data-cat="all" onclick="setFilter('all')">All</button>
+    <button class="filter-pill" data-cat="singles" onclick="setFilter('singles')">🃏 Singles</button>
+    <button class="filter-pill" data-cat="slabs" onclick="setFilter('slabs')">🏆 Slabs</button>
+    <button class="filter-pill" data-cat="sealed" onclick="setFilter('sealed')">📦 Sealed</button>
+    <div class="filter-spacer"></div>
+    <input type="search" class="inv-search" id="inv-search" placeholder="Search items…" oninput="renderTable()">
+  </div>
+
+  <div class="table-scroll" id="table-wrap"></div>
+
+  <div class="empty-state" id="empty-state">
+    <div class="empty-icon">🃏</div>
+    <div class="empty-title" id="empty-title">No inventory yet</div>
+    <div class="empty-sub" id="empty-sub">Add your singles, slabs, and sealed product to see what your collection-for-sale is worth at a glance.</div>
+    <button class="btn-primary" onclick="openItemModal()">+ Add First Item</button>
+  </div>
+</main>
+
+<!-- ── ITEM MODAL ── -->
+<div class="modal-overlay" id="item-modal">
+  <div class="modal">
+    <h2 id="im-title">Add Inventory Item</h2>
+    <div class="field">
+      <label>Item Name</label>
+      <input type="text" id="im-name" maxlength="140" placeholder="e.g. Charizard ex 199/165 · PSA 10 Pikachu · Surging Sparks ETB">
+    </div>
+    <div class="field">
+      <label>Category</label>
+      <div class="cat-pills">
+        <button type="button" class="cat-pill" data-cat="singles" onclick="pickCat('singles')">🃏 Singles</button>
+        <button type="button" class="cat-pill" data-cat="slabs" onclick="pickCat('slabs')">🏆 Slabs</button>
+        <button type="button" class="cat-pill" data-cat="sealed" onclick="pickCat('sealed')">📦 Sealed</button>
+      </div>
+    </div>
+    <div class="field-2col">
+      <div class="field">
+        <label>Quantity</label>
+        <input type="number" id="im-qty" min="1" step="1" value="1">
+      </div>
+      <div class="field">
+        <label>Paid ($ each)</label>
+        <input type="number" id="im-cost" min="0" step="0.01" placeholder="0.00">
+      </div>
+    </div>
+    <div class="field">
+      <label>Market Value ($ each)</label>
+      <input type="number" id="im-value" min="0" step="0.01" placeholder="0.00">
+    </div>
+    <div class="field">
+      <label>Notes (optional)</label>
+      <textarea id="im-notes" maxlength="500" placeholder="Set, condition, where it's stored, comps…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-danger" id="im-delete-btn" onclick="deleteItem()" style="display:none">Delete</button>
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveItem()">Save</button>
+    </div>
+  </div>
+</div>
+
+<button class="fab" onclick="openItemModal()" title="Add Item">＋</button>
+
+<script>
+// ── STORAGE ── (canonical name lives in VPCUtil.KEYS — do not hardcode)
+const INV_KEY = VPCUtil.KEYS.cardInventory;
+const uid = () => Math.random().toString(36).slice(2, 10);
+const getInv = () => { try { const v = JSON.parse(localStorage.getItem(INV_KEY) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
+const setInv = v => localStorage.setItem(INV_KEY, JSON.stringify(v));
+
+const { esc, escAttr, fmtMoney, money, sumMoney, todayStr } = VPCUtil;
+
+// The three buckets are fixed on purpose — Singles / Slabs / Sealed is how
+// card inventory is actually carried to (and priced at) shows.
+const CATS = {
+  singles: { icon: '🃏', label: 'Singles', color: 'var(--accent)',  fill: 'linear-gradient(90deg,#6c8cff,#8ba4ff)' },
+  slabs:   { icon: '🏆', label: 'Slabs',   color: 'var(--yellow)',  fill: 'linear-gradient(90deg,#fbbf24,#fcd34d)' },
+  sealed:  { icon: '📦', label: 'Sealed',  color: '#a78bfa',        fill: 'linear-gradient(90deg,#a78bfa,#c4b5fd)' },
+};
+const catOf = it => (CATS[it.cat] ? it.cat : 'singles'); // tolerate bad data
+
+// Per-item totals. qty defaults to 1 so a sparse record still counts.
+const itemQty   = it => Math.max(1, Math.round(+it.qty) || 1);
+const itemValue = it => money(itemQty(it) * (+it.value || 0));
+const itemCost  = it => money(itemQty(it) * (+it.cost  || 0));
+
+// ── STATE ──
+let filterCat = 'all';
+
+// ── RENDER ──
+function totals() {
+  const inv = getInv();
+  const t = { value: 0, cost: 0, count: inv.length, units: 0, byCat: {} };
+  Object.keys(CATS).forEach(c => { t.byCat[c] = { value: 0, cost: 0, count: 0 }; });
+  inv.forEach(it => {
+    const c = t.byCat[catOf(it)];
+    const v = itemValue(it), k = itemCost(it);
+    c.value = money(c.value + v); c.cost = money(c.cost + k); c.count++;
+    t.value = money(t.value + v); t.cost = money(t.cost + k); t.units += itemQty(it);
+  });
+  return t;
+}
+
+function renderStats() {
+  const t = totals();
+  document.getElementById('st-value').textContent = fmtMoney(t.value);
+  document.getElementById('st-units').textContent = `${t.count} item${t.count === 1 ? '' : 's'} · ${t.units} unit${t.units === 1 ? '' : 's'}`;
+  document.getElementById('st-cost').textContent = fmtMoney(t.cost);
+
+  const gain = money(t.value - t.cost);
+  const g = document.getElementById('st-gain');
+  g.textContent = `${gain >= 0 ? '+' : '−'}${fmtMoney(Math.abs(gain))}`;
+  g.style.color = gain > 0 ? 'var(--green)' : gain < 0 ? 'var(--red)' : 'var(--text2)';
+  document.getElementById('st-gain-pct').textContent =
+    t.cost > 0 ? `${gain >= 0 ? '+' : ''}${((gain / t.cost) * 100).toFixed(1)}% vs cost` : '—';
+
+  const top = Object.entries(t.byCat).sort((a, b) => b[1].value - a[1].value)[0];
+  const hasAny = top && top[1].value > 0;
+  document.getElementById('st-top').textContent = hasAny ? `${CATS[top[0]].icon} ${CATS[top[0]].label}` : '—';
+  document.getElementById('st-top-sub').textContent = hasAny ? `${fmtMoney(top[1].value)} of market value` : 'by market value';
+}
+
+function renderCatCards() {
+  const t = totals();
+  document.getElementById('cat-grid').innerHTML = Object.entries(CATS).map(([key, c]) => {
+    const b = t.byCat[key];
+    const share = t.value > 0 ? (b.value / t.value) * 100 : 0;
+    return `<div class="cat-card${filterCat === key ? ' active' : ''}" onclick="setFilter(filterCat === '${key}' ? 'all' : '${key}')">
+      <div class="cat-head"><span>${c.icon}</span> ${c.label}</div>
+      <div class="cat-value" style="color:${c.color}">${fmtMoney(b.value)}</div>
+      <div class="cat-sub">${b.count} item${b.count === 1 ? '' : 's'} · ${share.toFixed(0)}% of value${b.cost > 0 ? ` · paid ${fmtMoney(b.cost)}` : ''}</div>
+      <div class="cat-bar"><div class="cat-bar-fill" style="width:${share}%;background:${c.fill}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function setFilter(cat) {
+  filterCat = cat;
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.toggle('active', p.dataset.cat === cat));
+  renderCatCards();
+  renderTable();
+}
+
+function renderTable() {
+  const wrap = document.getElementById('table-wrap');
+  const empty = document.getElementById('empty-state');
+  const q = (document.getElementById('inv-search').value || '').trim().toLowerCase();
+  const all = getInv();
+
+  if (!all.length) {
+    wrap.innerHTML = '';
+    empty.style.display = 'block';
+    document.getElementById('empty-title').textContent = 'No inventory yet';
+    document.getElementById('empty-sub').textContent = 'Add your singles, slabs, and sealed product to see what your collection-for-sale is worth at a glance.';
+    return;
+  }
+
+  let items = all.filter(it => (filterCat === 'all' || catOf(it) === filterCat));
+  if (q) items = items.filter(it => `${it.name || ''} ${it.notes || ''}`.toLowerCase().includes(q));
+  items.sort((a, b) => itemValue(b) - itemValue(a));
+
+  if (!items.length) {
+    wrap.innerHTML = '';
+    empty.style.display = 'block';
+    document.getElementById('empty-title').textContent = 'Nothing matches';
+    document.getElementById('empty-sub').textContent = q ? 'No items match that search in this category.' : `No ${filterCat} tracked yet — add one with the + button.`;
+    return;
+  }
+  empty.style.display = 'none';
+
+  let h = `<table class="inv"><thead><tr>
+    <th>Item</th><th>Category</th>
+    <th class="num">Qty</th><th class="num">Paid (ea)</th><th class="num">Market (ea)</th>
+    <th class="num">Total Value</th><th class="num">Gain</th>
+  </tr></thead><tbody>`;
+  items.forEach(it => {
+    const c = CATS[catOf(it)];
+    const gain = money(itemValue(it) - itemCost(it));
+    const gCls = gain > 0 ? 'gain-pos' : gain < 0 ? 'gain-neg' : 'gain-flat';
+    h += `<tr onclick="openItemModal('${escAttr(it.id)}')">
+      <td><div class="inv-name">${esc(it.name || 'Unnamed item')}</div>${it.notes ? `<div class="inv-notes">${esc(it.notes)}</div>` : ''}</td>
+      <td><span class="cat-chip chip-${catOf(it)}">${c.icon} ${c.label}</span></td>
+      <td class="num">${itemQty(it)}</td>
+      <td class="num">${fmtMoney(it.cost)}</td>
+      <td class="num">${fmtMoney(it.value)}</td>
+      <td class="num" style="font-weight:800">${fmtMoney(itemValue(it))}</td>
+      <td class="num ${gCls}">${gain >= 0 ? '+' : '−'}${fmtMoney(Math.abs(gain))}</td>
+    </tr>`;
+  });
+  const vTot = sumMoney(items, itemValue);
+  const gTot = money(vTot - sumMoney(items, itemCost));
+  h += `</tbody><tfoot><tr>
+    <td colspan="5">${filterCat === 'all' ? 'Everything' : CATS[filterCat].label}${q ? ' (filtered)' : ''}</td>
+    <td class="num">${fmtMoney(vTot)}</td>
+    <td class="num ${gTot > 0 ? 'gain-pos' : gTot < 0 ? 'gain-neg' : 'gain-flat'}">${gTot >= 0 ? '+' : '−'}${fmtMoney(Math.abs(gTot))}</td>
+  </tr></tfoot></table>`;
+  wrap.innerHTML = h;
+}
+
+function renderAll() { renderStats(); renderCatCards(); renderTable(); }
+window.renderAll = renderAll; // cloud sync calls this after pulling new data
+
+// ── MODAL ──
+let editId = null, pickedCat = 'singles';
+
+function openItemModal(id) {
+  editId = id || null;
+  const it = id ? getInv().find(x => x.id === id) : null;
+  document.getElementById('im-title').textContent = it ? 'Edit Inventory Item' : 'Add Inventory Item';
+  document.getElementById('im-name').value  = it?.name  || '';
+  document.getElementById('im-qty').value   = it ? itemQty(it) : 1;
+  document.getElementById('im-cost').value  = it?.cost  ?? '';
+  document.getElementById('im-value').value = it?.value ?? '';
+  document.getElementById('im-notes').value = it?.notes || '';
+  document.getElementById('im-delete-btn').style.display = it ? '' : 'none';
+  // New items default to the bucket currently being viewed — one less tap.
+  pickCat(it ? catOf(it) : (filterCat !== 'all' ? filterCat : 'singles'));
+  document.getElementById('item-modal').classList.add('open');
+  setTimeout(() => document.getElementById('im-name').focus(), 80);
+}
+
+function pickCat(cat) {
+  pickedCat = cat;
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.toggle('selected', p.dataset.cat === cat));
+}
+
+function closeModal() { document.getElementById('item-modal').classList.remove('open'); }
+document.getElementById('item-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('item-modal')) closeModal();
+});
+
+function saveItem() {
+  const name = document.getElementById('im-name').value.trim();
+  if (!name) { alert('Item name is required.'); return; }
+  const qty   = Math.max(1, Math.round(parseFloat(document.getElementById('im-qty').value) || 1));
+  const cost  = Math.max(0, parseFloat(document.getElementById('im-cost').value)  || 0);
+  const value = Math.max(0, parseFloat(document.getElementById('im-value').value) || 0);
+  const item = {
+    id: editId || uid(),
+    name,
+    cat: pickedCat,
+    qty,
+    cost:  money(cost),
+    value: money(value),
+    notes: document.getElementById('im-notes').value.trim(),
+    updated: todayStr(),
+  };
+  const arr = getInv();
+  const idx = arr.findIndex(x => x.id === item.id);
+  idx >= 0 ? arr[idx] = { ...arr[idx], ...item } : arr.push(item);
+  setInv(arr);
+  if (typeof auditLog === 'function') auditLog(editId ? 'EDIT_INVENTORY_ITEM' : 'ADD_INVENTORY_ITEM', INV_KEY, name);
+  closeModal();
+  renderAll();
+}
+
+function deleteItem() {
+  if (!editId) return;
+  if (!confirm('Delete this inventory item?')) return;
+  setInv(getInv().filter(x => x.id !== editId));
+  if (typeof auditLog === 'function') auditLog('DELETE_INVENTORY_ITEM', INV_KEY, 'Item deleted');
+  closeModal();
+  renderAll();
+}
+
+renderAll();
+</script>
+</body>
+</html>

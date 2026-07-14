@@ -10,6 +10,7 @@
 const DASH_NAV = [
   ['index.html', '⌂', 'Home'],
   ['vault-pine-collective.html', '📊', 'Sales Hub'],
+  ['inventory.html', '🃏', 'Inventory'],
   ['goals-dashboard.html', '🎯', 'Goals'],
   ['expenses.html', '💸', 'Expenses'],
   ['analytics.html', '📈', 'Analytics'],
@@ -139,6 +140,19 @@ function buildSearchIndex() {
       url: 'vault-pine-collective.html',
     })
   );
+  // Card inventory (Singles / Slabs / Sealed)
+  try {
+    const inv = JSON.parse(localStorage.getItem(K.cardInventory) || '[]');
+    inv.forEach((it) =>
+      results.push({
+        type: 'Inventory',
+        icon: '🃏',
+        title: it.name || 'Inventory item',
+        sub: `${it.cat || ''} · qty ${it.qty || 1} · $${(+it.value || 0).toFixed(2)} ea${it.notes ? ' · ' + it.notes : ''}`,
+        url: 'inventory.html',
+      })
+    );
+  } catch (e) {}
   // Goals
   try {
     const goals = JSON.parse(localStorage.getItem(K.goals) || '{"goals":[]}').goals || [];

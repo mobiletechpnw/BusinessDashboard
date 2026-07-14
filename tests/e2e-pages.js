@@ -32,6 +32,7 @@ const PAGES = [
   'content.html',
   'growth.html',
   'events.html',
+  'inventory.html',
   'vendor-calendar.html',
   'event-signup.html',
 ];
@@ -148,11 +149,32 @@ function seedData(monthOffsets) {
       { id: 'tf2', date: mk(-1, 12), qty: 4, total: 46, brand: 'TestBrand', notes: 'PLA' },
     ]),
     vpc_events_v1: JSON.stringify([
-      { id: 'e1', name: 'Test Con', date: mk(0, 20), venue: 'Hall A' },
+      { id: 'e1', name: 'Test Con', date: mk(0, 20), venue: 'Hall A', tablePrice: 60 },
     ]),
     vpc_vendors_v1: JSON.stringify([{ id: 'v1', name: 'Vendor One', contact: '' }]),
     vpc_tables_v1: JSON.stringify([
-      { id: 't1', eventId: 'e1', vendorId: 'v1', price: 100, paid: true },
+      { id: 't1', eventId: 'e1', vendorId: 'v1', price: 100, qty: 2, paid: true },
+    ]),
+    vpc_card_inventory_v1: JSON.stringify([
+      {
+        id: 'i1',
+        name: 'Charizard ex 199/165',
+        cat: 'singles',
+        qty: 2,
+        cost: 80,
+        value: 120,
+        notes: 'NM',
+      },
+      { id: 'i2', name: 'PSA 10 Pikachu', cat: 'slabs', qty: 1, cost: 150, value: 260, notes: '' },
+      {
+        id: 'i3',
+        name: 'Surging Sparks ETB',
+        cat: 'sealed',
+        qty: 3,
+        cost: 45,
+        value: 65,
+        notes: '',
+      },
     ]),
     vpc_growth_v1: JSON.stringify({
       handle: '@vaultpine',
@@ -304,6 +326,27 @@ async function runProfile(browser, { name, viewport, mobile, seeded }) {
     );
     if (!roiVisible) errs.push('ROI panel not visible after clicking its tab');
     for (const e of errs) failures.push(`[${name}] events: ${e}`);
+    await pg.close();
+  }
+
+  // Inventory: every category filter must re-render without errors, and the
+  // seeded profile must show all three seeded items under "All".
+  {
+    const pg = await ctx.newPage();
+    const errs = [];
+    pg.on('pageerror', (e) => errs.push(`pageerror: ${e.message}`));
+    await pg.goto(BASE + 'inventory.html', { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await pg.waitForTimeout(400);
+    for (const cat of ['singles', 'slabs', 'sealed', 'all']) {
+      await pg.click(`.filter-pill[data-cat="${cat}"]`);
+      await pg.waitForTimeout(150);
+    }
+    if (seeded === true) {
+      const rows = await pg.evaluate(() => document.querySelectorAll('table.inv tbody tr').length);
+      if (rows !== 3) errs.push(`expected 3 seeded inventory rows, saw ${rows}`);
+    }
+    await pg.screenshot({ path: path.join(dir, 'inventory-filters.png') });
+    for (const e of errs) failures.push(`[${name}] inventory: ${e}`);
     await pg.close();
   }
 
