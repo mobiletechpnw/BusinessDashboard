@@ -198,14 +198,9 @@
     <div class="snap-head">
       <div>
         <div class="snap-title">📸 Value Over Time</div>
-        <div class="snap-sub">Take a snapshot after every show — each one records what your Singles, Slabs, and Sealed are worth right then, so you can watch the total change show to show.</div>
+        <div class="snap-sub">Take a snapshot after every show — the line tracks your total inventory value show to show. Hover a point for the Singles / Slabs / Sealed breakdown.</div>
       </div>
       <button class="btn-primary" onclick="openSnapModal()">📸 Take Snapshot</button>
-    </div>
-    <div class="snap-legend" id="snap-legend" style="display:none">
-      <span class="snap-key"><span class="snap-swatch" style="background:#6c8cff"></span>🃏 Singles</span>
-      <span class="snap-key"><span class="snap-swatch" style="background:#fbbf24"></span>🏆 Slabs</span>
-      <span class="snap-key"><span class="snap-swatch" style="background:#a78bfa"></span>📦 Sealed</span>
     </div>
     <div id="snap-chart-box">
       <div id="snap-chart"></div>
@@ -605,20 +600,27 @@ let snapPts = []; // chart geometry cache for the hover layer
 function renderSnapChart(snaps) {
   const box   = document.getElementById('snap-chart');
   const empty = document.getElementById('snap-empty');
-  const legend = document.getElementById('snap-legend');
   document.getElementById('snap-tip').style.display = 'none';
   if (!snaps.length) {
-    box.innerHTML = ''; legend.style.display = 'none'; empty.style.display = 'block'; snapPts = [];
+    box.innerHTML = ''; empty.style.display = 'block'; snapPts = [];
     return;
   }
   empty.style.display = 'none';
-  legend.style.display = 'flex';
 
   const W = Math.max(320, document.getElementById('snap-chart-box').clientWidth || 700);
-  const H = 230, padL = 52, padR = 16, padT = 18, padB = 28;
+  const H = 230, padL = 52, padR = 16, padT = 26, padB = 28;
   const plotW = W - padL - padR, plotH = H - padT - padB;
-  const yMax = niceCeil(Math.max(...snaps.map(s => s.value || 0)) * 1.1);
-  const yPos = v => padT + plotH - (v / yMax) * plotH;
+
+  // One line: each snapshot's TOTAL value (never summed across dates).
+  // The y domain hugs the data when values cluster high, so growth between
+  // shows stays visible instead of flattening against a $0 baseline.
+  const vals = snaps.map(s => s.value || 0);
+  const vMax = Math.max(...vals), vMin = Math.min(...vals);
+  const yTop = niceCeil(vMax * 1.05) || 100;
+  const step = yTop / 10;
+  let yBot = vMin >= yTop * 0.5 ? Math.max(0, Math.floor((vMin * 0.95) / step) * step) : 0;
+  if (yBot >= yTop) yBot = 0;
+  const yPos = v => padT + plotH - ((v - yBot) / (yTop - yBot)) * plotH;
 
   const t0 = new Date(snaps[0].date).getTime();
   const t1 = new Date(snaps[snaps.length - 1].date).getTime();
@@ -631,44 +633,30 @@ function renderSnapChart(snaps) {
   let g = '';
   const steps = 4;
   for (let i = 0; i <= steps; i++) {
-    const v = (yMax / steps) * i, y = yPos(v);
+    const v = yBot + ((yTop - yBot) / steps) * i, y = yPos(v);
     g += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>`;
     g += `<text x="${padL - 8}" y="${y + 3}" text-anchor="end" font-size="10" fill="#8892b0">${fmtAxis$(v)}</text>`;
   }
 
+  const LINE = '#34d399'; // the page's market-value green
   let marks = '';
-  if (snaps.length === 1) {
-    // A single snapshot: one stacked column so the composition still reads.
-    const s = snaps[0], bw = 46, x = padL + plotW / 2 - bw / 2;
-    let cum = 0;
-    SNAP_CATS.forEach(c => {
-      const v = snapCatVal(s, c.key);
-      if (v <= 0) return;
-      const y1 = yPos(cum), y2 = yPos(cum + v);
-      marks += `<rect x="${x}" y="${y2}" width="${bw}" height="${Math.max(1, y1 - y2 - 2)}" rx="4" fill="${c.color}"/>`;
-      cum += v;
-    });
-    marks += `<text x="${padL + plotW / 2}" y="${yPos(s.value) - 8}" text-anchor="middle" font-size="11" font-weight="700" fill="#e2e8f0">${fmtMoney(s.value)}</text>`;
-  } else {
-    // Stacked areas: singles at the baseline, slabs, then sealed — the top
-    // edge of the stack is the total value the tracker is about.
-    const cums = snaps.map(s => { let c = 0; const row = { base: 0 }; SNAP_CATS.forEach(k => { c += snapCatVal(s, k.key); row[k.key] = c; }); return row; });
-    let below = snaps.map((s, i) => ({ x: snapPts[i].x, y: yPos(0) }));
-    SNAP_CATS.forEach(c => {
-      const above = snaps.map((s, i) => ({ x: snapPts[i].x, y: yPos(cums[i][c.key]) }));
-      const path = 'M' + above.map(p => `${p.x},${p.y}`).join(' L') +
-        ' L' + below.slice().reverse().map(p => `${p.x},${p.y}`).join(' L') + ' Z';
-      marks += `<path d="${path}" fill="${c.color}" fill-opacity="0.55" stroke="#0d0f16" stroke-width="2"/>`;
-      marks += `<path d="M${above.map(p => `${p.x},${p.y}`).join(' L')}" fill="none" stroke="${c.color}" stroke-width="2"/>`;
-      below = above;
-    });
-    // Total: dots on the top edge + a direct label on the last point.
-    snaps.forEach((s, i) => {
-      marks += `<circle cx="${snapPts[i].x}" cy="${yPos(s.value)}" r="3.5" fill="#e2e8f0" stroke="#0d0f16" stroke-width="1.5"/>`;
-    });
-    const last = snaps[snaps.length - 1];
-    marks += `<text x="${W - padR}" y="${Math.max(12, yPos(last.value) - 10)}" text-anchor="end" font-size="11" font-weight="700" fill="#e2e8f0">Total ${fmtMoney(last.value)}</text>`;
+  const pts = snaps.map((s, i) => ({ x: snapPts[i].x, y: yPos(s.value || 0) }));
+  if (snaps.length > 1) {
+    marks += `<path d="M${pts.map(p => `${p.x},${p.y}`).join(' L')} L${pts[pts.length - 1].x},${padT + plotH} L${pts[0].x},${padT + plotH} Z" fill="${LINE}" fill-opacity="0.09"/>`;
+    marks += `<path d="M${pts.map(p => `${p.x},${p.y}`).join(' L')}" fill="none" stroke="${LINE}" stroke-width="2" stroke-linejoin="round"/>`;
   }
+  snaps.forEach((s, i) => {
+    marks += `<circle cx="${pts[i].x}" cy="${pts[i].y}" r="4" fill="${LINE}" stroke="#0d0f16" stroke-width="1.5"/>`;
+    // Growth since the previous show, right on the chart.
+    if (i > 0 && snaps.length <= 12) {
+      const d = money((s.value || 0) - (snaps[i - 1].value || 0));
+      const col = d > 0 ? '#34d399' : d < 0 ? '#f87171' : '#8892b0';
+      const anchor = i === snaps.length - 1 ? 'end' : 'middle';
+      marks += `<text x="${anchor === 'end' ? pts[i].x + 4 : pts[i].x}" y="${Math.max(10, pts[i].y - 12)}" text-anchor="${anchor}" font-size="10" font-weight="700" fill="${col}">${d >= 0 ? '+' : '−'}${fmtAxis$(Math.abs(d))}</text>`;
+    }
+  });
+  const last = snaps[snaps.length - 1], lastP = pts[pts.length - 1];
+  marks += `<text x="${snaps.length === 1 ? lastP.x : W - padR}" y="${Math.max(12, lastP.y - (snaps.length > 1 ? 26 : 12))}" text-anchor="${snaps.length === 1 ? 'middle' : 'end'}" font-size="11" font-weight="700" fill="#e2e8f0">Total ${fmtMoney(last.value)}</text>`;
 
   // X labels: first + last (+ middle when there's room).
   let xl = '';
