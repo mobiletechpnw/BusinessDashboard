@@ -44,6 +44,7 @@ const SYNC_KEYS = [
   // ── Products: JetTags ───────────────────────────────────
   'vp_jettags_v1',
   'vp_jettags_restock_v1',
+  'vp_jt_chars_v1', // user-added characters (name, initial qty, cost)
   'vp_jt_inventory_v1', // per-character purchased counts (drives low-stock alerts)
 
   // ── Products: Pins ──────────────────────────────────────
