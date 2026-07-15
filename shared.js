@@ -148,7 +148,7 @@ function buildSearchIndex() {
         type: 'Inventory',
         icon: '🃏',
         title: it.name || 'Inventory item',
-        sub: `${it.cat || ''} · qty ${it.qty || 1} · $${(+it.value || 0).toFixed(2)} ea${it.notes ? ' · ' + it.notes : ''}`,
+        sub: `${it.cat || ''} · qty ${it.qty || 1} · $${(+it.value || 0).toFixed(2)} ${it.lot ? 'total' : 'ea'}${it.notes ? ' · ' + it.notes : ''}`,
         url: 'inventory.html',
       })
     );
