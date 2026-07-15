@@ -247,7 +247,7 @@
     <h2 id="im-title">Add Inventory Item</h2>
     <div class="field">
       <label>Item Name</label>
-      <input type="text" id="im-name" maxlength="140" placeholder="e.g. Charizard ex 199/165 · PSA 10 Pikachu · Surging Sparks ETB">
+      <input type="text" id="im-name" maxlength="140" placeholder="e.g. Charizard ex 199/165 · PSA 10 Pikachu · Bulk singles binder">
     </div>
     <div class="field">
       <label>Category</label>
@@ -257,18 +257,26 @@
         <button type="button" class="cat-pill" data-cat="sealed" onclick="pickCat('sealed')">📦 Sealed</button>
       </div>
     </div>
+    <div class="field">
+      <label>Pricing</label>
+      <div class="cat-pills">
+        <button type="button" class="cat-pill" data-mode="each" onclick="pickMode('each')">💲 Per item</button>
+        <button type="button" class="cat-pill" data-mode="lot" onclick="pickMode('lot')">Σ Combined total</button>
+      </div>
+      <div id="im-mode-hint" style="font-size:.7rem;color:var(--text2);margin-top:6px;line-height:1.5"></div>
+    </div>
     <div class="field-2col">
       <div class="field">
-        <label>Quantity</label>
+        <label id="im-qty-label">Quantity</label>
         <input type="number" id="im-qty" min="1" step="1" value="1">
       </div>
       <div class="field">
-        <label>Paid ($ each)</label>
+        <label id="im-cost-label">Paid ($ each)</label>
         <input type="number" id="im-cost" min="0" step="0.01" placeholder="0.00">
       </div>
     </div>
     <div class="field">
-      <label>Market Value ($ each)</label>
+      <label id="im-value-label">Market Value ($ each)</label>
       <input type="number" id="im-value" min="0" step="0.01" placeholder="0.00">
     </div>
     <div class="field">
@@ -304,9 +312,11 @@ const CATS = {
 const catOf = it => (CATS[it.cat] ? it.cat : 'singles'); // tolerate bad data
 
 // Per-item totals. qty defaults to 1 so a sparse record still counts.
+// Lot items (it.lot) store cost/value as COMBINED totals for the whole lot
+// — e.g. "bulk singles binder, $800" — so qty is just a card count there.
 const itemQty   = it => Math.max(1, Math.round(+it.qty) || 1);
-const itemValue = it => money(itemQty(it) * (+it.value || 0));
-const itemCost  = it => money(itemQty(it) * (+it.cost  || 0));
+const itemValue = it => it.lot ? money(+it.value || 0) : money(itemQty(it) * (+it.value || 0));
+const itemCost  = it => it.lot ? money(+it.cost  || 0) : money(itemQty(it) * (+it.cost  || 0));
 
 // ── STATE ──
 let filterCat = 'all';
@@ -401,12 +411,16 @@ function renderTable() {
     const c = CATS[catOf(it)];
     const gain = money(itemValue(it) - itemCost(it));
     const gCls = gain > 0 ? 'gain-pos' : gain < 0 ? 'gain-neg' : 'gain-flat';
+    const lotChip = it.lot ? ` <span class="cat-chip" style="background:rgba(52,211,153,.14);color:var(--green)" title="Combined total for the whole lot">Σ lot</span>` : '';
+    const eaCell = v => it.lot
+      ? `<td class="num" style="color:var(--text2)" title="Combined total for the whole lot">Σ ${fmtMoney(v)}</td>`
+      : `<td class="num">${fmtMoney(v)}</td>`;
     h += `<tr onclick="openItemModal('${escAttr(it.id)}')">
       <td><div class="inv-name">${esc(it.name || 'Unnamed item')}</div>${it.notes ? `<div class="inv-notes">${esc(it.notes)}</div>` : ''}</td>
-      <td><span class="cat-chip chip-${catOf(it)}">${c.icon} ${c.label}</span></td>
+      <td><span class="cat-chip chip-${catOf(it)}">${c.icon} ${c.label}</span>${lotChip}</td>
       <td class="num">${itemQty(it)}</td>
-      <td class="num">${fmtMoney(it.cost)}</td>
-      <td class="num">${fmtMoney(it.value)}</td>
+      ${eaCell(it.cost)}
+      ${eaCell(it.value)}
       <td class="num" style="font-weight:800">${fmtMoney(itemValue(it))}</td>
       <td class="num ${gCls}">${gain >= 0 ? '+' : '−'}${fmtMoney(Math.abs(gain))}</td>
     </tr>`;
@@ -425,7 +439,7 @@ function renderAll() { renderStats(); renderCatCards(); renderTable(); renderSna
 window.renderAll = renderAll; // cloud sync calls this after pulling new data
 
 // ── MODAL ──
-let editId = null, pickedCat = 'singles';
+let editId = null, pickedCat = 'singles', pickedMode = 'each';
 
 function openItemModal(id) {
   editId = id || null;
@@ -439,13 +453,28 @@ function openItemModal(id) {
   document.getElementById('im-delete-btn').style.display = it ? '' : 'none';
   // New items default to the bucket currently being viewed — one less tap.
   pickCat(it ? catOf(it) : (filterCat !== 'all' ? filterCat : 'singles'));
+  pickMode(it?.lot ? 'lot' : 'each');
   document.getElementById('item-modal').classList.add('open');
   setTimeout(() => document.getElementById('im-name').focus(), 80);
 }
 
 function pickCat(cat) {
   pickedCat = cat;
-  document.querySelectorAll('.cat-pill').forEach(p => p.classList.toggle('selected', p.dataset.cat === cat));
+  document.querySelectorAll('.cat-pill[data-cat]').forEach(p => p.classList.toggle('selected', p.dataset.cat === cat));
+}
+
+// "Per item" prices each unit (total = qty × price); "Combined total" treats
+// the whole entry as one lot — you type what the entire pile is worth.
+function pickMode(mode) {
+  pickedMode = mode;
+  document.querySelectorAll('.cat-pill[data-mode]').forEach(p => p.classList.toggle('selected', p.dataset.mode === mode));
+  const lot = mode === 'lot';
+  document.getElementById('im-qty-label').textContent   = lot ? 'Cards in Lot (approx OK)' : 'Quantity';
+  document.getElementById('im-cost-label').textContent  = lot ? 'Paid ($ total for the lot)' : 'Paid ($ each)';
+  document.getElementById('im-value-label').textContent = lot ? 'Market Value ($ total for the lot)' : 'Market Value ($ each)';
+  document.getElementById('im-mode-hint').textContent = lot
+    ? 'One combined number for the whole pile — e.g. "Bulk singles binder · 300 cards · worth $800 total". No need to price each card.'
+    : 'Each unit is priced individually; total = quantity × price.';
 }
 
 function closeModal() { document.getElementById('item-modal').classList.remove('open'); }
@@ -463,6 +492,7 @@ function saveItem() {
     id: editId || uid(),
     name,
     cat: pickedCat,
+    lot: pickedMode === 'lot', // always set, so edits can switch a lot back to per-item
     qty,
     cost:  money(cost),
     value: money(value),
