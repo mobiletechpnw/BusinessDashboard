@@ -54,6 +54,7 @@ const SYNC_KEYS = [
 
   // ── Card Inventory (Singles / Slabs / Sealed) ───────────
   'vpc_card_inventory_v1',
+  'vpc_inv_snapshots_v1', // dated value snapshots (taken after each show)
 
   // ── Content Planner ─────────────────────────────────────
   'vpc_content_v1',
