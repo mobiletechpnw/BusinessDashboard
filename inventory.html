@@ -198,9 +198,10 @@
     <div class="snap-head">
       <div>
         <div class="snap-title">📸 Value Over Time</div>
-        <div class="snap-sub">Take a snapshot after every show — the line tracks your total inventory value show to show. Hover a point for the Singles / Slabs / Sealed breakdown.</div>
+        <div class="snap-sub">Log your inventory value after every show — type the totals for that date (or let it prefill from your item list). Each date stands alone; the chart and table show the difference show to show.</div>
+        <div id="snap-current" style="font-size:.82rem;margin-top:8px;display:none"></div>
       </div>
-      <button class="btn-primary" onclick="openSnapModal()">📸 Take Snapshot</button>
+      <button class="btn-primary" onclick="openSnapModal()">📸 Log Value</button>
     </div>
     <div id="snap-chart-box">
       <div id="snap-chart"></div>
@@ -214,11 +215,11 @@
 <!-- ── SNAPSHOT MODAL ── -->
 <div class="modal-overlay" id="snap-modal">
   <div class="modal">
-    <h2>Take Value Snapshot</h2>
+    <h2>Log Inventory Value</h2>
     <div class="field-2col">
       <div class="field">
         <label>Date</label>
-        <input type="date" id="sn-date">
+        <input type="date" id="sn-date" onchange="snUpdateTotal()">
       </div>
       <div class="field">
         <label>Show / Label (optional)</label>
@@ -226,12 +227,31 @@
       </div>
     </div>
     <div class="field">
-      <label>Will Record</label>
-      <div id="sn-preview" style="background:var(--surface2,rgba(255,255,255,.05));border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:.8rem;line-height:1.8"></div>
+      <label>What It's Worth on This Date ($)</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <div>
+          <div style="font-size:.68rem;color:var(--text2);font-weight:700;margin-bottom:4px">🃏 Singles</div>
+          <input type="number" id="sn-singles" min="0" step="0.01" placeholder="0" oninput="snUpdateTotal()">
+        </div>
+        <div>
+          <div style="font-size:.68rem;color:var(--text2);font-weight:700;margin-bottom:4px">🏆 Slabs</div>
+          <input type="number" id="sn-slabs" min="0" step="0.01" placeholder="0" oninput="snUpdateTotal()">
+        </div>
+        <div>
+          <div style="font-size:.68rem;color:var(--text2);font-weight:700;margin-bottom:4px">📦 Sealed</div>
+          <input type="number" id="sn-sealed" min="0" step="0.01" placeholder="0" oninput="snUpdateTotal()">
+        </div>
+      </div>
+      <div style="font-size:.7rem;color:var(--text2);margin-top:6px;line-height:1.5">Prefilled from your item list — type over any number if you just know the totals. Only this date's buckets are added together; dates are never combined.</div>
     </div>
+    <div class="field">
+      <label>Cost Basis Total ($ · optional)</label>
+      <input type="number" id="sn-cost" min="0" step="0.01" placeholder="what you paid for it all">
+    </div>
+    <div id="sn-total" style="background:var(--surface2,rgba(255,255,255,.05));border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:.8rem;line-height:1.7"></div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeSnapModal()">Cancel</button>
-      <button class="btn-primary" onclick="saveSnapshot()">Save Snapshot</button>
+      <button class="btn-primary" onclick="saveSnapshot()">Save</button>
     </div>
   </div>
 </div>
@@ -547,10 +567,14 @@ function suggestSnapLabel() {
 function openSnapModal() {
   document.getElementById('sn-date').value = todayStr();
   document.getElementById('sn-label').value = suggestSnapLabel();
+  // Prefill from the item list, but every number is editable — you can log
+  // dated totals directly without itemizing anything.
   const s = snapNow();
-  document.getElementById('sn-preview').innerHTML =
-    SNAP_CATS.map(c => `${c.icon} ${c.label} <strong>${fmtMoney(snapCatVal(s, c.key))}</strong>`).join(' &nbsp;·&nbsp; ') +
-    `<br><strong style="color:var(--green)">Total market value ${fmtMoney(s.value)}</strong> <span style="color:var(--text2)">· cost basis ${fmtMoney(s.cost)} · ${s.units} unit${s.units === 1 ? '' : 's'}</span>`;
+  document.getElementById('sn-singles').value = s.singles.value || '';
+  document.getElementById('sn-slabs').value   = s.slabs.value || '';
+  document.getElementById('sn-sealed').value  = s.sealed.value || '';
+  document.getElementById('sn-cost').value    = s.cost || '';
+  snUpdateTotal();
   document.getElementById('snap-modal').classList.add('open');
   setTimeout(() => document.getElementById('sn-label').focus(), 80);
 }
@@ -559,14 +583,44 @@ document.getElementById('snap-modal').addEventListener('click', e => {
   if (e.target === document.getElementById('snap-modal')) closeSnapModal();
 });
 
+const snInput = id => money(Math.max(0, parseFloat(document.getElementById(id).value) || 0));
+
+// Live preview: this date's total and the DIFFERENCE vs the previous
+// snapshot — dates are never summed together.
+function snUpdateTotal() {
+  const total = money(snInput('sn-singles') + snInput('sn-slabs') + snInput('sn-sealed'));
+  const date = document.getElementById('sn-date').value || todayStr();
+  const prev = getSnaps().filter(s => s.date < date).sort((a, b) => b.date.localeCompare(a.date))[0];
+  let diffTxt = '';
+  if (prev) {
+    const d = money(total - (prev.value || 0));
+    const col = d > 0 ? 'var(--green)' : d < 0 ? 'var(--red)' : 'var(--text2)';
+    diffTxt = ` &nbsp;·&nbsp; <span style="color:${col};font-weight:700">${d >= 0 ? '+' : '−'}${fmtMoney(Math.abs(d))}</span> <span style="color:var(--text2)">vs ${fmtDate(prev.date)}${prev.label ? ' (' + esc(prev.label) + ')' : ''}</span>`;
+  }
+  document.getElementById('sn-total').innerHTML =
+    `Total for this date: <strong style="color:var(--green)">${fmtMoney(total)}</strong>${diffTxt}`;
+}
+
 function saveSnapshot() {
   const date = document.getElementById('sn-date').value;
   const label = document.getElementById('sn-label').value.trim();
   if (!date) { alert('Pick a date.'); return; }
+  const vals = { singles: snInput('sn-singles'), slabs: snInput('sn-slabs'), sealed: snInput('sn-sealed') };
+  const total = money(vals.singles + vals.slabs + vals.sealed);
+  const cost = snInput('sn-cost');
   const arr = getSnaps();
   const dup = arr.findIndex(s => s.date === date);
-  if (dup >= 0 && !confirm(`A snapshot for ${fmtDate(date)} already exists — replace it with today's numbers?`)) return;
-  const rec = { id: dup >= 0 ? arr[dup].id : uid(), date, label, ...snapNow(), taken: new Date().toISOString() };
+  if (dup >= 0 && !confirm(`A snapshot for ${fmtDate(date)} already exists — replace it with these numbers?`)) return;
+  // Bucket cost basis: split the (optional) total cost by value share.
+  const share = k => total > 0 ? money(cost * (vals[k] / total)) : 0;
+  const rec = {
+    id: dup >= 0 ? arr[dup].id : uid(), date, label,
+    singles: { value: vals.singles, cost: share('singles') },
+    slabs:   { value: vals.slabs,   cost: share('slabs') },
+    sealed:  { value: vals.sealed,  cost: share('sealed') },
+    value: total, cost, units: snapNow().units,
+    taken: new Date().toISOString(),
+  };
   if (dup >= 0) arr[dup] = rec; else arr.push(rec);
   setSnaps(arr);
   if (typeof auditLog === 'function') auditLog('ADD_INVENTORY_SNAPSHOT', SNAP_KEY, label || date);
@@ -582,8 +636,24 @@ function deleteSnapshot(id) {
 
 function renderSnapshots() {
   const snaps = getSnaps().slice().sort((a, b) => a.date.localeCompare(b.date));
+  renderSnapCurrent(snaps);
   renderSnapChart(snaps);
   renderSnapTable(snaps);
+}
+
+// Headline: the latest date's value and the difference vs the show before —
+// never a sum across dates.
+function renderSnapCurrent(snaps) {
+  const el = document.getElementById('snap-current');
+  if (!snaps.length) { el.style.display = 'none'; return; }
+  const last = snaps[snaps.length - 1], prev = snaps[snaps.length - 2];
+  let h = `Latest: <strong style="color:var(--green)">${fmtMoney(last.value || 0)}</strong> <span style="color:var(--text2)">(${fmtDate(last.date)}${last.label ? ' · ' + esc(last.label) : ''})</span>`;
+  if (prev) {
+    const d = money((last.value || 0) - (prev.value || 0));
+    const col = d > 0 ? 'var(--green)' : d < 0 ? 'var(--red)' : 'var(--text2)';
+    h += ` &nbsp;·&nbsp; <span style="color:${col};font-weight:700">${d >= 0 ? '+' : '−'}${fmtMoney(Math.abs(d))}</span> <span style="color:var(--text2)">since ${fmtDate(prev.date)}</span>`;
+  }
+  el.innerHTML = h; el.style.display = 'block';
 }
 
 // Round a max value up to a "nice" axis ceiling (1/2/2.5/5 × 10^n).
