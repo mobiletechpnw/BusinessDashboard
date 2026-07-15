@@ -996,7 +996,7 @@
     <div class="jtat"><div class="jtat-num" style="color:var(--accent)" id="jtProfit">$0.00</div><div class="jtat-label">Gross Profit</div></div>
     <div class="jtat"><div class="jtat-num" style="color:var(--yellow)" id="jtMargin">—</div><div class="jtat-label">Gross Margin</div></div>
     <div class="jtat"><div class="jtat-num" style="color:var(--text2)" id="jtCogs">$0.00</div><div class="jtat-label">COGS</div></div>
-    <div class="jtat"><div class="jtat-num" style="color:var(--text2)" id="jtInvCost">$0.00</div><div class="jtat-label">Inventory Cost</div></div>
+    <div class="jtat"><div class="jtat-num" style="color:var(--text2)" id="jtInvCost">$0.00</div><div class="jtat-label" id="jtInvCostLabel">Inventory Cost</div></div>
     <div class="jtat"><div class="jtat-num" style="color:var(--accent2)" id="jtSold">0</div><div class="jtat-label">Tags Sold</div></div>
     <div class="jtat"><div class="jtat-num" id="jtRemaining">0</div><div class="jtat-label">In Stock</div></div>
   </div>
@@ -1008,6 +1008,7 @@
         <div style="font-size:0.78rem;color:var(--text2);margin-top:3px" id="jtSubtitle">150 tags purchased · $112 total cost ($0.75/ea) · Sell price $5.00/ea</div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-ghost" onclick="openJtCharModal()">+ New Character</button>
         <button class="btn-ghost" onclick="openJtRestockModal()">+ Restock</button>
         <button class="btn-primary" style="background:#8b5cf6" onclick="openJtSaleModal()">+ Log Sale</button>
       </div>
@@ -1033,6 +1034,31 @@
           <span style="font-size:0.72rem;color:var(--text2)" id="jtInventoryDate"></span>
         </div>
         <div id="jtInventoryGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:4px"></div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:20px">
+      <!-- Order & restock history: every batch bought, what it cost, reorder vs new -->
+      <div class="card" style="grid-column:1/-1">
+        <div class="card-title">📦 Order &amp; Restock History</div>
+        <div style="font-size:0.74rem;color:var(--text2);margin-bottom:10px">Every batch you've bought — original stock, reorders, and new characters — with what each one cost you.</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Character</th>
+                <th class="num">Qty</th>
+                <th class="num">Cost</th>
+                <th class="num">Cost/Tag</th>
+                <th>Notes</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="jtOrdersTbody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -1102,10 +1128,35 @@
       <label>Character(s) — select one or more (qty splits evenly)</label>
       <div id="jtRestockCharSelect" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px"></div>
     </div>
+    <div class="field">
+      <label>Total Cost of This Order ($) — what you paid</label>
+      <input type="number" id="jtRestockCost" step="0.01" min="0" placeholder="e.g. 15.00 (optional)">
+    </div>
     <div class="field"><label>Notes (optional)</label><input type="text" id="jtRestockNotes" placeholder="e.g. New batch, reorder"></div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeJtRestockModal()">Cancel</button>
       <button class="btn-primary" style="background:#8b5cf6" onclick="saveJtRestock()">Save Restock</button>
+    </div>
+  </div>
+</div>
+
+<!-- Jet Tag New Character Modal -->
+<div class="modal-overlay" id="jtCharModal">
+  <div class="modal" style="width:520px">
+    <h2>Add New Character</h2>
+    <div class="field"><label>Character Name</label><input type="text" id="jtCharName" maxlength="60" placeholder="e.g. Snorlax"></div>
+    <div class="field-row">
+      <div class="field"><label>Date Purchased</label><input type="date" id="jtCharDate"></div>
+      <div class="field"><label>Qty Purchased</label><input type="number" id="jtCharQty" value="10" min="1"></div>
+    </div>
+    <div class="field">
+      <label>Total Cost of This Order ($) — what you paid</label>
+      <input type="number" id="jtCharCost" step="0.01" min="0" placeholder="e.g. 8.50 (optional)">
+    </div>
+    <div class="field"><label>Notes (optional)</label><input type="text" id="jtCharNotes" placeholder="e.g. First batch of this character"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeJtCharModal()">Cancel</button>
+      <button class="btn-primary" style="background:#8b5cf6" onclick="saveJtCharacter()">Add Character</button>
     </div>
   </div>
 </div>
@@ -3614,7 +3665,10 @@ function exportOrdersCSV() {
 // ══════════════════════════════════════════════════════════════
 const JT_KEY         = VPCUtil.KEYS.jetTags;
 const JT_RESTOCK_KEY = 'vp_jettags_restock_v1';
+const JT_CHARS_KEY   = VPCUtil.KEYS.jetTagChars;
 
+// The original 150-tag order. New characters added later live in
+// JT_CHARS_KEY (localStorage) so they survive reloads and sync.
 const JT_INVENTORY = [
   { id:'charizard',   name:'Charizard',   purchased:10 },
   { id:'leafeon',     name:'Leafeon',     purchased:10 },
@@ -3633,34 +3687,39 @@ const JT_INVENTORY = [
 
 const JT_TOTAL_PURCHASED = JT_INVENTORY.reduce((s,c) => s + c.purchased, 0); // 150
 const JT_TOTAL_COST      = 112;
-const JT_COST_PER_TAG    = JT_TOTAL_COST / JT_TOTAL_PURCHASED; // ~$0.862
+const JT_COST_PER_TAG    = JT_TOTAL_COST / JT_TOTAL_PURCHASED; // ~$0.75, original order
 const JT_SELL_PRICE      = 5.00;
 
 function getJtSales()       { return JSON.parse(localStorage.getItem(JT_KEY) || '[]'); }
 function saveJtSales(arr)   { localStorage.setItem(JT_KEY, JSON.stringify(arr)); }
 function getJtRestocks()    { return JSON.parse(localStorage.getItem(JT_RESTOCK_KEY) || '[]'); }
 function saveJtRestocks(arr){ localStorage.setItem(JT_RESTOCK_KEY, JSON.stringify(arr)); }
+function getJtCustomChars()     { return JSON.parse(localStorage.getItem(JT_CHARS_KEY) || '[]'); }
+function saveJtCustomChars(arr) { localStorage.setItem(JT_CHARS_KEY, JSON.stringify(arr)); }
+
+// Built-in roster + user-added characters, as one list.
+function jtAllChars() { return JT_INVENTORY.concat(getJtCustomChars()); }
 
 function jtRestockedByChar() {
   const map = {};
-  JT_INVENTORY.forEach(c => { map[c.id] = 0; });
+  jtAllChars().forEach(c => { map[c.id] = 0; });
   getJtRestocks().forEach(r => { map[r.charId] = (map[r.charId] || 0) + r.qty; });
   return map;
 }
 
 function jtEffectivePurchased(charId) {
-  const base = (JT_INVENTORY.find(c => c.id === charId) || {}).purchased || 0;
+  const base = (jtAllChars().find(c => c.id === charId) || {}).purchased || 0;
   return base + (jtRestockedByChar()[charId] || 0);
 }
 
 function jtTotalEffective() {
   const rm = jtRestockedByChar();
-  return JT_INVENTORY.reduce((s, c) => s + c.purchased + (rm[c.id] || 0), 0);
+  return jtAllChars().reduce((s, c) => s + (c.purchased || 0) + (rm[c.id] || 0), 0);
 }
 
 function jtSoldByChar() {
   const map = {};
-  JT_INVENTORY.forEach(c => map[c.id] = 0);
+  jtAllChars().forEach(c => map[c.id] = 0);
   getJtSales().forEach(sale => {
     (sale.chars || []).forEach(cid => {
       map[cid] = (map[cid] || 0) + (sale.charQty?.[cid] || 0);
@@ -3669,18 +3728,37 @@ function jtSoldByChar() {
   return map;
 }
 
+// What a batch cost. Batches logged before cost tracking existed fall back
+// to the original order's per-tag price.
+function jtBatchCost(qty, cost) {
+  return (typeof cost === 'number' && !isNaN(cost)) ? cost : (qty || 0) * JT_COST_PER_TAG;
+}
+
+function jtTotalCost() {
+  let cost = JT_TOTAL_COST;
+  getJtCustomChars().forEach(c => { cost += jtBatchCost(c.purchased, c.cost); });
+  getJtRestocks().forEach(r => { cost += jtBatchCost(r.qty, r.cost); });
+  return cost;
+}
+
+// Weighted average cost across every batch — the per-tag cost used for COGS.
+function jtAvgCost() {
+  const eff = jtTotalEffective();
+  return eff > 0 ? jtTotalCost() / eff : JT_COST_PER_TAG;
+}
+
 function jtTotals() {
   const sales = getJtSales();
   let revenue = 0, qty = 0;
   sales.forEach(s => { revenue += s.revenue || 0; qty += s.qty || 0; });
   const totalEffective = jtTotalEffective();
-  const totalRestocked = totalEffective - JT_TOTAL_PURCHASED;
-  const totalCost  = JT_TOTAL_COST + totalRestocked * JT_COST_PER_TAG;
-  const cogs   = qty * JT_COST_PER_TAG;
+  const totalCost = jtTotalCost();
+  const avgCost   = totalEffective > 0 ? totalCost / totalEffective : JT_COST_PER_TAG;
+  const cogs   = qty * avgCost;
   const profit = revenue - cogs;
   const remaining = totalEffective - qty;
   const margin = revenue > 0 ? (profit / revenue * 100) : 0;
-  return { revenue, cogs, profit, margin, qty, remaining, totalEffective, totalCost };
+  return { revenue, cogs, profit, margin, qty, remaining, totalEffective, totalCost, avgCost };
 }
 
 function renderJtStatBar() {
@@ -3693,31 +3771,38 @@ function renderJtStatBar() {
   marginEl.style.color  = t.margin >= 60 ? 'var(--green)' : t.margin >= 40 ? 'var(--yellow)' : 'var(--red)';
   document.getElementById('jtCogs').textContent      = fmt$(t.cogs);
   document.getElementById('jtInvCost').textContent   = fmt$(t.totalCost);
+  const invLabel = document.getElementById('jtInvCostLabel');
+  if (invLabel) invLabel.textContent = `Inventory Cost · ${fmt$(t.avgCost)}/tag`;
   document.getElementById('jtSold').textContent      = t.qty;
   document.getElementById('jtRemaining').textContent = t.remaining;
   document.getElementById('jtInventoryDate').textContent = 'As of ' + new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   const sub = document.getElementById('jtSubtitle');
-  if (sub) sub.textContent = `${t.totalEffective} tags purchased · ${fmt$(t.totalCost)} inventory cost · $${JT_SELL_PRICE.toFixed(2)}/ea sell price`;
+  if (sub) sub.textContent = `${t.totalEffective} tags purchased · ${fmt$(t.totalCost)} inventory cost · avg ${fmt$(t.avgCost)}/tag · $${JT_SELL_PRICE.toFixed(2)}/ea sell price`;
 }
 
 function renderJtInventoryGrid() {
   const soldMap    = jtSoldByChar();
   const restockMap = jtRestockedByChar();
   const grid       = document.getElementById('jtInventoryGrid');
-  grid.innerHTML = JT_INVENTORY.map(c => {
-    const effective = c.purchased + (restockMap[c.id] || 0);
+  grid.innerHTML = jtAllChars().map(c => {
+    const base      = c.purchased || 0;
+    const restocked = restockMap[c.id] || 0;
+    const effective = base + restocked;
     const sold      = soldMap[c.id] || 0;
     const left      = effective - sold;
     const pct       = effective ? (left / effective) * 100 : 0;
     const barCls    = left === 0 ? 'sold-out' : left <= 2 ? 'low' : '';
     const numCol    = left === 0 ? 'color:var(--red)' : left <= 2 ? 'color:var(--yellow)' : 'color:var(--green)';
+    const breakdown = restocked > 0
+      ? `<div style="font-size:0.68rem;color:#a78bfa">↺ ${base} original + ${restocked} reordered</div>`
+      : '';
     return `<div class="jt-card">
       <div class="jt-name">${esc(c.name)}</div>
       <div class="jt-bar-bg"><div class="jt-bar-fill ${barCls}" style="width:${pct}%"></div></div>
       <div class="jt-nums">
         <span style="${numCol};font-weight:700">${left} left</span>
         <span>${sold}/${effective} sold</span>
-      </div>
+      </div>${breakdown}
     </div>`;
   }).join('');
 }
@@ -3729,11 +3814,13 @@ function renderJtSalesLog() {
     tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text2)">No sales logged yet — click <strong>+ Log Sale</strong> to start tracking.</td></tr>`;
     return;
   }
+  const avgCost = jtAvgCost();
+  const allChars = jtAllChars();
   tbody.innerHTML = sales.map(s => {
-    const cogs   = (s.qty || 0) * JT_COST_PER_TAG;
+    const cogs   = (s.qty || 0) * avgCost;
     const profit = (s.revenue || 0) - cogs;
     const chars  = (s.chars || []).map(cid => {
-      const c = JT_INVENTORY.find(x => x.id === cid);
+      const c = allChars.find(x => x.id === cid);
       return c ? c.name : cid;
     }).join(', ');
     return `<tr>
@@ -3752,8 +3839,8 @@ function renderJtSalesLog() {
 function renderJtTopSellers() {
   const soldMap    = jtSoldByChar();
   const restockMap = jtRestockedByChar();
-  const sorted = JT_INVENTORY
-    .map(c => ({ ...c, effective: c.purchased + (restockMap[c.id] || 0), sold: soldMap[c.id] || 0 }))
+  const sorted = jtAllChars()
+    .map(c => ({ ...c, effective: (c.purchased || 0) + (restockMap[c.id] || 0), sold: soldMap[c.id] || 0 }))
     .sort((a, b) => b.sold - a.sold);
   const withSales = sorted.filter(c => c.sold > 0);
   const el = document.getElementById('jtTopSellersChart');
@@ -3785,8 +3872,8 @@ function renderJtLowStock() {
   const soldMap    = jtSoldByChar();
   const restockMap = jtRestockedByChar();
   const LOW = 3;
-  const items = JT_INVENTORY
-    .map(c => { const eff = c.purchased + (restockMap[c.id]||0); return { ...c, eff, sold: soldMap[c.id]||0, left: eff - (soldMap[c.id]||0) }; })
+  const items = jtAllChars()
+    .map(c => { const eff = (c.purchased||0) + (restockMap[c.id]||0); return { ...c, eff, sold: soldMap[c.id]||0, left: eff - (soldMap[c.id]||0) }; })
     .filter(c => c.left <= LOW)
     .sort((a,b) => a.left - b.left);
   const titleEl = document.getElementById('jtLowStockTitle');
@@ -3819,12 +3906,90 @@ function renderJtLowStock() {
   }).join('');
 }
 
+function renderJtOrderHistory() {
+  const tbody = document.getElementById('jtOrdersTbody');
+  if (!tbody) return;
+  const nameById = {};
+  jtAllChars().forEach(c => { nameById[c.id] = c.name; });
+  const rows = [{
+    kind: 'original', date: '', name: `All ${JT_INVENTORY.length} original characters`,
+    qty: JT_TOTAL_PURCHASED, cost: JT_TOTAL_COST, notes: 'Starting inventory', id: null,
+  }];
+  getJtCustomChars().forEach(c => rows.push({
+    kind: 'new', date: c.date || '', name: c.name, qty: c.purchased || 0,
+    cost: (typeof c.cost === 'number' && !isNaN(c.cost)) ? c.cost : null,
+    notes: c.notes || '', id: c.id,
+  }));
+  getJtRestocks().forEach(r => rows.push({
+    kind: 'restock', date: r.date || '', name: nameById[r.charId] || r.charId, qty: r.qty || 0,
+    cost: (typeof r.cost === 'number' && !isNaN(r.cost)) ? r.cost : null,
+    notes: r.notes || '', id: r.id,
+  }));
+  rows.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const badge = (bg, color, txt) =>
+    `<span style="font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:99px;background:${bg};color:${color};white-space:nowrap">${txt}</span>`;
+  tbody.innerHTML = rows.map(r => {
+    const type = r.kind === 'original' ? badge('var(--surface2)', 'var(--text2)', '📦 Original')
+      : r.kind === 'new' ? badge('rgba(74,222,128,0.12)', 'var(--green)', '🆕 New character')
+      : badge('rgba(139,92,246,0.14)', '#a78bfa', '↺ Reorder');
+    const costTxt = r.cost != null ? fmt$(r.cost) : '—';
+    const unitTxt = (r.cost != null && r.qty > 0) ? fmt$(r.cost / r.qty) : '—';
+    const del = r.kind === 'restock'
+      ? `<button class="icon-btn" onclick="deleteJtRestock('${r.id}')" title="Delete restock entry">✕</button>`
+      : r.kind === 'new'
+        ? `<button class="icon-btn" onclick="deleteJtCharacter('${r.id}')" title="Delete character">✕</button>`
+        : '';
+    return `<tr>
+      <td>${r.date ? fmtDate(r.date) : '—'}</td>
+      <td>${type}</td>
+      <td>${esc(r.name)}</td>
+      <td class="num">${r.qty}</td>
+      <td class="num">${costTxt}</td>
+      <td class="num" style="color:var(--text2)">${unitTxt}</td>
+      <td style="color:var(--text2);font-size:0.78rem">${esc(r.notes)}</td>
+      <td>${del}</td>
+    </tr>`;
+  }).join('');
+}
+
+function deleteJtRestock(id) {
+  if (!confirm('Delete this restock entry? Its qty and cost are removed from inventory.')) return;
+  saveJtRestocks(getJtRestocks().filter(r => r.id !== id));
+  renderJtAll(); toast('Restock entry deleted.');
+}
+
+function deleteJtCharacter(id) {
+  const c = getJtCustomChars().find(x => x.id === id);
+  if (!c) return;
+  const sold = jtSoldByChar()[id] || 0;
+  const msg = sold > 0
+    ? `Delete ${c.name}? ${sold} sold tag(s) reference it — sales keep their revenue but lose the character name.`
+    : `Delete ${c.name} and its restock history?`;
+  if (!confirm(msg)) return;
+  saveJtCustomChars(getJtCustomChars().filter(x => x.id !== id));
+  saveJtRestocks(getJtRestocks().filter(r => r.charId !== id));
+  renderJtAll(); toast(`${c.name} removed.`);
+}
+
+// Publish per-character effective counts so the home dashboard's low-stock
+// alert (reads VPCUtil.KEYS.jetTagInventory) sees the same numbers as this page.
+function syncJtInventoryKey() {
+  try {
+    const restockMap = jtRestockedByChar();
+    localStorage.setItem(VPCUtil.KEYS.jetTagInventory, JSON.stringify(
+      jtAllChars().map(c => ({ id: c.id, name: c.name, purchased: (c.purchased || 0) + (restockMap[c.id] || 0) }))
+    ));
+  } catch (e) {}
+}
+
 function renderJtAll() {
   renderJtStatBar();
   renderJtInventoryGrid();
+  renderJtOrderHistory();
   renderJtSalesLog();
   renderJtTopSellers();
   renderJtLowStock();
+  syncJtInventoryKey();
 }
 
 // ── Sale Modal ──
@@ -3835,8 +4000,8 @@ function openJtSaleModal() {
   document.getElementById('jtNotes').value = '';
   const soldMap    = jtSoldByChar();
   const restockMap = jtRestockedByChar();
-  document.getElementById('jtCharSelect').innerHTML = JT_INVENTORY.map(c => {
-    const left = c.purchased + (restockMap[c.id]||0) - (soldMap[c.id]||0);
+  document.getElementById('jtCharSelect').innerHTML = jtAllChars().map(c => {
+    const left = (c.purchased||0) + (restockMap[c.id]||0) - (soldMap[c.id]||0);
     const disabled = left <= 0 ? 'style="opacity:0.4;pointer-events:none"' : '';
     return `<div class="jt-char-btn" data-charid="${c.id}" onclick="jtToggleChar(this)" ${disabled}>
       ${esc(c.name)}<br><span style="font-size:0.65rem;font-weight:400;color:var(--text2)">${left} left</span>
@@ -3853,7 +4018,7 @@ function jtToggleChar(el) { el.classList.toggle('selected'); jtUpdateRevPreview(
 function jtUpdateRevPreview() {
   const qty = parseInt(document.getElementById('jtQty').value) || 0;
   const price = parseFloat(document.getElementById('jtPrice').value) || 0;
-  const revenue = qty * price, cogs = qty * JT_COST_PER_TAG, profit = revenue - cogs;
+  const revenue = qty * price, cogs = qty * jtAvgCost(), profit = revenue - cogs;
   const preview = document.getElementById('jtRevPreview');
   if (qty > 0) {
     preview.style.display = 'block';
@@ -3876,10 +4041,10 @@ function saveJtSale() {
     const base = Math.floor(qty / chars.length), rem = qty - base * chars.length;
     chars.forEach((cid, i) => { charQty[cid] = base + (i === 0 ? rem : 0); });
   }
-  const soldMap = jtSoldByChar(), restockMap = jtRestockedByChar();
+  const soldMap = jtSoldByChar(), restockMap = jtRestockedByChar(), all = jtAllChars();
   for (const cid of chars) {
-    const eff = (JT_INVENTORY.find(c=>c.id===cid)?.purchased||0) + (restockMap[cid]||0);
-    if (charQty[cid] > eff - (soldMap[cid]||0)) { toast(`Not enough ${JT_INVENTORY.find(c=>c.id===cid)?.name} in stock!`); return; }
+    const eff = (all.find(c=>c.id===cid)?.purchased||0) + (restockMap[cid]||0);
+    if (charQty[cid] > eff - (soldMap[cid]||0)) { toast(`Not enough ${all.find(c=>c.id===cid)?.name} in stock!`); return; }
   }
   const arr = getJtSales();
   arr.push({ id:uid(), date, qty, revenue: qty * price, chars, charQty, notes });
@@ -3895,10 +4060,11 @@ function deleteJtSale(id) {
 function openJtRestockModal() {
   document.getElementById('jtRestockDate').value  = TODAY;
   document.getElementById('jtRestockQty').value   = 1;
+  document.getElementById('jtRestockCost').value  = '';
   document.getElementById('jtRestockNotes').value = '';
   const restockMap = jtRestockedByChar();
-  document.getElementById('jtRestockCharSelect').innerHTML = JT_INVENTORY.map(c => {
-    const current = c.purchased + (restockMap[c.id] || 0);
+  document.getElementById('jtRestockCharSelect').innerHTML = jtAllChars().map(c => {
+    const current = (c.purchased||0) + (restockMap[c.id] || 0);
     return `<div class="jt-char-btn" data-charid="${c.id}" onclick="this.classList.toggle('selected')">
       ${esc(c.name)}<br><span style="font-size:0.65rem;font-weight:400;color:var(--text2)">${current} in stock</span>
     </div>`;
@@ -3911,23 +4077,67 @@ function closeJtRestockModal() { document.getElementById('jtRestockModal').class
 function saveJtRestock() {
   const date  = document.getElementById('jtRestockDate').value;
   const qty   = parseInt(document.getElementById('jtRestockQty').value);
+  const costVal = parseFloat(document.getElementById('jtRestockCost').value);
+  const hasCost = !isNaN(costVal) && costVal >= 0;
   const notes = document.getElementById('jtRestockNotes').value.trim();
   if (!date || !qty || qty <= 0) { toast('Fill in Date and Qty.'); return; }
   const selected = [...document.querySelectorAll('#jtRestockCharSelect .jt-char-btn.selected')];
   if (!selected.length) { toast('Select at least one character.'); return; }
   const chars = selected.map(el => el.dataset.charid);
   const base = Math.floor(qty / chars.length), rem = qty - base * chars.length;
+  const unit = hasCost ? costVal / qty : null;
   const arr = getJtRestocks();
   chars.forEach((charId, i) => {
     const charQty = base + (i === 0 ? rem : 0);
-    if (charQty > 0) arr.push({ id:uid(), date, charId, qty: charQty, notes });
+    if (charQty > 0) {
+      const entry = { id:uid(), date, charId, qty: charQty, notes };
+      if (hasCost) entry.cost = +(charQty * unit).toFixed(2);
+      arr.push(entry);
+    }
   });
   saveJtRestocks(arr); closeJtRestockModal(); renderJtAll();
   toast(`Restocked ${qty} tag${qty>1?'s':''} across ${chars.length} character${chars.length>1?'s':''}!`);
 }
 
+// ── New Character Modal ──
+function openJtCharModal() {
+  document.getElementById('jtCharName').value  = '';
+  document.getElementById('jtCharDate').value  = TODAY;
+  document.getElementById('jtCharQty').value   = 10;
+  document.getElementById('jtCharCost').value  = '';
+  document.getElementById('jtCharNotes').value = '';
+  document.getElementById('jtCharModal').classList.add('open');
+}
+
+function closeJtCharModal() { document.getElementById('jtCharModal').classList.remove('open'); }
+
+function saveJtCharacter() {
+  const name    = document.getElementById('jtCharName').value.trim();
+  const date    = document.getElementById('jtCharDate').value;
+  const qty     = parseInt(document.getElementById('jtCharQty').value);
+  const costVal = parseFloat(document.getElementById('jtCharCost').value);
+  const notes   = document.getElementById('jtCharNotes').value.trim();
+  if (!name) { toast('Enter a character name.'); return; }
+  if (!date || !qty || qty <= 0) { toast('Fill in Date and Qty.'); return; }
+  const all = jtAllChars();
+  if (all.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+    toast(`${name} already exists — use + Restock to add stock.`); return;
+  }
+  let id = name.toLowerCase().replace(/[^a-z0-9]+/g, '') || 'char';
+  const taken = new Set(all.map(c => c.id));
+  for (let n = 2; taken.has(id); n++) id = id.replace(/\d+$/, '') + n;
+  const entry = { id, name, purchased: qty, date, notes, custom: true };
+  if (!isNaN(costVal) && costVal >= 0) entry.cost = costVal;
+  const arr = getJtCustomChars();
+  arr.push(entry);
+  saveJtCustomChars(arr);
+  closeJtCharModal(); renderJtAll();
+  toast(`${name} added with ${qty} tag${qty>1?'s':''} in stock!`);
+}
+
 document.getElementById('jtSaleModal').addEventListener('click', e => { if (e.target===e.currentTarget) closeJtModal(); });
 document.getElementById('jtRestockModal').addEventListener('click', e => { if (e.target===e.currentTarget) closeJtRestockModal(); });
+document.getElementById('jtCharModal').addEventListener('click', e => { if (e.target===e.currentTarget) closeJtCharModal(); });
 
 // Init jet tags on load
 renderJtAll();

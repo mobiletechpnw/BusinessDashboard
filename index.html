@@ -849,7 +849,7 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
     const jtInv = JSON.parse(localStorage.getItem(VPCUtil.KEYS.jetTagInventory)||'null');
     if (jtInv) {
       const soldMap = {};
-      jt.forEach(s => (s.chars||[]).forEach(c => { soldMap[c] = (soldMap[c]||0) + (s.qty||1); }));
+      jt.forEach(s => (s.chars||[]).forEach(c => { soldMap[c] = (soldMap[c]||0) + (s.charQty?.[c] ?? (s.qty||1)); }));
       const low = jtInv.filter(c => (c.purchased - (soldMap[c.id]||0)) <= 2 && (c.purchased - (soldMap[c.id]||0)) >= 0);
       if (low.length) alerts.push({ type:'warning', icon:'🏷', text:`${low.length} Jet Tag character${low.length>1?'s':''} low on stock (≤2 remaining)`, url:'vault-pine-collective.html', label:'View' });
     }

@@ -74,6 +74,7 @@
     jetTags: 'vp_jettags_v1',
     pins: 'vp_pins_v1',
     jetTagInventory: 'vp_jt_inventory_v1',
+    jetTagChars: 'vp_jt_chars_v1',
     pinInventory: 'vp_pin_inventory_v1',
     filament: 'riser_filament_v1',
     events: 'vpc_events_v1',
