@@ -107,6 +107,19 @@
   .cat-pill.selected { background:rgba(108,140,255,.16); border-color:var(--accent); color:var(--text); }
   .modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:20px; flex-wrap:wrap; }
 
+  /* ── Value snapshots (after every show) ── */
+  .snap-section { margin-top:26px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:var(--radius,12px); padding:18px 20px; }
+  .snap-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:4px; }
+  .snap-title { font-size:.95rem; font-weight:800; }
+  .snap-sub { font-size:.74rem; color:var(--text2); margin-top:3px; max-width:520px; line-height:1.5; }
+  .snap-legend { display:flex; gap:14px; flex-wrap:wrap; margin:10px 0 2px; }
+  .snap-key { display:flex; align-items:center; gap:6px; font-size:.72rem; color:var(--text2); font-weight:600; }
+  .snap-swatch { width:10px; height:10px; border-radius:3px; flex-shrink:0; }
+  #snap-chart-box { position:relative; margin-top:6px; }
+  #snap-chart svg { display:block; width:100%; height:auto; }
+  .snap-tip { position:absolute; pointer-events:none; background:#141720; border:1px solid var(--border); border-radius:8px; padding:8px 12px; font-size:.72rem; line-height:1.7; display:none; z-index:50; box-shadow:0 8px 30px rgba(0,0,0,.45); white-space:nowrap; }
+  .snap-empty { text-align:center; color:var(--text2); font-size:.8rem; padding:26px 10px; line-height:1.6; }
+
   .fab { display:none; }
 
   @media(max-width:820px) {
@@ -179,7 +192,54 @@
     <div class="empty-sub" id="empty-sub">Add your singles, slabs, and sealed product to see what your collection-for-sale is worth at a glance.</div>
     <button class="btn-primary" onclick="openItemModal()">+ Add First Item</button>
   </div>
+
+  <!-- ── Value over time: one snapshot per show ── -->
+  <div class="snap-section">
+    <div class="snap-head">
+      <div>
+        <div class="snap-title">📸 Value Over Time</div>
+        <div class="snap-sub">Take a snapshot after every show — each one records what your Singles, Slabs, and Sealed are worth right then, so you can watch the total change show to show.</div>
+      </div>
+      <button class="btn-primary" onclick="openSnapModal()">📸 Take Snapshot</button>
+    </div>
+    <div class="snap-legend" id="snap-legend" style="display:none">
+      <span class="snap-key"><span class="snap-swatch" style="background:#6c8cff"></span>🃏 Singles</span>
+      <span class="snap-key"><span class="snap-swatch" style="background:#fbbf24"></span>🏆 Slabs</span>
+      <span class="snap-key"><span class="snap-swatch" style="background:#a78bfa"></span>📦 Sealed</span>
+    </div>
+    <div id="snap-chart-box">
+      <div id="snap-chart"></div>
+      <div class="snap-tip" id="snap-tip"></div>
+    </div>
+    <div class="snap-empty" id="snap-empty">No snapshots yet — take your first one after your next show (or right now, for a starting point).</div>
+    <div class="table-scroll" id="snap-table" style="margin-top:10px"></div>
+  </div>
 </main>
+
+<!-- ── SNAPSHOT MODAL ── -->
+<div class="modal-overlay" id="snap-modal">
+  <div class="modal">
+    <h2>Take Value Snapshot</h2>
+    <div class="field-2col">
+      <div class="field">
+        <label>Date</label>
+        <input type="date" id="sn-date">
+      </div>
+      <div class="field">
+        <label>Show / Label (optional)</label>
+        <input type="text" id="sn-label" maxlength="80" placeholder="e.g. After Renton Card Show">
+      </div>
+    </div>
+    <div class="field">
+      <label>Will Record</label>
+      <div id="sn-preview" style="background:var(--surface2,rgba(255,255,255,.05));border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:.8rem;line-height:1.8"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeSnapModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveSnapshot()">Save Snapshot</button>
+    </div>
+  </div>
+</div>
 
 <!-- ── ITEM MODAL ── -->
 <div class="modal-overlay" id="item-modal">
@@ -232,7 +292,7 @@ const uid = () => Math.random().toString(36).slice(2, 10);
 const getInv = () => { try { const v = JSON.parse(localStorage.getItem(INV_KEY) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
 const setInv = v => localStorage.setItem(INV_KEY, JSON.stringify(v));
 
-const { esc, escAttr, fmtMoney, money, sumMoney, todayStr } = VPCUtil;
+const { esc, escAttr, fmtMoney, fmtDate, money, sumMoney, todayStr } = VPCUtil;
 
 // The three buckets are fixed on purpose — Singles / Slabs / Sealed is how
 // card inventory is actually carried to (and priced at) shows.
@@ -361,7 +421,7 @@ function renderTable() {
   wrap.innerHTML = h;
 }
 
-function renderAll() { renderStats(); renderCatCards(); renderTable(); }
+function renderAll() { renderStats(); renderCatCards(); renderTable(); renderSnapshots(); }
 window.renderAll = renderAll; // cloud sync calls this after pulling new data
 
 // ── MODAL ──
@@ -426,6 +486,236 @@ function deleteItem() {
   closeModal();
   renderAll();
 }
+
+// ── VALUE SNAPSHOTS ── one dated record per show of what each bucket is
+// worth (market value + cost basis), so the total is trackable over time.
+const SNAP_KEY = VPCUtil.KEYS.invSnapshots;
+const getSnaps = () => { try { const v = JSON.parse(localStorage.getItem(SNAP_KEY) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
+const setSnaps = v => localStorage.setItem(SNAP_KEY, JSON.stringify(v));
+
+const SNAP_CATS = [
+  { key: 'singles', label: 'Singles', icon: '🃏', color: '#6c8cff' },
+  { key: 'slabs',   label: 'Slabs',   icon: '🏆', color: '#fbbf24' },
+  { key: 'sealed',  label: 'Sealed',  icon: '📦', color: '#a78bfa' },
+];
+
+function snapNow() {
+  const t = totals();
+  const pick = c => ({ value: t.byCat[c].value, cost: t.byCat[c].cost });
+  return { singles: pick('singles'), slabs: pick('slabs'), sealed: pick('sealed'), value: t.value, cost: t.cost, units: t.units };
+}
+const snapCatVal = (s, key) => money((s[key] && +s[key].value) || 0);
+
+// Prefill the label from the most recent show that already happened (≤14 days ago).
+function suggestSnapLabel() {
+  try {
+    const evs = JSON.parse(localStorage.getItem(VPCUtil.KEYS.events) || '[]');
+    const today = todayStr();
+    const cutoff = new Date(Date.now() - 14 * 86400000).toLocaleDateString('en-CA');
+    const past = (Array.isArray(evs) ? evs : [])
+      .filter(e => e && e.name && e.date && e.date <= today && e.date >= cutoff)
+      .sort((a, b) => b.date.localeCompare(a.date));
+    return past.length ? `After ${past[0].name}` : '';
+  } catch (e) { return ''; }
+}
+
+function openSnapModal() {
+  document.getElementById('sn-date').value = todayStr();
+  document.getElementById('sn-label').value = suggestSnapLabel();
+  const s = snapNow();
+  document.getElementById('sn-preview').innerHTML =
+    SNAP_CATS.map(c => `${c.icon} ${c.label} <strong>${fmtMoney(snapCatVal(s, c.key))}</strong>`).join(' &nbsp;·&nbsp; ') +
+    `<br><strong style="color:var(--green)">Total market value ${fmtMoney(s.value)}</strong> <span style="color:var(--text2)">· cost basis ${fmtMoney(s.cost)} · ${s.units} unit${s.units === 1 ? '' : 's'}</span>`;
+  document.getElementById('snap-modal').classList.add('open');
+  setTimeout(() => document.getElementById('sn-label').focus(), 80);
+}
+function closeSnapModal() { document.getElementById('snap-modal').classList.remove('open'); }
+document.getElementById('snap-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('snap-modal')) closeSnapModal();
+});
+
+function saveSnapshot() {
+  const date = document.getElementById('sn-date').value;
+  const label = document.getElementById('sn-label').value.trim();
+  if (!date) { alert('Pick a date.'); return; }
+  const arr = getSnaps();
+  const dup = arr.findIndex(s => s.date === date);
+  if (dup >= 0 && !confirm(`A snapshot for ${fmtDate(date)} already exists — replace it with today's numbers?`)) return;
+  const rec = { id: dup >= 0 ? arr[dup].id : uid(), date, label, ...snapNow(), taken: new Date().toISOString() };
+  if (dup >= 0) arr[dup] = rec; else arr.push(rec);
+  setSnaps(arr);
+  if (typeof auditLog === 'function') auditLog('ADD_INVENTORY_SNAPSHOT', SNAP_KEY, label || date);
+  closeSnapModal();
+  renderSnapshots();
+}
+
+function deleteSnapshot(id) {
+  if (!confirm('Delete this snapshot?')) return;
+  setSnaps(getSnaps().filter(s => s.id !== id));
+  renderSnapshots();
+}
+
+function renderSnapshots() {
+  const snaps = getSnaps().slice().sort((a, b) => a.date.localeCompare(b.date));
+  renderSnapChart(snaps);
+  renderSnapTable(snaps);
+}
+
+// Round a max value up to a "nice" axis ceiling (1/2/2.5/5 × 10^n).
+function niceCeil(v) {
+  if (v <= 0) return 100;
+  const p = Math.pow(10, Math.floor(Math.log10(v)));
+  for (const m of [1, 2, 2.5, 5, 10]) if (v <= m * p) return m * p;
+  return 10 * p;
+}
+const fmtAxis$ = v => v >= 1000 ? '$' + (+(v / 1000).toFixed(1)) + 'k' : '$' + Math.round(v);
+
+let snapPts = []; // chart geometry cache for the hover layer
+
+function renderSnapChart(snaps) {
+  const box   = document.getElementById('snap-chart');
+  const empty = document.getElementById('snap-empty');
+  const legend = document.getElementById('snap-legend');
+  document.getElementById('snap-tip').style.display = 'none';
+  if (!snaps.length) {
+    box.innerHTML = ''; legend.style.display = 'none'; empty.style.display = 'block'; snapPts = [];
+    return;
+  }
+  empty.style.display = 'none';
+  legend.style.display = 'flex';
+
+  const W = Math.max(320, document.getElementById('snap-chart-box').clientWidth || 700);
+  const H = 230, padL = 52, padR = 16, padT = 18, padB = 28;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const yMax = niceCeil(Math.max(...snaps.map(s => s.value || 0)) * 1.1);
+  const yPos = v => padT + plotH - (v / yMax) * plotH;
+
+  const t0 = new Date(snaps[0].date).getTime();
+  const t1 = new Date(snaps[snaps.length - 1].date).getTime();
+  const xPos = s => snaps.length === 1 ? padL + plotW / 2
+    : padL + ((new Date(s.date).getTime() - t0) / Math.max(1, t1 - t0)) * plotW;
+
+  snapPts = snaps.map(s => ({ x: xPos(s), snap: s }));
+
+  // Grid + y labels (recessive)
+  let g = '';
+  const steps = 4;
+  for (let i = 0; i <= steps; i++) {
+    const v = (yMax / steps) * i, y = yPos(v);
+    g += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>`;
+    g += `<text x="${padL - 8}" y="${y + 3}" text-anchor="end" font-size="10" fill="#8892b0">${fmtAxis$(v)}</text>`;
+  }
+
+  let marks = '';
+  if (snaps.length === 1) {
+    // A single snapshot: one stacked column so the composition still reads.
+    const s = snaps[0], bw = 46, x = padL + plotW / 2 - bw / 2;
+    let cum = 0;
+    SNAP_CATS.forEach(c => {
+      const v = snapCatVal(s, c.key);
+      if (v <= 0) return;
+      const y1 = yPos(cum), y2 = yPos(cum + v);
+      marks += `<rect x="${x}" y="${y2}" width="${bw}" height="${Math.max(1, y1 - y2 - 2)}" rx="4" fill="${c.color}"/>`;
+      cum += v;
+    });
+    marks += `<text x="${padL + plotW / 2}" y="${yPos(s.value) - 8}" text-anchor="middle" font-size="11" font-weight="700" fill="#e2e8f0">${fmtMoney(s.value)}</text>`;
+  } else {
+    // Stacked areas: singles at the baseline, slabs, then sealed — the top
+    // edge of the stack is the total value the tracker is about.
+    const cums = snaps.map(s => { let c = 0; const row = { base: 0 }; SNAP_CATS.forEach(k => { c += snapCatVal(s, k.key); row[k.key] = c; }); return row; });
+    let below = snaps.map((s, i) => ({ x: snapPts[i].x, y: yPos(0) }));
+    SNAP_CATS.forEach(c => {
+      const above = snaps.map((s, i) => ({ x: snapPts[i].x, y: yPos(cums[i][c.key]) }));
+      const path = 'M' + above.map(p => `${p.x},${p.y}`).join(' L') +
+        ' L' + below.slice().reverse().map(p => `${p.x},${p.y}`).join(' L') + ' Z';
+      marks += `<path d="${path}" fill="${c.color}" fill-opacity="0.55" stroke="#0d0f16" stroke-width="2"/>`;
+      marks += `<path d="M${above.map(p => `${p.x},${p.y}`).join(' L')}" fill="none" stroke="${c.color}" stroke-width="2"/>`;
+      below = above;
+    });
+    // Total: dots on the top edge + a direct label on the last point.
+    snaps.forEach((s, i) => {
+      marks += `<circle cx="${snapPts[i].x}" cy="${yPos(s.value)}" r="3.5" fill="#e2e8f0" stroke="#0d0f16" stroke-width="1.5"/>`;
+    });
+    const last = snaps[snaps.length - 1];
+    marks += `<text x="${W - padR}" y="${Math.max(12, yPos(last.value) - 10)}" text-anchor="end" font-size="11" font-weight="700" fill="#e2e8f0">Total ${fmtMoney(last.value)}</text>`;
+  }
+
+  // X labels: first + last (+ middle when there's room).
+  let xl = '';
+  const xLabelIdx = snaps.length <= 2 ? snaps.map((_, i) => i)
+    : [0, Math.floor((snaps.length - 1) / 2), snaps.length - 1];
+  [...new Set(xLabelIdx)].forEach(i => {
+    const anchor = i === 0 ? 'start' : i === snaps.length - 1 ? 'end' : 'middle';
+    xl += `<text x="${snapPts[i].x}" y="${H - 8}" text-anchor="${snaps.length === 1 ? 'middle' : anchor}" font-size="10" fill="#8892b0">${fmtDate(snaps[i].date)}</text>`;
+  });
+
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Inventory value over time">
+    ${g}<g id="snap-marks">${marks}</g>
+    <line id="snap-cross" x1="0" y1="${padT}" x2="0" y2="${padT + plotH}" stroke="rgba(255,255,255,0.25)" stroke-width="1" style="display:none"/>
+    ${xl}
+  </svg>`;
+
+  // Hover layer: crosshair snaps to the nearest snapshot; tooltip shows all buckets.
+  const svg = box.querySelector('svg');
+  const tip = document.getElementById('snap-tip');
+  const cross = svg.querySelector('#snap-cross');
+  svg.addEventListener('pointermove', e => {
+    if (!snapPts.length) return;
+    const r = svg.getBoundingClientRect();
+    const mx = (e.clientX - r.left) * (W / r.width);
+    let best = snapPts[0];
+    snapPts.forEach(p => { if (Math.abs(p.x - mx) < Math.abs(best.x - mx)) best = p; });
+    const s = best.snap;
+    cross.setAttribute('x1', best.x); cross.setAttribute('x2', best.x);
+    cross.style.display = '';
+    tip.innerHTML = `<strong>${fmtDate(s.date)}</strong>${s.label ? ' · ' + esc(s.label) : ''}<br>` +
+      SNAP_CATS.map(c => `<span class="snap-swatch" style="background:${c.color};display:inline-block;margin-right:5px"></span>${c.label} ${fmtMoney(snapCatVal(s, c.key))}`).join('<br>') +
+      `<br><strong>Total ${fmtMoney(s.value)}</strong> <span style="color:#8892b0">· cost ${fmtMoney(s.cost || 0)}</span>`;
+    tip.style.display = 'block';
+    const boxR = document.getElementById('snap-chart-box').getBoundingClientRect();
+    const px = best.x * (r.width / W) + r.left - boxR.left;
+    tip.style.left = Math.min(Math.max(4, px + 12), boxR.width - tip.offsetWidth - 4) + 'px';
+    tip.style.top = '10px';
+  });
+  svg.addEventListener('pointerleave', () => { tip.style.display = 'none'; cross.style.display = 'none'; });
+}
+
+function renderSnapTable(snaps) {
+  const wrap = document.getElementById('snap-table');
+  if (!snaps.length) { wrap.innerHTML = ''; return; }
+  // Newest first; change compares each snapshot's total to the one before it.
+  const rows = snaps.slice().reverse().map((s, i, arr) => {
+    const prev = arr[i + 1];
+    let delta = '<span class="gain-flat">—</span>';
+    if (prev) {
+      const d = money((s.value || 0) - (prev.value || 0));
+      const cls = d > 0 ? 'gain-pos' : d < 0 ? 'gain-neg' : 'gain-flat';
+      delta = `<span class="${cls}">${d >= 0 ? '+' : '−'}${fmtMoney(Math.abs(d))}</span>`;
+    }
+    return `<tr style="cursor:default">
+      <td style="white-space:nowrap">${fmtDate(s.date)}</td>
+      <td>${esc(s.label || '')}</td>
+      <td class="num">${fmtMoney(snapCatVal(s, 'singles'))}</td>
+      <td class="num">${fmtMoney(snapCatVal(s, 'slabs'))}</td>
+      <td class="num">${fmtMoney(snapCatVal(s, 'sealed'))}</td>
+      <td class="num" style="font-weight:800">${fmtMoney(s.value || 0)}</td>
+      <td class="num" style="color:var(--text2)">${fmtMoney(s.cost || 0)}</td>
+      <td class="num">${delta}</td>
+      <td class="num"><button class="btn-ghost" style="padding:3px 9px;font-size:.72rem" onclick="deleteSnapshot('${escAttr(s.id)}')" title="Delete snapshot">✕</button></td>
+    </tr>`;
+  }).join('');
+  wrap.innerHTML = `<table class="inv"><thead><tr>
+    <th>Date</th><th>Show / Label</th>
+    <th class="num">🃏 Singles</th><th class="num">🏆 Slabs</th><th class="num">📦 Sealed</th>
+    <th class="num">Total Value</th><th class="num">Cost Basis</th><th class="num">Change</th><th></th>
+  </tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+let snapResizeRaf = null;
+window.addEventListener('resize', () => {
+  if (snapResizeRaf) return;
+  snapResizeRaf = requestAnimationFrame(() => { snapResizeRaf = null; renderSnapshots(); });
+});
 
 renderAll();
 </script>

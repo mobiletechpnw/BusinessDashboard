@@ -98,6 +98,7 @@
     guru: 'vpc_guru_v1',
     ritual: 'vpc_ritual_v1',
     cardInventory: 'vpc_card_inventory_v1',
+    invSnapshots: 'vpc_inv_snapshots_v1',
   });
 
   // ── Crew table claims ──────────────────────────────
