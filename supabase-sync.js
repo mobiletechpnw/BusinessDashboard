@@ -50,6 +50,7 @@ const SYNC_KEYS = [
   // ── Products: Pins ──────────────────────────────────────
   'vp_pins_v1',
   'vp_pins_restock_v1',
+  'vp_pin_chars_v1', // user-added characters (name, initial qty, cost)
   'vp_pin_inventory_v1', // per-character purchased counts (drives low-stock alerts)
 
   // ── Card Inventory (Singles / Slabs / Sealed) ───────────

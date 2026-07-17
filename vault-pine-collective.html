@@ -1172,7 +1172,7 @@
     <div class="pintat"><div class="pintat-num" style="color:#2dd4bf" id="pinProfit">$0.00</div><div class="pintat-label">Gross Profit</div></div>
     <div class="pintat"><div class="pintat-num" style="color:var(--yellow)" id="pinMargin">—</div><div class="pintat-label">Gross Margin</div></div>
     <div class="pintat"><div class="pintat-num" style="color:var(--text2)" id="pinCogs">$0.00</div><div class="pintat-label">COGS</div></div>
-    <div class="pintat"><div class="pintat-num" style="color:var(--text2)" id="pinInvCost">$0.00</div><div class="pintat-label">Inventory Cost</div></div>
+    <div class="pintat"><div class="pintat-num" style="color:var(--text2)" id="pinInvCost">$0.00</div><div class="pintat-label" id="pinInvCostLabel">Inventory Cost</div></div>
     <div class="pintat"><div class="pintat-num" style="color:var(--accent2)" id="pinSold">0</div><div class="pintat-label">Pins Sold</div></div>
     <div class="pintat"><div class="pintat-num" id="pinRemaining">0</div><div class="pintat-label">In Stock</div></div>
   </div>
@@ -1184,6 +1184,7 @@
         <div style="font-size:0.78rem;color:var(--text2);margin-top:3px" id="pinSubtitle">240 pins purchased · $228 total cost ($0.95/ea) · Sell price tracked per sale</div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-ghost" onclick="openPinCharModal()">+ New Character</button>
         <button class="btn-ghost" onclick="openPinRestockModal()">+ Restock</button>
         <button class="btn-primary" style="background:#0d9488" onclick="openPinSaleModal()">+ Log Sale</button>
       </div>
@@ -1208,6 +1209,31 @@
           <span style="font-size:0.72rem;color:var(--text2)" id="pinInventoryDate"></span>
         </div>
         <div id="pinInventoryGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:4px"></div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:20px">
+      <!-- Order & restock history: every batch bought, what it cost, reorder vs new -->
+      <div class="card" style="grid-column:1/-1">
+        <div class="card-title">📦 Order &amp; Restock History</div>
+        <div style="font-size:0.74rem;color:var(--text2);margin-bottom:10px">Every batch you've bought — original stock, reorders, and new characters — with what each one cost you.</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Character</th>
+                <th class="num">Qty</th>
+                <th class="num">Cost</th>
+                <th class="num">Cost/Pin</th>
+                <th>Notes</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="pinOrdersTbody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -1333,22 +1359,50 @@
   </div>
 </div>
 
-<!-- Pin Restock Modal -->
+<!-- Pin Restock / Order Modal -->
 <div class="modal-overlay" id="pinRestockModal">
-  <div class="modal" style="width:520px">
-    <h2>Restock Pokémon Pins</h2>
+  <div class="modal" style="width:580px">
+    <h2>Restock — Log a Stock Order</h2>
+    <div style="font-size:0.76rem;color:var(--text2);margin:-6px 0 14px">One order, mixed contents: type a qty next to each character you reordered, add brand-new characters below, and enter what the whole order cost — it splits across the pins automatically.</div>
     <div class="field-row">
       <div class="field"><label>Date</label><input type="date" id="pinRestockDate"></div>
-      <div class="field"><label>Total Qty Added</label><input type="number" id="pinRestockQty" value="1" min="1"></div>
+      <div class="field"><label>Total Cost of Order ($) — what you paid</label><input type="number" id="pinRestockCost" step="0.01" min="0" placeholder="e.g. 42.00 (optional)" oninput="pinUpdateOrderPreview()"></div>
     </div>
     <div class="field">
-      <label>Character(s) — select one or more (qty splits evenly)</label>
-      <div id="pinRestockCharSelect" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px"></div>
+      <label>Reorders — qty per character (leave 0 if not in this order)</label>
+      <div id="pinOrderQtyGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:6px;max-height:240px;overflow-y:auto;padding-right:2px"></div>
     </div>
-    <div class="field"><label>Notes (optional)</label><input type="text" id="pinRestockNotes" placeholder="e.g. New batch, reorder"></div>
+    <div class="field">
+      <label>New characters in this order</label>
+      <div id="pinOrderNewChars"></div>
+      <button class="btn-ghost" style="font-size:0.75rem;padding:5px 10px;margin-top:6px" onclick="pinAddOrderNewCharRow()">+ Add new character</button>
+    </div>
+    <div id="pinOrderPreview" style="background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:4px;font-size:0.82rem;color:var(--text2);display:none"></div>
+    <div class="field"><label>Notes (optional)</label><input type="text" id="pinRestockNotes" placeholder="e.g. July vendor order"></div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closePinRestockModal()">Cancel</button>
-      <button class="btn-primary" style="background:#0d9488" onclick="savePinRestock()">Save Restock</button>
+      <button class="btn-primary" style="background:#0d9488" onclick="savePinOrder()">Save Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- Pin New Character Modal -->
+<div class="modal-overlay" id="pinCharModal">
+  <div class="modal" style="width:520px">
+    <h2>Add New Character</h2>
+    <div class="field"><label>Character Name</label><input type="text" id="pinCharName" maxlength="60" placeholder="e.g. Gengar"></div>
+    <div class="field-row">
+      <div class="field"><label>Date Purchased</label><input type="date" id="pinCharDate"></div>
+      <div class="field"><label>Qty Purchased</label><input type="number" id="pinCharQty" value="20" min="1"></div>
+    </div>
+    <div class="field">
+      <label>Total Cost of This Order ($) — what you paid</label>
+      <input type="number" id="pinCharCost" step="0.01" min="0" placeholder="e.g. 19.00 (optional)">
+    </div>
+    <div class="field"><label>Notes (optional)</label><input type="text" id="pinCharNotes" placeholder="e.g. First batch of this character"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closePinCharModal()">Cancel</button>
+      <button class="btn-primary" style="background:#0d9488" onclick="savePinCharacter()">Add Character</button>
     </div>
   </div>
 </div>
@@ -3557,8 +3611,8 @@ function downloadBlob(filename, text, mime) {
 // Expenses page, content, production, growth, and net worth.
 function backupKeys() {
   const synced = (window.VpcSync && window.VpcSync.SYNC_KEYS) || [];
-  const local  = [LS_ORDERS, GOALS_KEY, EXP_KEY, JT_KEY, JT_RESTOCK_KEY,
-                  PIN_KEY, PIN_RESTOCK_KEY, EV_KEY, LS_PRINTER_CREDITS,
+  const local  = [LS_ORDERS, GOALS_KEY, EXP_KEY, JT_KEY, JT_RESTOCK_KEY, JT_CHARS_KEY,
+                  PIN_KEY, PIN_RESTOCK_KEY, PIN_CHARS_KEY, EV_KEY, LS_PRINTER_CREDITS,
                   LS_GOAL_KEY, LS_FILAMENT_KEY];
   return [...new Set([...synced, ...local])];
 }
@@ -4222,7 +4276,10 @@ renderJtAll();
 // ══════════════════════════════════════════════════════════════
 const PIN_KEY         = VPCUtil.KEYS.pins;
 const PIN_RESTOCK_KEY = 'vp_pins_restock_v1';
+const PIN_CHARS_KEY   = VPCUtil.KEYS.pinChars;
 
+// The original 240-pin order. New characters added later live in
+// PIN_CHARS_KEY (localStorage) so they survive reloads and sync.
 const PIN_INVENTORY = [
   { id:'snorlax',    name:'Snorlax',    purchased:20 },
   { id:'squirtle',   name:'Squirtle',   purchased:20 },
@@ -4246,22 +4303,27 @@ function getPinSales()        { return JSON.parse(localStorage.getItem(PIN_KEY) 
 function savePinSales(arr)    { localStorage.setItem(PIN_KEY, JSON.stringify(arr)); }
 function getPinRestocks()     { return JSON.parse(localStorage.getItem(PIN_RESTOCK_KEY) || '[]'); }
 function savePinRestocks(arr) { localStorage.setItem(PIN_RESTOCK_KEY, JSON.stringify(arr)); }
+function getPinCustomChars()     { return JSON.parse(localStorage.getItem(PIN_CHARS_KEY) || '[]'); }
+function savePinCustomChars(arr) { localStorage.setItem(PIN_CHARS_KEY, JSON.stringify(arr)); }
+
+// Built-in roster + user-added characters, as one list.
+function pinAllChars() { return PIN_INVENTORY.concat(getPinCustomChars()); }
 
 function pinRestockedByChar() {
   const map = {};
-  PIN_INVENTORY.forEach(c => { map[c.id] = 0; });
+  pinAllChars().forEach(c => { map[c.id] = 0; });
   getPinRestocks().forEach(r => { map[r.charId] = (map[r.charId] || 0) + r.qty; });
   return map;
 }
 
 function pinTotalEffective() {
   const rm = pinRestockedByChar();
-  return PIN_INVENTORY.reduce((s, c) => s + c.purchased + (rm[c.id] || 0), 0);
+  return pinAllChars().reduce((s, c) => s + (c.purchased || 0) + (rm[c.id] || 0), 0);
 }
 
 function pinSoldByChar() {
   const map = {};
-  PIN_INVENTORY.forEach(c => map[c.id] = 0);
+  pinAllChars().forEach(c => map[c.id] = 0);
   getPinSales().forEach(sale => {
     (sale.chars || []).forEach(cid => {
       map[cid] = (map[cid] || 0) + (sale.charQty?.[cid] || 0);
@@ -4270,18 +4332,37 @@ function pinSoldByChar() {
   return map;
 }
 
+// What a batch cost. Batches logged before cost tracking existed fall back
+// to the original order's per-pin price.
+function pinBatchCost(qty, cost) {
+  return (typeof cost === 'number' && !isNaN(cost)) ? cost : (qty || 0) * PIN_COST_PER_PIN;
+}
+
+function pinTotalCost() {
+  let cost = PIN_TOTAL_COST;
+  getPinCustomChars().forEach(c => { cost += pinBatchCost(c.purchased, c.cost); });
+  getPinRestocks().forEach(r => { cost += pinBatchCost(r.qty, r.cost); });
+  return cost;
+}
+
+// Weighted average cost across every batch — the per-pin cost used for COGS.
+function pinAvgCost() {
+  const eff = pinTotalEffective();
+  return eff > 0 ? pinTotalCost() / eff : PIN_COST_PER_PIN;
+}
+
 function pinTotals() {
   const sales = getPinSales();
   let revenue = 0, qty = 0;
   sales.forEach(s => { revenue += s.revenue || 0; qty += s.qty || 0; });
   const totalEffective = pinTotalEffective();
-  const totalRestocked = totalEffective - PIN_TOTAL_PURCHASED;
-  const totalCost  = PIN_TOTAL_COST + totalRestocked * PIN_COST_PER_PIN;
-  const cogs    = qty * PIN_COST_PER_PIN;
+  const totalCost = pinTotalCost();
+  const avgCost   = totalEffective > 0 ? totalCost / totalEffective : PIN_COST_PER_PIN;
+  const cogs    = qty * avgCost;
   const profit  = revenue - cogs;
   const remaining = totalEffective - qty;
   const margin = revenue > 0 ? (profit / revenue * 100) : 0;
-  return { revenue, cogs, profit, margin, qty, remaining, totalEffective, totalCost };
+  return { revenue, cogs, profit, margin, qty, remaining, totalEffective, totalCost, avgCost };
 }
 
 function renderPinStatBar() {
@@ -4294,31 +4375,38 @@ function renderPinStatBar() {
   marginEl.style.color  = t.margin >= 60 ? 'var(--green)' : t.margin >= 40 ? 'var(--yellow)' : 'var(--red)';
   document.getElementById('pinCogs').textContent      = fmt$(t.cogs);
   document.getElementById('pinInvCost').textContent   = fmt$(t.totalCost);
+  const invLabel = document.getElementById('pinInvCostLabel');
+  if (invLabel) invLabel.textContent = `Inventory Cost · ${fmt$(t.avgCost)}/pin`;
   document.getElementById('pinSold').textContent      = t.qty;
   document.getElementById('pinRemaining').textContent = t.remaining;
   document.getElementById('pinInventoryDate').textContent = 'As of ' + new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   const sub = document.getElementById('pinSubtitle');
-  if (sub) sub.textContent = `${t.totalEffective} pins purchased · ${fmt$(t.totalCost)} inventory cost · Sell price tracked per sale`;
+  if (sub) sub.textContent = `${t.totalEffective} pins purchased · ${fmt$(t.totalCost)} inventory cost · avg ${fmt$(t.avgCost)}/pin · sell price tracked per sale`;
 }
 
 function renderPinInventoryGrid() {
   const soldMap    = pinSoldByChar();
   const restockMap = pinRestockedByChar();
   const grid       = document.getElementById('pinInventoryGrid');
-  grid.innerHTML = PIN_INVENTORY.map(c => {
-    const effective = c.purchased + (restockMap[c.id] || 0);
+  grid.innerHTML = pinAllChars().map(c => {
+    const base      = c.purchased || 0;
+    const restocked = restockMap[c.id] || 0;
+    const effective = base + restocked;
     const sold      = soldMap[c.id] || 0;
     const left      = effective - sold;
     const pct       = effective ? (left / effective) * 100 : 0;
     const barCls    = left === 0 ? 'sold-out' : left <= 3 ? 'low' : '';
     const numCol    = left === 0 ? 'color:var(--red)' : left <= 3 ? 'color:var(--yellow)' : 'color:var(--green)';
+    const breakdown = restocked > 0
+      ? `<div style="font-size:0.68rem;color:#2dd4bf">↺ ${base} original + ${restocked} reordered</div>`
+      : '';
     return `<div class="pin-card">
       <div class="pin-name">${esc(c.name)}</div>
       <div class="pin-bar-bg"><div class="pin-bar-fill ${barCls}" style="width:${pct}%"></div></div>
       <div class="pin-nums">
         <span style="${numCol};font-weight:700">${left} left</span>
         <span>${sold}/${effective} sold</span>
-      </div>
+      </div>${breakdown}
     </div>`;
   }).join('');
 }
@@ -4330,11 +4418,13 @@ function renderPinSalesLog() {
     tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text2)">No pin sales logged yet — click <strong>+ Log Sale</strong> to start tracking.</td></tr>`;
     return;
   }
+  const avgCost  = pinAvgCost();
+  const allChars = pinAllChars();
   tbody.innerHTML = sales.map(s => {
-    const cogs   = (s.qty || 0) * PIN_COST_PER_PIN;
+    const cogs   = (s.qty || 0) * avgCost;
     const profit = (s.revenue || 0) - cogs;
     const chars  = (s.chars || []).map(cid => {
-      const c = PIN_INVENTORY.find(x => x.id === cid);
+      const c = allChars.find(x => x.id === cid);
       return c ? c.name : cid;
     }).join(', ');
     return `<tr>
@@ -4353,8 +4443,8 @@ function renderPinSalesLog() {
 function renderPinTopSellers() {
   const soldMap    = pinSoldByChar();
   const restockMap = pinRestockedByChar();
-  const sorted = PIN_INVENTORY
-    .map(c => ({ ...c, effective: c.purchased + (restockMap[c.id]||0), sold: soldMap[c.id]||0 }))
+  const sorted = pinAllChars()
+    .map(c => ({ ...c, effective: (c.purchased || 0) + (restockMap[c.id]||0), sold: soldMap[c.id]||0 }))
     .sort((a, b) => b.sold - a.sold);
   const withSales = sorted.filter(c => c.sold > 0);
   const el = document.getElementById('pinTopSellersChart');
@@ -4386,8 +4476,8 @@ function renderPinLowStock() {
   const soldMap    = pinSoldByChar();
   const restockMap = pinRestockedByChar();
   const LOW = 3;
-  const items = PIN_INVENTORY
-    .map(c => { const eff = c.purchased + (restockMap[c.id]||0); return { ...c, eff, sold: soldMap[c.id]||0, left: eff - (soldMap[c.id]||0) }; })
+  const items = pinAllChars()
+    .map(c => { const eff = (c.purchased||0) + (restockMap[c.id]||0); return { ...c, eff, sold: soldMap[c.id]||0, left: eff - (soldMap[c.id]||0) }; })
     .filter(c => c.left <= LOW)
     .sort((a, b) => a.left - b.left);
   const titleEl = document.getElementById('pinLowStockTitle');
@@ -4420,12 +4510,90 @@ function renderPinLowStock() {
   }).join('');
 }
 
+function renderPinOrderHistory() {
+  const tbody = document.getElementById('pinOrdersTbody');
+  if (!tbody) return;
+  const nameById = {};
+  pinAllChars().forEach(c => { nameById[c.id] = c.name; });
+  const rows = [{
+    kind: 'original', date: '', name: `All ${PIN_INVENTORY.length} original characters`,
+    qty: PIN_TOTAL_PURCHASED, cost: PIN_TOTAL_COST, notes: 'Starting inventory', id: null,
+  }];
+  getPinCustomChars().forEach(c => rows.push({
+    kind: 'new', date: c.date || '', name: c.name, qty: c.purchased || 0,
+    cost: (typeof c.cost === 'number' && !isNaN(c.cost)) ? c.cost : null,
+    notes: c.notes || '', id: c.id,
+  }));
+  getPinRestocks().forEach(r => rows.push({
+    kind: 'restock', date: r.date || '', name: nameById[r.charId] || r.charId, qty: r.qty || 0,
+    cost: (typeof r.cost === 'number' && !isNaN(r.cost)) ? r.cost : null,
+    notes: r.notes || '', id: r.id,
+  }));
+  rows.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const badge = (bg, color, txt) =>
+    `<span style="font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:99px;background:${bg};color:${color};white-space:nowrap">${txt}</span>`;
+  tbody.innerHTML = rows.map(r => {
+    const type = r.kind === 'original' ? badge('var(--surface2)', 'var(--text2)', '📦 Original')
+      : r.kind === 'new' ? badge('rgba(74,222,128,0.12)', 'var(--green)', '🆕 New character')
+      : badge('rgba(45,212,191,0.14)', '#2dd4bf', '↺ Reorder');
+    const costTxt = r.cost != null ? fmt$(r.cost) : '—';
+    const unitTxt = (r.cost != null && r.qty > 0) ? fmt$(r.cost / r.qty) : '—';
+    const del = r.kind === 'restock'
+      ? `<button class="icon-btn" onclick="deletePinRestock('${r.id}')" title="Delete restock entry">✕</button>`
+      : r.kind === 'new'
+        ? `<button class="icon-btn" onclick="deletePinCharacter('${r.id}')" title="Delete character">✕</button>`
+        : '';
+    return `<tr>
+      <td>${r.date ? fmtDate(r.date) : '—'}</td>
+      <td>${type}</td>
+      <td>${esc(r.name)}</td>
+      <td class="num">${r.qty}</td>
+      <td class="num">${costTxt}</td>
+      <td class="num" style="color:var(--text2)">${unitTxt}</td>
+      <td style="color:var(--text2);font-size:0.78rem">${esc(r.notes)}</td>
+      <td>${del}</td>
+    </tr>`;
+  }).join('');
+}
+
+function deletePinRestock(id) {
+  if (!confirm('Delete this restock entry? Its qty and cost are removed from inventory.')) return;
+  savePinRestocks(getPinRestocks().filter(r => r.id !== id));
+  renderPinAll(); toast('Restock entry deleted.');
+}
+
+function deletePinCharacter(id) {
+  const c = getPinCustomChars().find(x => x.id === id);
+  if (!c) return;
+  const sold = pinSoldByChar()[id] || 0;
+  const msg = sold > 0
+    ? `Delete ${c.name}? ${sold} sold pin(s) reference it — sales keep their revenue but lose the character name.`
+    : `Delete ${c.name} and its restock history?`;
+  if (!confirm(msg)) return;
+  savePinCustomChars(getPinCustomChars().filter(x => x.id !== id));
+  savePinRestocks(getPinRestocks().filter(r => r.charId !== id));
+  renderPinAll(); toast(`${c.name} removed.`);
+}
+
+// Publish per-character effective counts so the home dashboard's low-stock
+// alert (reads VPCUtil.KEYS.pinInventory) sees the same numbers as this page.
+function syncPinInventoryKey() {
+  try {
+    const restockMap = pinRestockedByChar();
+    localStorage.setItem(VPCUtil.KEYS.pinInventory, JSON.stringify(
+      pinAllChars().map(c => ({ id: c.id, name: c.name, purchased: (c.purchased || 0) + (restockMap[c.id] || 0) }))
+    ));
+  } catch (e) {}
+}
+
 function renderPinAll() {
   renderPinStatBar();
   renderPinInventoryGrid();
+  renderPinOrderHistory();
   renderPinSalesLog();
   renderPinTopSellers();
   renderPinLowStock();
+  syncPinInventoryKey();
 }
 
 // ── Sale Modal ──
@@ -4436,8 +4604,8 @@ function openPinSaleModal() {
   document.getElementById('pinNotes').value = '';
   const soldMap    = pinSoldByChar();
   const restockMap = pinRestockedByChar();
-  document.getElementById('pinCharSelect').innerHTML = PIN_INVENTORY.map(c => {
-    const left     = c.purchased + (restockMap[c.id]||0) - (soldMap[c.id]||0);
+  document.getElementById('pinCharSelect').innerHTML = pinAllChars().map(c => {
+    const left     = (c.purchased||0) + (restockMap[c.id]||0) - (soldMap[c.id]||0);
     const disabled = left <= 0 ? 'style="opacity:0.4;pointer-events:none"' : '';
     return `<div class="pin-char-btn" data-charid="${c.id}" onclick="pinToggleChar(this)" ${disabled}>
       ${esc(c.name)}<br><span style="font-size:0.65rem;font-weight:400;color:var(--text2)">${left} left</span>
@@ -4453,7 +4621,7 @@ function pinToggleChar(el) { el.classList.toggle('selected'); pinUpdateRevPrevie
 function pinUpdateRevPreview() {
   const qty = parseInt(document.getElementById('pinQty').value) || 0;
   const price = parseFloat(document.getElementById('pinPrice').value) || 0;
-  const revenue = qty * price, cogs = qty * PIN_COST_PER_PIN, profit = revenue - cogs;
+  const revenue = qty * price, cogs = qty * pinAvgCost(), profit = revenue - cogs;
   const preview = document.getElementById('pinRevPreview');
   if (qty > 0) {
     preview.style.display = 'block';
@@ -4476,10 +4644,10 @@ function savePinSale() {
     const base = Math.floor(qty / chars.length), rem = qty - base * chars.length;
     chars.forEach((cid, i) => { charQty[cid] = base + (i === 0 ? rem : 0); });
   }
-  const soldMap = pinSoldByChar(), restockMap = pinRestockedByChar();
+  const soldMap = pinSoldByChar(), restockMap = pinRestockedByChar(), all = pinAllChars();
   for (const cid of chars) {
-    const eff = (PIN_INVENTORY.find(c=>c.id===cid)?.purchased||0) + (restockMap[cid]||0);
-    if (charQty[cid] > eff - (soldMap[cid]||0)) { toast(`Not enough ${PIN_INVENTORY.find(c=>c.id===cid)?.name} in stock!`); return; }
+    const eff = (all.find(c=>c.id===cid)?.purchased||0) + (restockMap[cid]||0);
+    if (charQty[cid] > eff - (soldMap[cid]||0)) { toast(`Not enough ${all.find(c=>c.id===cid)?.name} in stock!`); return; }
   }
   const arr = getPinSales();
   arr.push({ id:uid(), date, qty, revenue: qty * price, chars, charQty, notes });
@@ -4491,43 +4659,160 @@ function deletePinSale(id) {
   savePinSales(getPinSales().filter(s => s.id !== id)); renderPinAll(); toast('Sale deleted.');
 }
 
-// ── Restock Modal ──
+// ── Restock / Order Modal ──
+// One order can mix reorders (qty per existing character) and brand-new
+// characters; a single order total is split across all pins by qty.
 function openPinRestockModal() {
   document.getElementById('pinRestockDate').value  = TODAY;
-  document.getElementById('pinRestockQty').value   = 1;
+  document.getElementById('pinRestockCost').value  = '';
   document.getElementById('pinRestockNotes').value = '';
-  const restockMap = pinRestockedByChar();
-  document.getElementById('pinRestockCharSelect').innerHTML = PIN_INVENTORY.map(c => {
-    const current = c.purchased + (restockMap[c.id] || 0);
-    return `<div class="pin-char-btn" data-charid="${c.id}" onclick="this.classList.toggle('selected')">
-      ${esc(c.name)}<br><span style="font-size:0.65rem;font-weight:400;color:var(--text2)">${current} in stock</span>
+  document.getElementById('pinOrderNewChars').innerHTML = '';
+  const restockMap = pinRestockedByChar(), soldMap = pinSoldByChar();
+  document.getElementById('pinOrderQtyGrid').innerHTML = pinAllChars().map(c => {
+    const left = (c.purchased||0) + (restockMap[c.id]||0) - (soldMap[c.id]||0);
+    const leftCol = left === 0 ? 'var(--red)' : left <= 3 ? 'var(--yellow)' : 'var(--text2)';
+    return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 10px">
+      <span style="font-size:0.78rem;font-weight:600;min-width:0">${esc(c.name)}<br><span style="font-size:0.65rem;font-weight:400;color:${leftCol}">${left} left</span></span>
+      <input type="number" min="0" value="0" data-charid="${c.id}" class="pin-order-qty" oninput="pinUpdateOrderPreview()" style="width:64px;padding:6px 8px;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:0.85rem;outline:none">
     </div>`;
   }).join('');
+  pinUpdateOrderPreview();
   document.getElementById('pinRestockModal').classList.add('open');
 }
 
 function closePinRestockModal() { document.getElementById('pinRestockModal').classList.remove('open'); }
 
-function savePinRestock() {
-  const date  = document.getElementById('pinRestockDate').value;
-  const qty   = parseInt(document.getElementById('pinRestockQty').value);
-  const notes = document.getElementById('pinRestockNotes').value.trim();
-  if (!date || !qty || qty <= 0) { toast('Fill in Date and Qty.'); return; }
-  const selected = [...document.querySelectorAll('#pinRestockCharSelect .pin-char-btn.selected')];
-  if (!selected.length) { toast('Select at least one character.'); return; }
-  const chars = selected.map(el => el.dataset.charid);
-  const base = Math.floor(qty / chars.length), rem = qty - base * chars.length;
-  const arr = getPinRestocks();
-  chars.forEach((charId, i) => {
-    const charQty = base + (i === 0 ? rem : 0);
-    if (charQty > 0) arr.push({ id:uid(), date, charId, qty: charQty, notes });
+function pinAddOrderNewCharRow() {
+  const row = document.createElement('div');
+  row.className = 'pin-order-newchar';
+  row.style.cssText = 'display:flex;gap:6px;align-items:center;margin-top:6px';
+  row.innerHTML = `
+    <input type="text" placeholder="Character name" maxlength="60" class="pin-nc-name" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);padding:7px 10px;font-size:0.82rem;outline:none">
+    <input type="number" min="1" value="20" class="pin-nc-qty" oninput="pinUpdateOrderPreview()" style="width:64px;padding:6px 8px;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:0.85rem;outline:none">
+    <button class="icon-btn" onclick="this.parentElement.remove();pinUpdateOrderPreview()" title="Remove">✕</button>`;
+  document.getElementById('pinOrderNewChars').appendChild(row);
+  row.querySelector('.pin-nc-name').focus();
+}
+
+// Read the order form: reorder lines (qty > 0) + new-character lines.
+function pinOrderLines() {
+  const lines = [];
+  document.querySelectorAll('#pinOrderQtyGrid .pin-order-qty').forEach(inp => {
+    const qty = parseInt(inp.value) || 0;
+    if (qty > 0) lines.push({ charId: inp.dataset.charid, qty });
   });
-  savePinRestocks(arr); closePinRestockModal(); renderPinAll();
-  toast(`Restocked ${qty} pin${qty>1?'s':''} across ${chars.length} character${chars.length>1?'s':''}!`);
+  const newChars = [];
+  document.querySelectorAll('#pinOrderNewChars .pin-order-newchar').forEach(row => {
+    newChars.push({
+      name: row.querySelector('.pin-nc-name').value.trim(),
+      qty: parseInt(row.querySelector('.pin-nc-qty').value) || 0,
+    });
+  });
+  return { lines, newChars };
+}
+
+function pinUpdateOrderPreview() {
+  const { lines, newChars } = pinOrderLines();
+  const valid = newChars.filter(nc => nc.name && nc.qty > 0);
+  const totalQty = lines.reduce((s,l) => s+l.qty, 0) + valid.reduce((s,l) => s+l.qty, 0);
+  const el = document.getElementById('pinOrderPreview');
+  if (totalQty <= 0) { el.style.display = 'none'; return; }
+  const cost = parseFloat(document.getElementById('pinRestockCost').value);
+  const nChars = lines.length + valid.length;
+  const costTxt = (!isNaN(cost) && cost >= 0)
+    ? `&nbsp;·&nbsp; ${fmt$(cost)} total = <strong style="color:var(--text)">${fmt$(cost/totalQty)}/pin</strong>`
+    : `&nbsp;·&nbsp; no cost entered — will assume ${fmt$(PIN_COST_PER_PIN)}/pin`;
+  el.style.display = 'block';
+  el.innerHTML = `<strong style="color:var(--text)">This order:</strong> ${totalQty} pin${totalQty>1?'s':''} across ${nChars} character${nChars>1?'s':''}${costTxt}`;
+}
+
+function savePinOrder() {
+  const date    = document.getElementById('pinRestockDate').value;
+  const costVal = parseFloat(document.getElementById('pinRestockCost').value);
+  const hasCost = !isNaN(costVal) && costVal >= 0;
+  const notes   = document.getElementById('pinRestockNotes').value.trim();
+  if (!date) { toast('Pick a date.'); return; }
+  const { lines, newChars } = pinOrderLines();
+  for (const nc of newChars) {
+    if (!nc.name) { toast('Fill in a name for each new character row (or remove it).'); return; }
+    if (nc.qty <= 0) { toast(`Enter a qty for ${nc.name}.`); return; }
+  }
+  const totalQty = lines.reduce((s,l) => s+l.qty, 0) + newChars.reduce((s,l) => s+l.qty, 0);
+  if (totalQty <= 0) { toast('Enter a qty for at least one character.'); return; }
+  const existing = pinAllChars();
+  const seenNames = new Set(existing.map(c => c.name.toLowerCase()));
+  for (const nc of newChars) {
+    if (seenNames.has(nc.name.toLowerCase())) { toast(`${nc.name} already exists — set its qty in the reorder list instead.`); return; }
+    seenNames.add(nc.name.toLowerCase());
+  }
+  const unit  = hasCost ? costVal / totalQty : null;
+  const share = q => +(q * unit).toFixed(2);
+
+  const restocks = getPinRestocks();
+  lines.forEach(l => {
+    const entry = { id:uid(), date, charId: l.charId, qty: l.qty, notes };
+    if (hasCost) entry.cost = share(l.qty);
+    restocks.push(entry);
+  });
+  savePinRestocks(restocks);
+
+  if (newChars.length) {
+    const custom = getPinCustomChars();
+    const taken = new Set(existing.map(c => c.id));
+    newChars.forEach(nc => {
+      let id = nc.name.toLowerCase().replace(/[^a-z0-9]+/g, '') || 'char';
+      for (let n = 2; taken.has(id); n++) id = id.replace(/\d+$/, '') + n;
+      taken.add(id);
+      const rec = { id, name: nc.name, purchased: nc.qty, date, notes, custom: true };
+      if (hasCost) rec.cost = share(nc.qty);
+      custom.push(rec);
+    });
+    savePinCustomChars(custom);
+  }
+  closePinRestockModal(); renderPinAll();
+  const nChars = lines.length + newChars.length;
+  toast(`Order logged: ${totalQty} pin${totalQty>1?'s':''} across ${nChars} character${nChars>1?'s':''}${hasCost ? ' · ' + fmt$(costVal) : ''}!`);
+}
+
+// ── New Character Modal ──
+function openPinCharModal() {
+  document.getElementById('pinCharName').value  = '';
+  document.getElementById('pinCharDate').value  = TODAY;
+  document.getElementById('pinCharQty').value   = 20;
+  document.getElementById('pinCharCost').value  = '';
+  document.getElementById('pinCharNotes').value = '';
+  document.getElementById('pinCharModal').classList.add('open');
+}
+
+function closePinCharModal() { document.getElementById('pinCharModal').classList.remove('open'); }
+
+function savePinCharacter() {
+  const name    = document.getElementById('pinCharName').value.trim();
+  const date    = document.getElementById('pinCharDate').value;
+  const qty     = parseInt(document.getElementById('pinCharQty').value);
+  const costVal = parseFloat(document.getElementById('pinCharCost').value);
+  const notes   = document.getElementById('pinCharNotes').value.trim();
+  if (!name) { toast('Enter a character name.'); return; }
+  if (!date || !qty || qty <= 0) { toast('Fill in Date and Qty.'); return; }
+  const all = pinAllChars();
+  if (all.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+    toast(`${name} already exists — use + Restock to add stock.`); return;
+  }
+  let id = name.toLowerCase().replace(/[^a-z0-9]+/g, '') || 'char';
+  const taken = new Set(all.map(c => c.id));
+  for (let n = 2; taken.has(id); n++) id = id.replace(/\d+$/, '') + n;
+  const entry = { id, name, purchased: qty, date, notes, custom: true };
+  if (!isNaN(costVal) && costVal >= 0) entry.cost = costVal;
+  const arr = getPinCustomChars();
+  arr.push(entry);
+  savePinCustomChars(arr);
+  closePinCharModal(); renderPinAll();
+  toast(`${name} added with ${qty} pin${qty>1?'s':''} in stock!`);
 }
 
 document.getElementById('pinSaleModal').addEventListener('click', e => { if (e.target===e.currentTarget) closePinModal(); });
 document.getElementById('pinRestockModal').addEventListener('click', e => { if (e.target===e.currentTarget) closePinRestockModal(); });
+document.getElementById('pinCharModal').addEventListener('click', e => { if (e.target===e.currentTarget) closePinCharModal(); });
 
 // Init pins on load
 renderPinAll();

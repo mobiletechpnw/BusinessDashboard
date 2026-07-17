@@ -76,6 +76,7 @@
     jetTagInventory: 'vp_jt_inventory_v1',
     jetTagChars: 'vp_jt_chars_v1',
     pinInventory: 'vp_pin_inventory_v1',
+    pinChars: 'vp_pin_chars_v1',
     filament: 'riser_filament_v1',
     events: 'vpc_events_v1',
     // The Sales Hub page keeps its OWN separate events list under this older

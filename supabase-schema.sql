@@ -98,10 +98,14 @@ GRANT SELECT ON public.app_data TO anon;  -- anon is blocked by RLS anyway
 --  PRODUCTS — JET TAGS
 --    vp_jettags_v1                — JetTag product sales records
 --    vp_jettags_restock_v1        — JetTag restock/inventory entries
+--    vp_jt_chars_v1               — user-added JetTag characters
+--    vp_jt_inventory_v1           — per-character purchased counts
 --
 --  PRODUCTS — PINS
 --    vp_pins_v1                   — Pin product sales records
 --    vp_pins_restock_v1           — Pin restock/inventory entries
+--    vp_pin_chars_v1              — user-added Pin characters
+--    vp_pin_inventory_v1          — per-character purchased counts
 --
 --  CONTENT PLANNER
 --    vpc_content_v1               — content calendar & queue entries
