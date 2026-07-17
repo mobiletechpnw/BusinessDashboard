@@ -4,16 +4,15 @@
   "description": "Vault & Pine Collective — Business Command Center (static PWA)",
   "private": true,
   "scripts": {
+    "studio": "hyperframes preview studio-project --port=3002 --no-open",
     "test": "node --test",
     "test:e2e": "node tests/e2e-pages.js",
     "format": "prettier --write \"{*,tests/*}.{js,json,css}\"",
     "format:check": "prettier --check \"{*,tests/*}.{js,json,css}\""
   },
   "devDependencies": {
+    "hyperframes": "^0.7.60",
     "playwright": "1.56.1",
     "prettier": "^3.3.0"
-  },
-  "dependencies": {
-    "@hyperframes/studio": "^0.7.60"
   }
 }
