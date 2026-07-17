@@ -128,6 +128,24 @@ function buildSearchIndex() {
       url: 'vault-pine-collective.html',
     })
   );
+  // Custom category sales
+  const cats = {};
+  JSON.parse(localStorage.getItem(K.categories) || '[]').forEach((c) => {
+    cats[c.id] = c;
+  });
+  const catItemNames = {};
+  JSON.parse(localStorage.getItem(K.catItems) || '[]').forEach((i) => {
+    catItemNames[i.catId + '/' + i.id] = i.name;
+  });
+  JSON.parse(localStorage.getItem(K.catSales) || '[]').forEach((s) =>
+    results.push({
+      type: `${(cats[s.catId] || {}).name || 'Category'} Sale`,
+      icon: ((cats[s.catId] || {}).emoji || '').trim() || '🛍',
+      title: (s.items || []).map((iid) => catItemNames[s.catId + '/' + iid] || iid).join(', '),
+      sub: `${s.qty} sold · $${s.revenue} · ${s.date}${s.notes ? ' · ' + s.notes : ''}`,
+      url: 'vault-pine-collective.html',
+    })
+  );
   // Events — Events page writes KEYS.events; search once read the wrong key
   // (vp_events_v1, never written) and silently indexed nothing.
   const events = JSON.parse(localStorage.getItem(K.events) || '[]');

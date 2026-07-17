@@ -53,6 +53,12 @@ const SYNC_KEYS = [
   'vp_pin_chars_v1', // user-added characters (name, initial qty, cost)
   'vp_pin_inventory_v1', // per-character purchased counts (drives low-stock alerts)
 
+  // ── Products: custom categories (user-created) ──────────
+  'vpc_categories_v1', // category registry (name, unit, emoji, color)
+  'vpc_cat_items_v1', // items across all custom categories (tagged catId)
+  'vpc_cat_restocks_v1', // restock entries (tagged catId)
+  'vpc_cat_sales_v1', // sales records (tagged catId)
+
   // ── Card Inventory (Singles / Slabs / Sealed) ───────────
   'vpc_card_inventory_v1',
   'vpc_inv_snapshots_v1', // dated value snapshots (taken after each show)

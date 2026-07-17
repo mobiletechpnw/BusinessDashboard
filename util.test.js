@@ -118,3 +118,66 @@ test('parseClaimQty rejects unreadable or absurd claims', () => {
   assert.strictEqual(U.parseClaimQty('call me at 5551234567'), null);
   assert.strictEqual(U.parseClaimQty('0'), null);
 });
+
+// Fake localStorage for the custom-category helpers.
+function fakeStore(data) {
+  const m = new Map(Object.entries(data).map(([k, v]) => [k, JSON.stringify(v)]));
+  return { getItem: (k) => (m.has(k) ? m.get(k) : null) };
+}
+
+test('customCatTotals computes weighted-avg COGS and stock per category', () => {
+  const store = fakeStore({
+    [U.KEYS.categories]: [{ id: 'stickers', name: 'Stickers', unit: 'sticker' }],
+    [U.KEYS.catItems]: [
+      { id: 'pika', catId: 'stickers', name: 'Pikachu', purchased: 10, cost: 5 },
+      { id: 'mew', catId: 'stickers', name: 'Mew', purchased: 10, cost: 15 },
+      { id: 'zzz', catId: 'other', name: 'Elsewhere', purchased: 99, cost: 999 },
+    ],
+    [U.KEYS.catRestocks]: [{ id: 'r1', catId: 'stickers', itemId: 'pika', qty: 10, cost: 20 }],
+    [U.KEYS.catSales]: [
+      {
+        id: 's1',
+        catId: 'stickers',
+        qty: 3,
+        revenue: 12,
+        items: ['pika'],
+        itemQty: { pika: 3 },
+      },
+    ],
+  });
+  const [t] = U.customCatTotals(store);
+  assert.strictEqual(t.cat.id, 'stickers');
+  assert.strictEqual(t.units, 30); // 10 + 10 purchased + 10 restocked
+  assert.strictEqual(t.cost, 40); // 5 + 15 + 20
+  assert.strictEqual(t.avgCost, 40 / 30);
+  assert.strictEqual(t.revenue, 12);
+  assert.strictEqual(t.cogs, 4); // 3 sold × $1.333…
+  assert.strictEqual(t.profit, 8);
+  assert.strictEqual(t.left, 27);
+  const pika = t.stock.find((i) => i.id === 'pika');
+  assert.deepStrictEqual(pika, { id: 'pika', name: 'Pikachu', effective: 20, sold: 3, left: 17 });
+  // Mew has 10 left → not low; nothing in this category is low on stock.
+  assert.deepStrictEqual(t.low, []);
+});
+
+test('customCatTotals flags low stock and tolerates missing costs', () => {
+  const store = fakeStore({
+    [U.KEYS.categories]: [{ id: 'c1', name: 'Patches' }],
+    [U.KEYS.catItems]: [{ id: 'a', catId: 'c1', name: 'A', purchased: 4 }], // no cost
+    [U.KEYS.catRestocks]: [],
+    [U.KEYS.catSales]: [
+      { id: 's', catId: 'c1', qty: 2, revenue: 10, items: ['a'], itemQty: { a: 2 } },
+    ],
+  });
+  const [t] = U.customCatTotals(store);
+  assert.strictEqual(t.cost, 0); // unknown batch cost adds $0, never NaN
+  assert.strictEqual(t.cogs, 0);
+  assert.strictEqual(t.profit, 10);
+  assert.deepStrictEqual(t.low, [{ id: 'a', name: 'A', effective: 4, sold: 2, left: 2 }]);
+});
+
+test('customCatTotals is safe on empty or corrupt stores', () => {
+  assert.deepStrictEqual(U.customCatTotals(fakeStore({})), []);
+  const corrupt = { getItem: () => '{not json' };
+  assert.deepStrictEqual(U.customCatTotals(corrupt), []);
+});

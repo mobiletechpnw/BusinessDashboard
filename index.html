@@ -631,20 +631,23 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
 
 // ── Data load ──
 (function loadData() {
-  let orders = [], jtSales = [], pinSales = [];
+  let orders = [], jtSales = [], pinSales = [], catTotals = [];
   try {
     orders   = JSON.parse(localStorage.getItem(VPCUtil.KEYS.orders) || '[]');
     jtSales  = JSON.parse(localStorage.getItem(VPCUtil.KEYS.jetTags) || '[]');
     pinSales = JSON.parse(localStorage.getItem(VPCUtil.KEYS.pins) || '[]');
+    catTotals = VPCUtil.customCatTotals();
   } catch(e) {}
   const now = new Date(), thisMonth = VPCUtil.todayStr().slice(0,7);
 
   const riserRev = orders.reduce((s,o)=>s+(o.salePrice||0),0);
-  const totalRev = riserRev + jtSales.reduce((s,x)=>s+(x.revenue||0),0) + pinSales.reduce((s,x)=>s+(x.revenue||0),0);
+  const catRev   = catTotals.reduce((s,t)=>s+(t.revenue||0),0);
+  const totalRev = riserRev + jtSales.reduce((s,x)=>s+(x.revenue||0),0) + pinSales.reduce((s,x)=>s+(x.revenue||0),0) + catRev;
   const riserProfit = orders.reduce((s,o)=>s+(o.salePrice||0)-(o.cogs||0),0);
   const jtProfit    = jtSales.reduce((s,x)=>s+(x.revenue||0),0) - jtSales.reduce((s,x)=>s+(x.qty||0),0) * 0.747; // approx cost per tag
   const pinProfit   = pinSales.reduce((s,x)=>s+(x.revenue||0),0) - pinSales.reduce((s,x)=>s+(x.qty||0),0) * 0.95;
-  const profit      = riserProfit + jtProfit + pinProfit;
+  const catProfit   = catTotals.reduce((s,t)=>s+(t.profit||0),0);
+  const profit      = riserProfit + jtProfit + pinProfit + catProfit;
   const monthRev = orders.filter(o=>(o.date||'').startsWith(thisMonth)).reduce((s,o)=>s+(o.salePrice||0),0);
   const monthOrders = orders.filter(o=>(o.date||'').startsWith(thisMonth)).length;
 
@@ -864,6 +867,13 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
       const low = pinInv.filter(c => (c.purchased - (soldMap[c.id]||0)) <= 3 && (c.purchased - (soldMap[c.id]||0)) >= 0);
       if (low.length) alerts.push({ type:'warning', icon:'📌', text:`${low.length} Pin character${low.length>1?'s':''} low on stock (≤3 remaining)`, url:'vault-pine-collective.html', label:'View' });
     }
+  } catch(e) {}
+  // Custom category low stock
+  try {
+    VPCUtil.customCatTotals().forEach(t => {
+      if (!t.low.length) return;
+      alerts.push({ type:'warning', icon:(t.cat.emoji||'').trim()||'🛍', text:`${t.low.length} ${t.cat.name} item${t.low.length>1?'s':''} low on stock (≤3 remaining)`, url:'vault-pine-collective.html', label:'View' });
+    });
   } catch(e) {}
   if (!alerts.length) return;
   bar.innerHTML = alerts.map((a,i)=>`

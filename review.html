@@ -539,9 +539,11 @@ function renderRevenue() {
     const now = new Date();
     const thisMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
 
+    const catSales = JSON.parse(localStorage.getItem(VPCUtil.KEYS.catSales)||'[]');
     const totalRev = orders.reduce((s,o)=>s+(o.salePrice||0),0)
       + jtSales.reduce((s,x)=>s+(x.revenue||0),0)
-      + pinSales.reduce((s,x)=>s+(x.revenue||0),0);
+      + pinSales.reduce((s,x)=>s+(x.revenue||0),0)
+      + catSales.reduce((s,x)=>s+(x.revenue||0),0);
     const monthRev = orders.filter(o=>(o.date||'').startsWith(thisMonth)).reduce((s,o)=>s+(o.salePrice||0),0);
     const profit = orders.reduce((s,o)=>s+(o.salePrice||0)-(o.cogs||0),0);
     const monthOrders = orders.filter(o=>(o.date||'').startsWith(thisMonth)).length;

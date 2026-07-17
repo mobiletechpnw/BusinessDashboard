@@ -107,6 +107,12 @@ GRANT SELECT ON public.app_data TO anon;  -- anon is blocked by RLS anyway
 --    vp_pin_chars_v1              — user-added Pin characters
 --    vp_pin_inventory_v1          — per-character purchased counts
 --
+--  PRODUCTS — CUSTOM CATEGORIES (user-created)
+--    vpc_categories_v1            — category registry (name, unit, emoji)
+--    vpc_cat_items_v1             — items across all categories (catId tag)
+--    vpc_cat_restocks_v1          — restock entries (catId tag)
+--    vpc_cat_sales_v1             — sales records (catId tag)
+--
 --  CONTENT PLANNER
 --    vpc_content_v1               — content calendar & queue entries
 --

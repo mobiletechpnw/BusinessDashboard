@@ -77,6 +77,13 @@
     jetTagChars: 'vp_jt_chars_v1',
     pinInventory: 'vp_pin_inventory_v1',
     pinChars: 'vp_pin_chars_v1',
+    // Custom product categories (user-created from the Sales Hub). All four
+    // stores are FIXED keys with per-record catId tags, so the cloud-sync
+    // key list never has to change no matter how many categories exist.
+    categories: 'vpc_categories_v1',
+    catItems: 'vpc_cat_items_v1',
+    catRestocks: 'vpc_cat_restocks_v1',
+    catSales: 'vpc_cat_sales_v1',
     filament: 'riser_filament_v1',
     events: 'vpc_events_v1',
     // The Sales Hub page keeps its OWN separate events list under this older
@@ -171,6 +178,77 @@
     store.setItem(EVENTS_UNIFIED_FLAG, '1');
   };
 
+  // ── Custom product categories ──────────────────────
+  // User-created categories (Sales Hub "+ New Category") keep their registry
+  // and data in the four KEYS.cat* stores. These helpers are the single
+  // source of truth for category math, shared by the Sales Hub page and by
+  // every page that rolls category sales into its totals (home KPIs, daily
+  // review, guru, events ROI).
+  const readArr = (store, key) => {
+    try {
+      const v = JSON.parse(store.getItem(key) || '[]');
+      return Array.isArray(v) ? v : [];
+    } catch (e) {
+      return [];
+    }
+  };
+
+  const customCategories = (store = localStorage) => readArr(store, KEYS.categories);
+
+  // Per-category rollup: revenue, weighted-average-cost COGS, units left,
+  // and low-stock items. Batches saved without a cost count their units but
+  // add $0 to the cost basis — custom categories have no hard-coded fallback
+  // price the way Jet Tags/Pins do.
+  const customCatTotals = (store = localStorage) => {
+    const items = readArr(store, KEYS.catItems);
+    const restocks = readArr(store, KEYS.catRestocks);
+    const sales = readArr(store, KEYS.catSales);
+    return customCategories(store).map((cat) => {
+      const its = items.filter((i) => i.catId === cat.id);
+      const rs = restocks.filter((r) => r.catId === cat.id);
+      const ss = sales.filter((s) => s.catId === cat.id);
+      const units =
+        its.reduce((s, i) => s + (+i.purchased || 0), 0) +
+        rs.reduce((s, r) => s + (+r.qty || 0), 0);
+      const cost = money(
+        its.reduce((s, i) => s + (+i.cost || 0), 0) + rs.reduce((s, r) => s + (+r.cost || 0), 0)
+      );
+      const qtySold = ss.reduce((s, x) => s + (+x.qty || 0), 0);
+      const revenue = sumMoney(ss, (x) => x.revenue);
+      const avgCost = units > 0 ? cost / units : 0;
+      const cogs = money(qtySold * avgCost);
+      const soldById = {};
+      ss.forEach((x) =>
+        (x.items || []).forEach((iid) => {
+          soldById[iid] = (soldById[iid] || 0) + ((x.itemQty || {})[iid] || 0);
+        })
+      );
+      const restockedById = {};
+      rs.forEach((r) => {
+        restockedById[r.itemId] = (restockedById[r.itemId] || 0) + (+r.qty || 0);
+      });
+      const stock = its.map((i) => {
+        const effective = (+i.purchased || 0) + (restockedById[i.id] || 0);
+        const sold = soldById[i.id] || 0;
+        return { id: i.id, name: i.name, effective, sold, left: effective - sold };
+      });
+      const low = stock.filter((i) => i.left <= 3 && i.left >= 0);
+      return {
+        cat,
+        units,
+        cost,
+        avgCost,
+        revenue,
+        cogs,
+        profit: money(revenue - cogs),
+        qtySold,
+        left: units - qtySold,
+        stock,
+        low,
+      };
+    });
+  };
+
   const api = {
     money,
     sumMoney,
@@ -185,6 +263,8 @@
     normalizeEvent,
     mergeEvents,
     migrateEventStores,
+    customCategories,
+    customCatTotals,
   };
 
   // Browser global + CommonJS (for the test runner).

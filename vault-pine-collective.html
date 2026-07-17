@@ -280,9 +280,11 @@
 
 
   /* ── Modals ── */
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 500; align-items: center; justify-content: center; }
+  /* Above the shared mobile bottom nav (z-index 1000, shared.js) so modal
+     action buttons stay tappable on phones. */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center; }
   .modal-overlay.open { display: flex; }
-  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 26px; width: 500px; max-width: 95vw; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 26px; width: 500px; max-width: 95vw; max-height: 90vh; overflow-y: auto; }
   .modal h2 { font-size: 1rem; margin-bottom: 20px; }
   .field { margin-bottom: 14px; }
   .field label { display: block; font-size: 0.72rem; color: var(--text2); margin-bottom: 5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
@@ -395,6 +397,7 @@
     <div class="main-tab" data-section="pins">📌 Pins</div>
     <div class="main-tab" data-section="events">🎪 Events</div>
     <div class="main-tab" data-section="backoffice">⚙ Back Office</div>
+    <div class="main-tab" data-action="newcat" title="Create a new product category" style="color:var(--text2)">＋ New Category</div>
   </div>
   <div class="header-stats">
     <div class="hstat">
@@ -1293,7 +1296,7 @@
     <div class="card">
       <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
         <span>All Events</span>
-        <span style="font-size:0.72rem;color:var(--text2)">Revenue auto-matched from Riser, Jet Tag &amp; Pin sales on event date(s)</span>
+        <span style="font-size:0.72rem;color:var(--text2)">Revenue auto-matched from Riser, Jet Tag, Pin &amp; custom-category sales on event date(s)</span>
       </div>
       <div class="table-wrap">
         <table>
@@ -1301,6 +1304,7 @@
             <th>Event</th><th>Date(s)</th><th>Location</th>
             <th class="num">Booth Cost</th><th class="num">Risers Rev</th>
             <th class="num">Tags Rev</th><th class="num">Pins Rev</th>
+            <th class="num">Other Rev</th>
             <th class="num">Total Rev</th><th class="num">Net Profit</th>
             <th></th>
           </tr></thead>
@@ -1407,6 +1411,105 @@
   </div>
 </div>
 
+<!-- ══ CUSTOM CATEGORY MODALS (shared by every user-created category) ══ -->
+
+<!-- Category Create / Edit Modal -->
+<div class="modal-overlay" id="catModal">
+  <div class="modal" style="width:520px">
+    <h2 id="cmTitle">New Category</h2>
+    <div style="font-size:0.76rem;color:var(--text2);margin:-6px 0 14px">A category gets its own tracker tab — inventory by item, stock orders with real costs, a sales log, and low-stock alerts — just like Jet Tags and Pins.</div>
+    <div class="field-row">
+      <div class="field"><label>Category Name</label><input type="text" id="cmName" maxlength="40" placeholder="e.g. Stickers"></div>
+      <div class="field"><label>Unit Name (singular)</label><input type="text" id="cmUnit" maxlength="20" placeholder="e.g. sticker"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Emoji (tab &amp; alerts)</label><input type="text" id="cmEmoji" maxlength="4" placeholder="🛍"></div>
+      <div class="field"><label>Accent Color</label><input type="color" id="cmColor" value="#0d9488" style="height:40px;padding:3px;width:100%"></div>
+    </div>
+    <div class="field"><label>Default Sell Price per Unit ($) — optional</label><input type="number" id="cmPrice" step="0.01" min="0" placeholder="e.g. 5.00"></div>
+    <div class="modal-actions" style="justify-content:space-between">
+      <button class="btn-ghost" id="cmDelete" style="color:var(--red);border-color:var(--red);display:none" onclick="deleteCategory()">Delete Category</button>
+      <div style="display:flex;gap:10px;margin-left:auto">
+        <button class="btn-ghost" onclick="closeCatModal()">Cancel</button>
+        <button class="btn-primary" id="cmSave" onclick="saveCategory()">Create Category</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Category New Item Modal -->
+<div class="modal-overlay" id="catItemModal">
+  <div class="modal" style="width:520px">
+    <h2 id="ciTitle">Add New Item</h2>
+    <div class="field"><label>Item Name</label><input type="text" id="ciName" maxlength="60" placeholder="e.g. Charizard"></div>
+    <div class="field-row">
+      <div class="field"><label>Date Purchased</label><input type="date" id="ciDate"></div>
+      <div class="field"><label>Qty Purchased</label><input type="number" id="ciQty" value="10" min="1"></div>
+    </div>
+    <div class="field">
+      <label>Total Cost of This Order ($) — what you paid</label>
+      <input type="number" id="ciCost" step="0.01" min="0" placeholder="e.g. 8.50 (optional)">
+    </div>
+    <div class="field"><label>Notes (optional)</label><input type="text" id="ciNotes" placeholder="e.g. First batch of this item"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeCatItemModal()">Cancel</button>
+      <button class="btn-primary" id="ciSave" onclick="saveCatItem()">Add Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- Category Restock / Order Modal -->
+<div class="modal-overlay" id="catOrderModal">
+  <div class="modal" style="width:580px">
+    <h2 id="coTitle">Restock — Log a Stock Order</h2>
+    <div style="font-size:0.76rem;color:var(--text2);margin:-6px 0 14px">One order, mixed contents: type a qty next to each item you reordered, add brand-new items below, and enter what the whole order cost — it splits across the units automatically.</div>
+    <div class="field-row">
+      <div class="field"><label>Date</label><input type="date" id="coDate"></div>
+      <div class="field"><label>Total Cost of Order ($) — what you paid</label><input type="number" id="coCost" step="0.01" min="0" placeholder="e.g. 42.00 (optional)" oninput="catUpdateOrderPreview()"></div>
+    </div>
+    <div class="field">
+      <label>Reorders — qty per item (leave 0 if not in this order)</label>
+      <div id="coQtyGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:6px;max-height:240px;overflow-y:auto;padding-right:2px"></div>
+    </div>
+    <div class="field">
+      <label>New items in this order</label>
+      <div id="coNewItems"></div>
+      <button class="btn-ghost" style="font-size:0.75rem;padding:5px 10px;margin-top:6px" onclick="catAddOrderNewItemRow()">+ Add new item</button>
+    </div>
+    <div id="coPreview" style="background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:4px;font-size:0.82rem;color:var(--text2);display:none"></div>
+    <div class="field"><label>Notes (optional)</label><input type="text" id="coNotes" placeholder="e.g. July vendor order"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeCatOrderModal()">Cancel</button>
+      <button class="btn-primary" id="coSave" onclick="saveCatOrder()">Save Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- Category Sale Modal -->
+<div class="modal-overlay" id="catSaleModal">
+  <div class="modal" style="width:520px">
+    <h2 id="csTitle">Log Sale</h2>
+    <div class="field-row">
+      <div class="field"><label>Date</label><input type="date" id="csDate"></div>
+      <div class="field"><label>Total Qty Sold</label><input type="number" id="csQty" value="1" min="1" oninput="catUpdateRevPreview()"></div>
+    </div>
+    <div class="field">
+      <label>Item(s) Sold — select one or more</label>
+      <div id="csItemSelect" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px"></div>
+    </div>
+    <div class="field">
+      <label id="csPriceLabel">Sale Price per Unit ($)</label>
+      <input type="number" id="csPrice" step="0.01" min="0" oninput="catUpdateRevPreview()">
+    </div>
+    <div id="csRevPreview" style="background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:4px;font-size:0.82rem;color:var(--text2);display:none"></div>
+    <div class="field"><label>Notes (optional)</label><input type="text" id="csNotes" placeholder="e.g. Card show, Whatnot, eBay"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeCatSaleModal()">Cancel</button>
+      <button class="btn-primary" id="csSave" onclick="saveCatSale()">Save Sale</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════════════════════════════════════ FAB ══ -->
 <!-- Context-aware FAB: shows the right "add" modal for the active section/tab -->
 <button class="fab" id="vpc-fab" onclick="vpcFabAction()" title="Quick add" aria-label="Add">＋</button>
@@ -1460,6 +1563,7 @@ function vpcFabAction() {
   if (sectionId === 'section-expenses') { openExpModal(); return; }
   if (sectionId === 'section-jettags') { openJtSaleModal(); return; }
   if (sectionId === 'section-pins') { openPinSaleModal(); return; }
+  if (sectionId.startsWith('section-cat-')) { openCatSaleModal(sectionId.slice('section-cat-'.length)); return; }
   if (sectionId === 'section-events') { openEvModal(); return; }
   // Sales section — check which sub-tab is active
   const activeTab = document.querySelector('#section-sales .tab.active');
@@ -1524,15 +1628,21 @@ function toast(msg) {
 // ══════════════════════════════════════════════════════════════
 //  MAIN NAV
 // ══════════════════════════════════════════════════════════════
-document.querySelectorAll('.main-tab').forEach(t => {
-  t.addEventListener('click', () => {
-    document.querySelectorAll('.main-tab').forEach(x => x.classList.remove('active'));
-    document.querySelectorAll('.section').forEach(x => x.classList.remove('active'));
-    t.classList.add('active');
-    document.getElementById('section-' + t.dataset.section).classList.add('active');
-    const fab = document.getElementById('vpc-fab');
-    if (fab) fab.style.display = t.dataset.section === 'backoffice' ? 'none' : '';
-  });
+// Delegated so tabs created at runtime (custom categories) work too.
+function activateMainTab(t) {
+  document.querySelectorAll('.main-tab').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(x => x.classList.remove('active'));
+  t.classList.add('active');
+  const section = document.getElementById('section-' + t.dataset.section);
+  if (section) section.classList.add('active');
+  const fab = document.getElementById('vpc-fab');
+  if (fab) fab.style.display = t.dataset.section === 'backoffice' ? 'none' : '';
+}
+document.querySelector('.main-nav').addEventListener('click', (e) => {
+  const t = e.target.closest('.main-tab');
+  if (!t) return;
+  if (t.dataset.action === 'newcat') { openCatModal(); return; }
+  if (t.dataset.section) activateMainTab(t);
 });
 
 // ══════════════════════════════════════════════════════════════
@@ -3613,7 +3723,8 @@ function backupKeys() {
   const synced = (window.VpcSync && window.VpcSync.SYNC_KEYS) || [];
   const local  = [LS_ORDERS, GOALS_KEY, EXP_KEY, JT_KEY, JT_RESTOCK_KEY, JT_CHARS_KEY,
                   PIN_KEY, PIN_RESTOCK_KEY, PIN_CHARS_KEY, EV_KEY, LS_PRINTER_CREDITS,
-                  LS_GOAL_KEY, LS_FILAMENT_KEY];
+                  LS_GOAL_KEY, LS_FILAMENT_KEY, VPCUtil.KEYS.categories,
+                  VPCUtil.KEYS.catItems, VPCUtil.KEYS.catRestocks, VPCUtil.KEYS.catSales];
   return [...new Set([...synced, ...local])];
 }
 
@@ -4817,6 +4928,648 @@ document.getElementById('pinCharModal').addEventListener('click', e => { if (e.t
 // Init pins on load
 renderPinAll();
 
+// ══════════════════════════════════════════════════════════════
+//  CUSTOM CATEGORIES — user-created product trackers
+// ══════════════════════════════════════════════════════════════
+// The same tracker Jet Tags and Pins get (stat bar, per-item inventory,
+// stock orders with real costs, weighted-average COGS, sales log, low-stock
+// warnings) but fully data-driven: categories are created from the nav's
+// "＋ New Category" tab, and every record lives in four fixed VPCUtil.KEYS
+// stores tagged with catId — so cloud sync, backups, and cross-page revenue
+// rollups (VPCUtil.customCatTotals) need no per-category changes.
+const CAT_KEY          = VPCUtil.KEYS.categories;
+const CAT_ITEMS_KEY    = VPCUtil.KEYS.catItems;
+const CAT_RESTOCKS_KEY = VPCUtil.KEYS.catRestocks;
+const CAT_SALES_KEY    = VPCUtil.KEYS.catSales;
+
+const getCats           = () => JSON.parse(localStorage.getItem(CAT_KEY) || '[]');
+const saveCats          = a  => localStorage.setItem(CAT_KEY, JSON.stringify(a));
+const getCatItemsAll    = () => JSON.parse(localStorage.getItem(CAT_ITEMS_KEY) || '[]');
+const saveCatItems      = a  => localStorage.setItem(CAT_ITEMS_KEY, JSON.stringify(a));
+const getCatRestocksAll = () => JSON.parse(localStorage.getItem(CAT_RESTOCKS_KEY) || '[]');
+const saveCatRestocks   = a  => localStorage.setItem(CAT_RESTOCKS_KEY, JSON.stringify(a));
+const getCatSalesAll    = () => JSON.parse(localStorage.getItem(CAT_SALES_KEY) || '[]');
+const saveCatSales      = a  => localStorage.setItem(CAT_SALES_KEY, JSON.stringify(a));
+
+const catById     = id => getCats().find(c => c.id === id);
+const catItems    = id => getCatItemsAll().filter(i => i.catId === id);
+const catRestocks = id => getCatRestocksAll().filter(r => r.catId === id);
+const catSales    = id => getCatSalesAll().filter(s => s.catId === id);
+// Shared math (same numbers every other page sees in its rollups).
+const catTotalsFor   = id => VPCUtil.customCatTotals().find(t => t.cat.id === id);
+
+const catAccent  = c => /^#[0-9a-fA-F]{6}$/.test(c.color || '') ? c.color : '#0d9488';
+const catEmoji  = c => (c.emoji || '').trim() || '🛍';
+const catUnit   = c => (c.unit || '').trim().toLowerCase() || 'item';
+const catPlural = (c, n) => { const u = catUnit(c); return n === 1 ? u : u + 's'; };
+const catCap    = s => s.charAt(0).toUpperCase() + s.slice(1);
+const hexRgba   = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; };
+
+let CAT_ACTIVE  = null; // catId the open sale/order/item modal acts on
+let CAT_EDITING = null; // catId open in the category modal (null = creating)
+
+// Unique slug id within `taken`.
+function catSlugId(name, taken, fallback) {
+  let id = name.toLowerCase().replace(/[^a-z0-9]+/g, '') || fallback;
+  for (let n = 2; taken.has(id); n++) id = id.replace(/\d+$/, '') + n;
+  return id;
+}
+
+function catSectionHtml(cat) {
+  const color = catAccent(cat);
+  return `<div class="section" id="section-cat-${cat.id}" data-cat="${cat.id}">
+  <div class="pin-stat-bar">
+    <div class="pintat"><div class="pintat-num green" data-hook="revenue">$0.00</div><div class="pintat-label">Revenue</div></div>
+    <div class="pintat"><div class="pintat-num" style="color:${color}" data-hook="profit">$0.00</div><div class="pintat-label">Gross Profit</div></div>
+    <div class="pintat"><div class="pintat-num" style="color:var(--yellow)" data-hook="margin">—</div><div class="pintat-label">Gross Margin</div></div>
+    <div class="pintat"><div class="pintat-num" style="color:var(--text2)" data-hook="cogs">$0.00</div><div class="pintat-label">COGS</div></div>
+    <div class="pintat"><div class="pintat-num" style="color:var(--text2)" data-hook="invcost">$0.00</div><div class="pintat-label" data-hook="invcostlabel">Inventory Cost</div></div>
+    <div class="pintat"><div class="pintat-num" style="color:var(--accent2)" data-hook="sold">0</div><div class="pintat-label">${esc(catCap(catPlural(cat, 2)))} Sold</div></div>
+    <div class="pintat"><div class="pintat-num" data-hook="remaining">0</div><div class="pintat-label">In Stock</div></div>
+  </div>
+  <main>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px">
+      <div>
+        <div style="font-size:1rem;font-weight:800">${esc(catEmoji(cat))} ${esc(cat.name)} Tracker</div>
+        <div style="font-size:0.78rem;color:var(--text2);margin-top:3px" data-hook="subtitle"></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-ghost" onclick="openCatModal('${cat.id}')" title="Rename, restyle, or delete this category">✎ Edit</button>
+        <button class="btn-ghost" onclick="openCatItemModal('${cat.id}')">+ New Item</button>
+        <button class="btn-ghost" onclick="openCatOrderModal('${cat.id}')">+ Restock</button>
+        <button class="btn-primary" style="background:${color}" onclick="openCatSaleModal('${cat.id}')">+ Log Sale</button>
+      </div>
+    </div>
+    <div class="grid-2" style="margin-bottom:20px">
+      <div class="card">
+        <div class="card-title">🏆 Top Sellers by Item</div>
+        <div data-hook="topsellers"></div>
+      </div>
+      <div class="card" data-hook="lowstockcard">
+        <div class="card-title" data-hook="lowstocktitle">⚠️ Low Stock Warning</div>
+        <div data-hook="lowstocklist"></div>
+      </div>
+    </div>
+    <div class="grid-2" style="margin-bottom:20px">
+      <div class="card" style="grid-column:1/-1">
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+          <span>Inventory by Item</span>
+          <span style="font-size:0.72rem;color:var(--text2)" data-hook="invdate"></span>
+        </div>
+        <div data-hook="invgrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:4px"></div>
+      </div>
+    </div>
+    <div class="grid-2" style="margin-bottom:20px">
+      <div class="card" style="grid-column:1/-1">
+        <div class="card-title">📦 Order &amp; Restock History</div>
+        <div style="font-size:0.74rem;color:var(--text2);margin-bottom:10px">Every batch you've bought — new items and reorders — with what each one cost you.</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Type</th><th>Item</th><th class="num">Qty</th><th class="num">Cost</th><th class="num">Cost/Unit</th><th>Notes</th><th></th></tr></thead>
+            <tbody data-hook="orderstbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Sales Log</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Date</th><th>Item(s)</th><th class="num">Qty</th><th class="num">Revenue</th><th class="num">COGS</th><th class="num">Profit</th><th>Notes</th><th></th></tr></thead>
+          <tbody data-hook="salestbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>`;
+}
+
+// (Re)build every category tab + section. Tabs sit between Pins and Events.
+function buildCatUI(activateCatId) {
+  const prevActive = document.querySelector('.section.active')?.id || '';
+  document.querySelectorAll('.main-tab[data-cat], .section[data-cat]').forEach(el => el.remove());
+  const evTab     = document.querySelector('.main-tab[data-section="events"]');
+  const evSection = document.getElementById('section-events');
+  getCats().forEach(cat => {
+    evTab.insertAdjacentHTML('beforebegin',
+      `<div class="main-tab" data-section="cat-${cat.id}" data-cat="${cat.id}">${esc(catEmoji(cat))} ${esc(cat.name)}</div>`);
+    evSection.insertAdjacentHTML('beforebegin', catSectionHtml(cat));
+    renderCatSection(cat.id);
+  });
+  const wantSection = activateCatId ? `section-cat-${activateCatId}` : prevActive;
+  if (activateCatId || !document.querySelector('.section.active')) {
+    const tab = document.querySelector(`.main-tab[data-section="${wantSection.replace(/^section-/, '')}"]`)
+      || document.querySelector('.main-tab[data-section="sales"]');
+    activateMainTab(tab);
+  }
+}
+
+function renderCatSection(catId) {
+  const root = document.getElementById('section-cat-' + catId);
+  const cat  = catById(catId);
+  const t    = catTotalsFor(catId);
+  if (!root || !cat || !t) return;
+  const q = h => root.querySelector(`[data-hook="${h}"]`);
+  const color = catAccent(cat), unit = catUnit(cat);
+  q('revenue').textContent = fmt$(t.revenue);
+  q('profit').textContent  = fmt$(t.profit);
+  q('profit').style.color  = t.profit >= 0 ? color : 'var(--red)';
+  const margin = t.revenue > 0 ? (t.profit / t.revenue * 100) : 0;
+  q('margin').textContent = t.revenue > 0 ? margin.toFixed(1) + '%' : '—';
+  q('margin').style.color = margin >= 60 ? 'var(--green)' : margin >= 40 ? 'var(--yellow)' : 'var(--red)';
+  q('cogs').textContent    = fmt$(t.cogs);
+  q('invcost').textContent = fmt$(t.cost);
+  q('invcostlabel').textContent = t.units > 0 ? `Inventory Cost · ${fmt$(t.avgCost)}/${unit}` : 'Inventory Cost';
+  q('sold').textContent      = t.qtySold;
+  q('remaining').textContent = t.left;
+  q('invdate').textContent   = 'As of ' + new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  q('subtitle').textContent  = t.units > 0
+    ? `${t.units} ${catPlural(cat, t.units)} purchased · ${fmt$(t.cost)} inventory cost · avg ${fmt$(t.avgCost)}/${unit}${cat.sellPrice != null ? ` · $${(+cat.sellPrice).toFixed(2)}/ea sell price` : ''}`
+    : 'No stock yet — add your first items with + New Item or + Restock.';
+  renderCatInvGrid(cat, t, q('invgrid'));
+  renderCatOrderHistory(cat, q('orderstbody'));
+  renderCatSalesLog(cat, t, q('salestbody'));
+  renderCatTopSellers(t, q('topsellers'), color);
+  renderCatLowStock(cat, t, q('lowstocktitle'), q('lowstocklist'), q('lowstockcard'));
+}
+
+function renderCatInvGrid(cat, t, el) {
+  if (!t.stock.length) {
+    el.innerHTML = `<div style="grid-column:1/-1;color:var(--text2);font-size:.83rem;padding:12px 0">No items yet — click <strong>+ New Item</strong> to add your first ${esc(catUnit(cat))}.</div>`;
+    return;
+  }
+  const baseById = {};
+  catItems(cat.id).forEach(i => { baseById[i.id] = +i.purchased || 0; });
+  el.innerHTML = t.stock.map(s => {
+    const base = baseById[s.id] || 0, restocked = s.effective - base;
+    const pct    = s.effective ? (s.left / s.effective) * 100 : 0;
+    const barCls = s.left === 0 ? 'sold-out' : s.left <= 3 ? 'low' : '';
+    const numCol = s.left === 0 ? 'color:var(--red)' : s.left <= 3 ? 'color:var(--yellow)' : 'color:var(--green)';
+    const breakdown = restocked > 0
+      ? `<div style="font-size:0.68rem;color:${catAccent(cat)}">↺ ${base} original + ${restocked} reordered</div>`
+      : '';
+    return `<div class="pin-card">
+      <div class="pin-name">${esc(s.name)}</div>
+      <div class="pin-bar-bg"><div class="pin-bar-fill ${barCls}" style="width:${pct}%"></div></div>
+      <div class="pin-nums">
+        <span style="${numCol};font-weight:700">${s.left} left</span>
+        <span>${s.sold}/${s.effective} sold</span>
+      </div>${breakdown}
+    </div>`;
+  }).join('');
+}
+
+function renderCatOrderHistory(cat, tbody) {
+  const nameById = {};
+  catItems(cat.id).forEach(i => { nameById[i.id] = i.name; });
+  const rows = [];
+  catItems(cat.id).forEach(i => rows.push({
+    kind: 'new', date: i.date || '', name: i.name, qty: +i.purchased || 0,
+    cost: (typeof i.cost === 'number' && !isNaN(i.cost)) ? i.cost : null,
+    notes: i.notes || '', id: i.id,
+  }));
+  catRestocks(cat.id).forEach(r => rows.push({
+    kind: 'restock', date: r.date || '', name: nameById[r.itemId] || r.itemId, qty: +r.qty || 0,
+    cost: (typeof r.cost === 'number' && !isNaN(r.cost)) ? r.cost : null,
+    notes: r.notes || '', id: r.id,
+  }));
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text2)">No orders yet — log your first stock with <strong>+ New Item</strong> or <strong>+ Restock</strong>.</td></tr>`;
+    return;
+  }
+  rows.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const color = catAccent(cat);
+  const badge = (bg, c, txt) =>
+    `<span style="font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:99px;background:${bg};color:${c};white-space:nowrap">${txt}</span>`;
+  tbody.innerHTML = rows.map(r => {
+    const type = r.kind === 'new'
+      ? badge('rgba(74,222,128,0.12)', 'var(--green)', '🆕 New item')
+      : badge(hexRgba(color, 0.14), color, '↺ Reorder');
+    const costTxt = r.cost != null ? fmt$(r.cost) : '—';
+    const unitTxt = (r.cost != null && r.qty > 0) ? fmt$(r.cost / r.qty) : '—';
+    const del = r.kind === 'restock'
+      ? `<button class="icon-btn" onclick="deleteCatRestock('${cat.id}','${r.id}')" title="Delete restock entry">✕</button>`
+      : `<button class="icon-btn" onclick="deleteCatItem('${cat.id}','${r.id}')" title="Delete item">✕</button>`;
+    return `<tr>
+      <td>${r.date ? fmtDate(r.date) : '—'}</td>
+      <td>${type}</td>
+      <td>${esc(r.name)}</td>
+      <td class="num">${r.qty}</td>
+      <td class="num">${costTxt}</td>
+      <td class="num" style="color:var(--text2)">${unitTxt}</td>
+      <td style="color:var(--text2);font-size:0.78rem">${esc(r.notes)}</td>
+      <td>${del}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderCatSalesLog(cat, t, tbody) {
+  const sales = catSales(cat.id).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  if (!sales.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text2)">No sales logged yet — click <strong>+ Log Sale</strong> to start tracking.</td></tr>`;
+    return;
+  }
+  const nameById = {};
+  catItems(cat.id).forEach(i => { nameById[i.id] = i.name; });
+  const color = catAccent(cat);
+  tbody.innerHTML = sales.map(s => {
+    const cogs   = (s.qty || 0) * t.avgCost;
+    const profit = (s.revenue || 0) - cogs;
+    const items  = (s.items || []).map(iid => nameById[iid] || iid).join(', ');
+    return `<tr>
+      <td>${fmtDate(s.date)}</td>
+      <td>${esc(items || '—')}</td>
+      <td class="num">${s.qty}</td>
+      <td class="num green">${fmt$(s.revenue)}</td>
+      <td class="num" style="color:var(--text2)">${fmt$(cogs)}</td>
+      <td class="num" style="color:${profit >= 0 ? color : 'var(--red)'}">${fmt$(profit)}</td>
+      <td style="color:var(--text2);font-size:0.78rem">${esc(s.notes || '')}</td>
+      <td><button class="icon-btn" onclick="deleteCatSale('${cat.id}','${s.id}')" title="Delete">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderCatTopSellers(t, el, color) {
+  const sorted = t.stock.slice().sort((a, b) => b.sold - a.sold);
+  const withSales = sorted.filter(i => i.sold > 0);
+  if (!withSales.length) {
+    el.innerHTML = '<div style="color:var(--text2);font-size:.83rem;padding:16px 0">No sales yet — log a sale to see rankings.</div>';
+    return;
+  }
+  const max = withSales[0].sold;
+  el.innerHTML = sorted.map((i, idx) => {
+    if (i.sold === 0) return '';
+    const pct = (i.sold / max * 100).toFixed(0);
+    const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉'
+      : `<span style="display:inline-block;width:18px;text-align:center;font-size:.72rem;color:var(--text2);font-weight:700">${idx + 1}</span>`;
+    const barColor = idx === 0 ? '#f59e0b' : idx === 1 ? '#94a3b8' : idx === 2 ? '#cd7f32' : color;
+    return `<div style="margin-bottom:11px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+        <span style="font-size:.83rem;font-weight:600;display:flex;align-items:center;gap:5px">${medal} ${esc(i.name)}</span>
+        <span style="font-size:.8rem;font-weight:700;color:${barColor};font-variant-numeric:tabular-nums">${i.sold} sold</span>
+      </div>
+      <div style="background:var(--surface2);border-radius:99px;height:8px;overflow:hidden">
+        <div style="width:${pct}%;background:${barColor};border-radius:99px;height:8px"></div>
+      </div>
+      <div style="font-size:.7rem;color:var(--text2);margin-top:3px">${(i.sold / i.effective * 100).toFixed(0)}% of stock moved · ${i.effective - i.sold} remaining</div>
+    </div>`;
+  }).filter(Boolean).join('');
+}
+
+function renderCatLowStock(cat, t, titleEl, listEl, cardEl) {
+  if (!t.stock.length) {
+    titleEl.textContent = '⚠️ Low Stock Warning';
+    cardEl.style.borderLeft = '';
+    listEl.innerHTML = '<div style="color:var(--text2);font-size:.83rem;padding:16px 0">Add items to start tracking stock levels.</div>';
+    return;
+  }
+  const items = t.stock.filter(i => i.left <= 3).sort((a, b) => a.left - b.left);
+  if (!items.length) {
+    titleEl.textContent = '✅ Stock Levels';
+    cardEl.style.borderLeft = '3px solid var(--green)';
+    listEl.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:14px 0"><span style="font-size:1.6rem">✅</span><span style="color:var(--green);font-size:.88rem;font-weight:600">All ${esc(catPlural(cat, 2))} well-stocked</span></div>`;
+    return;
+  }
+  const soldOut = items.filter(i => i.left === 0);
+  titleEl.innerHTML = soldOut.length
+    ? `🚫 Low Stock — <span style="color:var(--red)">${soldOut.length} sold out</span>`
+    : `⚠️ Low Stock — <span style="color:var(--yellow)">${items.length} item${items.length > 1 ? 's' : ''}</span>`;
+  cardEl.style.borderLeft = soldOut.length ? '3px solid var(--red)' : '3px solid var(--yellow)';
+  listEl.innerHTML = items.map(i => {
+    const isSoldOut = i.left === 0;
+    const color = isSoldOut ? 'var(--red)' : 'var(--yellow)';
+    const bg    = isSoldOut ? 'rgba(248,113,113,0.08)' : 'rgba(251,191,36,0.08)';
+    const bdr   = isSoldOut ? 'rgba(248,113,113,0.25)' : 'rgba(251,191,36,0.25)';
+    const icon  = isSoldOut ? '🚫' : i.left === 1 ? '🔴' : '⚠️';
+    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:9px;background:${bg};margin-bottom:8px;border:1px solid ${bdr}">
+      <span style="font-size:1.1rem;flex-shrink:0">${icon}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.85rem;font-weight:700">${esc(i.name)}</div>
+        <div style="font-size:.7rem;color:var(--text2);margin-top:1px">${i.effective ? (i.sold / i.effective * 100).toFixed(0) : 0}% sold · ${i.sold}/${i.effective} moved</div>
+      </div>
+      <span style="font-size:.83rem;font-weight:800;color:${color};white-space:nowrap">${isSoldOut ? 'SOLD OUT' : i.left + ' remaining'}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── Category Create / Edit / Delete ──
+function openCatModal(catId) {
+  CAT_EDITING = catId || null;
+  const cat = catId ? catById(catId) : null;
+  document.getElementById('cmTitle').textContent = cat ? `Edit ${cat.name}` : 'New Category';
+  document.getElementById('cmName').value  = cat ? cat.name : '';
+  document.getElementById('cmUnit').value  = cat ? (cat.unit || '') : '';
+  document.getElementById('cmEmoji').value = cat ? (cat.emoji || '') : '';
+  document.getElementById('cmColor').value = cat ? catAccent(cat) : '#0d9488';
+  document.getElementById('cmPrice').value = cat && cat.sellPrice != null ? cat.sellPrice : '';
+  document.getElementById('cmSave').textContent = cat ? 'Save Changes' : 'Create Category';
+  document.getElementById('cmDelete').style.display = cat ? '' : 'none';
+  document.getElementById('catModal').classList.add('open');
+  if (!cat) document.getElementById('cmName').focus();
+}
+
+function closeCatModal() { document.getElementById('catModal').classList.remove('open'); }
+
+function saveCategory() {
+  const name  = document.getElementById('cmName').value.trim();
+  const unit  = document.getElementById('cmUnit').value.trim().toLowerCase();
+  const emoji = document.getElementById('cmEmoji').value.trim();
+  const color = document.getElementById('cmColor').value;
+  const price = parseFloat(document.getElementById('cmPrice').value);
+  if (!name) { toast('Give the category a name.'); return; }
+  const cats = getCats();
+  if (cats.some(c => c.name.toLowerCase() === name.toLowerCase() && c.id !== CAT_EDITING)) {
+    toast(`${name} already exists.`); return;
+  }
+  if (['jet tags', 'pins'].includes(name.toLowerCase())) {
+    toast(`${name} already exists as a built-in tracker.`); return;
+  }
+  if (CAT_EDITING) {
+    const cat = cats.find(c => c.id === CAT_EDITING);
+    if (!cat) return;
+    Object.assign(cat, { name, unit, emoji, color });
+    cat.sellPrice = (!isNaN(price) && price >= 0) ? price : null;
+    saveCats(cats); closeCatModal(); buildCatUI(cat.id);
+    toast(`${name} updated.`);
+  } else {
+    const id  = catSlugId(name, new Set(cats.map(c => c.id)), 'cat');
+    const cat = { id, name, unit, emoji, color, created: TODAY };
+    if (!isNaN(price) && price >= 0) cat.sellPrice = price;
+    cats.push(cat); saveCats(cats); closeCatModal(); buildCatUI(id);
+    toast(`${name} created — add stock with + New Item or + Restock.`);
+  }
+}
+
+function deleteCategory() {
+  const cat = catById(CAT_EDITING);
+  if (!cat) return;
+  const n = catSales(cat.id).length;
+  if (!confirm(`Delete ${cat.name}? Its items, restocks, and ${n} sale record${n === 1 ? '' : 's'} are permanently removed — they also stop counting toward your revenue totals.`)) return;
+  saveCats(getCats().filter(c => c.id !== cat.id));
+  saveCatItems(getCatItemsAll().filter(i => i.catId !== cat.id));
+  saveCatRestocks(getCatRestocksAll().filter(r => r.catId !== cat.id));
+  saveCatSales(getCatSalesAll().filter(s => s.catId !== cat.id));
+  closeCatModal(); buildCatUI();
+  toast(`${cat.name} deleted.`);
+}
+
+// ── New Item Modal ──
+function openCatItemModal(catId) {
+  const cat = catById(catId); if (!cat) return;
+  CAT_ACTIVE = catId;
+  document.getElementById('ciTitle').textContent = `Add Item — ${cat.name}`;
+  document.getElementById('ciName').value  = '';
+  document.getElementById('ciDate').value  = TODAY;
+  document.getElementById('ciQty').value   = 10;
+  document.getElementById('ciCost').value  = '';
+  document.getElementById('ciNotes').value = '';
+  document.getElementById('ciSave').style.background = catAccent(cat);
+  document.getElementById('catItemModal').classList.add('open');
+}
+
+function closeCatItemModal() { document.getElementById('catItemModal').classList.remove('open'); }
+
+function saveCatItem() {
+  const cat = catById(CAT_ACTIVE); if (!cat) return;
+  const name    = document.getElementById('ciName').value.trim();
+  const date    = document.getElementById('ciDate').value;
+  const qty     = parseInt(document.getElementById('ciQty').value);
+  const costVal = parseFloat(document.getElementById('ciCost').value);
+  const notes   = document.getElementById('ciNotes').value.trim();
+  if (!name) { toast('Enter an item name.'); return; }
+  if (!date || !qty || qty <= 0) { toast('Fill in Date and Qty.'); return; }
+  const items = catItems(cat.id);
+  if (items.some(i => i.name.toLowerCase() === name.toLowerCase())) {
+    toast(`${name} already exists — use + Restock to add stock.`); return;
+  }
+  const id  = catSlugId(name, new Set(items.map(i => i.id)), 'item');
+  const rec = { id, catId: cat.id, name, purchased: qty, date, notes };
+  if (!isNaN(costVal) && costVal >= 0) rec.cost = costVal;
+  saveCatItems([...getCatItemsAll(), rec]);
+  closeCatItemModal(); renderCatSection(cat.id);
+  toast(`${name} added with ${qty} ${catPlural(cat, qty)} in stock!`);
+}
+
+// ── Restock / Order Modal ──
+// One order can mix reorders (qty per existing item) and brand-new items;
+// a single order total is split across all units by qty.
+function openCatOrderModal(catId) {
+  const cat = catById(catId); if (!cat) return;
+  CAT_ACTIVE = catId;
+  const t = catTotalsFor(catId);
+  document.getElementById('coTitle').textContent = `Restock ${cat.name} — Log a Stock Order`;
+  document.getElementById('coDate').value  = TODAY;
+  document.getElementById('coCost').value  = '';
+  document.getElementById('coNotes').value = '';
+  document.getElementById('coNewItems').innerHTML = '';
+  document.getElementById('coSave').style.background = catAccent(cat);
+  document.getElementById('coQtyGrid').innerHTML = t.stock.length ? t.stock.map(s => {
+    const leftCol = s.left === 0 ? 'var(--red)' : s.left <= 3 ? 'var(--yellow)' : 'var(--text2)';
+    return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 10px">
+      <span style="font-size:0.78rem;font-weight:600;min-width:0">${esc(s.name)}<br><span style="font-size:0.65rem;font-weight:400;color:${leftCol}">${s.left} left</span></span>
+      <input type="number" min="0" value="0" data-itemid="${s.id}" class="co-order-qty" oninput="catUpdateOrderPreview()" style="width:64px;padding:6px 8px;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:0.85rem;outline:none">
+    </div>`;
+  }).join('') : `<div style="grid-column:1/-1;color:var(--text2);font-size:.8rem;padding:4px 0">No items yet — add the order's items below.</div>`;
+  catUpdateOrderPreview();
+  document.getElementById('catOrderModal').classList.add('open');
+}
+
+function closeCatOrderModal() { document.getElementById('catOrderModal').classList.remove('open'); }
+
+function catAddOrderNewItemRow() {
+  const row = document.createElement('div');
+  row.className = 'co-order-newitem';
+  row.style.cssText = 'display:flex;gap:6px;align-items:center;margin-top:6px';
+  row.innerHTML = `
+    <input type="text" placeholder="Item name" maxlength="60" class="co-ni-name" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);padding:7px 10px;font-size:0.82rem;outline:none">
+    <input type="number" min="1" value="10" class="co-ni-qty" oninput="catUpdateOrderPreview()" style="width:64px;padding:6px 8px;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:0.85rem;outline:none">
+    <button class="icon-btn" onclick="this.parentElement.remove();catUpdateOrderPreview()" title="Remove">✕</button>`;
+  document.getElementById('coNewItems').appendChild(row);
+  row.querySelector('.co-ni-name').focus();
+}
+
+// Read the order form: reorder lines (qty > 0) + new-item lines.
+function catOrderLines() {
+  const lines = [];
+  document.querySelectorAll('#coQtyGrid .co-order-qty').forEach(inp => {
+    const qty = parseInt(inp.value) || 0;
+    if (qty > 0) lines.push({ itemId: inp.dataset.itemid, qty });
+  });
+  const newItems = [];
+  document.querySelectorAll('#coNewItems .co-order-newitem').forEach(row => {
+    newItems.push({
+      name: row.querySelector('.co-ni-name').value.trim(),
+      qty: parseInt(row.querySelector('.co-ni-qty').value) || 0,
+    });
+  });
+  return { lines, newItems };
+}
+
+function catUpdateOrderPreview() {
+  const cat = catById(CAT_ACTIVE); if (!cat) return;
+  const { lines, newItems } = catOrderLines();
+  const valid = newItems.filter(ni => ni.name && ni.qty > 0);
+  const totalQty = lines.reduce((s, l) => s + l.qty, 0) + valid.reduce((s, l) => s + l.qty, 0);
+  const el = document.getElementById('coPreview');
+  if (totalQty <= 0) { el.style.display = 'none'; return; }
+  const cost = parseFloat(document.getElementById('coCost').value);
+  const nItems = lines.length + valid.length;
+  const costTxt = (!isNaN(cost) && cost >= 0)
+    ? `&nbsp;·&nbsp; ${fmt$(cost)} total = <strong style="color:var(--text)">${fmt$(cost / totalQty)}/${esc(catUnit(cat))}</strong>`
+    : '&nbsp;·&nbsp; no cost entered — this batch won’t add to your cost basis';
+  el.style.display = 'block';
+  el.innerHTML = `<strong style="color:var(--text)">This order:</strong> ${totalQty} ${esc(catPlural(cat, totalQty))} across ${nItems} item${nItems > 1 ? 's' : ''}${costTxt}`;
+}
+
+function saveCatOrder() {
+  const cat = catById(CAT_ACTIVE); if (!cat) return;
+  const date    = document.getElementById('coDate').value;
+  const costVal = parseFloat(document.getElementById('coCost').value);
+  const hasCost = !isNaN(costVal) && costVal >= 0;
+  const notes   = document.getElementById('coNotes').value.trim();
+  if (!date) { toast('Pick a date.'); return; }
+  const { lines, newItems } = catOrderLines();
+  for (const ni of newItems) {
+    if (!ni.name) { toast('Fill in a name for each new item row (or remove it).'); return; }
+    if (ni.qty <= 0) { toast(`Enter a qty for ${ni.name}.`); return; }
+  }
+  const totalQty = lines.reduce((s, l) => s + l.qty, 0) + newItems.reduce((s, l) => s + l.qty, 0);
+  if (totalQty <= 0) { toast('Enter a qty for at least one item.'); return; }
+  const existing  = catItems(cat.id);
+  const seenNames = new Set(existing.map(i => i.name.toLowerCase()));
+  for (const ni of newItems) {
+    if (seenNames.has(ni.name.toLowerCase())) { toast(`${ni.name} already exists — set its qty in the reorder list instead.`); return; }
+    seenNames.add(ni.name.toLowerCase());
+  }
+  const unit  = hasCost ? costVal / totalQty : null;
+  const share = q => +(q * unit).toFixed(2);
+
+  const restocks = getCatRestocksAll();
+  lines.forEach(l => {
+    const entry = { id: uid(), catId: cat.id, date, itemId: l.itemId, qty: l.qty, notes };
+    if (hasCost) entry.cost = share(l.qty);
+    restocks.push(entry);
+  });
+  saveCatRestocks(restocks);
+
+  if (newItems.length) {
+    const all   = getCatItemsAll();
+    const taken = new Set(existing.map(i => i.id));
+    newItems.forEach(ni => {
+      const id = catSlugId(ni.name, taken, 'item');
+      taken.add(id);
+      const rec = { id, catId: cat.id, name: ni.name, purchased: ni.qty, date, notes };
+      if (hasCost) rec.cost = share(ni.qty);
+      all.push(rec);
+    });
+    saveCatItems(all);
+  }
+  closeCatOrderModal(); renderCatSection(cat.id);
+  const nItems = lines.length + newItems.length;
+  toast(`Order logged: ${totalQty} ${catPlural(cat, totalQty)} across ${nItems} item${nItems > 1 ? 's' : ''}${hasCost ? ' · ' + fmt$(costVal) : ''}!`);
+}
+
+// ── Sale Modal ──
+function openCatSaleModal(catId) {
+  const cat = catById(catId); if (!cat) return;
+  CAT_ACTIVE = catId;
+  const t = catTotalsFor(catId);
+  document.getElementById('csTitle').textContent = `Log ${cat.name} Sale`;
+  document.getElementById('csDate').value  = TODAY;
+  document.getElementById('csQty').value   = 1;
+  document.getElementById('csPrice').value = cat.sellPrice != null ? (+cat.sellPrice).toFixed(2) : '';
+  document.getElementById('csNotes').value = '';
+  document.getElementById('csPriceLabel').textContent = `Sale Price per ${catCap(catUnit(cat))} ($)`;
+  document.getElementById('csSave').style.background = catAccent(cat);
+  document.getElementById('csItemSelect').innerHTML = t.stock.length ? t.stock.map(s => {
+    const disabled = s.left <= 0 ? 'style="opacity:0.4;pointer-events:none"' : '';
+    return `<div class="pin-char-btn" data-itemid="${s.id}" onclick="catToggleItem(this)" ${disabled}>
+      ${esc(s.name)}<br><span style="font-size:0.65rem;font-weight:400;color:var(--text2)">${s.left} left</span>
+    </div>`;
+  }).join('') : `<div style="grid-column:1/-1;color:var(--text2);font-size:.8rem;padding:4px 0">No items yet — add stock first with + New Item or + Restock.</div>`;
+  document.getElementById('csRevPreview').style.display = 'none';
+  document.getElementById('catSaleModal').classList.add('open');
+}
+
+function closeCatSaleModal() { document.getElementById('catSaleModal').classList.remove('open'); }
+
+function catToggleItem(el) { el.classList.toggle('selected'); catUpdateRevPreview(); }
+
+function catUpdateRevPreview() {
+  const cat = catById(CAT_ACTIVE); if (!cat) return;
+  const qty   = parseInt(document.getElementById('csQty').value) || 0;
+  const price = parseFloat(document.getElementById('csPrice').value) || 0;
+  const t = catTotalsFor(CAT_ACTIVE);
+  const revenue = qty * price, cogs = qty * t.avgCost, profit = revenue - cogs;
+  const preview = document.getElementById('csRevPreview');
+  if (qty > 0) {
+    preview.style.display = 'block';
+    preview.innerHTML = `<strong style="color:var(--text)">Preview:</strong>
+      ${qty} ${esc(catPlural(cat, qty))} × ${fmt$(price)} = <strong style="color:var(--green)">${fmt$(revenue)}</strong>
+      &nbsp;·&nbsp; COGS ${fmt$(cogs)} &nbsp;·&nbsp; Profit <strong style="color:${catAccent(cat)}">${fmt$(profit)}</strong>`;
+  } else { preview.style.display = 'none'; }
+}
+
+function saveCatSale() {
+  const cat = catById(CAT_ACTIVE); if (!cat) return;
+  const date  = document.getElementById('csDate').value;
+  const qty   = parseInt(document.getElementById('csQty').value);
+  const price = parseFloat(document.getElementById('csPrice').value);
+  const notes = document.getElementById('csNotes').value.trim();
+  if (!date || !qty || qty <= 0 || isNaN(price)) { toast('Fill in Date, Qty, and Price.'); return; }
+  const selected = [...document.querySelectorAll('#csItemSelect .pin-char-btn.selected')];
+  const items    = selected.map(el => el.dataset.itemid);
+  const itemQty  = {};
+  if (items.length > 0) {
+    const base = Math.floor(qty / items.length), rem = qty - base * items.length;
+    items.forEach((iid, i) => { itemQty[iid] = base + (i === 0 ? rem : 0); });
+  }
+  const t = catTotalsFor(cat.id);
+  for (const iid of items) {
+    const s = t.stock.find(x => x.id === iid);
+    if (s && itemQty[iid] > s.left) { toast(`Not enough ${s.name} in stock!`); return; }
+  }
+  saveCatSales([...getCatSalesAll(), { id: uid(), catId: cat.id, date, qty, revenue: qty * price, items, itemQty, notes }]);
+  closeCatSaleModal(); renderCatSection(cat.id);
+  toast(`${cat.name} sale logged!`);
+}
+
+// ── Deletes ──
+function deleteCatSale(catId, id) {
+  if (!confirm('Delete this sale entry?')) return;
+  saveCatSales(getCatSalesAll().filter(s => !(s.catId === catId && s.id === id)));
+  renderCatSection(catId); toast('Sale deleted.');
+}
+
+function deleteCatRestock(catId, id) {
+  if (!confirm('Delete this restock entry? Its qty and cost are removed from inventory.')) return;
+  saveCatRestocks(getCatRestocksAll().filter(r => !(r.catId === catId && r.id === id)));
+  renderCatSection(catId); toast('Restock entry deleted.');
+}
+
+function deleteCatItem(catId, id) {
+  const item = catItems(catId).find(i => i.id === id);
+  if (!item) return;
+  const t = catTotalsFor(catId);
+  const sold = (t.stock.find(s => s.id === id) || {}).sold || 0;
+  const msg = sold > 0
+    ? `Delete ${item.name}? ${sold} sold unit(s) reference it — sales keep their revenue but lose the item name.`
+    : `Delete ${item.name} and its restock history?`;
+  if (!confirm(msg)) return;
+  saveCatItems(getCatItemsAll().filter(i => !(i.catId === catId && i.id === id)));
+  saveCatRestocks(getCatRestocksAll().filter(r => !(r.catId === catId && r.itemId === id)));
+  renderCatSection(catId); toast(`${item.name} removed.`);
+}
+
+['catModal', 'catItemModal', 'catOrderModal', 'catSaleModal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', e => {
+    if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+  });
+});
+
+// Build category tabs + sections on load
+buildCatUI();
+
 
 
 document.getElementById('headerDate').textContent =
@@ -4852,9 +5605,10 @@ function evCalcRevenue(ev) {
   const riserCogs = getOrders().filter(o => dates.includes(o.date)).reduce((s, o) => s + o.cogs, 0);
   const jtRev = getJtSales().filter(s => dates.includes(s.date)).reduce((s, x) => s + x.revenue, 0);
   const pinRev = getPinSales().filter(s => dates.includes(s.date)).reduce((s, x) => s + x.revenue, 0);
-  const totalRev = riserRev + jtRev + pinRev;
+  const otherRev = getCatSalesAll().filter(s => dates.includes(s.date)).reduce((s, x) => s + (x.revenue || 0), 0);
+  const totalRev = riserRev + jtRev + pinRev + otherRev;
   const netProfit = totalRev - riserCogs - (ev.boothCost || 0);
-  return { riserRev, jtRev, pinRev, totalRev, netProfit };
+  return { riserRev, jtRev, pinRev, otherRev, totalRev, netProfit };
 }
 
 function renderEvAll() {
@@ -4874,12 +5628,13 @@ function renderEvAll() {
       <td class="num" style="color:var(--text2)">${fmt$(r.riserRev)}</td>
       <td class="num" style="color:var(--text2)">${fmt$(r.jtRev)}</td>
       <td class="num" style="color:var(--text2)">${fmt$(r.pinRev)}</td>
+      <td class="num" style="color:var(--text2)">${fmt$(r.otherRev)}</td>
       <td class="num green">${fmt$(r.totalRev)}</td>
       <td class="num" style="color:${profColor};font-weight:700">${fmt$(r.netProfit)}</td>
       <td><button class="icon-btn" onclick="deleteEvent('${ev.id}')">✕</button></td>
     </tr>`;
   }).join('');
-  document.getElementById('evTbody').innerHTML = rows || '<tr><td colspan="10" style="color:var(--text2);text-align:center;padding:20px">No events logged yet — click "+ Log Event" to add one</td></tr>';
+  document.getElementById('evTbody').innerHTML = rows || '<tr><td colspan="11" style="color:var(--text2);text-align:center;padding:20px">No events logged yet — click "+ Log Event" to add one</td></tr>';
   document.getElementById('evTotalRev').textContent = fmt$(totalRev);
   document.getElementById('evTotalProfit').textContent = fmt$(totalProfit);
   document.getElementById('evTotalEvents').textContent = events.length;

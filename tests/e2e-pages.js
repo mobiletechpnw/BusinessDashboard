@@ -306,6 +306,49 @@ async function runProfile(browser, { name, viewport, mobile, seeded }) {
     await pg.close();
   }
 
+  // Custom categories: create one from the nav, confirm its tracker renders,
+  // then delete it — the whole lifecycle must produce no page errors.
+  {
+    const pg = await ctx.newPage();
+    const errs = [];
+    pg.on('pageerror', (e) => errs.push(`pageerror: ${e.message}`));
+    pg.on('dialog', (d) => d.accept());
+    await pg.goto(BASE + 'vault-pine-collective.html', {
+      waitUntil: 'domcontentloaded',
+      timeout: 15000,
+    });
+    // The floating Business Sensei panel slides in on a 3.5s timer and can
+    // sit over modal buttons, intercepting clicks — dismiss it for today
+    // (same switch its "Don't show today" button flips) before loading.
+    await pg.addInitScript(() => {
+      localStorage.setItem('vpc_sensei_dismissed_' + new Date().toDateString(), '1');
+    });
+    await pg.reload({ waitUntil: 'domcontentloaded' });
+    await pg.waitForTimeout(500);
+    await pg.click('.main-tab[data-action="newcat"]');
+    await pg.fill('#cmName', 'E2E Widgets');
+    await pg.fill('#cmUnit', 'widget');
+    await pg.click('#cmSave');
+    await pg.waitForTimeout(300);
+    const created = await pg.evaluate(
+      () =>
+        !!document.querySelector('.main-tab[data-cat="e2ewidgets"]') &&
+        document.getElementById('section-cat-e2ewidgets')?.classList.contains('active')
+    );
+    if (!created) errs.push('category tab/section not created');
+    await pg.screenshot({ path: path.join(dir, 'vpc-custom-category.png') });
+    await pg.evaluate(() => openCatModal('e2ewidgets'));
+    await pg.waitForTimeout(200);
+    await pg.click('#cmDelete');
+    await pg.waitForTimeout(300);
+    const deleted = await pg.evaluate(
+      () => !document.querySelector('.main-tab[data-cat="e2ewidgets"]')
+    );
+    if (!deleted) errs.push('category not deleted');
+    for (const e of errs) failures.push(`[${name}] custom category: ${e}`);
+    await pg.close();
+  }
+
   // Events: ROI tab must be visible; empty profile must show the empty state.
   {
     const pg = await ctx.newPage();

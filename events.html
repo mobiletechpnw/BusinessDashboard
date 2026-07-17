@@ -1137,6 +1137,10 @@ function renderROI() {
   const orders  = JSON.parse(localStorage.getItem(VPCUtil.KEYS.orders) || '[]');
   const jt      = JSON.parse(localStorage.getItem(VPCUtil.KEYS.jetTags) || '[]');
   const pins    = JSON.parse(localStorage.getItem(VPCUtil.KEYS.pins) || '[]');
+  const catSales = JSON.parse(localStorage.getItem(VPCUtil.KEYS.catSales) || '[]');
+  // Weighted-average unit cost per custom category, for per-event COGS.
+  const catAvgCost = {};
+  VPCUtil.customCatTotals().forEach(t => { catAvgCost[t.cat.id] = t.avgCost; });
   const costs   = JSON.parse(localStorage.getItem(VPCUtil.KEYS.costs) || '{}');
   const jtCost  = costs.jettag ?? 0.862;
   const pinCost = costs.pin    ?? 0.95;
@@ -1169,15 +1173,18 @@ function renderROI() {
     const dayOrders = orders.filter(o => (o.date || '') === d);
     const dayJt     = jt.filter(t => (t.date || '') === d);
     const dayPins   = pins.filter(p => (p.date || '') === d);
+    const dayCats   = catSales.filter(c => (c.date || '') === d);
 
     const revenue = dayOrders.reduce((s, o) => s + (o.salePrice || 0), 0)
       + dayJt.reduce((s, t) => s + (t.revenue || 0), 0)
-      + dayPins.reduce((s, p) => s + (p.revenue || 0), 0);
+      + dayPins.reduce((s, p) => s + (p.revenue || 0), 0)
+      + dayCats.reduce((s, c) => s + (c.revenue || 0), 0);
 
     const jtUnits  = dayJt.reduce((s, t) => s + (t.qty || 0), 0);
     const pinUnits = dayPins.reduce((s, p) => s + (p.qty || 0), 0);
     const cogs     = dayOrders.reduce((s, o) => s + (o.cogs || 0), 0)
-      + jtUnits * jtCost + pinUnits * pinCost;
+      + jtUnits * jtCost + pinUnits * pinCost
+      + dayCats.reduce((s, c) => s + (c.qty || 0) * (catAvgCost[c.catId] || 0), 0);
     const grossProfit = revenue - cogs;
     const netAfterTables = grossProfit - tableCost;
     const roiPct  = tableCost > 0 ? (netAfterTables / tableCost * 100) : null;

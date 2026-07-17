@@ -1111,9 +1111,11 @@ function computeMilestones() {
   const pins      = readJSON(VPCUtil.KEYS.pins, []);
   const goals     = (readJSON(VPCUtil.KEYS.goals, { goals: [] }).goals) || [];
 
+  const catSls    = readJSON(VPCUtil.KEYS.catSales, []);
   const totalRev  = orders.reduce((s, o) => s + (o.salePrice || 0), 0)
                   + jt.reduce((s, x) => s + (x.revenue || 0), 0)
-                  + pins.reduce((s, x) => s + (x.revenue || 0), 0);
+                  + pins.reduce((s, x) => s + (x.revenue || 0), 0)
+                  + catSls.reduce((s, x) => s + (x.revenue || 0), 0);
   const totalCogs = orders.reduce((s, o) => s + (o.cogs || 0), 0);
   const ordRev    = orders.reduce((s, o) => s + (o.salePrice || 0), 0);
   const margin    = ordRev > 0 ? (ordRev - totalCogs) / ordRev * 100 : 0;
@@ -1421,13 +1423,15 @@ function monthLabel(d) { return d.toLocaleDateString('en-US', { month: 'long', y
 function monthMetrics(prefix) {
   const orders = readJSON(VPCUtil.KEYS.orders, []);
   const jt = readJSON(VPCUtil.KEYS.jetTags, []), pins = readJSON(VPCUtil.KEYS.pins, []);
+  const catSls = readJSON(VPCUtil.KEYS.catSales, []);
   const exps = readJSON(VPCUtil.KEYS.expenses, []);
   const mo = orders.filter(o => (o.date || '').startsWith(prefix));
   const orderRev = mo.reduce((s, o) => s + (o.salePrice || 0), 0);
   const cogs = mo.reduce((s, o) => s + (o.cogs || 0), 0);
   const revenue = orderRev
     + jt.filter(x => (x.date || '').startsWith(prefix)).reduce((s, x) => s + (x.revenue || 0), 0)
-    + pins.filter(x => (x.date || '').startsWith(prefix)).reduce((s, x) => s + (x.revenue || 0), 0);
+    + pins.filter(x => (x.date || '').startsWith(prefix)).reduce((s, x) => s + (x.revenue || 0), 0)
+    + catSls.filter(x => (x.date || '').startsWith(prefix)).reduce((s, x) => s + (x.revenue || 0), 0);
   const expenses = exps.filter(e => (e.date || '').startsWith(prefix)).reduce((s, e) => s + (e.amount || 0), 0);
   const margin = orderRev > 0 ? (orderRev - cogs) / orderRev * 100 : null;
   const snaps = (readJSON(VPCUtil.KEYS.networth, { snapshots: [] }).snapshots || []).filter(s => s.date.startsWith(prefix));
