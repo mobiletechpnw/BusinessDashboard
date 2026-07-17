@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #000;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      code,
+      pre,
+      .monospace {
+        font-family: "JetBrains Mono", monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <div data-hf-id="hf-199x" id="root" data-composition-id="main" data-start="0" data-duration="10" data-width="1920" data-height="1080">
+      <div data-hf-id="hf-9d9x" id="intro" class="clip" data-start="0" data-duration="10" data-track-index="1" style="
+          width: 1920px;
+          height: 1080px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 18px;
+          background: radial-gradient(ellipse at 50% 120%, #1a2f26 0%, #0d0f16 65%);
+        ">
+        <div data-hf-id="hf-xgk7" id="title" style="font-size: 96px; font-weight: 800; color: #e2e8f0; letter-spacing: -2px">
+          Vault &amp; Pine <span data-hf-id="hf-o4ce" style="color: #34d399">Collective</span>
+        </div>
+        <div data-hf-id="hf-krnp" id="subtitle" style="font-size: 34px; color: #8892b0; letter-spacing: 6px; text-transform: uppercase">
+          Trading Cards · Collectibles · Community
+        </div>
+      </div>
+
+      <!--
+        Add more clips here. Example:
+        <div id="cta" class="clip" data-start="5" data-duration="5" data-track-index="2"
+             style="font-size: 64px; color: #fff; padding: 40px">
+          Hello World
+        </div>
+      -->
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      tl.from("#title", { opacity: 0, y: 60, duration: 1.2, ease: "power3.out" }, 0.3);
+      tl.from("#subtitle", { opacity: 0, y: 30, duration: 1, ease: "power3.out" }, 0.9);
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

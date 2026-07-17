@@ -17,6 +17,7 @@ const DASH_NAV = [
   ['production.html', '🖨️', 'Production'],
   ['events.html', '🎪', 'Events'],
   ['content.html', '📱', 'Content'],
+  ['studio.html', '🎬', 'Studio'],
   ['growth.html', '🚀', 'Growth'],
   ['review.html', '📋', 'Review'],
   ['guru.html', '🥋', 'Guru'],
