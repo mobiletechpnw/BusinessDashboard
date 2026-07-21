@@ -272,6 +272,26 @@ const VpcSync = {
   _listeners: [],
   _status: 'idle',
   _pulling: false,
+  // True ONLY for the synchronous moment a pull writes a cloud value back into
+  // localStorage — never across the pull's network wait. The setItem
+  // monkey-patch keys off this (not the whole-pull _pulling window) so that a
+  // real user edit made while a pull is still in flight is stamped fresh and
+  // pushed, instead of being mistaken for a cloud write, left un-pushed, and
+  // then clobbered by the landing pull.
+  _applyingRemote: false,
+
+  // Write a cloud value into localStorage without re-queuing a push or bumping
+  // the freshness stamp to "now" (the stamp mirrors the cloud's own time). The
+  // two writes are synchronous, so no user edit can interleave inside the flag.
+  _writeRemote(key, value, ts) {
+    this._applyingRemote = true;
+    try {
+      localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+      localStorage.setItem(`${key}__ts`, String(ts));
+    } finally {
+      this._applyingRemote = false;
+    }
+  },
 
   onStatus(fn) {
     this._listeners.push(fn);
@@ -300,9 +320,7 @@ const VpcSync = {
         if (cloudTs > localTs && localRecentlyEdited) {
           conflicts.push({ key: row.key, cloudTs, localTs, value: row.value });
         } else if (cloudTs >= localTs) {
-          const val = row.value;
-          localStorage.setItem(row.key, typeof val === 'string' ? val : JSON.stringify(val));
-          localStorage.setItem(`${row.key}__ts`, cloudTs);
+          this._writeRemote(row.key, row.value, cloudTs);
           pulled++;
         } else {
           skipped++;
@@ -382,9 +400,7 @@ const VpcSync = {
     document.getElementById('vpc-conf-cloud').addEventListener('click', () => {
       // Use cloud — overwrite local
       conflicts.forEach((c) => {
-        const val = c.value;
-        localStorage.setItem(c.key, typeof val === 'string' ? val : JSON.stringify(val));
-        localStorage.setItem(`${c.key}__ts`, c.cloudTs);
+        VpcSync._writeRemote(c.key, c.value, c.cloudTs);
       });
       modal.remove();
       onDone();
@@ -624,7 +640,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   localStorage.setItem = function (key, value) {
     _setItem(key, value);
-    if (!SYNC_KEYS.includes(key) || VpcSync._pulling) return;
+    // Skip only writes the sync layer itself is landing (_applyingRemote), NOT
+    // every write during a pull's network wait — a user edit made then is real
+    // and must still be stamped and pushed, or it gets dropped and overwritten
+    // when the pull lands (the "logged a value and it didn't save" bug).
+    if (!SYNC_KEYS.includes(key) || VpcSync._applyingRemote) return;
     // Stamp the freshness marker synchronously on every user write. The push to
     // the cloud is debounced (~800ms), so without this an autoSync/visibility
     // pull firing in that window would see a stale __ts, judge local as older

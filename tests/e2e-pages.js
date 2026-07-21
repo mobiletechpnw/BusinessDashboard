@@ -397,6 +397,116 @@ async function runProfile(browser, { name, viewport, mobile, seeded }) {
   return failures;
 }
 
+// Regression: logging an inventory value while the initial cloud pull is still
+// in flight must NOT be lost. The pull is mocked to be slow and to carry the
+// pre-save cloud state; the just-logged value has to survive the landing pull
+// AND get pushed to the cloud. Guards the supabase-sync write-during-pull race
+// that made "I logged a value and it didn't save" happen.
+async function runSyncRaceTest(browser) {
+  const failures = [];
+  const SUPA = 'https://cqvnspbdfmgwcutezmqe.supabase.co';
+  const today = new Date().toLocaleDateString('en-CA');
+  // Cloud already holds a DIFFERENT snapshot for today, so a naive pull would
+  // stomp the local edit back to $800.
+  const cloud = {
+    vpc_inv_snapshots_v1: {
+      value: [
+        {
+          id: 'cloud1',
+          date: today,
+          label: 'from cloud',
+          singles: { value: 800, cost: 0 },
+          slabs: { value: 0, cost: 0 },
+          sealed: { value: 0, cost: 0 },
+          value: 800,
+          cost: 0,
+          units: 0,
+          taken: new Date().toISOString(),
+        },
+      ],
+      updated_at: new Date().toISOString(),
+    },
+  };
+  let pushedSnapshots = null;
+
+  const ctx = await browser.newContext({ serviceWorkers: 'block' });
+  await ctx.route(
+    (u) => u.href.startsWith(SUPA),
+    async (route) => {
+      const req = route.request();
+      if (req.url().includes('/auth/v1/'))
+        return route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+      if (req.url().includes('/rest/v1/app_data')) {
+        if (req.method() === 'GET') {
+          // Snapshot the payload NOW (pre-save), then stall — the pull must land
+          // carrying stale cloud data, exactly as a slow mobile pull would.
+          const body = JSON.stringify(
+            Object.entries(cloud).map(([key, v]) => ({
+              key,
+              value: v.value,
+              updated_at: v.updated_at,
+            }))
+          );
+          await new Promise((r) => setTimeout(r, 1200));
+          return route.fulfill({ status: 200, contentType: 'application/json', body });
+        }
+        if (req.method() === 'POST') {
+          const rec = JSON.parse(req.postData() || '{}');
+          cloud[rec.key] = { value: rec.value, updated_at: rec.updated_at };
+          if (rec.key === 'vpc_inv_snapshots_v1') pushedSnapshots = rec.value;
+          return route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify([rec]),
+          });
+        }
+      }
+      return route.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
+    }
+  );
+  await ctx.addInitScript(() => {
+    localStorage.setItem(
+      'vpc_auth_session',
+      JSON.stringify({
+        access_token: 'test-token',
+        refresh_token: 'test-refresh',
+        expires_at: Date.now() + 86400000,
+        user: { id: 'test-user', email: 'test@example.com' },
+      })
+    );
+  });
+
+  const errs = [];
+  const pg = await ctx.newPage();
+  pg.on('pageerror', (e) => errs.push(`pageerror: ${e.message}`));
+  pg.on('dialog', (d) => d.accept());
+  await pg.goto(BASE + 'inventory.html', { waitUntil: 'domcontentloaded', timeout: 15000 });
+  // Act WHILE the initial pull is still in flight: log a $1110 value.
+  await pg.waitForTimeout(150);
+  await pg.evaluate(() => openSnapModal());
+  await pg.fill('#sn-singles', '999');
+  await pg.fill('#sn-slabs', '111');
+  await pg.fill('#sn-sealed', '0');
+  await pg.click('button.btn-primary:has-text("Save")');
+  // Let the slow pull land (~1200ms) and the debounced push fire (~800ms).
+  await pg.waitForTimeout(1800);
+  const totals = await pg.evaluate(() =>
+    JSON.parse(localStorage.getItem('vpc_inv_snapshots_v1') || '[]').map((s) => s.value)
+  );
+  if (!totals.includes(1110))
+    errs.push(`logged value lost after pull landed (local totals: ${JSON.stringify(totals)})`);
+  if (!pushedSnapshots || !pushedSnapshots.some((s) => s.value === 1110))
+    errs.push(
+      `logged value never pushed to cloud (pushed: ${JSON.stringify(
+        (pushedSnapshots || []).map((s) => s.value)
+      )})`
+    );
+  for (const e of errs) failures.push(`[sync-race] inventory snapshot: ${e}`);
+  await pg.close();
+  await ctx.close();
+  return failures;
+}
+
 (async () => {
   fs.rmSync(SHOTS, { recursive: true, force: true });
   const server = await startServer();
@@ -421,6 +531,12 @@ async function runProfile(browser, { name, viewport, mobile, seeded }) {
     console.log(`${failures.length ? '✗' : '✓'} ${profile.name} (${failures.length} failure(s))`);
     allFailures = allFailures.concat(failures);
   }
+
+  const raceFailures = await runSyncRaceTest(browser);
+  console.log(
+    `${raceFailures.length ? '✗' : '✓'} sync-write-race (${raceFailures.length} failure(s))`
+  );
+  allFailures = allFailures.concat(raceFailures);
 
   await browser.close();
   server.close();
