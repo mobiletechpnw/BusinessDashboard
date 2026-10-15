@@ -2,3 +2,8 @@
 *.backup-*.html
 node_modules
 tests/screenshots/
+
+# Hyperframes studio project — rendered videos and editor scratch state
+studio-project/renders/
+studio-project/.hyperframes/backup/
+studio-project/.hyperframes/prepared-assets/

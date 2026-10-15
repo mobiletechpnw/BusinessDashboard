@@ -30,6 +30,7 @@ const PAGES = [
   'production.html',
   'review.html',
   'content.html',
+  'studio.html',
   'growth.html',
   'events.html',
   'inventory.html',
