@@ -6,7 +6,9 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # Pinned: ubuntu-latest moved to 26.04, which Playwright 1.56.1 cannot
+    # install Chromium on. Bump together with the playwright devDependency.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
