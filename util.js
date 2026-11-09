@@ -249,6 +249,32 @@
     });
   };
 
+  // Revenue and sale count across every product line — riser orders, Jet
+  // Tags, Pins, and custom-category sales — for dates starting with `prefix`
+  // ('YYYY-MM' for a month, '' for all time). One rule, so "This Month" and
+  // "All-Time" on Home and the Daily Review always count the same things.
+  // Custom-category sales count only while their category exists, matching
+  // customCatTotals.
+  const salesInPeriod = (prefix = '', store = localStorage) => {
+    const live = new Set(customCategories(store).map((c) => c.id));
+    const inPeriod = (x) => String((x && x.date) || '').startsWith(prefix);
+    const amounts = [
+      ...readArr(store, KEYS.orders)
+        .filter(inPeriod)
+        .map((o) => o.salePrice),
+      ...readArr(store, KEYS.jetTags)
+        .filter(inPeriod)
+        .map((x) => x.revenue),
+      ...readArr(store, KEYS.pins)
+        .filter(inPeriod)
+        .map((x) => x.revenue),
+      ...readArr(store, KEYS.catSales)
+        .filter((x) => live.has(x.catId) && inPeriod(x))
+        .map((x) => x.revenue),
+    ];
+    return { revenue: sumMoney(amounts), count: amounts.length };
+  };
+
   const api = {
     money,
     sumMoney,
@@ -265,6 +291,7 @@
     migrateEventStores,
     customCategories,
     customCatTotals,
+    salesInPeriod,
   };
 
   // Browser global + CommonJS (for the test runner).

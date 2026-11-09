@@ -543,9 +543,10 @@ function renderRevenue() {
       + jtSales.reduce((s,x)=>s+(x.revenue||0),0)
       + pinSales.reduce((s,x)=>s+(x.revenue||0),0)
       + catSales.reduce((s,x)=>s+(x.revenue||0),0);
-    const monthRev = orders.filter(o=>(o.date||'').startsWith(thisMonth)).reduce((s,o)=>s+(o.salePrice||0),0);
+    // Same product lines as All-Time (risers, Jet Tags, Pins, custom categories).
+    const month = VPCUtil.salesInPeriod(thisMonth);
+    const monthRev = month.revenue;
     const profit = orders.reduce((s,o)=>s+(o.salePrice||0)-(o.cogs||0),0);
-    const monthOrders = orders.filter(o=>(o.date||'').startsWith(thisMonth)).length;
 
     if (!orders.length && !jtSales.length) {
       el.innerHTML = '<div class="empty-msg">No sales data yet.</div>';
@@ -556,7 +557,7 @@ function renderRevenue() {
       ['All-Time Revenue', fmt(totalRev), 'var(--green)'],
       ['This Month', fmt(monthRev), 'var(--accent)'],
       ['Net Profit (Risers)', fmt(profit), profit>=0?'var(--green)':'var(--red)'],
-      ['Orders This Month', monthOrders, 'var(--text)'],
+      ['Sales This Month', month.count, 'var(--text)'],
     ].map(([label, val, color]) => `
       <div class="rev-stat">
         <span style="color:var(--text2)">${label}</span>

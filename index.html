@@ -345,7 +345,7 @@ footer a { color: var(--accent); text-decoration: none; }
         <div class="tile-badge">Primary Hub</div>
       </div>
       <div class="tile-title">Vault &amp; Pine Collective</div>
-      <div class="tile-desc">Riser sales, filament tracking, printer payoff, jet tags, pins, and events — the whole operation.</div>
+      <div class="tile-desc">Riser sales, filament tracking, printer payoff, jet tags, pins, and business expenses — the whole operation.</div>
       <div class="spark-wrap"><canvas id="spark"></canvas></div>
       <div class="tile-foot">
         <span class="tile-arrow">Open Dashboard <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
@@ -667,14 +667,17 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
   const pinProfit   = pinSales.reduce((s,x)=>s+(x.revenue||0),0) - pinSales.reduce((s,x)=>s+(x.qty||0),0) * 0.95;
   const catProfit   = catTotals.reduce((s,t)=>s+(t.profit||0),0);
   const profit      = riserProfit + jtProfit + pinProfit + catProfit;
-  const monthRev = orders.filter(o=>(o.date||'').startsWith(thisMonth)).reduce((s,o)=>s+(o.salePrice||0),0);
-  const monthOrders = orders.filter(o=>(o.date||'').startsWith(thisMonth)).length;
+  // This Month counts the same product lines as All-Time (risers, Jet Tags,
+  // Pins, custom categories) — see VPCUtil.salesInPeriod.
+  const month    = VPCUtil.salesInPeriod(thisMonth);
+  const allTime  = VPCUtil.salesInPeriod('');
+  const monthRev = month.revenue;
 
   countUp(document.getElementById('kpi-rev'),    totalRev, '$');
   countUp(document.getElementById('kpi-month'),  monthRev, '$');
   countUp(document.getElementById('kpi-profit'), profit,   '$');
-  document.getElementById('kpi-rev-sub').textContent   = `${orders.length} total orders`;
-  document.getElementById('kpi-month-sub').textContent = `${monthOrders} order${monthOrders!==1?'s':''} this month`;
+  document.getElementById('kpi-rev-sub').textContent   = `${allTime.count} sale${allTime.count!==1?'s':''} · all products`;
+  document.getElementById('kpi-month-sub').textContent = `${month.count} sale${month.count!==1?'s':''} this month`;
   const allRevForMargin = totalRev;
   const grossMarginPct = allRevForMargin > 0 ? (profit / allRevForMargin * 100).toFixed(1) : '0.0';
   document.getElementById('kpi-profit-sub').innerHTML  = allRevForMargin <= 0

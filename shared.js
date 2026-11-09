@@ -220,7 +220,7 @@ function buildSearchIndex() {
   [
     {
       title: 'Vault & Pine Collective',
-      sub: 'Sales Hub — sales, goals, business expenses, jet tags, pins, events',
+      sub: 'Sales Hub — orders, business expenses, jet tags, pins, filament, back office',
       url: 'vault-pine-collective.html',
       icon: '🌲',
       type: 'Page',
