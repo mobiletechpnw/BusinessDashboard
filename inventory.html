@@ -25,8 +25,6 @@
   .brand { font-size:1.05rem; font-weight:800; }
   .brand span { color:var(--accent); }
   .header-right { display:flex; align-items:center; gap:10px; }
-  .back-link { font-size:.8rem; color:var(--text2); text-decoration:none; padding:6px 12px; border:1px solid var(--border); border-radius:6px; transition:all .15s; }
-  .back-link:hover { color:var(--text); border-color:var(--accent); }
   .btn-primary { background:var(--accent); color:#fff; border:none; border-radius:8px; padding:9px 16px; font-size:.82rem; font-weight:700; cursor:pointer; font-family:inherit; transition:opacity .15s; }
   .btn-primary:hover { opacity:.9; }
   .btn-ghost { background:none; color:var(--text2); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-size:.8rem; font-weight:600; cursor:pointer; font-family:inherit; transition:all .15s; }
@@ -142,7 +140,6 @@
 <header>
   <div class="brand">Card <span>Inventory</span></div>
   <div class="header-right">
-    <a href="index.html" class="back-link">⌂ Home</a>
     <button class="btn-primary" onclick="openItemModal()">+ Add Item</button>
   </div>
 </header>

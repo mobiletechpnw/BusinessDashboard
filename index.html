@@ -24,6 +24,7 @@
   --c-intel:   #2DD4BF;
   --c-prod:    #FB923C;
   --c-content: #FBBF24;
+  --c-inventory: #38BDF8;
   --glass: rgba(255,255,255,0.03);
   --glass-border: rgba(255,255,255,0.08);
 }
@@ -161,6 +162,7 @@ a.tile:hover::before { opacity: 0.65; }
 a.tile:hover .tile-orb { opacity: 0.22; }
 
 /* tile spans */
+.span-6x4  { grid-column: span 6;  grid-row: span 4; }
 .span-6x3  { grid-column: span 6;  grid-row: span 3; }
 .span-3x3  { grid-column: span 3;  grid-row: span 3; }
 .span-3x2  { grid-column: span 3;  grid-row: span 2; }
@@ -276,8 +278,11 @@ footer a { color: var(--accent); text-decoration: none; }
   .hero { padding: 30px 16px 4px; }
   main { padding: 12px 12px 28px; }
   .bento { grid-auto-rows: 84px; gap: 10px; }
-  .span-6x3, .span-3x3, .span-3x2, .span-4x2, .span-6x2 { grid-column: span 12; }
-  .span-3x1 { grid-column: span 6; }
+  .span-6x4, .span-6x3, .span-3x3, .span-3x2, .span-4x2, .span-6x2 { grid-column: span 12; }
+  .span-6x4 { grid-row: span 3; }
+  /* KPI tiles are a label and a number — one row is enough on a phone. */
+  .span-3x1 { grid-column: span 6; grid-row: span 1; }
+  .header-date { display: none; }
   .span-12x2 { grid-column: span 12; grid-row: span 3; }
   .kpi-value { font-size: 1.4rem; }
   .tile { border-radius: 16px; padding: 18px; }
@@ -332,8 +337,8 @@ footer a { color: var(--accent); text-decoration: none; }
   <!-- ════ BENTO GRID ════ -->
   <div class="bento">
 
-    <!-- FEATURED: Sales hub w/ sparkline · 6x3 -->
-    <a class="tile span-6x3" href="vault-pine-collective.html" style="--tile-accent:var(--c-sales);">
+    <!-- FEATURED: Sales hub w/ sparkline · 6x4 — as tall as the KPIs + snapshot beside it -->
+    <a class="tile span-6x4" href="vault-pine-collective.html" style="--tile-accent:var(--c-sales);">
       <div class="tile-orb"></div>
       <div class="tile-head">
         <div class="tile-icon">🌲</div>
@@ -417,8 +422,8 @@ footer a { color: var(--accent); text-decoration: none; }
       <div class="widget-body" id="delivery-list">Loading…</div>
     </div>
 
-    <!-- Daily review · 4x2 -->
-    <a class="tile span-4x2" href="review.html" style="--tile-accent:var(--c-review);">
+    <!-- App tiles · 3x2, four to a row -->
+    <a class="tile span-3x2" href="review.html" style="--tile-accent:var(--c-review);">
       <div class="tile-orb"></div>
       <div class="tile-head">
         <div class="tile-icon">📋</div>
@@ -431,8 +436,22 @@ footer a { color: var(--accent); text-decoration: none; }
       </div>
     </a>
 
+    <a class="tile span-3x2" href="inventory.html" style="--tile-accent:var(--c-inventory);">
+      <div class="tile-orb"></div>
+      <div class="tile-head">
+        <div class="tile-icon">🃏</div>
+        <div class="tile-badge">Inventory</div>
+      </div>
+      <div class="tile-title">Card Inventory</div>
+      <div class="tile-desc">Singles, slabs, and sealed — what your stock is worth.</div>
+      <div class="tile-foot">
+        <span class="tile-arrow">Open Inventory <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
+        <span class="tile-stat" id="inventory-stat">—</span>
+      </div>
+    </a>
+
     <!-- Expenses · 4x2 -->
-    <a class="tile span-4x2" href="expenses.html" style="--tile-accent:var(--c-expense);">
+    <a class="tile span-3x2" href="expenses.html" style="--tile-accent:var(--c-expense);">
       <div class="tile-orb"></div>
       <div class="tile-head">
         <div class="tile-icon">💸</div>
@@ -447,7 +466,7 @@ footer a { color: var(--accent); text-decoration: none; }
     </a>
 
     <!-- Analytics · 4x2 -->
-    <a class="tile span-4x2" href="analytics.html" style="--tile-accent:var(--c-intel);">
+    <a class="tile span-3x2" href="analytics.html" style="--tile-accent:var(--c-intel);">
       <div class="tile-orb"></div>
       <div class="tile-head">
         <div class="tile-icon">📈</div>
@@ -456,12 +475,12 @@ footer a { color: var(--accent); text-decoration: none; }
       <div class="tile-title">Business Intelligence</div>
       <div class="tile-desc">Margins, show comparisons, monthly trends.</div>
       <div class="tile-foot">
-        <span class="tile-arrow">View Intel <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
+        <span class="tile-arrow">View Analytics <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
       </div>
     </a>
 
     <!-- Production · 4x2 -->
-    <a class="tile span-4x2" href="production.html" style="--tile-accent:var(--c-prod);">
+    <a class="tile span-3x2" href="production.html" style="--tile-accent:var(--c-prod);">
       <div class="tile-orb"></div>
       <div class="tile-head">
         <div class="tile-icon">🖨️</div>
@@ -475,7 +494,7 @@ footer a { color: var(--accent); text-decoration: none; }
     </a>
 
     <!-- Content · 4x2 -->
-    <a class="tile span-4x2" href="content.html" style="--tile-accent:var(--c-content);">
+    <a class="tile span-3x2" href="content.html" style="--tile-accent:var(--c-content);">
       <div class="tile-orb"></div>
       <div class="tile-head">
         <div class="tile-icon">📱</div>
@@ -489,7 +508,7 @@ footer a { color: var(--accent); text-decoration: none; }
     </a>
 
     <!-- Instagram Growth · 4x2 -->
-    <a class="tile span-4x2" href="growth.html" style="--tile-accent:#ec4899;">
+    <a class="tile span-3x2" href="growth.html" style="--tile-accent:#ec4899;">
       <div class="tile-orb"></div>
       <div class="tile-head">
         <div class="tile-icon">🚀</div>
@@ -504,7 +523,7 @@ footer a { color: var(--accent); text-decoration: none; }
     </a>
 
     <!-- Financial Guru · 4x2 -->
-    <a class="tile span-4x2" href="guru.html" style="--tile-accent:#a78bfa;">
+    <a class="tile span-3x2" href="guru.html" style="--tile-accent:#a78bfa;">
       <div class="tile-orb"></div>
       <div class="tile-head">
         <div class="tile-icon">🥋</div>
@@ -658,9 +677,11 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
   document.getElementById('kpi-month-sub').textContent = `${monthOrders} order${monthOrders!==1?'s':''} this month`;
   const allRevForMargin = totalRev;
   const grossMarginPct = allRevForMargin > 0 ? (profit / allRevForMargin * 100).toFixed(1) : '0.0';
-  document.getElementById('kpi-profit-sub').innerHTML  = profit >= 0
-    ? `<span class="kpi-up">↑ ${grossMarginPct}% margin</span>`
-    : `<span class="kpi-down">↓ check costs</span>`;
+  document.getElementById('kpi-profit-sub').innerHTML  = allRevForMargin <= 0
+    ? 'no sales yet'
+    : profit >= 0
+      ? `<span class="kpi-up">${grossMarginPct}% margin</span>`
+      : `<span class="kpi-down">below cost — check pricing</span>`;
   document.getElementById('vpc-stat').innerHTML = `<strong>${orders.length}</strong> orders`;
 
   // Sparkline — last 8 weeks of revenue (2026: data-forward tiles)
@@ -700,7 +721,8 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
     const overdue = active.filter(x=>x.due && new Date(x.due+'T00:00:00') < today);
     countUp(document.getElementById('kpi-goals'), active.length, '', 700);
     document.getElementById('kpi-goals-sub').innerHTML = overdue.length
-      ? `<span class="kpi-down">⚠ ${overdue.length} overdue</span>` : `<span class="kpi-up">${done.length} completed</span>`;
+      ? `<span class="kpi-down">⚠ ${overdue.length} overdue</span>`
+      : done.length ? `<span class="kpi-up">${done.length} completed</span>` : 'none completed yet';
     document.getElementById('goals-stat').innerHTML = `<strong>${done.length}</strong> done`;
     if (overdue.length) {
       const b = document.getElementById('goals-badge');
@@ -722,7 +744,17 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
     const g = JSON.parse(localStorage.getItem(VPCUtil.KEYS.growth) || '{"snapshots":[]}');
     const snaps = (g.snapshots || []).slice().sort((a,b) => a.date.localeCompare(b.date));
     const el = document.getElementById('growth-stat');
-    if (el) el.innerHTML = snaps.length ? `<strong>${(snaps[snaps.length-1].followers||0).toLocaleString()}</strong> followers` : `<strong>—</strong> log #1`;
+    if (el) el.innerHTML = snaps.length ? `<strong>${(snaps[snaps.length-1].followers||0).toLocaleString()}</strong> followers` : `<strong>—</strong> followers`;
+  } catch(e) {}
+
+  // Card inventory — market value of what's on hand
+  try {
+    const items = JSON.parse(localStorage.getItem(VPCUtil.KEYS.cardInventory) || '[]');
+    // Same rule as inventory.html: a lot entry's value is already the whole lot's total.
+    const value = items.reduce((s, i) => s + (i.lot ? +i.value || 0 : Math.max(1, Math.round(+i.qty) || 1) * (+i.value || 0)), 0);
+    document.getElementById('inventory-stat').innerHTML = items.length
+      ? `<strong>${fmt(value)}</strong> value`
+      : `<strong>0</strong> items`;
   } catch(e) {}
 
   // Events

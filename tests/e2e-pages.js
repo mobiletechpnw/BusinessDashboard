@@ -317,13 +317,6 @@ async function runProfile(browser, { name, viewport, mobile, seeded }) {
       waitUntil: 'domcontentloaded',
       timeout: 15000,
     });
-    // The floating Business Sensei panel slides in on a 3.5s timer and can
-    // sit over modal buttons, intercepting clicks — dismiss it for today
-    // (same switch its "Don't show today" button flips) before loading.
-    await pg.addInitScript(() => {
-      localStorage.setItem('vpc_sensei_dismissed_' + new Date().toDateString(), '1');
-    });
-    await pg.reload({ waitUntil: 'domcontentloaded' });
     await pg.waitForTimeout(500);
     await pg.click('.main-tab[data-action="newcat"]');
     await pg.fill('#cmName', 'E2E Widgets');

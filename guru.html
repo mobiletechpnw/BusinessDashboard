@@ -305,7 +305,7 @@
 <header>
   <h1>🥋 <span>Financial</span> Guru</h1>
   <div class="header-right" style="display:flex;align-items:center;gap:10px;">
-    <div class="rank-chip" id="rank-chip">🥋 Novice</div>
+    <div class="rank-chip" id="rank-chip" title="Highest Academy belt earned">🥋 No belt yet</div>
   </div>
 </header>
 
@@ -1082,7 +1082,7 @@ function renderHealth() {
   })(start);
 
   document.getElementById('hero-grade').innerHTML =
-    `${grade.icon} You are a <strong style="color:${grade.color}">${grade.name}</strong> — ${grade.line}`;
+    `${grade.icon} Health grade: <strong style="color:${grade.color}">${grade.name}</strong> — ${grade.line}`;
 
   // Breakdown rows
   document.getElementById('score-breakdown').innerHTML = comp.map(c => `
@@ -1573,7 +1573,7 @@ function renderAll() {
   document.getElementById('hs-miles').textContent   = `${earnedMiles}/${totalMiles}`;
 
   // Rank chip = highest belt earned
-  let rank = 'Novice';
+  let rank = 'No belt yet';
   for (const b of BELTS) {
     if (beltDone(b.id, g) === beltLessons(b.id).length) rank = b.name;
   }

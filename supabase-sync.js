@@ -563,8 +563,10 @@ const VpcSync = {
 
     const header = document.querySelector('header');
     if (header) {
-      const ref = header.lastElementChild;
-      if (ref) header.insertBefore(wrap, ref);
+      // Sit just left of the search button (shared.js), whichever of the two
+      // scripts gets to the header first.
+      const search = header.querySelector('#vpc-search-btn');
+      if (search) header.insertBefore(wrap, search);
       else header.appendChild(wrap);
     } else {
       wrap.style.cssText += 'position:fixed;top:12px;right:16px;z-index:9999;';

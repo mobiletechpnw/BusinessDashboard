@@ -27,8 +27,6 @@ header { background:var(--surface); border-bottom:1px solid var(--border); paddi
 .btn-primary:hover { opacity:.9; transform:translateY(-1px); box-shadow:0 4px 18px rgba(108,140,255,.45); }
 .btn-ghost { background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:8px; padding:6px 14px; font-size:.78rem; font-weight:600; color:var(--text2); cursor:pointer; transition:all .15s; white-space:nowrap; backdrop-filter:blur(4px); }
 .btn-ghost:hover { border-color:var(--accent); color:var(--accent); background:rgba(108,140,255,.06); }
-.back-link { font-size:.75rem; color:var(--text2); text-decoration:none; padding:5px 10px; border:1px solid var(--border); border-radius:6px; transition:all .15s; white-space:nowrap; }
-.back-link:hover { color:var(--accent); border-color:var(--accent); }
 
 /* STAT BAR — glassmorphism strip */
 .stat-bar { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; padding:12px 24px; background:transparent; }
@@ -276,7 +274,6 @@ main { padding:0 0 24px; }
 <header>
   <div class="brand">Events <span>&amp; Tables</span></div>
   <div class="header-right">
-    <a href="index.html" class="back-link">⌂ Home</a>
     <button class="btn-ghost" onclick="generateShareLink()" title="Generate a shareable link for vendors">📤 Share Calendar</button>
     <button class="btn-ghost" onclick="openVendorModal()">+ Vendor</button>
     <button class="btn-primary" onclick="openEventModal()">+ Event</button>

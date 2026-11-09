@@ -10,9 +10,9 @@
 const DASH_NAV = [
   ['index.html', '⌂', 'Home'],
   ['vault-pine-collective.html', '📊', 'Sales Hub'],
-  ['inventory.html', '🃏', 'Inventory'],
+  ['inventory.html', '🃏', 'Card Inventory'],
   ['goals-dashboard.html', '🎯', 'Goals'],
-  ['expenses.html', '💸', 'Expenses'],
+  ['expenses.html', '💸', 'Personal Expenses'],
   ['analytics.html', '📈', 'Analytics'],
   ['production.html', '🖨️', 'Production'],
   ['events.html', '🎪', 'Events'],
@@ -339,6 +339,7 @@ window.runSearch = function (q) {
 
 function injectSearchBtn() {
   const btn = document.createElement('button');
+  btn.id = 'vpc-search-btn';
   btn.title = 'Search (Ctrl+K)';
   btn.onclick = openSearch;
   btn.style.cssText = `
@@ -970,149 +971,8 @@ const SENSEI_PAGE_MAP = {
   'production.html': 'production',
   'content.html': 'content',
   'review.html': 'general',
-  'index.html': 'general',
   'guru.html': 'general',
 };
-
-function injectSenseiPanel() {
-  const page = location.pathname.split('/').pop() || 'index.html';
-  const poolKey = SENSEI_PAGE_MAP[page] || 'general';
-  const pool = [...(SENSEI_TIPS[poolKey] || []), ...SENSEI_TIPS.general.slice(0, 2)];
-  if (!pool.length) return;
-
-  // Dismissed for today?
-  const dismissKey = 'vpc_sensei_dismissed_' + new Date().toDateString();
-  if (localStorage.getItem(dismissKey)) return;
-  // Don't show on login/reset pages
-  if (page === 'login.html' || page === 'reset-password.html') return;
-
-  let idx = Math.floor(Math.random() * pool.length);
-
-  function renderTip() {
-    const t = pool[idx];
-    document.getElementById('sensei-cat').textContent = t.cat;
-    document.getElementById('sensei-head').textContent = t.head;
-    document.getElementById('sensei-body').textContent = t.body;
-    document.getElementById('sensei-count').textContent = `${idx + 1} / ${pool.length}`;
-  }
-
-  // Inject styles
-  if (!document.getElementById('sensei-styles')) {
-    const s = document.createElement('style');
-    s.id = 'sensei-styles';
-    s.textContent = `
-      #sensei-panel {
-        position: fixed; bottom: 24px; left: 20px; z-index: 8500;
-        width: 290px; font-family: inherit;
-        transform: translateY(120%); opacity: 0;
-        transition: transform 0.45s cubic-bezier(.2,.8,.3,1), opacity 0.4s ease;
-      }
-      #sensei-panel.open { transform: translateY(0); opacity: 1; }
-      #sensei-trigger {
-        background: linear-gradient(135deg, rgba(108,142,255,0.15) 0%, rgba(167,139,250,0.12) 100%);
-        border: 1px solid rgba(108,142,255,0.3);
-        backdrop-filter: blur(16px);
-        border-radius: 40px; padding: 8px 16px 8px 10px;
-        display: flex; align-items: center; gap: 8px;
-        cursor: pointer; font-size: 0.78rem; font-weight: 700;
-        color: #e2e8f0; white-space: nowrap;
-        box-shadow: 0 4px 20px rgba(108,142,255,0.2);
-        transition: all 0.2s; margin-bottom: 8px; width: fit-content;
-      }
-      #sensei-trigger:hover { background: rgba(108,142,255,0.22); transform: translateY(-1px); }
-      #sensei-trigger .st-icon { font-size: 1rem; }
-      #sensei-trigger .st-pulse {
-        width: 6px; height: 6px; border-radius: 50%; background: #34d399;
-        box-shadow: 0 0 6px #34d399; flex-shrink: 0;
-        animation: s-pulse 2s ease-in-out infinite;
-      }
-      @keyframes s-pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-      #sensei-card {
-        background: linear-gradient(160deg, rgba(22,25,38,0.97) 0%, rgba(15,17,23,0.97) 100%);
-        border: 1px solid rgba(108,142,255,0.25);
-        backdrop-filter: blur(24px) saturate(1.3);
-        border-radius: 18px; padding: 18px 18px 14px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 30px rgba(108,142,255,0.06);
-        display: none;
-      }
-      #sensei-card.visible { display: block; }
-      .sensei-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-      .sensei-logo { display: flex; align-items: center; gap: 7px; font-size: 0.72rem; font-weight: 800; color: #8892b0; text-transform: uppercase; letter-spacing: 0.8px; }
-      .sensei-logo span { font-size: 1rem; }
-      #sensei-close { background: none; border: none; color: #8892b0; font-size: 0.75rem; cursor: pointer; padding: 2px 6px; border-radius: 4px; min-height: unset; transition: color 0.15s; font-family: inherit; }
-      #sensei-close:hover { color: #e2e8f0; }
-      #sensei-cat {
-        display: inline-block; font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
-        letter-spacing: 0.8px; padding: 2px 9px; border-radius: 20px;
-        background: rgba(108,142,255,0.1); border: 1px solid rgba(108,142,255,0.22);
-        color: #6c8cff; margin-bottom: 8px;
-      }
-      #sensei-head { font-size: 0.88rem; font-weight: 800; color: #e2e8f0; margin-bottom: 7px; line-height: 1.3; letter-spacing: -0.2px; }
-      #sensei-body { font-size: 0.76rem; color: #8892b0; line-height: 1.65; }
-      .sensei-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.07); }
-      #sensei-count { font-size: 0.62rem; color: #8892b0; }
-      .sensei-nav { display: flex; gap: 4px; }
-      .sensei-nav button { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #8892b0; padding: 4px 9px; border-radius: 6px; font-size: 0.72rem; cursor: pointer; font-family: inherit; min-height: unset; transition: all 0.15s; }
-      .sensei-nav button:hover { border-color: #6c8cff; color: #6c8cff; }
-      #sensei-dismiss { font-size: 0.62rem; color: #8892b0; background: none; border: none; cursor: pointer; font-family: inherit; min-height: unset; padding: 0; text-decoration: underline; opacity: 0.6; }
-      #sensei-dismiss:hover { opacity: 1; }
-      @media (max-width: 600px) {
-        #sensei-panel { left: 10px; right: 10px; width: auto; bottom: 16px; }
-      }
-    `;
-    document.head.appendChild(s);
-  }
-
-  const panel = document.createElement('div');
-  panel.id = 'sensei-panel';
-  panel.innerHTML = `
-    <div id="sensei-trigger" onclick="document.getElementById('sensei-card').classList.toggle('visible');this.style.display='none';">
-      <div class="st-pulse"></div>
-      <span class="st-icon">🧠</span>
-      Business Sensei — tap for a tip
-    </div>
-    <div id="sensei-card">
-      <div class="sensei-header">
-        <div class="sensei-logo"><span>🧠</span> Business Sensei</div>
-        <button id="sensei-close" onclick="document.getElementById('sensei-panel').classList.remove('open')" title="Hide">✕</button>
-      </div>
-      <div id="sensei-cat"></div>
-      <div id="sensei-head"></div>
-      <div id="sensei-body"></div>
-      <div class="sensei-foot">
-        <div>
-          <span id="sensei-count"></span><br>
-          <button id="sensei-dismiss" onclick="localStorage.setItem('${dismissKey}','1');document.getElementById('sensei-panel').classList.remove('open')">Don't show today</button>
-        </div>
-        <div class="sensei-nav">
-          <button onclick="senseiPrev()">← Prev</button>
-          <button onclick="senseiNext()">Next →</button>
-        </div>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(panel);
-  renderTip();
-
-  // Expose nav functions
-  window.senseiNext = () => {
-    idx = (idx + 1) % pool.length;
-    renderTip();
-  };
-  window.senseiPrev = () => {
-    idx = (idx - 1 + pool.length) % pool.length;
-    renderTip();
-  };
-
-  // Slide in after delay
-  setTimeout(() => panel.classList.add('open'), 3500);
-
-  // Auto-advance tip every 45 s
-  setInterval(() => {
-    idx = (idx + 1) % pool.length;
-    renderTip();
-  }, 45000);
-}
 
 // ── DATA-AWARE COACHING BAR ────────────────────────
 // Reads real business data and generates a contextual insight,
@@ -1120,6 +980,9 @@ function injectSenseiPanel() {
 function injectSenseiInsightBar() {
   const page = location.pathname.split('/').pop() || 'index.html';
   if (page === 'login.html' || page === 'reset-password.html') return;
+  // Home has its own Sensei card in the grid — a second tip strip there
+  // would just repeat it.
+  if (page === 'index.html') return;
 
   let insight = null;
 
@@ -1247,10 +1110,10 @@ function injectSenseiInsightBar() {
     }
   } catch (e) {}
 
-  // Fallback: show a random general tip
+  // Fallback: a random tip from this page's own pool (general if it has none)
   if (!insight) {
-    const general = SENSEI_TIPS.general;
-    const t = general[Math.floor(Math.random() * general.length)];
+    const pool = SENSEI_TIPS[SENSEI_PAGE_MAP[page]] || SENSEI_TIPS.general;
+    const t = pool[Math.floor(Math.random() * pool.length)];
     insight = {
       icon: '🧠',
       color: 'var(--accent2)',
@@ -1344,7 +1207,6 @@ document.addEventListener('DOMContentLoaded', () => {
   injectSearchBtn();
   injectCursorGlow();
   injectSenseiInsightBar();
-  injectSenseiPanel();
   registerSW();
   injectMobileNav();
   // Deferred enhancements
@@ -1395,7 +1257,7 @@ function injectMobileNav() {
     { href: 'vault-pine-collective.html', icon: '📊', label: 'Sales' },
     { href: 'events.html', icon: '🎪', label: 'Events' },
     { href: 'expenses.html', icon: '💸', label: 'Expenses' },
-    { href: 'analytics.html', icon: '📈', label: 'Insights' },
+    { href: 'analytics.html', icon: '📈', label: 'Analytics' },
   ];
 
   const nav = document.createElement('nav');
