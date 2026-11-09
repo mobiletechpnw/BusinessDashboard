@@ -56,6 +56,8 @@
   /* If they still don't fit, the tab strip scrolls sideways (thin scrollbar
      as the cue) instead of pushing Sign Out and search off the screen. */
   .main-nav { min-width: 0; overflow-x: auto; scrollbar-width: thin; }
+  /* With the quick-stats hidden, keep sync + search pinned to the right. */
+  #vpc-sync-wrap { margin-left: auto; }
   .main-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
   /* ── Header quick-stats ── */

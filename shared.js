@@ -220,7 +220,7 @@ function buildSearchIndex() {
   [
     {
       title: 'Vault & Pine Collective',
-      sub: 'Sales · Goals · Expenses · Jet Tags · Pins · Events',
+      sub: 'Sales Hub — sales, goals, business expenses, jet tags, pins, events',
       url: 'vault-pine-collective.html',
       icon: '🌲',
       type: 'Page',
@@ -258,6 +258,42 @@ function buildSearchIndex() {
       sub: 'Academy lessons, health score, milestones, calculators',
       url: 'guru.html',
       icon: '🥋',
+      type: 'Page',
+    },
+    { title: 'Home', sub: 'Command Center overview', url: 'index.html', icon: '⌂', type: 'Page' },
+    {
+      title: 'Card Inventory',
+      sub: 'Singles, slabs, sealed — stock value over time',
+      url: 'inventory.html',
+      icon: '🃏',
+      type: 'Page',
+    },
+    {
+      title: 'Production Hub',
+      sub: 'Print queue and stock levels',
+      url: 'production.html',
+      icon: '🖨️',
+      type: 'Page',
+    },
+    {
+      title: 'Events & Tables',
+      sub: 'Shows, vendor tables, payments, ROI',
+      url: 'events.html',
+      icon: '🎪',
+      type: 'Page',
+    },
+    {
+      title: 'Content Planner',
+      sub: 'Posts calendar, queue, templates',
+      url: 'content.html',
+      icon: '📱',
+      type: 'Page',
+    },
+    {
+      title: 'Instagram Growth',
+      sub: 'Follower snapshots and goal',
+      url: 'growth.html',
+      icon: '🚀',
       type: 'Page',
     },
   ].forEach((p) => results.push(p));
@@ -1256,7 +1292,7 @@ function injectMobileNav() {
     { href: 'index.html', icon: '⌂', label: 'Home' },
     { href: 'vault-pine-collective.html', icon: '📊', label: 'Sales' },
     { href: 'events.html', icon: '🎪', label: 'Events' },
-    { href: 'expenses.html', icon: '💸', label: 'Expenses' },
+    { href: 'expenses.html', icon: '💸', label: 'Personal' },
     { href: 'analytics.html', icon: '📈', label: 'Analytics' },
   ];
 

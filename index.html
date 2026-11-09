@@ -24,7 +24,7 @@
   --c-intel:   #2DD4BF;
   --c-prod:    #FB923C;
   --c-content: #FBBF24;
-  --c-inventory: #38BDF8;
+  --c-inventory: #E879F9;
   --glass: rgba(255,255,255,0.03);
   --glass-border: rgba(255,255,255,0.08);
 }
@@ -450,7 +450,7 @@ footer a { color: var(--accent); text-decoration: none; }
       </div>
     </a>
 
-    <!-- Expenses · 4x2 -->
+    <!-- Expenses · 3x2 -->
     <a class="tile span-3x2" href="expenses.html" style="--tile-accent:var(--c-expense);">
       <div class="tile-orb"></div>
       <div class="tile-head">
@@ -465,7 +465,7 @@ footer a { color: var(--accent); text-decoration: none; }
       </div>
     </a>
 
-    <!-- Analytics · 4x2 -->
+    <!-- Analytics · 3x2 -->
     <a class="tile span-3x2" href="analytics.html" style="--tile-accent:var(--c-intel);">
       <div class="tile-orb"></div>
       <div class="tile-head">
@@ -479,7 +479,7 @@ footer a { color: var(--accent); text-decoration: none; }
       </div>
     </a>
 
-    <!-- Production · 4x2 -->
+    <!-- Production · 3x2 -->
     <a class="tile span-3x2" href="production.html" style="--tile-accent:var(--c-prod);">
       <div class="tile-orb"></div>
       <div class="tile-head">
@@ -487,13 +487,13 @@ footer a { color: var(--accent); text-decoration: none; }
         <div class="tile-badge">Production</div>
       </div>
       <div class="tile-title">Production Hub</div>
-      <div class="tile-desc">Print queue, progress, and inventory with low-stock alerts.</div>
+      <div class="tile-desc">Print queue, progress, and stock levels with low-stock alerts.</div>
       <div class="tile-foot">
         <span class="tile-arrow">Open Production <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
       </div>
     </a>
 
-    <!-- Content · 4x2 -->
+    <!-- Content · 3x2 -->
     <a class="tile span-3x2" href="content.html" style="--tile-accent:var(--c-content);">
       <div class="tile-orb"></div>
       <div class="tile-head">
@@ -507,7 +507,7 @@ footer a { color: var(--accent); text-decoration: none; }
       </div>
     </a>
 
-    <!-- Instagram Growth · 4x2 -->
+    <!-- Instagram Growth · 3x2 -->
     <a class="tile span-3x2" href="growth.html" style="--tile-accent:#ec4899;">
       <div class="tile-orb"></div>
       <div class="tile-head">
@@ -522,7 +522,7 @@ footer a { color: var(--accent); text-decoration: none; }
       </div>
     </a>
 
-    <!-- Financial Guru · 4x2 -->
+    <!-- Financial Guru · 3x2 -->
     <a class="tile span-3x2" href="guru.html" style="--tile-accent:#a78bfa;">
       <div class="tile-orb"></div>
       <div class="tile-head">
@@ -679,9 +679,11 @@ document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observ
   const grossMarginPct = allRevForMargin > 0 ? (profit / allRevForMargin * 100).toFixed(1) : '0.0';
   document.getElementById('kpi-profit-sub').innerHTML  = allRevForMargin <= 0
     ? 'no sales yet'
-    : profit >= 0
+    : profit > 0
       ? `<span class="kpi-up">${grossMarginPct}% margin</span>`
-      : `<span class="kpi-down">below cost — check pricing</span>`;
+      : profit === 0
+        ? 'break-even — 0% margin'
+        : `<span class="kpi-down">below cost — check pricing</span>`;
   document.getElementById('vpc-stat').innerHTML = `<strong>${orders.length}</strong> orders`;
 
   // Sparkline — last 8 weeks of revenue (2026: data-forward tiles)
