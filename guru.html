@@ -305,7 +305,7 @@
 <header>
   <h1>🥋 <span>Financial</span> Guru</h1>
   <div class="header-right" style="display:flex;align-items:center;gap:10px;">
-    <div class="rank-chip" id="rank-chip">🥋 Novice</div>
+    <div class="rank-chip" id="rank-chip" title="Highest Academy belt earned">🥋 No belt yet</div>
   </div>
 </header>
 
@@ -695,7 +695,7 @@ const LESSONS = [
       "Your expense tracker is doing double duty: it's your management dashboard today and your audit defense later. The receipt you photograph in ten seconds now can be worth real money in April."
     ],
     takeaway:"Every documented business expense is a tax discount. Log them same-day.",
-    action:{ label:'Log your business expenses', url:'expenses.html' },
+    action:{ label:'Open Personal Expenses', url:'expenses.html' },
     quiz:{ q:'A business expense only reduces your taxes if it is…', opts:['Over $100','Paid in cash','Documented with records','Recurring monthly'], a:2 } },
 
   { id:'b3', belt:'brown', min:3, title:'Debt: Tool or Trap',
@@ -1082,7 +1082,7 @@ function renderHealth() {
   })(start);
 
   document.getElementById('hero-grade').innerHTML =
-    `${grade.icon} You are a <strong style="color:${grade.color}">${grade.name}</strong> — ${grade.line}`;
+    `${grade.icon} Health grade: <strong style="color:${grade.color}">${grade.name}</strong> — ${grade.line}`;
 
   // Breakdown rows
   document.getElementById('score-breakdown').innerHTML = comp.map(c => `
@@ -1573,7 +1573,7 @@ function renderAll() {
   document.getElementById('hs-miles').textContent   = `${earnedMiles}/${totalMiles}`;
 
   // Rank chip = highest belt earned
-  let rank = 'Novice';
+  let rank = 'No belt yet';
   for (const b of BELTS) {
     if (beltDone(b.id, g) === beltLessons(b.id).length) rank = b.name;
   }

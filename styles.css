@@ -374,18 +374,14 @@ header {
   top: 0;
   z-index: 200;
 }
-.home-link {
-  font-size: 0.8rem;
-  color: var(--text2);
-  text-decoration: none;
-  padding: 6px 12px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  transition: all 0.15s;
+.brand + #vpc-sync-wrap,
+h1 + #vpc-sync-wrap {
+  /* Pages whose header is just a title: keep the account controls and
+     search together on the right instead of floating mid-header. */
+  margin-left: auto;
 }
-.home-link:hover {
-  color: var(--text);
-  border-color: var(--accent);
+#vpc-search-btn {
+  margin-left: 8px;
 }
 
 /* ── Shared table ── */
@@ -550,11 +546,6 @@ main {
   }
   button {
     min-height: 44px;
-  }
-  a.home-link {
-    min-height: 44px;
-    display: inline-flex;
-    align-items: center;
   }
   .act-btn,
   .icon-btn {
@@ -967,11 +958,6 @@ button.loading {
   }
   .header-right {
     gap: 4px;
-  }
-  .home-link,
-  .back-link {
-    padding: 5px 8px;
-    font-size: 0.65rem;
   }
 }
 

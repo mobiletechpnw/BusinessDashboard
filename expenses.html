@@ -11,7 +11,7 @@
 <script src="util.js"></script>
 <script src="shared.js" defer></script>
 <script src="supabase-sync.js" defer></script>
-<title>Expenses · VPC</title>
+<title>Personal Expenses · VPC</title>
 <style>
   body { min-height: 100vh; display: flex; flex-direction: column; }
 
@@ -24,8 +24,6 @@
   }
   .brand { font-size: 1.05rem; font-weight: 800; }
   .brand span { color: var(--red); }
-  .home-link { font-size: 0.8rem; color: var(--text2); text-decoration: none; padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; transition: all 0.15s; }
-  .home-link:hover { color: var(--text); border-color: var(--accent); }
 
   /* ── KPI Strip ── */
   .kpi-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
@@ -181,7 +179,6 @@
 
 <header>
   <div class="brand">💸 <span>Personal</span> Expenses</div>
-  <a class="home-link" href="index.html">⌂ Home</a>
 </header>
 
 <nav class="dash-nav"></nav>
@@ -222,9 +219,6 @@
 
   <!-- ── Entries Tab ── -->
   <div class="panel active" id="tab-month">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:18px">
-      <button class="add-btn" style="display:flex" onclick="openModal()">＋ Add Expense</button>
-    </div>
     <div id="entries-list"></div>
   </div>
 
@@ -408,7 +402,7 @@ let editRecId  = null;
 function todayStr() { return VPCUtil.todayStr(); }
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 const $ = id => document.getElementById(id);
-const fmt = n => '$' + Math.abs(n).toFixed(2);
+const fmt = n => VPCUtil.fmtMoney(Math.abs(n || 0));
 const fmtK = n => n >= 1000 ? '$' + (n/1000).toFixed(1)+'k' : fmt(n);
 
 // ── Storage ──

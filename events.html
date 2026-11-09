@@ -27,8 +27,6 @@ header { background:var(--surface); border-bottom:1px solid var(--border); paddi
 .btn-primary:hover { opacity:.9; transform:translateY(-1px); box-shadow:0 4px 18px rgba(108,140,255,.45); }
 .btn-ghost { background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:8px; padding:6px 14px; font-size:.78rem; font-weight:600; color:var(--text2); cursor:pointer; transition:all .15s; white-space:nowrap; backdrop-filter:blur(4px); }
 .btn-ghost:hover { border-color:var(--accent); color:var(--accent); background:rgba(108,140,255,.06); }
-.back-link { font-size:.75rem; color:var(--text2); text-decoration:none; padding:5px 10px; border:1px solid var(--border); border-radius:6px; transition:all .15s; white-space:nowrap; }
-.back-link:hover { color:var(--accent); border-color:var(--accent); }
 
 /* STAT BAR — glassmorphism strip */
 .stat-bar { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; padding:12px 24px; background:transparent; }
@@ -252,7 +250,7 @@ main { padding:0 0 24px; }
 .roi-stat-val { font-size:1rem; font-weight:800; }
 .roi-stat-lbl { font-size:.62rem; color:var(--text2); text-transform:uppercase; letter-spacing:.3px; margin-top:2px; }
 .roi-net { padding-top:12px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
-.roi-badge { font-size:.62rem; font-weight:700; padding:3px 8px; border-radius:99px; text-transform:uppercase; letter-spacing:.4px; }
+.roi-badge { font-size:.62rem; font-weight:700; padding:3px 8px; border-radius:99px; text-transform:uppercase; letter-spacing:.4px; white-space:nowrap; flex-shrink:0; }
 
 @media(max-width:700px) {
   main { padding:0 12px 12px; }
@@ -276,7 +274,6 @@ main { padding:0 0 24px; }
 <header>
   <div class="brand">Events <span>&amp; Tables</span></div>
   <div class="header-right">
-    <a href="index.html" class="back-link">⌂ Home</a>
     <button class="btn-ghost" onclick="generateShareLink()" title="Generate a shareable link for vendors">📤 Share Calendar</button>
     <button class="btn-ghost" onclick="openVendorModal()">+ Vendor</button>
     <button class="btn-primary" onclick="openEventModal()">+ Event</button>
@@ -316,12 +313,12 @@ main { padding:0 0 24px; }
        #panel-roi inside #panel-matrix and the ROI tab rendered invisible. -->
 
   <div id="panel-roi" style="display:none">
-    <div id="roi-kpis" class="kpi-strip" style="margin-bottom:20px;grid-template-columns:repeat(4,1fr)"></div>
+    <div id="roi-kpis" class="kpi-strip" style="margin-bottom:20px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))"></div>
     <div class="roi-grid" id="roi-cards"></div>
     <div class="empty-state" id="roi-empty" style="display:none">
       <div class="empty-icon">📈</div>
       <div class="empty-title">No events to analyze</div>
-      <div class="empty-sub">Add events and table entries to see ROI analysis per show.</div>
+      <div class="empty-sub">Add events (with a table or booth cost) to see ROI per show. Revenue is pulled from your Sales Hub sales on the show's dates.</div>
     </div>
   </div>
 </main>
@@ -339,6 +336,10 @@ main { padding:0 0 24px; }
       <input type="date" id="ev-date">
     </div>
     <div class="field">
+      <label>End Date (optional — multi-day shows)</label>
+      <input type="date" id="ev-end">
+    </div>
+    <div class="field">
       <label>Location</label>
       <input type="text" id="ev-location" placeholder="e.g. Seattle Convention Center">
     </div>
@@ -346,6 +347,15 @@ main { padding:0 0 24px; }
       <label>Table Price ($ per table — what the organizer charges)</label>
       <input type="number" id="ev-table-price" min="0" step="0.01" placeholder="e.g. 60">
       <div class="field-hint">Set this and crew sign-up claims price themselves automatically (2 tables → 2× this).</div>
+    </div>
+    <div class="field">
+      <label>Booth Cost ($ — for shows not booked as a table)</label>
+      <input type="number" id="ev-booth-cost" min="0" step="0.01" placeholder="e.g. 45">
+      <div class="field-hint">Pop-ups, entry fees, etc. ROI uses this only when no Vault &amp; Pine table is booked for the event.</div>
+    </div>
+    <div class="field">
+      <label>Notes (optional)</label>
+      <input type="text" id="ev-notes" placeholder="e.g. Great foot traffic near the entrance">
     </div>
     <div class="field">
       <label>Approval Status</label>
@@ -747,7 +757,10 @@ function openEventModal(id) {
   evPrivate  = ev?.private  || false;
   document.getElementById('ev-modal-title').textContent = ev ? 'Edit Event' : 'New Event';
   document.getElementById('ev-name').value     = ev?.name     || '';
-  document.getElementById('ev-date').value     = ev?.date     || '';
+  document.getElementById('ev-date').value     = ev?.date || ev?.start || '';
+  document.getElementById('ev-end').value      = ev?.end && ev.end !== (ev.date || ev.start) ? ev.end : '';
+  document.getElementById('ev-booth-cost').value = ev?.boothCost ? ev.boothCost : '';
+  document.getElementById('ev-notes').value    = ev?.notes    || '';
   document.getElementById('ev-location').value = ev?.location || '';
   document.getElementById('ev-table-price').value = ev?.tablePrice ?? '';
   document.getElementById('ev-delete-btn').style.display = ev ? '' : 'none';
@@ -806,11 +819,19 @@ function saveEvent() {
   const tablePrice = tpRaw !== '' && !isNaN(tp) && tp >= 0 ? money(tp) : null;
   // `start` mirrors `date` so the Sales Hub (which reads/sorts on `start`)
   // shows events created here.
-  const item = { id: editEvId || uid(), name, date, start: date, location: document.getElementById('ev-location').value.trim(), tablePrice, approved: evApproved, private: evPrivate };
+  const endRaw = document.getElementById('ev-end').value;
+  const end = endRaw && date && endRaw > date ? endRaw : null;
+  const booth = parseFloat(document.getElementById('ev-booth-cost').value);
+  const item = {
+    id: editEvId || uid(), name, date, start: date, end,
+    location: document.getElementById('ev-location').value.trim(),
+    tablePrice, approved: evApproved, private: evPrivate,
+    boothCost: !isNaN(booth) && booth > 0 ? money(booth) : 0,
+    notes: document.getElementById('ev-notes').value.trim(),
+  };
   const arr  = getEvents();
   const idx  = arr.findIndex(x => x.id === item.id);
-  // Merge, not replace, so Sales-Hub fields (boothCost, end, notes) survive
-  // an edit made here.
+  // Merge, not replace, so any field this form doesn't own survives an edit.
   idx >= 0 ? arr[idx] = { ...arr[idx], ...item } : arr.push(item);
   setEvents(arr);
   if (typeof auditLog === 'function') auditLog(editEvId ? 'EDIT_EVENT' : 'ADD_EVENT', EV_KEY, document.getElementById('ev-name')?.value || '');
@@ -1131,7 +1152,8 @@ function switchEvTab(tab) {
 
 // ── ROI TAB ───────────────────────────────────────────
 function renderROI() {
-  const events  = getEvents().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const evStart = ev => ev.start || ev.date || '';
+  const events  = getEvents().sort((a, b) => evStart(b).localeCompare(evStart(a)));
   const tables  = getTables();
   const vendors = getVendors();
   const orders  = JSON.parse(localStorage.getItem(VPCUtil.KEYS.orders) || '[]');
@@ -1161,24 +1183,32 @@ function renderROI() {
   }
   roiEmpty.style.display = 'none';
 
-  let totalTableCost = 0, totalRevenue = 0, totalNet = 0;
+  let totalTableCost = 0, totalRevenue = 0, totalNet = 0, bestName = '—', bestNet = -Infinity;
   const cards = events.map(ev => {
-    // Table cost: only Vault & Pine's own table, not friend tables
+    // Show cost: Vault & Pine's own table(s), not friend tables. A show not
+    // booked as a table (pop-up, entry fee) uses the event's booth cost.
     const evTables   = tables.filter(t => t.eventId === ev.id && (ownVendorId ? t.vendorId === ownVendorId : true));
-    const tableCost  = evTables.reduce((s, t) => s + (+t.price || 0), 0);
     const tableCount = evTables.length;
+    const tableCost  = tableCount
+      ? evTables.reduce((s, t) => s + (+t.price || 0), 0)
+      : (+ev.boothCost || 0);
+    const costLabel  = tableCount ? `Table Cost · ${tableCount} table${tableCount > 1 ? 's' : ''}` : 'Booth Cost';
 
-    // Sales matching event date
-    const d = ev.date || '';
-    const dayOrders = orders.filter(o => (o.date || '') === d);
-    const dayJt     = jt.filter(t => (t.date || '') === d);
-    const dayPins   = pins.filter(p => (p.date || '') === d);
-    const dayCats   = catSales.filter(c => (c.date || '') === d);
+    // Sales on any day of the show (start → end; one day when no end date)
+    const d0 = evStart(ev), d1 = ev.end && ev.end > d0 ? ev.end : d0;
+    const onShow = x => { const d = x.date || ''; return d0 && d >= d0 && d <= d1; };
+    const dayOrders = orders.filter(onShow);
+    const dayJt     = jt.filter(onShow);
+    const dayPins   = pins.filter(onShow);
+    const dayCats   = catSales.filter(onShow);
 
-    const revenue = dayOrders.reduce((s, o) => s + (o.salePrice || 0), 0)
-      + dayJt.reduce((s, t) => s + (t.revenue || 0), 0)
-      + dayPins.reduce((s, p) => s + (p.revenue || 0), 0)
-      + dayCats.reduce((s, c) => s + (c.revenue || 0), 0);
+    const riserRev = dayOrders.reduce((s, o) => s + (o.salePrice || 0), 0);
+    const jtRev    = dayJt.reduce((s, t) => s + (t.revenue || 0), 0);
+    const pinRev   = dayPins.reduce((s, p) => s + (p.revenue || 0), 0);
+    const otherRev = dayCats.reduce((s, c) => s + (c.revenue || 0), 0);
+    const revenue  = riserRev + jtRev + pinRev + otherRev;
+    const split = [['Risers', riserRev], ['Tags', jtRev], ['Pins', pinRev], ['Other', otherRev]]
+      .filter(([, v]) => v > 0).map(([k, v]) => `${k} ${fmtMoney(v)}`).join(' · ');
 
     const jtUnits  = dayJt.reduce((s, t) => s + (t.qty || 0), 0);
     const pinUnits = dayPins.reduce((s, p) => s + (p.qty || 0), 0);
@@ -1192,9 +1222,10 @@ function renderROI() {
     totalTableCost = money(totalTableCost + tableCost);
     totalRevenue   = money(totalRevenue + revenue);
     totalNet       = money(totalNet + netAfterTables);
+    if ((tableCost > 0 || revenue > 0) && netAfterTables > bestNet) { bestNet = netAfterTables; bestName = ev.name; }
 
     const badgeCls  = roiPct === null ? '' : roiPct >= 100 ? 'badge-green' : roiPct >= 0 ? 'badge-yellow' : 'badge-red';
-    const badgeTxt  = roiPct === null ? '— no tables' : roiPct >= 100 ? '💰 Strong ROI' : roiPct >= 0 ? '📊 Break-even' : '❌ Loss';
+    const badgeTxt  = roiPct === null ? '— no cost logged' : roiPct >= 100 ? '💰 Strong ROI' : roiPct >= 0 ? '📊 Break-even' : '❌ Loss';
     const netColor  = netAfterTables >= 0 ? 'var(--green)' : 'var(--red)';
     const roiTxt    = roiPct !== null ? `${roiPct >= 0 ? '+' : ''}${roiPct.toFixed(0)}%` : '—';
 
@@ -1204,7 +1235,7 @@ function renderROI() {
           <div>
             <div class="roi-event-name">${esc(ev.name)}</div>
             <div class="roi-event-meta">
-              ${ev.date ? `📅 ${fmtDate(ev.date)}` : ''}
+              ${d0 ? `📅 ${fmtDate(d0)}${d1 !== d0 ? ` – ${fmtDate(d1)}` : ''}` : ''}
               ${ev.location ? ` · 📍 ${esc(ev.location)}` : ''}
               · <span style="color:${ev.approved ? 'var(--green)' : 'var(--yellow)'}">${ev.approved ? '✓ Approved' : '○ Unapproved'}</span>
             </div>
@@ -1214,11 +1245,12 @@ function renderROI() {
         <div class="roi-stats">
           <div class="roi-stat">
             <div class="roi-stat-val" style="color:var(--red)">${fmtMoney(tableCost)}</div>
-            <div class="roi-stat-lbl">Table Cost${tableCount ? ` · ${tableCount} tables` : ''}</div>
+            <div class="roi-stat-lbl">${costLabel}</div>
           </div>
           <div class="roi-stat">
             <div class="roi-stat-val" style="color:var(--accent)">${fmtMoney(revenue)}</div>
             <div class="roi-stat-lbl">Sales Revenue</div>
+            ${split ? `<div style="font-size:.62rem;color:var(--text2);margin-top:3px">${split}</div>` : ''}
           </div>
           <div class="roi-stat">
             <div class="roi-stat-val" style="color:var(--green)">${fmtMoney(grossProfit)}</div>
@@ -1226,13 +1258,14 @@ function renderROI() {
           </div>
           <div class="roi-stat">
             <div class="roi-stat-val" style="color:var(--yellow)">${roiTxt}</div>
-            <div class="roi-stat-lbl">ROI on Tables</div>
+            <div class="roi-stat-lbl">ROI on Show Cost</div>
           </div>
         </div>
         <div class="roi-net">
           <span style="font-size:.78rem;color:var(--text2)">COGS: <strong>${fmtMoney(cogs)}</strong></span>
           <span style="font-size:.88rem">Net: <strong style="color:${netColor}">${fmtMoney(netAfterTables)}</strong></span>
         </div>
+        ${ev.notes ? `<div style="font-size:.72rem;color:var(--text2);margin-top:10px">${esc(ev.notes)}</div>` : ''}
       </div>`;
   });
 
@@ -1241,12 +1274,15 @@ function renderROI() {
   const totalRoi = totalTableCost > 0 ? ((totalNet / totalTableCost) * 100).toFixed(0) + '%' : '—';
   roiKpis.innerHTML = [
     { val: events.length, label: 'Events', color: 'var(--text)' },
-    { val: fmtMoney(totalTableCost), label: 'Table Investment', color: 'var(--red)' },
+    { val: fmtMoney(totalTableCost), label: 'Table & Booth Costs', color: 'var(--red)' },
     { val: fmtMoney(totalRevenue), label: 'Total Revenue', color: 'var(--accent)' },
-    { val: fmtMoney(totalNet), label: 'Net After Tables', color: totalNet >= 0 ? 'var(--green)' : 'var(--red)' },
+    { val: fmtMoney(totalNet), label: 'Net After Costs', color: totalNet >= 0 ? 'var(--green)' : 'var(--red)' },
+    // A name, not a number: smaller and on one line, full name on hover.
+    { val: esc(bestName), label: 'Best Event (net)', color: 'var(--accent2)',
+      style: 'font-size:.95rem;line-height:1.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis', title: bestName },
   ].map(k => `
     <div class="kpi">
-      <div class="kpi-val" style="color:${k.color}">${k.val}</div>
+      <div class="kpi-val" style="color:${k.color};${k.style || ''}"${k.title ? ` title="${esc(k.title)}"` : ''}>${k.val}</div>
       <div class="kpi-label">${k.label}</div>
     </div>`).join('');
 }
@@ -1547,6 +1583,8 @@ async function dismissSignup(id) {
 }
 
 renderAll();
+// events.html#roi (the Sales Hub's Events tab links here) opens the ROI tab.
+if (location.hash === '#roi') switchEvTab('roi');
 // Sign-ups need the auth session, which supabase-sync.js (deferred) sets up by
 // DOMContentLoaded — so load them then rather than during inline parse.
 if (document.readyState === 'loading') {

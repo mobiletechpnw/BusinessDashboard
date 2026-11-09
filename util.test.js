@@ -181,3 +181,22 @@ test('customCatTotals is safe on empty or corrupt stores', () => {
   const corrupt = { getItem: () => '{not json' };
   assert.deepStrictEqual(U.customCatTotals(corrupt), []);
 });
+
+test('salesInPeriod counts every product line for the month and all time', () => {
+  const store = fakeStore({
+    [U.KEYS.orders]: [
+      { date: '2026-11-02', salePrice: 90 },
+      { date: '2026-10-30', salePrice: 100 },
+    ],
+    [U.KEYS.jetTags]: [{ date: '2026-11-05', revenue: 12.5 }],
+    [U.KEYS.pins]: [{ date: '2026-11-06', revenue: 8 }],
+    [U.KEYS.categories]: [{ id: 'stickers', name: 'Stickers' }],
+    [U.KEYS.catSales]: [
+      { date: '2026-11-07', catId: 'stickers', revenue: 0.1 },
+      { date: '2026-11-07', catId: 'deleted', revenue: 999 },
+    ],
+  });
+  assert.deepStrictEqual(U.salesInPeriod('2026-11', store), { revenue: 110.6, count: 4 });
+  assert.deepStrictEqual(U.salesInPeriod('', store), { revenue: 210.6, count: 5 });
+  assert.deepStrictEqual(U.salesInPeriod('2026-12', store), { revenue: 0, count: 0 });
+});

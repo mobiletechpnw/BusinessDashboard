@@ -84,7 +84,7 @@ footer { text-align:center; padding:22px; font-size:.7rem; color:var(--text2); }
     <div class="tag">🪑 Crew Table Claim</div>
     <div class="ev-name" id="ev-name">Loading…</div>
     <div class="ev-meta" id="ev-meta"></div>
-    <p class="intro">Claim your spot — we book the block together so the whole crew sits together, then settle up once the tables are confirmed.</p>
+    <p class="intro" id="intro">Claim your spot — we book the block together so the whole crew sits together, then settle up once the tables are confirmed.</p>
 
     <div class="msg err" id="err" style="display:none"></div>
 
@@ -192,6 +192,12 @@ function showFatal(msg) {
   document.getElementById('ev-meta').innerHTML = '';
   const f = document.getElementById('signup-form');
   if (f) f.style.display = 'none';
+  // Nothing can be sent from this state — drop the sign-up pitch and the
+  // "details are sent privately" note so only the problem is left.
+  ['intro', 'foot-note'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
   const err = document.getElementById('err');
   err.textContent = msg;
   err.classList.add('err');
