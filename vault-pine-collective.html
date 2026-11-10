@@ -15,60 +15,27 @@
 <style>
   body { min-height: 100vh; }
 
-  /* ── Master Header ── */
-  header {
-    background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 0 32px; display: flex; align-items: stretch;
-    justify-content: flex-start; position: sticky; top: 0; z-index: 200;
-    min-height: 58px;
-  }
-  .header-brand {
-    display: flex; align-items: center; flex-shrink: 0;
-  }
-  .brand-logo {
-    font-size: 1.2rem; font-weight: 800; letter-spacing: -0.4px; white-space: nowrap;
-  }
-  .brand-logo .pine { color: var(--green); }
-  .brand-logo .vault { color: var(--accent); }
-  .brand-sep { color: var(--border); font-weight: 300; font-size: 1.3rem; }
-  .header-date { font-size: 0.75rem; color: var(--text2); }
+  /* Header and cross-page nav come from styles.css, same as every page. */
+  .brand { font-size: 1rem; font-weight: 800; letter-spacing: -.3px; white-space: nowrap; }
+  .brand span { color: var(--accent); }
 
-  /* ── Main nav (Sales / Goals / etc) ── */
+  /* ── Section row (Sales / Business Expenses / trackers) ──
+     Sits under the cross-page nav and scrolls with the page; written like
+     the shared tab bar so it reads as part of the same site. */
   .main-nav {
-    display: flex; align-items: stretch; gap: 0; margin-left: 20px;
+    display: flex; gap: 0; padding: 0 32px;
+    border-bottom: 1px solid var(--glass-border);
+    background: rgba(13, 15, 22, 0.7);
+    overflow-x: auto; scrollbar-width: none;
   }
+  .main-nav::-webkit-scrollbar { display: none; }
   .main-tab {
-    display: flex; align-items: center; padding: 0 22px;
-    font-size: 0.84rem; font-weight: 700; color: var(--text2);
-    cursor: pointer; border-bottom: 3px solid transparent;
-    transition: all 0.15s; user-select: none; letter-spacing: 0.2px;
+    padding: 14px 20px; font-size: 0.84rem; font-weight: 600; color: var(--text2);
+    cursor: pointer; border-bottom: 2px solid transparent;
+    transition: all 0.15s; user-select: none; white-space: nowrap;
   }
   .main-tab:hover { color: var(--text); }
-  a.main-tab { text-decoration: none; }
-  /* Keep each tab on one line; tighten the padding where eight tabs, the
-     account controls and search all share a laptop-width header. */
-  .main-tab { white-space: nowrap; }
-  @media (max-width: 1500px) {
-    .main-tab { padding: 0 10px; }
-    .main-nav { margin-left: 12px; }
-    /* Sign Out stays; the account email gives up its room to the tabs. */
-    #vpc-sync-wrap > div:last-child > span:first-child { display: none; }
-  }
-  /* If they still don't fit, the tab strip scrolls sideways (thin scrollbar
-     as the cue) instead of pushing Sign Out and search off the screen. */
-  .main-nav { min-width: 0; overflow-x: auto; scrollbar-width: thin; }
-  /* With the quick-stats hidden, keep sync + search pinned to the right. */
-  #vpc-sync-wrap { margin-left: auto; }
   .main-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
-  /* ── Header quick-stats ── */
-  .header-stats { display: flex; align-items: center; gap: 24px; margin-left: auto; }
-  .hstat { text-align: right; }
-  .hstat-num { font-size: 1.1rem; font-weight: 800; }
-  .hstat-label { font-size: 0.65rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
-  /* The quick-stats repeat the KPI bar below and push the account controls
-     off-screen on laptop widths — show them only where there's room. */
-  @media (max-width: 1600px) { .header-stats { display: none; } }
 
   /* ── KPI bar (Sales) ── */
   .kpi-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
@@ -76,19 +43,6 @@
   .kpi-val { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; }
   .kpi-label { font-size: 0.68rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px; }
   .kpi-sub { font-size: 0.7rem; margin-top: 4px; }
-
-  /* ── Cross-dashboard nav ── */
-  .dash-nav {
-    display: flex; gap: 0; background: var(--bg); border-bottom: 1px solid var(--border);
-    padding: 0 24px; position: sticky; top: 58px; z-index: 190; height: 40px; align-items: stretch;
-  }
-  .dash-nav-link {
-    display: flex; align-items: center; padding: 0 14px; font-size: 0.78rem; font-weight: 600;
-    color: var(--text2); text-decoration: none; border-bottom: 2px solid transparent;
-    transition: all 0.15s; white-space: nowrap;
-  }
-  .dash-nav-link:hover { color: var(--text); }
-  .dash-nav-link.active { color: var(--accent); border-bottom-color: var(--accent); }
 
   /* ── Sales sub-tab bar ── */
   .tab-bar {
@@ -285,42 +239,13 @@
   .range-label { font-size: 0.7rem; color: var(--text2); margin-right: 4px; }
 
   @media (max-width: 700px) {
-    /* Header: row 1 = brand + sync chip, row 2 = section nav */
-    header {
-      padding: 0 12px;
-      flex-wrap: wrap;
-      min-height: auto;
-      gap: 0;
-      justify-content: space-between;
-    }
-    .header-brand {
-      display: flex; align-items: center;
-      min-height: 52px;
-      padding: 6px 0;
-    }
-    .header-stats { display: none; }
-    /* Main nav becomes full-width second row */
-    .main-nav {
-      order: 10;
-      width: calc(100% + 24px);
-      margin: 0 -12px;
-      border-top: 1px solid var(--border);
-      overflow-x: auto;
-      scrollbar-width: none;
-      flex-wrap: nowrap;
-      padding: 0 4px;
-      height: 44px;
-      align-items: center;
-      gap: 0;
-    }
-    .main-nav::-webkit-scrollbar { display: none; }
-    .main-tab { padding: 0 14px; font-size: 0.78rem; white-space: nowrap; min-height: 44px; }
-    /* Shift sticky elements down for the 2-row header (52+44=96px) */
-    .dash-nav { top: 96px; }
-    .tab-bar { top: 136px; padding: 0 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-wrap: nowrap; }
+    .main-nav { padding: 0 8px; }
+    .main-tab { padding: 12px 14px; font-size: 0.78rem; }
+    /* Sticky offset under the shared mobile header + nav (see styles.css) */
+    .tab-bar { top: 77px; padding: 0 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-wrap: nowrap; }
     .tab-bar::-webkit-scrollbar { display: none; }
     .tab { white-space: nowrap; padding: 12px 14px; font-size: 0.78rem; }
-    .exp-tab-bar { top: 136px; padding: 0 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-wrap: nowrap; }
+    .exp-tab-bar { top: 77px; padding: 0 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-wrap: nowrap; }
     .exp-tab-bar::-webkit-scrollbar { display: none; }
     .exp-tab { white-space: nowrap; }
     .kpi-bar { grid-template-columns: repeat(2, 1fr); }
@@ -347,46 +272,21 @@
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════ MASTER HEADER ══ -->
 <header>
-  <div class="header-brand">
-    <div class="brand-logo">
-      <span class="vault">Vault</span> <span style="color:var(--border)">&amp;</span> <span class="pine">Pine</span>
-      <span style="color:var(--text2);font-weight:400;font-size:.9rem;margin-left:4px">Collective</span>
-    </div>
-  </div>
-  <div class="main-nav">
-    <div class="main-tab active" data-section="sales">Sales</div>
-    <a class="main-tab" href="goals-dashboard.html" title="Opens the Goals page">🎯 Goals ↗</a>
-    <div class="main-tab" data-section="expenses" title="Business costs — separate from the Personal Expenses page">Business Expenses</div>
-    <div class="main-tab" data-section="jettags">🏷 Jet Tags</div>
-    <div class="main-tab" data-section="pins">📌 Pins</div>
-    <a class="main-tab" href="events.html#roi" data-link="events" title="Opens show ROI on the Events page">🎪 Events ↗</a>
-    <div class="main-tab" data-section="backoffice">⚙ Back Office</div>
-    <div class="main-tab" data-action="newcat" title="Create a new product category" style="color:var(--text2)">＋ New Category</div>
-  </div>
-  <div class="header-stats">
-    <div class="hstat">
-      <div class="hstat-num green" id="hs-revenue">—</div>
-      <div class="hstat-label">Revenue</div>
-    </div>
-    <div class="hstat">
-      <div class="hstat-num" style="color:var(--accent)" id="hs-profit">—</div>
-      <div class="hstat-label">Profit</div>
-    </div>
-    <div class="hstat">
-      <div class="hstat-num" style="color:var(--accent2)" id="hs-goalspct">0%</div>
-      <div class="hstat-label">Goals Done</div>
-    </div>
-    <div class="hstat">
-      <div class="hstat-num" style="color:var(--red)" id="hs-expenses">$0</div>
-      <div class="hstat-label">Mo. Expenses</div>
-    </div>
-    <div class="header-date" id="headerDate"></div>
-  </div>
+  <div class="brand">Sales <span>Hub</span></div>
 </header>
 
 <nav class="dash-nav"></nav>
+
+<!-- Section row: switches between the Sales Hub's own sections -->
+<div class="main-nav">
+  <div class="main-tab active" data-section="sales">Sales</div>
+  <div class="main-tab" data-section="expenses" title="Business costs — separate from the Personal Expenses page">Business Expenses</div>
+  <div class="main-tab" data-section="jettags">🏷 Jet Tags</div>
+  <div class="main-tab" data-section="pins">📌 Pins</div>
+  <div class="main-tab" data-section="backoffice">⚙ Back Office</div>
+  <div class="main-tab" data-action="newcat" title="Create a new product category" style="color:var(--text2)">＋ New Category</div>
+</div>
 
 <!-- ══════════════════════════════════════════ SALES SECTION ══ -->
 <div class="section active" id="section-sales">
@@ -1690,8 +1590,6 @@ function renderKPIs() {
   document.getElementById('kpiCustSub').textContent   = `${custCount} unique customers`;
 
   // header quick-stats
-  document.getElementById('hs-revenue').textContent = fmt$(totalRev);
-  document.getElementById('hs-profit').textContent  = fmt$(totalProf);
 }
 
 // ── Monthly Chart ──
@@ -3125,19 +3023,12 @@ function saveNewFilament() {
 document.getElementById('addFilamentModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeAddFilament(); });
 
 // ══════════════════════════════════════════════════════════════
-//  GOALS — managed on goals-dashboard.html (the "Goals ↗" tab links
-//  there); this page only shows their progress in the header.
+//  GOALS — managed on goals-dashboard.html; the key stays here for
+//  backup/restore.
 // ══════════════════════════════════════════════════════════════
 const GOALS_KEY = VPCUtil.KEYS.goals;
 // Events are managed on events.html; the key stays here for backup/restore.
 const EV_KEY = VPCUtil.KEYS.events;
-function renderGoalsStat() {
-  let goals = [];
-  try { goals = (JSON.parse(localStorage.getItem(GOALS_KEY)) || {}).goals || []; } catch {}
-  const allObj = goals.flatMap(g => g.objectives || []);
-  const pct = allObj.length ? Math.round(allObj.filter(o => o.done).length / allObj.length * 100) : 0;
-  document.getElementById('hs-goalspct').textContent = pct + '%';
-}
 
 // ══════════════════════════════════════════════════════════════
 //  KEYBOARD / MODAL CLOSE
@@ -3190,7 +3081,6 @@ function renderExpenseKPIs() {
   const totalRev2 = getOrders().reduce((s,o) => s + o.salePrice, 0);
   const expRatioEl = document.getElementById('eskpiExpRatio');
   if (expRatioEl) expRatioEl.textContent = totalRev2 > 0 ? `${((totalMo / totalRev2) * 100).toFixed(1)}% of revenue` : '';
-  document.getElementById('hs-expenses').textContent = fmt$(totalMo);
 }
 
 // ── Category bars (overview) ──
@@ -3552,7 +3442,7 @@ function importBackup(file) {
     if (d.printerCredits !== undefined) localStorage.setItem(LS_PRINTER_CREDITS,   JSON.stringify(d.printerCredits));
     if (d.monthlyGoal    != null)       localStorage.setItem(LS_GOAL_KEY,          d.monthlyGoal);
     if (d.filament       !== undefined) localStorage.setItem(LS_FILAMENT_KEY,      JSON.stringify(d.filament));
-    renderSalesAll(); renderGoalsStat(); renderExpensesAll();
+    renderSalesAll(); renderExpensesAll();
     if (typeof renderJtAll  === 'function') renderJtAll();
     if (typeof renderPinAll === 'function') renderPinAll();
     toast('Restored ✓ — all local data replaced.');
@@ -4809,11 +4699,11 @@ function catSectionHtml(cat) {
 </div>`;
 }
 
-// (Re)build every category tab + section. Tabs sit between Pins and Events.
+// (Re)build every category tab + section. Tabs sit between Pins and Back Office.
 function buildCatUI(activateCatId) {
   const prevActive = document.querySelector('.section.active')?.id || '';
   document.querySelectorAll('.main-tab[data-cat], .section[data-cat]').forEach(el => el.remove());
-  const evTab     = document.querySelector('.main-tab[data-link="events"]');
+  const evTab     = document.querySelector('.main-tab[data-section="backoffice"]');
   const evSection = document.getElementById('section-backoffice');
   getCats().forEach(cat => {
     evTab.insertAdjacentHTML('beforebegin',
@@ -5337,20 +5227,15 @@ buildCatUI();
 
 
 
-document.getElementById('headerDate').textContent =
-  NOW.toLocaleDateString('en-US', {weekday:'short', year:'numeric', month:'long', day:'numeric'});
-
 initOrders();
 initFilament();
 renderSalesAll();
-renderGoalsStat();
 renderExpensesAll();
 
 
 // Full re-render hook — called by VpcSync after pulling fresh cloud data
 window.renderAll = function() {
   try { renderSalesAll();    } catch(e) {}
-  try { renderGoalsStat();   } catch(e) {}
   try { renderExpensesAll(); } catch(e) {}
   try { renderJtAll();       } catch(e) {}
   try { renderPinAll();      } catch(e) {}
