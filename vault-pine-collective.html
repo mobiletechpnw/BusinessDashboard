@@ -815,6 +815,10 @@
           <option>Rental (1-day)</option>
           <option>Custom</option>
         </select>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button type="button" class="btn-ghost" style="font-size:0.75rem;padding:5px 10px;margin-top:6px" onclick="openOrderProductModal()">+ New Product</button>
+          <button type="button" class="btn-ghost" id="aoEditProduct" style="font-size:0.75rem;padding:5px 10px;margin-top:6px;display:none" onclick="openOrderProductModal(document.getElementById('aoProduct').value)">Edit Product</button>
+        </div>
       </div>
       <div class="field"><label>Qty / Sets</label><input type="number" id="aoQty" value="1" min="1"></div>
     </div>
@@ -846,6 +850,26 @@
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeAddOrder()">Cancel</button>
       <button class="btn-primary" id="aoSaveBtn" onclick="saveNewOrder()">Save Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- Order Product Create / Edit Modal (saved products for the order form) -->
+<div class="modal-overlay" id="orderProductModal">
+  <div class="modal" style="width:480px">
+    <h2 id="opTitle">New Product</h2>
+    <div style="font-size:0.76rem;color:var(--text2);margin:-6px 0 14px">Saved products appear in the order form's product list and fill in Sale Price and COGS for you (per unit × quantity).</div>
+    <div class="field"><label>Product Name</label><input type="text" id="opName" maxlength="60" placeholder="e.g. KickStands"></div>
+    <div class="field-row">
+      <div class="field"><label>Cost per Unit ($)</label><input type="number" id="opCost" step="0.01" min="0" placeholder="e.g. 1.25"></div>
+      <div class="field"><label>Sale Price per Unit ($)</label><input type="number" id="opPrice" step="0.01" min="0" placeholder="e.g. 5.00 (optional)"></div>
+    </div>
+    <div class="modal-actions" style="justify-content:space-between">
+      <button class="btn-ghost" id="opDelete" style="color:var(--red);border-color:var(--red);display:none" onclick="deleteOrderProduct()">Delete Product</button>
+      <div style="display:flex;gap:10px;margin-left:auto">
+        <button class="btn-ghost" onclick="closeOrderProductModal()">Cancel</button>
+        <button class="btn-primary" id="opSave" onclick="saveOrderProduct()">Add Product</button>
+      </div>
     </div>
   </div>
 </div>
@@ -2210,12 +2234,130 @@ function renderInsights() {
 // ── Add / Edit Order ──
 let editOrderId = null;
 
+// Saved products: user-defined entries for the order form's product list,
+// each carrying a per-unit cost (and optional per-unit sale price) that
+// prefills the order. Orders store the product NAME, so renaming or deleting
+// a saved product never rewrites past orders.
+const LS_ORDER_PRODUCTS = VPCUtil.KEYS.orderProducts;
+const ORDER_BUILTIN_PRODUCTS = ['18 Large Risers + 9 End Cap Pairs', 'Large Risers Only', 'Medium Risers', 'Small Risers', 'End Caps Only', 'Rental (1-day)'];
+const ORDER_CUSTOM_PRODUCT = 'Custom';
+function getOrderProducts() {
+  try { const a = JSON.parse(localStorage.getItem(LS_ORDER_PRODUCTS) || '[]'); return Array.isArray(a) ? a : []; }
+  catch (e) { return []; }
+}
+function saveOrderProducts(arr) { localStorage.setItem(LS_ORDER_PRODUCTS, JSON.stringify(arr)); }
+function orderProductByName(name) { return getOrderProducts().find(p => p.name === name) || null; }
+
+// Rebuild the product list: built-ins, then saved products, then Custom.
+function renderProductOptions() {
+  const sel = document.getElementById('aoProduct');
+  sel.innerHTML = '';
+  ORDER_BUILTIN_PRODUCTS.forEach(n => sel.add(new Option(n, n)));
+  const saved = getOrderProducts();
+  if (saved.length) {
+    const grp = document.createElement('optgroup');
+    grp.label = 'My Products';
+    saved.forEach(p => grp.appendChild(new Option(p.name, p.name)));
+    sel.appendChild(grp);
+  }
+  sel.add(new Option(ORDER_CUSTOM_PRODUCT, ORDER_CUSTOM_PRODUCT));
+}
+
 function setProductSelect(val) {
+  renderProductOptions();
   const sel = document.getElementById('aoProduct');
   if (val && ![...sel.options].some(o => o.value === val)) {
     sel.add(new Option(val, val));   // keep an unusual product value selectable
   }
   sel.value = val || sel.options[0].value;
+  syncProductPresetUI();
+}
+
+// Quantity the Sale Price / COGS fields were last prefilled for — lets a
+// quantity change rescale them only while they still hold the prefilled value.
+let aoPresetQty = 1;
+function aoQtyVal() { return Math.max(1, parseInt(document.getElementById('aoQty').value) || 1); }
+function syncProductPresetUI() {
+  const p = orderProductByName(document.getElementById('aoProduct').value);
+  document.getElementById('aoEditProduct').style.display = p ? '' : 'none';
+  aoPresetQty = aoQtyVal();
+}
+// Picking a saved product fills Sale Price and COGS (per unit × quantity).
+function applyProductPreset() {
+  syncProductPresetUI();
+  const p = orderProductByName(document.getElementById('aoProduct').value);
+  if (!p) return;
+  if (p.price != null) document.getElementById('aoSale').value = (p.price * aoPresetQty).toFixed(2);
+  if (p.cost  != null) document.getElementById('aoCogs').value = (p.cost  * aoPresetQty).toFixed(2);
+}
+// Changing quantity rescales a field only if it is blank or untouched since
+// the prefill — a hand-entered price (a discount, say) is left alone.
+function rescaleProductPreset() {
+  const p = orderProductByName(document.getElementById('aoProduct').value);
+  const qty = aoQtyVal();
+  if (p) {
+    [['aoSale', p.price], ['aoCogs', p.cost]].forEach(([id, unit]) => {
+      if (unit == null) return;
+      const el = document.getElementById(id);
+      const untouched = el.value === '' || Math.abs(parseFloat(el.value) - unit * aoPresetQty) < 0.005;
+      if (untouched) el.value = (unit * qty).toFixed(2);
+    });
+  }
+  aoPresetQty = qty;
+}
+document.getElementById('aoProduct').addEventListener('change', applyProductPreset);
+document.getElementById('aoQty').addEventListener('input', rescaleProductPreset);
+
+// ── Saved product create / edit ──
+let ORDER_PRODUCT_EDITING = null;
+function openOrderProductModal(name) {
+  const p = name ? orderProductByName(name) : null;
+  ORDER_PRODUCT_EDITING = p ? p.id : null;
+  document.getElementById('opTitle').textContent = p ? `Edit ${p.name}` : 'New Product';
+  document.getElementById('opName').value  = p ? p.name : '';
+  document.getElementById('opCost').value  = p && p.cost  != null ? p.cost  : '';
+  document.getElementById('opPrice').value = p && p.price != null ? p.price : '';
+  document.getElementById('opSave').textContent = p ? 'Save Changes' : 'Add Product';
+  document.getElementById('opDelete').style.display = p ? '' : 'none';
+  document.getElementById('orderProductModal').classList.add('open');
+  if (!p) document.getElementById('opName').focus();
+}
+function closeOrderProductModal() { document.getElementById('orderProductModal').classList.remove('open'); }
+
+function saveOrderProduct() {
+  const name  = document.getElementById('opName').value.trim();
+  const cost  = parseFloat(document.getElementById('opCost').value);
+  const price = parseFloat(document.getElementById('opPrice').value);
+  if (!name) { toast('Give the product a name.'); return; }
+  if (isNaN(cost) || cost < 0) { toast('Enter your cost per unit.'); return; }
+  const arr = getOrderProducts();
+  const lower = name.toLowerCase();
+  if (arr.some(p => p.name.toLowerCase() === lower && p.id !== ORDER_PRODUCT_EDITING) ||
+      [...ORDER_BUILTIN_PRODUCTS, ORDER_CUSTOM_PRODUCT].some(n => n.toLowerCase() === lower)) {
+    toast(`${name} already exists.`); return;
+  }
+  const fields = { name, cost, price: (!isNaN(price) && price >= 0) ? price : null };
+  const editing = ORDER_PRODUCT_EDITING ? arr.find(p => p.id === ORDER_PRODUCT_EDITING) : null;
+  if (editing) Object.assign(editing, fields);
+  else arr.push({ id: uid(), ...fields });
+  saveOrderProducts(arr);
+  if (typeof auditLog === 'function') auditLog(editing ? 'EDIT_ORDER_PRODUCT' : 'ADD_ORDER_PRODUCT', LS_ORDER_PRODUCTS, name);
+  closeOrderProductModal();
+  setProductSelect(name);      // select it in the order form…
+  applyProductPreset();        // …and fill in its price and cost
+  toast(editing ? `${name} updated.` : `${name} added to your products.`);
+}
+
+function deleteOrderProduct() {
+  const arr = getOrderProducts();
+  const p = arr.find(x => x.id === ORDER_PRODUCT_EDITING);
+  if (!p) return;
+  if (!confirm(`Delete ${p.name} from your saved products? Orders already logged keep their product name and numbers.`)) return;
+  saveOrderProducts(arr.filter(x => x.id !== p.id));
+  if (typeof auditLog === 'function') auditLog('DELETE_ORDER_PRODUCT', LS_ORDER_PRODUCTS, p.name);
+  closeOrderProductModal();
+  setProductSelect(ORDER_CUSTOM_PRODUCT);
+  toast(`${p.name} deleted.`);
 }
 
 function openAddOrder(id) {
@@ -2227,8 +2369,8 @@ function openAddOrder(id) {
     if (!o) { toast('Order not found.'); return; }
     document.getElementById('aoDate').value     = o.date;
     document.getElementById('aoCustomer').value = o.customer;
-    setProductSelect(o.product);
     document.getElementById('aoQty').value      = o.sets || 1;
+    setProductSelect(o.product);
     document.getElementById('aoSale').value     = o.salePrice;
     document.getElementById('aoCogs').value     = o.cogs;
     document.getElementById('aoRef').value          = o.referredBy || '';
@@ -2240,8 +2382,8 @@ function openAddOrder(id) {
   } else {
     document.getElementById('aoDate').value     = TODAY;
     document.getElementById('aoCustomer').value = '';
-    setProductSelect(null);
     document.getElementById('aoQty').value      = 1;
+    setProductSelect(null);
     document.getElementById('aoSale').value     = '';
     document.getElementById('aoCogs').value     = 21.33;
     document.getElementById('aoRef').value      = '';
@@ -3004,6 +3146,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeAddOrder(); closeExpModal(); closeJtModal(); closeJtRestockModal(); closePinModal(); closePinRestockModal(); }
 });
 document.getElementById('addOrderModal').addEventListener('click', e => { if (e.target===e.currentTarget) closeAddOrder(); });
+document.getElementById('orderProductModal').addEventListener('click', e => { if (e.target===e.currentTarget) closeOrderProductModal(); });
 
 // ══════════════════════════════════════════════════════════════
 //  EXPENSES
