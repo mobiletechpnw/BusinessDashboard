@@ -71,6 +71,8 @@
   // never rename the string, or you orphan existing data.
   const KEYS = Object.freeze({
     orders: 'vp_orders_v2',
+    // Saved products for the order form (name + per-unit cost / sale price).
+    orderProducts: 'vpc_order_products_v1',
     jetTags: 'vp_jettags_v1',
     pins: 'vp_pins_v1',
     jetTagInventory: 'vp_jt_inventory_v1',

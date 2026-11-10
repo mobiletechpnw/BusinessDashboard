@@ -24,6 +24,7 @@ const SESSION_KEY = 'vpc_auth_session';
 const SYNC_KEYS = [
   // ── Sales & Orders ──────────────────────────────────────
   'vp_orders_v2',
+  'vpc_order_products_v1', // saved products that prefill the order form
 
   // ── Goals ───────────────────────────────────────────────
   'goals_dashboard_v1',
