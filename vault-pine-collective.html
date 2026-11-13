@@ -361,6 +361,7 @@
           <div id="thisMonthSnap"></div>
         </div>
       </div>
+      <div class="card" id="unitsSoldCard" style="margin-bottom:20px"></div>
       <div class="card" id="monthlyGoalCard" style="margin-bottom:20px"></div>
       <div class="card" id="printerPayoffCard" style="margin-bottom:20px"></div>
       <div class="card" id="installedBaseCard" style="margin-bottom:20px"></div>
@@ -2236,9 +2237,19 @@ function saveOrderProduct() {
   }
   const fields = { name, cost, price: (!isNaN(price) && price >= 0) ? price : null };
   const editing = ORDER_PRODUCT_EDITING ? arr.find(p => p.id === ORDER_PRODUCT_EDITING) : null;
+  const oldName = editing ? editing.name : null;
   if (editing) Object.assign(editing, fields);
   else arr.push({ id: uid(), ...fields });
   saveOrderProducts(arr);
+  // A rename carries the product's past orders with it, so they keep
+  // counting toward it in Units Sold. Prices and costs are left alone.
+  if (oldName && oldName !== name) {
+    const orders = rawOrders();
+    let moved = 0;
+    orders.forEach(o => { if (o.product === oldName) { o.product = name; moved++; } });
+    if (moved) localStorage.setItem(LS_ORDERS, JSON.stringify(orders));
+  }
+  renderUnitsSold(); renderInstalledBase(); if (oldName && oldName !== name) renderOrderTable();
   if (typeof auditLog === 'function') auditLog(editing ? 'EDIT_ORDER_PRODUCT' : 'ADD_ORDER_PRODUCT', LS_ORDER_PRODUCTS, name);
   closeOrderProductModal();
   setProductSelect(name);      // select it in the order form…
@@ -2254,8 +2265,64 @@ function deleteOrderProduct() {
   saveOrderProducts(arr.filter(x => x.id !== p.id));
   if (typeof auditLog === 'function') auditLog('DELETE_ORDER_PRODUCT', LS_ORDER_PRODUCTS, p.name);
   closeOrderProductModal();
+  renderUnitsSold(); renderInstalledBase();
   setProductSelect(ORDER_CUSTOM_PRODUCT);
   toast(`${p.name} deleted.`);
+}
+
+// ── Units sold by product line ──
+// Every order belongs to one line: a saved product (by exact name), Rentals,
+// Custom, Risers (the built-in and historical riser descriptions), or Other
+// (e.g. orders for a saved product that has since been deleted).
+const RISER_PRODUCT_RE = /riser|large|med|small|cap/i;
+function orderLine(o, saved = getOrderProducts()) {
+  const name = o.product || '';
+  const p = saved.find(x => x.name === name);
+  if (p)                          return { key: 'p:' + p.id, label: p.name };
+  if (name === ORDER_CUSTOM_PRODUCT) return { key: 'custom', label: 'Custom' };
+  if (name === 'Rental (1-day)')  return { key: 'rentals', label: 'Rentals' };
+  if (RISER_PRODUCT_RE.test(name)) return { key: 'risers', label: 'Risers' };
+  return { key: 'other', label: 'Other' };
+}
+
+function renderUnitsSold() {
+  const card = document.getElementById('unitsSoldCard');
+  if (!card) return;
+  const saved = getOrderProducts();
+  // Risers and every saved product always get a tile (0 until sold);
+  // Rentals / Custom / Other only when there's something in them.
+  const lines = { risers: { label: 'Risers', unit: 'sets', units: 0, orders: 0, revenue: 0 } };
+  saved.forEach(p => { lines['p:' + p.id] = { label: p.name, unit: 'sold', units: 0, orders: 0, revenue: 0 }; });
+  getFilteredOrders().forEach(o => {
+    const l = orderLine(o, saved);
+    if (!lines[l.key]) lines[l.key] = { label: l.label, unit: l.key === 'rentals' ? 'rentals' : 'sold', units: 0, orders: 0, revenue: 0 };
+    const t = lines[l.key];
+    t.units   += Math.max(1, parseInt(o.sets) || 1);
+    t.orders  += 1;
+    t.revenue += o.salePrice || 0;
+  });
+  const order = ['risers', ...saved.map(p => 'p:' + p.id), 'rentals', 'other', 'custom'];
+  const colors = { risers: 'var(--green)', custom: 'var(--yellow)', other: 'var(--text2)', rentals: 'var(--accent2)' };
+  const tiles = order.filter(k => lines[k]).map(k => {
+    const t = lines[k];
+    const col = colors[k] || 'var(--accent)';
+    return `<div style="background:var(--surface2);border-radius:8px;padding:14px;text-align:center">
+        <div style="font-size:2rem;font-weight:800;color:${col};line-height:1">${t.units}</div>
+        <div style="font-size:.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;margin-top:4px">${esc(t.label)} ${t.unit}</div>
+        <div style="font-size:.7rem;color:var(--text2);margin-top:6px">${t.orders} order${t.orders === 1 ? '' : 's'} · ${fmt$(t.revenue)}</div>
+      </div>`;
+  }).join('');
+  const rangeLabel = document.querySelector('.range-btn.active')?.textContent.trim() || 'All Time';
+  const customNote = lines.custom
+    ? `<div style="font-size:.74rem;color:var(--text2);margin-top:14px">Custom orders aren't counted under a product. To move them, open each one on the Orders tab, choose its product, and check the Sale Price and COGS before saving — choosing a saved product refills them.</div>`
+    : '';
+  card.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:18px">
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2)">📊 Units Sold</div>
+      <div style="font-size:.78rem;color:var(--text2)">${esc(rangeLabel)} · risers counted in sets, products in units</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px">${tiles}</div>
+    ${customNote}`;
 }
 
 function openAddOrder(id) {
@@ -2369,6 +2436,7 @@ function renderSalesAll() {
   renderMonthlyChart();
   renderPipeline();
   renderThisMonthSnap();
+  renderUnitsSold();
   renderMonthlyGoal();
   renderPrinterPayoff();
   renderInstalledBase();
@@ -2660,7 +2728,9 @@ function editGoal() {
 function renderInstalledBase() {
   const card = document.getElementById('installedBaseCard');
   if (!card) return;
-  const orders = getOrders();
+  // Riser sets only — saved products (e.g. KickStands), rentals and Custom
+  // orders aren't sets in the field.
+  const orders = getOrders().filter(o => orderLine(o).key === 'risers');
   const vendorMap = {};
   orders.forEach(o => {
     const raw = o.customer.replace(/#\d+\s*-?\s*/g,'').replace(/\s*\(?\d+(st|nd|rd|th)\s+set\)?/gi,'').replace(/\s*pt\s*\d+/gi,'').trim();
