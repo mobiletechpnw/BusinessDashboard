@@ -107,8 +107,11 @@
   .badge-unpaid     { background: #3b1212; color: var(--red); cursor: pointer; }
   .badge-completed  { background: #0d3320; color: var(--green); cursor: pointer; }
   .badge-in_progress{ background: #12213b; color: var(--accent); cursor: pointer; }
+  .badge-printed    { background: #0d3320; color: var(--green); cursor: pointer; }
+  .badge-not_printed{ background: #3b2e12; color: var(--yellow); cursor: pointer; }
   .badge-paid:hover, .badge-partial:hover, .badge-unpaid:hover,
-  .badge-completed:hover, .badge-in_progress:hover { filter: brightness(1.25); }
+  .badge-completed:hover, .badge-in_progress:hover,
+  .badge-printed:hover, .badge-not_printed:hover { filter: brightness(1.25); }
 
   /* ── Search / filter ── */
   .toolbar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
@@ -388,6 +391,7 @@
                 <th>Referred By</th>
                 <th>Notes</th>
                 <th onclick="sortTable('payStatus')" style="cursor:pointer">Payment ↕</th>
+                <th onclick="sortTable('printStatus')" style="cursor:pointer">Printed ↕</th>
                 <th onclick="sortTable('fulfillStatus')" style="cursor:pointer">Status ↕</th>
                 <th style="text-align:right">Actions</th>
               </tr>
@@ -745,6 +749,15 @@
         <select id="aoFulfillStatus">
           <option value="completed">✅ Completed</option>
           <option value="in_progress">🔵 In Progress</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Print Status</label>
+        <select id="aoPrintStatus">
+          <option value="not_printed">⏳ Not Printed</option>
+          <option value="printed">🖨️ Printed</option>
         </select>
       </div>
     </div>
@@ -1718,7 +1731,8 @@ function renderOrderTable() {
   if (orderMonthFilter !== 'all') orders = orders.filter(o => o.date.startsWith(orderMonthFilter));
   if (q) orders = orders.filter(o => [o.customer, o.product, o.referredBy, o.notes].join(' ').toLowerCase().includes(q));
   orders.sort((a, b) => {
-    let av = a[sortCol], bv = b[sortCol];
+    let av = sortCol === 'printStatus' ? printStatusOf(a) : a[sortCol];
+    let bv = sortCol === 'printStatus' ? printStatusOf(b) : b[sortCol];
     if (typeof av === 'string') return av.localeCompare(bv) * sortDir;
     return (av - bv) * sortDir;
   });
@@ -1738,6 +1752,7 @@ function renderOrderTable() {
 
   const PAY_LABELS  = { paid: '✅ Paid', partial: '🟡 Partial', unpaid: '🔴 Unpaid' };
   const FILL_LABELS = { completed: '✅ Done', in_progress: '🔵 In Progress' };
+  const PRINT_LABELS = { printed: '🖨️ Printed', not_printed: '⏳ Not Printed' };
 
   const rows = pageOrders.map(o => {
     const profit   = o.salePrice - o.cogs;
@@ -1747,6 +1762,8 @@ function renderOrderTable() {
     const fill     = o.fulfillStatus || 'completed';
     const payBadge  = `<span class="badge badge-${pay}"  title="Click to cycle" onclick="togglePayStatus('${o.id}')">${PAY_LABELS[pay]||pay}</span>`;
     const fillBadge = `<span class="badge badge-${fill}" title="Click to toggle" onclick="toggleFulfillStatus('${o.id}')">${FILL_LABELS[fill]||fill}</span>`;
+    const print     = printStatusOf(o);
+    const printBadge = `<span class="badge badge-${print}" title="Click to toggle" onclick="togglePrintStatus('${o.id}')">${PRINT_LABELS[print]}</span>`;
     const actions   =
       `<button class="icon-btn" title="Edit order" onclick="openAddOrder('${o.id}')">✏️</button>
        <button class="icon-btn" title="Delete order" onclick="deleteOrder('${o.id}')">✕</button>`;
@@ -1761,6 +1778,7 @@ function renderOrderTable() {
       <td style="font-size:.78rem;color:var(--text2)">${esc(o.referredBy||'—')}</td>
       <td style="font-size:.75rem;color:var(--text2);max-width:160px">${esc(o.notes||'')}</td>
       <td>${payBadge}</td>
+      <td style="white-space:nowrap">${printBadge}</td>
       <td>${fillBadge}</td>
       <td style="text-align:right;white-space:nowrap">${actions}</td>
     </tr>`;
@@ -1773,7 +1791,7 @@ function renderOrderTable() {
     <td class="num" style="color:var(--text2)">${fmt$(totalCogs)}</td>
     <td class="num" style="color:var(--accent)">${fmt$(totalProf)}</td>
     <td class="num" style="color:var(--yellow)">${totalCogs ? (totalProf/totalCogs*100).toFixed(1) : '0.0'}%</td>
-    <td colspan="5"></td>
+    <td colspan="6"></td>
   </tr>`;
 
   document.getElementById('orderTbody').innerHTML = rows + footerRow;
@@ -2342,6 +2360,7 @@ function openAddOrder(id) {
     document.getElementById('aoNotes').value        = o.notes || '';
     document.getElementById('aoPayStatus').value    = o.payStatus    || 'paid';
     document.getElementById('aoFulfillStatus').value= o.fulfillStatus || 'completed';
+    document.getElementById('aoPrintStatus').value  = printStatusOf(o);
     titleEl.textContent = 'Edit Order';
     saveEl.textContent  = 'Save Changes';
   } else {
@@ -2355,6 +2374,7 @@ function openAddOrder(id) {
     document.getElementById('aoNotes').value    = '';
     document.getElementById('aoPayStatus').value    = 'paid';
     document.getElementById('aoFulfillStatus').value= 'in_progress';
+    document.getElementById('aoPrintStatus').value  = 'not_printed';
     titleEl.textContent = 'Log New Order';
     saveEl.textContent  = 'Save Order';
   }
@@ -2377,8 +2397,11 @@ function saveNewOrder() {
     referredBy: document.getElementById('aoRef').value.trim(),
     notes: document.getElementById('aoNotes').value.trim(),
     payStatus:    document.getElementById('aoPayStatus').value,
-    fulfillStatus: document.getElementById('aoFulfillStatus').value
+    fulfillStatus: document.getElementById('aoFulfillStatus').value,
+    printStatus:   document.getElementById('aoPrintStatus').value
   };
+  // A finished order has been printed — Done implies Printed.
+  if (fields.fulfillStatus === 'completed') fields.printStatus = 'printed';
   const wasEditing = editOrderId;
   if (editOrderId) {
     const arr = rawOrders();
@@ -2409,11 +2432,28 @@ function togglePayStatus(id) {
   localStorage.setItem(LS_ORDERS, JSON.stringify(arr));
   renderOrderTable();
 }
+// Orders logged before the Printed column existed have no printStatus:
+// treat finished orders as printed and open ones as not yet printed.
+function printStatusOf(o) {
+  if (o.printStatus === 'printed' || o.printStatus === 'not_printed') return o.printStatus;
+  return (o.fulfillStatus || 'completed') === 'completed' ? 'printed' : 'not_printed';
+}
+function togglePrintStatus(id) {
+  const arr = rawOrders();
+  const o = arr.find(x => x.id === id);
+  if (!o) return;
+  o.printStatus = printStatusOf(o) === 'printed' ? 'not_printed' : 'printed';
+  // Not printed means it can't be done yet.
+  if (o.printStatus === 'not_printed' && (o.fulfillStatus || 'completed') === 'completed') o.fulfillStatus = 'in_progress';
+  localStorage.setItem(LS_ORDERS, JSON.stringify(arr));
+  renderOrderTable();
+}
 function toggleFulfillStatus(id) {
   const arr = rawOrders();
   const o = arr.find(x => x.id === id);
   if (!o) return;
   o.fulfillStatus = (o.fulfillStatus === 'completed') ? 'in_progress' : 'completed';
+  if (o.fulfillStatus === 'completed') o.printStatus = 'printed';   // Done implies Printed
   localStorage.setItem(LS_ORDERS, JSON.stringify(arr));
   renderOrderTable();
 }
@@ -3539,13 +3579,14 @@ function csvCell(v) {
 }
 function exportOrdersCSV() {
   const orders = getOrders();
-  const head = ['Date','Customer','Product','Sets','Sale Price','COGS','Profit','ROI %','Referred By','Notes'];
+  const head = ['Date','Customer','Product','Sets','Sale Price','COGS','Profit','ROI %','Referred By','Notes','Printed'];
   const lines = [head.join(',')];
   orders.forEach(o => {
     const profit = o.salePrice - o.cogs;
     const roi = o.cogs ? (profit / o.cogs * 100).toFixed(1) : '';
     lines.push([o.date, o.customer, o.product, o.sets, o.salePrice.toFixed(2),
-      o.cogs.toFixed(2), profit.toFixed(2), roi, o.referredBy || '', o.notes || ''
+      o.cogs.toFixed(2), profit.toFixed(2), roi, o.referredBy || '', o.notes || '',
+      printStatusOf(o) === 'printed' ? 'Yes' : 'No'
     ].map(csvCell).join(','));
   });
   downloadBlob(`vault-pine-orders-${TODAY}.csv`, lines.join('\r\n'), 'text/csv');
