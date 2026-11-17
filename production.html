@@ -212,18 +212,19 @@
     <div class="modal-title" id="job-modal-title">Add Print Job</div>
     <div class="field">
       <label>Item Type</label>
-      <select id="job-item">
+      <select id="job-item" onchange="applyJobProduct()">
         <option value="Large Riser">🖨️ Large Riser</option>
         <option value="Medium Riser">🖨️ Medium Riser</option>
         <option value="Small Riser">🖨️ Small Riser</option>
         <option value="End Caps">🖨️ End Caps</option>
         <option value="Custom Order">🖨️ Custom Order</option>
       </select>
+      <div id="job-item-hint" style="font-size:0.74rem;color:var(--text2);margin-top:6px;display:none"></div>
     </div>
     <div class="grid-2f">
       <div class="field">
         <label>Quantity</label>
-        <input type="number" id="job-qty" min="1" value="1" placeholder="e.g. 10">
+        <input type="number" id="job-qty" min="1" value="1" placeholder="e.g. 10" oninput="rescaleJobHours()">
       </div>
       <div class="field">
         <label>Est. Print Hours</label>
@@ -336,13 +337,63 @@ function kpiStrip(id, items) {
 // ════════════════════════════════
 let editJobId = null;
 
+// Saved products come from the Sales Hub order form (name, per-unit
+// print time). They join the built-in item types in the job's item list.
+const JOB_BUILTIN_ITEMS = ['Large Riser', 'Medium Riser', 'Small Riser', 'End Caps', 'Custom Order'];
+function getSavedProducts() {
+  try { const a = JSON.parse(localStorage.getItem(VPCUtil.KEYS.orderProducts) || '[]'); return Array.isArray(a) ? a : []; }
+  catch (e) { return []; }
+}
+function savedProductByName(name) { return getSavedProducts().find(p => p.name === name) || null; }
+function renderJobItemOptions(current) {
+  const sel = $('job-item');
+  sel.innerHTML = '';
+  JOB_BUILTIN_ITEMS.forEach(n => sel.add(new Option('🖨️ ' + n, n)));
+  const saved = getSavedProducts();
+  if (saved.length) {
+    const grp = document.createElement('optgroup');
+    grp.label = 'My Products';
+    saved.forEach(p => grp.appendChild(new Option('🖨️ ' + p.name, p.name)));
+    sel.appendChild(grp);
+  }
+  // Keep a job's item selectable even if its product was since deleted.
+  if (current && ![...sel.options].some(o => o.value === current)) sel.add(new Option('🖨️ ' + current, current));
+  sel.value = current || JOB_BUILTIN_ITEMS[0];
+}
+
+// Picking a saved product with a print time fills Est. Print Hours
+// (per unit × quantity); a quantity change rescales it unless edited by hand.
+let jobHoursPreset = null;   // { perUnit, qty } the hours field was last filled from
+function jobQty() { return Math.max(1, parseInt($('job-qty').value) || 1); }
+function fmtJobHours(h) { return String(Math.round(h * 100) / 100); }
+function showJobItemHint() {
+  const p = savedProductByName($('job-item').value);
+  const hint = $('job-item-hint');
+  if (p && p.printHours) { hint.style.display = ''; hint.textContent = `${fmtJobHours(p.printHours)} h per unit — Est. Print Hours fills in from the quantity.`; }
+  else hint.style.display = 'none';
+}
+function applyJobProduct() {
+  showJobItemHint();
+  const p = savedProductByName($('job-item').value);
+  if (p && p.printHours) {
+    $('job-hours').value = fmtJobHours(p.printHours * jobQty());
+    jobHoursPreset = { perUnit: p.printHours, qty: jobQty() };
+  } else jobHoursPreset = null;
+}
+function rescaleJobHours() {
+  if (!jobHoursPreset) return;
+  const untouched = Math.abs((parseFloat($('job-hours').value) || 0) - jobHoursPreset.perUnit * jobHoursPreset.qty) < 0.005;
+  if (untouched) $('job-hours').value = fmtJobHours(jobHoursPreset.perUnit * jobQty());
+  jobHoursPreset.qty = jobQty();
+}
+
 function openJobModal(id) {
   editJobId = id || null;
   $('job-modal-title').textContent = id ? 'Edit Print Job' : 'Add Print Job';
   if (id) {
     const job = getQueue().find(j => j.id === id);
     if (job) {
-      $('job-item').value     = job.item || 'Large Riser';
+      renderJobItemOptions(job.item || 'Large Riser');
       $('job-qty').value      = job.qty || 1;
       $('job-hours').value    = job.estHours || 4;
       $('job-filament').value = job.filament || '';
@@ -351,7 +402,7 @@ function openJobModal(id) {
       $('job-notes').value    = job.notes || '';
     }
   } else {
-    $('job-item').value     = 'Large Riser';
+    renderJobItemOptions('Large Riser');
     $('job-qty').value      = 1;
     $('job-hours').value    = 4;
     $('job-filament').value = '';
@@ -359,6 +410,10 @@ function openJobModal(id) {
     $('job-started').value  = '';
     $('job-notes').value    = '';
   }
+  // Editing keeps the job's saved hours; a later item/quantity change refills them.
+  const p = savedProductByName($('job-item').value);
+  jobHoursPreset = p && p.printHours ? { perUnit: p.printHours, qty: jobQty() } : null;
+  showJobItemHint();
   $('job-modal').classList.add('open');
 }
 
@@ -447,7 +502,7 @@ function jobCardHTML(job) {
     <div class="job-card status-${job.status}">
       <div class="job-icon">${icon}</div>
       <div class="job-info">
-        <div class="job-name">${job.item} × ${job.qty}</div>
+        <div class="job-name">${VPCUtil.esc(job.item)} × ${job.qty}</div>
         <div class="job-meta">
           ${job.filament ? `<span>🎨 ${job.filament}</span>` : ''}
           <span>⏱ ${job.estHours}h est.</span>

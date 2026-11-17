@@ -107,8 +107,11 @@
   .badge-unpaid     { background: #3b1212; color: var(--red); cursor: pointer; }
   .badge-completed  { background: #0d3320; color: var(--green); cursor: pointer; }
   .badge-in_progress{ background: #12213b; color: var(--accent); cursor: pointer; }
+  .badge-printed    { background: #0d3320; color: var(--green); cursor: pointer; }
+  .badge-not_printed{ background: #3b2e12; color: var(--yellow); cursor: pointer; }
   .badge-paid:hover, .badge-partial:hover, .badge-unpaid:hover,
-  .badge-completed:hover, .badge-in_progress:hover { filter: brightness(1.25); }
+  .badge-completed:hover, .badge-in_progress:hover,
+  .badge-printed:hover, .badge-not_printed:hover { filter: brightness(1.25); }
 
   /* ── Search / filter ── */
   .toolbar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
@@ -341,7 +344,8 @@
   <main>
     <!-- Overview -->
     <div class="panel active" id="panel-overview">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:20px">
+      <div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px">
+        <div class="filter-chip" id="toPrintLink" style="display:none;margin-right:auto" title="Show the orders that still need printing" onclick="showPrintQueue()"></div>
         <button class="btn-primary" onclick="openAddOrder()">+ Log New Order</button>
       </div>
       <div class="card" style="margin-bottom:20px">
@@ -372,6 +376,7 @@
       <div class="toolbar">
         <input class="search-input" id="orderSearch" placeholder="Search customer, product, referral…" oninput="orderPage=0; renderOrderTable()">
         <div id="orderMonthFilters" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+        <div id="orderPrintFilter"></div>
       </div>
       <div class="card">
         <div class="table-wrap">
@@ -388,6 +393,7 @@
                 <th>Referred By</th>
                 <th>Notes</th>
                 <th onclick="sortTable('payStatus')" style="cursor:pointer">Payment ↕</th>
+                <th onclick="sortTable('printStatus')" style="cursor:pointer">Printed ↕</th>
                 <th onclick="sortTable('fulfillStatus')" style="cursor:pointer">Status ↕</th>
                 <th style="text-align:right">Actions</th>
               </tr>
@@ -748,6 +754,15 @@
         </select>
       </div>
     </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Print Status</label>
+        <select id="aoPrintStatus">
+          <option value="not_printed">⏳ Not Printed</option>
+          <option value="printed">🖨️ Printed</option>
+        </select>
+      </div>
+    </div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeAddOrder()">Cancel</button>
       <button class="btn-primary" id="aoSaveBtn" onclick="saveNewOrder()">Save Order</button>
@@ -765,6 +780,11 @@
       <div class="field"><label>Cost per Unit ($)</label><input type="number" id="opCost" step="0.01" min="0" placeholder="e.g. 1.25"></div>
       <div class="field"><label>Sale Price per Unit ($)</label><input type="number" id="opPrice" step="0.01" min="0" placeholder="e.g. 5.00 (optional)"></div>
     </div>
+    <div class="field-row">
+      <div class="field"><label>Print Time per Unit (hours)</label><input type="number" id="opHours" step="0.25" min="0" placeholder="e.g. 1.5 (optional)"></div>
+      <div class="field"><label>Filament per Unit (g)</label><input type="number" id="opFilament" step="1" min="0" placeholder="e.g. 40 (optional)" oninput="renderFilamentCostHint()"></div>
+    </div>
+    <div id="opFilamentHint" style="font-size:0.74rem;color:var(--text2);margin:-6px 0 14px;display:none"></div>
     <div class="modal-actions" style="justify-content:space-between">
       <button class="btn-ghost" id="opDelete" style="color:var(--red);border-color:var(--red);display:none" onclick="deleteOrderProduct()">Delete Product</button>
       <div style="display:flex;gap:10px;margin-left:auto">
@@ -1497,7 +1517,7 @@ function deleteDelivery(id) {
 
 const LS_ORDERS    = VPCUtil.KEYS.orders;      // unified, fully-editable order store
 const LS_ORDERS_V1 = 'riser_orders_v1';   // legacy custom-orders store (pre-migration)
-let sortCol = 'date', sortDir = -1, orderMonthFilter = 'all';
+let sortCol = 'date', sortDir = -1, orderMonthFilter = 'all', orderNotPrintedOnly = false;
 const ORDER_PAGE_SIZE = 50;
 let orderPage = 0;
 
@@ -1712,13 +1732,45 @@ function renderOrderMonthFilters() {
 }
 function setMonthFilter(mk) { orderMonthFilter = mk; orderPage = 0; renderOrderMonthFilters(); renderOrderTable(); }
 
+// ── Print queue: orders not yet printed ──
+// Hours come from each saved product's print time per unit × quantity;
+// orders for products without one are counted but not timed.
+function printQueueSummary() {
+  const saved = getOrderProducts();
+  const open = getOrders().filter(o => printStatusOf(o) === 'not_printed');
+  let hours = 0, timed = 0;
+  open.forEach(o => {
+    const p = saved.find(x => x.name === o.product);
+    if (p && p.printHours) { hours += p.printHours * Math.max(1, parseInt(o.sets) || 1); timed++; }
+  });
+  return { count: open.length, hours, timed };
+}
+function fmtHours(h) { return (Math.round(h * 10) / 10).toLocaleString('en-US') + ' h'; }
+function renderPrintQueue() {
+  const q = printQueueSummary();
+  const hrs = q.timed ? ` · ≈ ${fmtHours(q.hours)}${q.timed < q.count ? ` for ${q.timed} of ${q.count}` : ''}` : '';
+  document.getElementById('orderPrintFilter').innerHTML =
+    `<div class="filter-chip ${orderNotPrintedOnly ? 'active' : ''}" title="Show only orders not yet printed" onclick="toggleNotPrintedFilter()">⏳ Not Printed (${q.count})</div>`;
+  const link = document.getElementById('toPrintLink');
+  link.style.display = q.count ? '' : 'none';
+  link.textContent = `⏳ ${q.count} order${q.count === 1 ? '' : 's'} to print${hrs}`;
+}
+function toggleNotPrintedFilter() { orderNotPrintedOnly = !orderNotPrintedOnly; orderPage = 0; renderOrderTable(); }
+function showPrintQueue() {
+  orderNotPrintedOnly = true; orderPage = 0;
+  document.querySelector('#section-sales .tab[data-tab="orders"]').click();
+  renderOrderTable();
+}
+
 function renderOrderTable() {
   const q = (document.getElementById('orderSearch').value || '').toLowerCase();
   let orders = getOrders();
   if (orderMonthFilter !== 'all') orders = orders.filter(o => o.date.startsWith(orderMonthFilter));
+  if (orderNotPrintedOnly) orders = orders.filter(o => printStatusOf(o) === 'not_printed');
   if (q) orders = orders.filter(o => [o.customer, o.product, o.referredBy, o.notes].join(' ').toLowerCase().includes(q));
   orders.sort((a, b) => {
-    let av = a[sortCol], bv = b[sortCol];
+    let av = sortCol === 'printStatus' ? printStatusOf(a) : a[sortCol];
+    let bv = sortCol === 'printStatus' ? printStatusOf(b) : b[sortCol];
     if (typeof av === 'string') return av.localeCompare(bv) * sortDir;
     return (av - bv) * sortDir;
   });
@@ -1738,6 +1790,7 @@ function renderOrderTable() {
 
   const PAY_LABELS  = { paid: '✅ Paid', partial: '🟡 Partial', unpaid: '🔴 Unpaid' };
   const FILL_LABELS = { completed: '✅ Done', in_progress: '🔵 In Progress' };
+  const PRINT_LABELS = { printed: '🖨️ Printed', not_printed: '⏳ Not Printed' };
 
   const rows = pageOrders.map(o => {
     const profit   = o.salePrice - o.cogs;
@@ -1747,6 +1800,8 @@ function renderOrderTable() {
     const fill     = o.fulfillStatus || 'completed';
     const payBadge  = `<span class="badge badge-${pay}"  title="Click to cycle" onclick="togglePayStatus('${o.id}')">${PAY_LABELS[pay]||pay}</span>`;
     const fillBadge = `<span class="badge badge-${fill}" title="Click to toggle" onclick="toggleFulfillStatus('${o.id}')">${FILL_LABELS[fill]||fill}</span>`;
+    const print     = printStatusOf(o);
+    const printBadge = `<span class="badge badge-${print}" title="Click to toggle" onclick="togglePrintStatus('${o.id}')">${PRINT_LABELS[print]}</span>`;
     const actions   =
       `<button class="icon-btn" title="Edit order" onclick="openAddOrder('${o.id}')">✏️</button>
        <button class="icon-btn" title="Delete order" onclick="deleteOrder('${o.id}')">✕</button>`;
@@ -1761,6 +1816,7 @@ function renderOrderTable() {
       <td style="font-size:.78rem;color:var(--text2)">${esc(o.referredBy||'—')}</td>
       <td style="font-size:.75rem;color:var(--text2);max-width:160px">${esc(o.notes||'')}</td>
       <td>${payBadge}</td>
+      <td style="white-space:nowrap">${printBadge}</td>
       <td>${fillBadge}</td>
       <td style="text-align:right;white-space:nowrap">${actions}</td>
     </tr>`;
@@ -1773,10 +1829,11 @@ function renderOrderTable() {
     <td class="num" style="color:var(--text2)">${fmt$(totalCogs)}</td>
     <td class="num" style="color:var(--accent)">${fmt$(totalProf)}</td>
     <td class="num" style="color:var(--yellow)">${totalCogs ? (totalProf/totalCogs*100).toFixed(1) : '0.0'}%</td>
-    <td colspan="5"></td>
+    <td colspan="6"></td>
   </tr>`;
 
   document.getElementById('orderTbody').innerHTML = rows + footerRow;
+  renderPrintQueue();
 
   // Render pagination controls below the table card
   let pgEl = document.getElementById('orderPagination');
@@ -2209,6 +2266,24 @@ document.getElementById('aoQty').addEventListener('input', rescaleProductPreset)
 
 // ── Saved product create / edit ──
 let ORDER_PRODUCT_EDITING = null;
+// Average filament cost per gram from logged roll purchases, assuming
+// standard 1 kg rolls (purchases record rolls and cost, not weight).
+function filamentCostPerGram() {
+  const f = getFilament();
+  const rolls = f.reduce((s, x) => s + (x.qty || 0), 0);
+  const spent = f.reduce((s, x) => s + (x.total || 0), 0);
+  return rolls ? { perGram: spent / rolls / 1000, perRoll: spent / rolls } : null;
+}
+function renderFilamentCostHint() {
+  const el = document.getElementById('opFilamentHint');
+  const g = parseFloat(document.getElementById('opFilament').value);
+  const rate = filamentCostPerGram();
+  if (!rate || isNaN(g) || g <= 0) { el.style.display = 'none'; return; }
+  const cost = g * rate.perGram;
+  el.style.display = '';
+  el.innerHTML = `≈ <strong style="color:var(--text)">${fmt$(cost)}</strong> of filament per unit, at your average ${fmt$(rate.perRoll)} per roll (assuming 1 kg rolls). ` +
+    `<button type="button" class="btn-ghost" style="font-size:0.72rem;padding:3px 9px;margin-left:4px" onclick="document.getElementById('opCost').value='${cost.toFixed(2)}'">Use as cost</button>`;
+}
 function openOrderProductModal(name) {
   const p = name ? orderProductByName(name) : null;
   ORDER_PRODUCT_EDITING = p ? p.id : null;
@@ -2216,6 +2291,9 @@ function openOrderProductModal(name) {
   document.getElementById('opName').value  = p ? p.name : '';
   document.getElementById('opCost').value  = p && p.cost  != null ? p.cost  : '';
   document.getElementById('opPrice').value = p && p.price != null ? p.price : '';
+  document.getElementById('opHours').value    = p && p.printHours != null ? p.printHours : '';
+  document.getElementById('opFilament').value = p && p.filamentG  != null ? p.filamentG  : '';
+  renderFilamentCostHint();
   document.getElementById('opSave').textContent = p ? 'Save Changes' : 'Add Product';
   document.getElementById('opDelete').style.display = p ? '' : 'none';
   document.getElementById('orderProductModal').classList.add('open');
@@ -2235,7 +2313,11 @@ function saveOrderProduct() {
       [...ORDER_BUILTIN_PRODUCTS, ORDER_CUSTOM_PRODUCT].some(n => n.toLowerCase() === lower)) {
     toast(`${name} already exists.`); return;
   }
-  const fields = { name, cost, price: (!isNaN(price) && price >= 0) ? price : null };
+  const hours = parseFloat(document.getElementById('opHours').value);
+  const grams = parseFloat(document.getElementById('opFilament').value);
+  const fields = { name, cost, price: (!isNaN(price) && price >= 0) ? price : null,
+    printHours: (!isNaN(hours) && hours > 0) ? hours : null,
+    filamentG:  (!isNaN(grams) && grams > 0) ? grams : null };
   const editing = ORDER_PRODUCT_EDITING ? arr.find(p => p.id === ORDER_PRODUCT_EDITING) : null;
   const oldName = editing ? editing.name : null;
   if (editing) Object.assign(editing, fields);
@@ -2249,7 +2331,7 @@ function saveOrderProduct() {
     orders.forEach(o => { if (o.product === oldName) { o.product = name; moved++; } });
     if (moved) localStorage.setItem(LS_ORDERS, JSON.stringify(orders));
   }
-  renderUnitsSold(); renderInstalledBase(); if (oldName && oldName !== name) renderOrderTable();
+  renderUnitsSold(); renderInstalledBase(); renderOrderTable();
   if (typeof auditLog === 'function') auditLog(editing ? 'EDIT_ORDER_PRODUCT' : 'ADD_ORDER_PRODUCT', LS_ORDER_PRODUCTS, name);
   closeOrderProductModal();
   setProductSelect(name);      // select it in the order form…
@@ -2342,6 +2424,7 @@ function openAddOrder(id) {
     document.getElementById('aoNotes').value        = o.notes || '';
     document.getElementById('aoPayStatus').value    = o.payStatus    || 'paid';
     document.getElementById('aoFulfillStatus').value= o.fulfillStatus || 'completed';
+    document.getElementById('aoPrintStatus').value  = printStatusOf(o);
     titleEl.textContent = 'Edit Order';
     saveEl.textContent  = 'Save Changes';
   } else {
@@ -2355,6 +2438,7 @@ function openAddOrder(id) {
     document.getElementById('aoNotes').value    = '';
     document.getElementById('aoPayStatus').value    = 'paid';
     document.getElementById('aoFulfillStatus').value= 'in_progress';
+    document.getElementById('aoPrintStatus').value  = 'not_printed';
     titleEl.textContent = 'Log New Order';
     saveEl.textContent  = 'Save Order';
   }
@@ -2377,8 +2461,11 @@ function saveNewOrder() {
     referredBy: document.getElementById('aoRef').value.trim(),
     notes: document.getElementById('aoNotes').value.trim(),
     payStatus:    document.getElementById('aoPayStatus').value,
-    fulfillStatus: document.getElementById('aoFulfillStatus').value
+    fulfillStatus: document.getElementById('aoFulfillStatus').value,
+    printStatus:   document.getElementById('aoPrintStatus').value
   };
+  // A finished order has been printed — Done implies Printed.
+  if (fields.fulfillStatus === 'completed') fields.printStatus = 'printed';
   const wasEditing = editOrderId;
   if (editOrderId) {
     const arr = rawOrders();
@@ -2409,11 +2496,28 @@ function togglePayStatus(id) {
   localStorage.setItem(LS_ORDERS, JSON.stringify(arr));
   renderOrderTable();
 }
+// Orders logged before the Printed column existed have no printStatus:
+// treat finished orders as printed and open ones as not yet printed.
+function printStatusOf(o) {
+  if (o.printStatus === 'printed' || o.printStatus === 'not_printed') return o.printStatus;
+  return (o.fulfillStatus || 'completed') === 'completed' ? 'printed' : 'not_printed';
+}
+function togglePrintStatus(id) {
+  const arr = rawOrders();
+  const o = arr.find(x => x.id === id);
+  if (!o) return;
+  o.printStatus = printStatusOf(o) === 'printed' ? 'not_printed' : 'printed';
+  // Not printed means it can't be done yet.
+  if (o.printStatus === 'not_printed' && (o.fulfillStatus || 'completed') === 'completed') o.fulfillStatus = 'in_progress';
+  localStorage.setItem(LS_ORDERS, JSON.stringify(arr));
+  renderOrderTable();
+}
 function toggleFulfillStatus(id) {
   const arr = rawOrders();
   const o = arr.find(x => x.id === id);
   if (!o) return;
   o.fulfillStatus = (o.fulfillStatus === 'completed') ? 'in_progress' : 'completed';
+  if (o.fulfillStatus === 'completed') o.printStatus = 'printed';   // Done implies Printed
   localStorage.setItem(LS_ORDERS, JSON.stringify(arr));
   renderOrderTable();
 }
@@ -3539,13 +3643,14 @@ function csvCell(v) {
 }
 function exportOrdersCSV() {
   const orders = getOrders();
-  const head = ['Date','Customer','Product','Sets','Sale Price','COGS','Profit','ROI %','Referred By','Notes'];
+  const head = ['Date','Customer','Product','Sets','Sale Price','COGS','Profit','ROI %','Referred By','Notes','Printed'];
   const lines = [head.join(',')];
   orders.forEach(o => {
     const profit = o.salePrice - o.cogs;
     const roi = o.cogs ? (profit / o.cogs * 100).toFixed(1) : '';
     lines.push([o.date, o.customer, o.product, o.sets, o.salePrice.toFixed(2),
-      o.cogs.toFixed(2), profit.toFixed(2), roi, o.referredBy || '', o.notes || ''
+      o.cogs.toFixed(2), profit.toFixed(2), roi, o.referredBy || '', o.notes || '',
+      printStatusOf(o) === 'printed' ? 'Yes' : 'No'
     ].map(csvCell).join(','));
   });
   downloadBlob(`vault-pine-orders-${TODAY}.csv`, lines.join('\r\n'), 'text/csv');
