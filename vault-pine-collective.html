@@ -344,7 +344,8 @@
   <main>
     <!-- Overview -->
     <div class="panel active" id="panel-overview">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:20px">
+      <div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px">
+        <div class="filter-chip" id="toPrintLink" style="display:none;margin-right:auto" title="Show the orders that still need printing" onclick="showPrintQueue()"></div>
         <button class="btn-primary" onclick="openAddOrder()">+ Log New Order</button>
       </div>
       <div class="card" style="margin-bottom:20px">
@@ -375,6 +376,7 @@
       <div class="toolbar">
         <input class="search-input" id="orderSearch" placeholder="Search customer, product, referral…" oninput="orderPage=0; renderOrderTable()">
         <div id="orderMonthFilters" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+        <div id="orderPrintFilter"></div>
       </div>
       <div class="card">
         <div class="table-wrap">
@@ -778,6 +780,11 @@
       <div class="field"><label>Cost per Unit ($)</label><input type="number" id="opCost" step="0.01" min="0" placeholder="e.g. 1.25"></div>
       <div class="field"><label>Sale Price per Unit ($)</label><input type="number" id="opPrice" step="0.01" min="0" placeholder="e.g. 5.00 (optional)"></div>
     </div>
+    <div class="field-row">
+      <div class="field"><label>Print Time per Unit (hours)</label><input type="number" id="opHours" step="0.25" min="0" placeholder="e.g. 1.5 (optional)"></div>
+      <div class="field"><label>Filament per Unit (g)</label><input type="number" id="opFilament" step="1" min="0" placeholder="e.g. 40 (optional)" oninput="renderFilamentCostHint()"></div>
+    </div>
+    <div id="opFilamentHint" style="font-size:0.74rem;color:var(--text2);margin:-6px 0 14px;display:none"></div>
     <div class="modal-actions" style="justify-content:space-between">
       <button class="btn-ghost" id="opDelete" style="color:var(--red);border-color:var(--red);display:none" onclick="deleteOrderProduct()">Delete Product</button>
       <div style="display:flex;gap:10px;margin-left:auto">
@@ -1510,7 +1517,7 @@ function deleteDelivery(id) {
 
 const LS_ORDERS    = VPCUtil.KEYS.orders;      // unified, fully-editable order store
 const LS_ORDERS_V1 = 'riser_orders_v1';   // legacy custom-orders store (pre-migration)
-let sortCol = 'date', sortDir = -1, orderMonthFilter = 'all';
+let sortCol = 'date', sortDir = -1, orderMonthFilter = 'all', orderNotPrintedOnly = false;
 const ORDER_PAGE_SIZE = 50;
 let orderPage = 0;
 
@@ -1725,10 +1732,41 @@ function renderOrderMonthFilters() {
 }
 function setMonthFilter(mk) { orderMonthFilter = mk; orderPage = 0; renderOrderMonthFilters(); renderOrderTable(); }
 
+// ── Print queue: orders not yet printed ──
+// Hours come from each saved product's print time per unit × quantity;
+// orders for products without one are counted but not timed.
+function printQueueSummary() {
+  const saved = getOrderProducts();
+  const open = getOrders().filter(o => printStatusOf(o) === 'not_printed');
+  let hours = 0, timed = 0;
+  open.forEach(o => {
+    const p = saved.find(x => x.name === o.product);
+    if (p && p.printHours) { hours += p.printHours * Math.max(1, parseInt(o.sets) || 1); timed++; }
+  });
+  return { count: open.length, hours, timed };
+}
+function fmtHours(h) { return (Math.round(h * 10) / 10).toLocaleString('en-US') + ' h'; }
+function renderPrintQueue() {
+  const q = printQueueSummary();
+  const hrs = q.timed ? ` · ≈ ${fmtHours(q.hours)}${q.timed < q.count ? ` for ${q.timed} of ${q.count}` : ''}` : '';
+  document.getElementById('orderPrintFilter').innerHTML =
+    `<div class="filter-chip ${orderNotPrintedOnly ? 'active' : ''}" title="Show only orders not yet printed" onclick="toggleNotPrintedFilter()">⏳ Not Printed (${q.count})</div>`;
+  const link = document.getElementById('toPrintLink');
+  link.style.display = q.count ? '' : 'none';
+  link.textContent = `⏳ ${q.count} order${q.count === 1 ? '' : 's'} to print${hrs}`;
+}
+function toggleNotPrintedFilter() { orderNotPrintedOnly = !orderNotPrintedOnly; orderPage = 0; renderOrderTable(); }
+function showPrintQueue() {
+  orderNotPrintedOnly = true; orderPage = 0;
+  document.querySelector('#section-sales .tab[data-tab="orders"]').click();
+  renderOrderTable();
+}
+
 function renderOrderTable() {
   const q = (document.getElementById('orderSearch').value || '').toLowerCase();
   let orders = getOrders();
   if (orderMonthFilter !== 'all') orders = orders.filter(o => o.date.startsWith(orderMonthFilter));
+  if (orderNotPrintedOnly) orders = orders.filter(o => printStatusOf(o) === 'not_printed');
   if (q) orders = orders.filter(o => [o.customer, o.product, o.referredBy, o.notes].join(' ').toLowerCase().includes(q));
   orders.sort((a, b) => {
     let av = sortCol === 'printStatus' ? printStatusOf(a) : a[sortCol];
@@ -1795,6 +1833,7 @@ function renderOrderTable() {
   </tr>`;
 
   document.getElementById('orderTbody').innerHTML = rows + footerRow;
+  renderPrintQueue();
 
   // Render pagination controls below the table card
   let pgEl = document.getElementById('orderPagination');
@@ -2227,6 +2266,24 @@ document.getElementById('aoQty').addEventListener('input', rescaleProductPreset)
 
 // ── Saved product create / edit ──
 let ORDER_PRODUCT_EDITING = null;
+// Average filament cost per gram from logged roll purchases, assuming
+// standard 1 kg rolls (purchases record rolls and cost, not weight).
+function filamentCostPerGram() {
+  const f = getFilament();
+  const rolls = f.reduce((s, x) => s + (x.qty || 0), 0);
+  const spent = f.reduce((s, x) => s + (x.total || 0), 0);
+  return rolls ? { perGram: spent / rolls / 1000, perRoll: spent / rolls } : null;
+}
+function renderFilamentCostHint() {
+  const el = document.getElementById('opFilamentHint');
+  const g = parseFloat(document.getElementById('opFilament').value);
+  const rate = filamentCostPerGram();
+  if (!rate || isNaN(g) || g <= 0) { el.style.display = 'none'; return; }
+  const cost = g * rate.perGram;
+  el.style.display = '';
+  el.innerHTML = `≈ <strong style="color:var(--text)">${fmt$(cost)}</strong> of filament per unit, at your average ${fmt$(rate.perRoll)} per roll (assuming 1 kg rolls). ` +
+    `<button type="button" class="btn-ghost" style="font-size:0.72rem;padding:3px 9px;margin-left:4px" onclick="document.getElementById('opCost').value='${cost.toFixed(2)}'">Use as cost</button>`;
+}
 function openOrderProductModal(name) {
   const p = name ? orderProductByName(name) : null;
   ORDER_PRODUCT_EDITING = p ? p.id : null;
@@ -2234,6 +2291,9 @@ function openOrderProductModal(name) {
   document.getElementById('opName').value  = p ? p.name : '';
   document.getElementById('opCost').value  = p && p.cost  != null ? p.cost  : '';
   document.getElementById('opPrice').value = p && p.price != null ? p.price : '';
+  document.getElementById('opHours').value    = p && p.printHours != null ? p.printHours : '';
+  document.getElementById('opFilament').value = p && p.filamentG  != null ? p.filamentG  : '';
+  renderFilamentCostHint();
   document.getElementById('opSave').textContent = p ? 'Save Changes' : 'Add Product';
   document.getElementById('opDelete').style.display = p ? '' : 'none';
   document.getElementById('orderProductModal').classList.add('open');
@@ -2253,7 +2313,11 @@ function saveOrderProduct() {
       [...ORDER_BUILTIN_PRODUCTS, ORDER_CUSTOM_PRODUCT].some(n => n.toLowerCase() === lower)) {
     toast(`${name} already exists.`); return;
   }
-  const fields = { name, cost, price: (!isNaN(price) && price >= 0) ? price : null };
+  const hours = parseFloat(document.getElementById('opHours').value);
+  const grams = parseFloat(document.getElementById('opFilament').value);
+  const fields = { name, cost, price: (!isNaN(price) && price >= 0) ? price : null,
+    printHours: (!isNaN(hours) && hours > 0) ? hours : null,
+    filamentG:  (!isNaN(grams) && grams > 0) ? grams : null };
   const editing = ORDER_PRODUCT_EDITING ? arr.find(p => p.id === ORDER_PRODUCT_EDITING) : null;
   const oldName = editing ? editing.name : null;
   if (editing) Object.assign(editing, fields);
@@ -2267,7 +2331,7 @@ function saveOrderProduct() {
     orders.forEach(o => { if (o.product === oldName) { o.product = name; moved++; } });
     if (moved) localStorage.setItem(LS_ORDERS, JSON.stringify(orders));
   }
-  renderUnitsSold(); renderInstalledBase(); if (oldName && oldName !== name) renderOrderTable();
+  renderUnitsSold(); renderInstalledBase(); renderOrderTable();
   if (typeof auditLog === 'function') auditLog(editing ? 'EDIT_ORDER_PRODUCT' : 'ADD_ORDER_PRODUCT', LS_ORDER_PRODUCTS, name);
   closeOrderProductModal();
   setProductSelect(name);      // select it in the order form…
