@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0f1117">
+<meta name="theme-color" content="#1c1c1e">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
@@ -15,7 +15,7 @@
 <style>
   body { min-height: 100vh; }
 
-  .brand { font-size: 1.05rem; font-weight: 800; }
+  .brand { font-size: 1.05rem; font-weight: 600; }
   .brand span { color: var(--accent); }
 
   .tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 32px; background: var(--surface); position: sticky; top: 98px; z-index: 150; }
@@ -31,13 +31,12 @@
   .kpi-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 28px; }
   @media (max-width: 680px) { .kpi-strip { grid-template-columns: 1fr 1fr; } }
   .kpi { background: var(--surface); padding: 18px 22px; }
-  .kpi-val { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px; }
-  .kpi-label { font-size: 0.65rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
-  .kpi-sub { font-size: 0.72rem; margin-top: 4px; }
+  .kpi-val { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.5px; }
+  .kpi-label { font-size: 0.75rem; color: var(--text2); margin-top: 4px; }
+  .kpi-sub { font-size: 0.75rem; margin-top: 4px; }
 
   /* Cards */
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; }
-  .card-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text2); margin-bottom: 16px; }
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
   .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 
@@ -45,16 +44,16 @@
   .cost-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
   .cost-row:last-child { border-bottom: none; }
   .cost-label { font-size: 0.88rem; font-weight: 600; }
-  .cost-sub { font-size: 0.72rem; color: var(--text2); margin-top: 2px; }
+  .cost-sub { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
   .cost-input-wrap { display: flex; align-items: center; gap: 8px; }
-  .cost-input { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 6px 10px; width: 90px; font-size: 0.9rem; text-align: right; }
+  .cost-input { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 6px 10px; width: 90px; font-size: 0.9rem; text-align: right; }
   .cost-input:focus { outline: none; border-color: var(--accent); }
-  .save-costs-btn { background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 8px 18px; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: opacity 0.15s; margin-top: 16px; }
+  .save-costs-btn { background: var(--accent-fill); color: #fff; border: none; border-radius: 999px; padding: 8px 18px; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: opacity 0.15s; margin-top: 16px; }
   .save-costs-btn:hover { opacity: 0.85; }
 
   /* Product margin table */
   table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
-  th { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { font-size: 0.75rem; font-weight: 600; color: var(--text2); padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
   th.num, td.num { text-align: right; }
   td { padding: 12px 12px; border-bottom: 1px solid var(--border); }
   tr:last-child td { border-bottom: none; }
@@ -67,17 +66,17 @@
   /* Show cards */
   .show-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
   .show-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
-  .show-name { font-size: 1rem; font-weight: 800; margin-bottom: 4px; }
+  .show-name { font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
   .show-meta { font-size: 0.75rem; color: var(--text2); margin-bottom: 14px; }
   .show-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .show-stat { background: var(--surface2); border-radius: 6px; padding: 10px 12px; }
-  .show-stat-val { font-size: 1.1rem; font-weight: 800; }
-  .show-stat-label { font-size: 0.65rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.4px; margin-top: 2px; }
+  .show-stat { background: var(--surface2); border-radius: 8px; padding: 10px 12px; }
+  .show-stat-val { font-size: 1.1rem; font-weight: 600; }
+  .show-stat-label { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
   .show-net { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; }
-  .show-badge { font-size: 0.65rem; font-weight: 700; padding: 3px 8px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.4px; }
-  .badge-green { background: rgba(52,211,153,0.15); color: var(--green); }
-  .badge-yellow { background: rgba(251,191,36,0.15); color: var(--yellow); }
-  .badge-red { background: rgba(248,113,113,0.15); color: var(--red); }
+  .show-badge { font-size: 0.75rem; font-weight: 600; padding: 3px 8px; border-radius: 99px; }
+  .badge-green { background: rgba(48, 209, 88,0.15); color: var(--green); }
+  .badge-yellow { background: rgba(255, 214, 10,0.15); color: var(--yellow); }
+  .badge-red { background: rgba(255, 105, 97,0.15); color: var(--red); }
 
   /* Bar chart — grouped side-by-side bars per month */
   .bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 200px; padding: 0 4px; overflow-x: auto; }
@@ -85,8 +84,8 @@
   .bar-wrap { display: flex; flex-direction: row; align-items: flex-end; gap: 2px; flex: 1; width: 100%; justify-content: center; }
   .bar { width: 44%; border-radius: 3px 3px 0 0; transition: opacity 0.15s; cursor: default; position: relative; min-height: 3px; }
   .bar:hover { opacity: 0.75; }
-  .bar-label { font-size: 0.62rem; color: var(--text2); white-space: nowrap; }
-  .bar-val { font-size: 0.63rem; font-weight: 700; color: var(--text2); line-height: 1; }
+  .bar-label { font-size: 0.75rem; color: var(--text2); white-space: nowrap; }
+  .bar-val { font-size: 0.75rem; font-weight: 600; color: var(--text2); line-height: 1; }
 
   /* Legend */
   .legend { display: flex; gap: 16px; margin-bottom: 16px; }
@@ -98,27 +97,27 @@
   .empty .e-icon { font-size: 2.5rem; margin-bottom: 12px; }
 
   /* Tooltip */
-  .tooltip-val { position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); background: #000; color: #fff; font-size: 0.65rem; padding: 3px 6px; border-radius: 4px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.15s; }
+  .tooltip-val { position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); background: #000; color: #fff; font-size: 0.75rem; padding: 3px 6px; border-radius: 8px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.15s; }
   .bar:hover .tooltip-val { opacity: 1; }
 
   /* P&L Statement */
   .pnl-header { margin-bottom: 22px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
-  .pnl-title   { font-size: 1.05rem; font-weight: 800; }
+  .pnl-title   { font-size: 1.05rem; font-weight: 600; }
   .pnl-sub     { font-size: 0.75rem; color: var(--text2); margin-top: 4px; }
-  .pnl-section { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--text2); padding: 14px 0 6px; }
+  .pnl-section { font-size: 0.75rem; font-weight: 600; color: var(--text2); padding: 14px 0 6px; }
   .pnl-row     { display: flex; justify-content: space-between; align-items: center; padding: 7px 0 7px 18px; font-size: 0.88rem; }
-  .pnl-total   { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; font-size: 0.92rem; font-weight: 700; }
-  .pnl-qty     { font-size: 0.7rem; color: var(--text2); font-weight: 400; margin-left: 6px; }
+  .pnl-total   { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; font-size: 0.92rem; font-weight: 600; }
+  .pnl-qty     { font-size: 0.75rem; color: var(--text2); font-weight: 400; margin-left: 6px; }
   .pnl-pct     { font-size: 0.75rem; font-weight: 600; margin-left: 8px; }
   .pnl-sep     { border-top: 1px solid var(--border); margin: 4px 0; }
   .pnl-sep-dbl { border-top: 3px double var(--border); margin: 8px 0; }
   .pnl-net     { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; }
-  .pnl-net-lbl { font-size: 1.05rem; font-weight: 900; letter-spacing: -.3px; }
-  .pnl-net-val { font-size: 1.3rem; font-weight: 800; text-align: right; letter-spacing: -.5px; }
-  .pnl-net-pct { font-size: 0.72rem; color: var(--text2); text-align: right; margin-top: 3px; }
+  .pnl-net-lbl { font-size: 1.05rem; font-weight: 700; letter-spacing: -.3px; }
+  .pnl-net-val { font-size: 1.3rem; font-weight: 600; text-align: right; letter-spacing: -.5px; }
+  .pnl-net-pct { font-size: 0.75rem; color: var(--text2); text-align: right; margin-top: 3px; }
 
   footer {
-    text-align: center; padding: 28px 24px; font-size: 0.72rem;
+    text-align: center; padding: 28px 24px; font-size: 0.75rem;
     color: var(--text2); border-top: 1px solid var(--border); margin-top: 16px;
   }
   footer a { color: var(--accent); text-decoration: none; }
@@ -142,7 +141,7 @@
   }
   @media (max-width: 480px) {
     .kpi-strip { grid-template-columns: 1fr 1fr; }
-    .modal { position: fixed; bottom: 0; left: 0; right: 0; width: 100% !important; max-width: 100% !important; border-radius: 16px 16px 0 0; max-height: 85vh; }
+    .modal { position: fixed; bottom: 0; left: 0; right: 0; width: 100% !important; max-width: 100% !important; border-radius: 28px 28px 0 0; max-height: 85vh; }
     .cost-input { width: 80px; }
     header { min-height: auto; padding: 10px 14px; }
   }
@@ -266,7 +265,7 @@
 <!-- ── P&L ── -->
 <div class="panel" id="tab-pnl">
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap">
-    <label style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text2)">Period:</label>
+    <label style="font-size:0.75rem;font-weight:600;color:var(--text2)">Period:</label>
     <select id="pnl-period" onchange="renderPnl()" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:8px;font-size:.84rem;outline:none;font-family:inherit;cursor:pointer;transition:border-color .15s">
       <option value="all">All Time</option>
     </select>
@@ -423,10 +422,10 @@ function renderMargins() {
           <span>${l.name}</span>
           <span style="color:var(--text2)">${fmt(l.rev)} &nbsp;·&nbsp; <span style="color:${clr(m)}">${m.toFixed(0)}% margin</span></span>
         </div>
-        <div style="background:var(--surface2);border-radius:4px;height:10px">
-          <div style="background:${l.color};width:${w}%;height:10px;border-radius:4px;transition:width 0.4s"></div>
+        <div style="background:var(--surface2);border-radius:8px;height:10px">
+          <div style="background:${l.color};width:${w}%;height:10px;border-radius:8px;transition:width 0.4s"></div>
         </div>
-        <div style="font-size:0.7rem;color:var(--text2);margin-top:4px">${l.units} units · ${fmt(l.profit)} profit</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-top:4px">${l.units} units · ${fmt(l.profit)} profit</div>
       </div>`;
   }).join('');
 
@@ -667,7 +666,7 @@ function renderTrends() {
           <div style="background:var(--accent);width:${(r/maxCust*100).toFixed(0)}%;height:4px;border-radius:3px"></div>
         </div>
       </div>
-      <span style="font-size:0.82rem;font-weight:700;color:var(--accent)">${fmt(r)}</span>
+      <span style="font-size:0.82rem;font-weight:600;color:var(--accent)">${fmt(r)}</span>
     </div>`).join('')
   : '<div style="color:var(--text2);font-size:0.84rem;padding:16px 0">No orders yet.</div>';
 
@@ -685,7 +684,7 @@ function renderTrends() {
           <div style="background:var(--accent2);width:${(r/maxProd*100).toFixed(0)}%;height:4px;border-radius:3px"></div>
         </div>
       </div>
-      <span style="font-size:0.82rem;font-weight:700;color:var(--accent2)">${fmt(r)}</span>
+      <span style="font-size:0.82rem;font-weight:600;color:var(--accent2)">${fmt(r)}</span>
     </div>`).join('')
   : '<div style="color:var(--text2);font-size:0.84rem;padding:16px 0">No products yet.</div>';
 }
@@ -820,7 +819,7 @@ function toast(msg) {
   if (!el) {
     el = document.createElement('div');
     el.id = '_toast';
-    el.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1e293b;border:1px solid #334155;color:#e2e8f0;padding:10px 18px;border-radius:8px;font-size:0.84rem;z-index:9999;transition:opacity 0.3s;opacity:0';
+    el.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#2c2c2e;border:1px solid #3a3a3c;color:#f5f5f7;padding:10px 18px;border-radius:8px;font-size:0.84rem;z-index:9999;transition:opacity 0.3s;opacity:0';
     document.body.appendChild(el);
   }
   el.textContent = msg;

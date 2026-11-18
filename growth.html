@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0f1117">
+<meta name="theme-color" content="#1c1c1e">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
@@ -16,7 +16,7 @@
   body { min-height: 100vh; }
 
   header {
-    background: rgba(13, 15, 22, 0.72);
+    background: rgba(22, 22, 23, 0.72);
     backdrop-filter: blur(20px) saturate(1.3);
     border-bottom: 1px solid var(--border);
     padding: 0 32px;
@@ -28,12 +28,12 @@
     top: 0;
     z-index: 200;
   }
-  header h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.3px; }
+  header h1 { font-size: 1.3rem; font-weight: 600; letter-spacing: -0.3px; }
   header h1 span { color: var(--accent); }
   .header-stats { display: flex; gap: 20px; align-items: center; }
   .stat { text-align: center; display: flex; align-items: baseline; gap: 6px; }
-  .stat-num { font-size: 1.1rem; font-weight: 800; color: var(--accent); }
-  .stat-label { font-size: 0.66rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-num { font-size: 1.1rem; font-weight: 600; color: var(--accent); }
+  .stat-label { font-size: 0.75rem; color: var(--text2); }
 
   main { max-width: 1200px; margin: 0 auto; padding: 28px 24px; }
 
@@ -57,14 +57,14 @@
   button {
     cursor: pointer;
     border: none;
-    border-radius: 8px;
+    border-radius: 999px;
     font-size: 0.85rem;
     font-weight: 600;
     padding: 9px 16px;
     transition: all 0.15s;
   }
-  .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover { background: #7d9bff; }
+  .btn-primary { background: var(--accent-fill); color: #fff; }
+  .btn-primary:hover { background: #0077ed; }
   .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
   .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
   .btn-icon { padding: 6px 10px; font-size: 1rem; }
@@ -82,10 +82,10 @@
     border-radius: var(--radius);
     padding: 16px 18px;
   }
-  .metric-label { font-size: 0.7rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
-  .metric-value { font-size: 1.7rem; font-weight: 800; margin-top: 6px; letter-spacing: -0.5px; }
-  .metric-sub { font-size: 0.74rem; color: var(--text2); margin-top: 4px; }
-  .delta { font-weight: 700; }
+  .metric-label { font-size: 0.75rem; color: var(--text2); font-weight: 600; }
+  .metric-value { font-size: 1.7rem; font-weight: 600; margin-top: 6px; letter-spacing: -0.5px; }
+  .metric-sub { font-size: 0.75rem; color: var(--text2); margin-top: 4px; }
+  .delta { font-weight: 600; }
   .delta.up { color: var(--green); }
   .delta.down { color: var(--red); }
   .delta.flat { color: var(--text2); }
@@ -99,7 +99,7 @@
     margin-bottom: 22px;
   }
   .panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
-  .panel-title { font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .panel-title { font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
   .panel-sub { font-size: 0.76rem; color: var(--text2); }
 
   /* Chart */
@@ -107,7 +107,7 @@
   .chart { display: block; }
   .range-group { display: flex; gap: 6px; }
   .range-btn { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); padding: 6px 12px; font-size: 0.75rem; }
-  .range-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .range-btn.active { background: var(--accent-fill); color: #fff; border-color: var(--accent); }
 
   /* Goal editor */
   .goal-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
@@ -118,32 +118,31 @@
   }
   .goal-input:focus { border-color: var(--accent); }
   .goal-bar-bg { flex: 1; min-width: 140px; background: var(--surface2); border-radius: 99px; height: 8px; overflow: hidden; }
-  .goal-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.4s; }
+  .goal-bar-fill { height: 100%; border-radius: 99px; background: var(--accent); transition: width 0.4s; }
 
   /* Snapshot table */
   .snap-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
   .snap-table th {
-    text-align: left; font-size: 0.68rem; color: var(--text2); text-transform: uppercase;
-    letter-spacing: 0.4px; font-weight: 600; padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap;
+    text-align: left; font-size: 0.75rem; color: var(--text2); font-weight: 600; padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap;
   }
-  .snap-table td { padding: 9px 10px; border-bottom: 1px solid #1e2138; white-space: nowrap; }
+  .snap-table td { padding: 9px 10px; border-bottom: 1px solid #2c2c2e; white-space: nowrap; }
   .snap-table tr:last-child td { border-bottom: none; }
   .snap-table tr:hover td { background: var(--surface2); }
   .snap-num { font-variant-numeric: tabular-nums; }
   .snap-actions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.12s; }
   .snap-table tr:hover .snap-actions { opacity: 1; }
-  .icon-btn { background: none; border: none; color: var(--text2); padding: 4px 6px; font-size: 0.85rem; border-radius: 5px; cursor: pointer; }
+  .icon-btn { background: none; border: none; color: var(--text2); padding: 4px 6px; font-size: 0.85rem; border-radius: 999px; cursor: pointer; }
   .icon-btn:hover { background: var(--surface2); color: var(--text); }
   .table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
   /* Automation panel */
-  .auto-status { display: inline-flex; align-items: center; gap: 7px; font-size: 0.8rem; font-weight: 700; padding: 4px 12px; border-radius: 99px; }
-  .auto-status.manual { background: #3b2e12; color: var(--yellow); }
-  .auto-status.connected { background: #123b20; color: var(--green); }
+  .auto-status { display: inline-flex; align-items: center; gap: 7px; font-size: 0.8rem; font-weight: 600; padding: 4px 12px; border-radius: 99px; }
+  .auto-status.manual { background: #453e1a; color: var(--yellow); }
+  .auto-status.connected { background: #203d28; color: var(--green); }
   .auto-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
   .auto-steps { font-size: 0.84rem; color: var(--text2); line-height: 1.7; margin-top: 6px; }
   .auto-steps ol { margin: 8px 0 0 18px; }
-  .auto-steps code { background: var(--surface2); padding: 1px 6px; border-radius: 5px; font-size: 0.8rem; color: var(--text); }
+  .auto-steps code { background: var(--surface2); padding: 1px 6px; border-radius: 8px; font-size: 0.8rem; color: var(--text); }
   details.auto-details summary { cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--accent); }
   details.auto-details[open] summary { margin-bottom: 10px; }
 
@@ -162,11 +161,11 @@
   .modal-overlay.open { display: flex; }
   .modal {
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: 14px; padding: 28px; width: 460px; max-width: 95vw;
+    border-radius: 28px; padding: 28px; width: 460px; max-width: 95vw;
   }
   .modal h2 { font-size: 1.1rem; margin-bottom: 20px; }
   .field { margin-bottom: 16px; }
-  .field label { display: block; font-size: 0.78rem; color: var(--text2); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+  .field label { display: block; font-size: 0.78rem; color: var(--text2); margin-bottom: 6px; font-weight: 600; }
   .field input, .field textarea {
     width: 100%; background: var(--surface2); border: 1px solid var(--border);
     border-radius: 8px; color: var(--text); padding: 10px 12px; font-size: 0.88rem;
@@ -181,7 +180,7 @@
   .toast {
     position: fixed; bottom: 24px; right: 24px;
     background: var(--surface); border: 1px solid var(--accent);
-    color: var(--text); padding: 12px 20px; border-radius: 9px;
+    color: var(--text); padding: 12px 20px; border-radius: 8px;
     font-size: 0.85rem; z-index: 300;
     transform: translateY(80px); opacity: 0;
     transition: all 0.25s;
@@ -194,13 +193,13 @@
     header h1 { font-size: 1.05rem; }
     .header-stats { gap: 8px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
     .header-stats::-webkit-scrollbar { display: none; }
-    .stat-label { font-size: 0.6rem; }
+    .stat-label { font-size: 0.75rem; }
     .top-bar { flex-direction: column; align-items: stretch; }
     .handle-input { width: 100%; }
     .top-bar > .btn-primary { display: none; }
   }
   @media (max-width: 480px) {
-    .modal { border-radius: 16px 16px 0 0; }
+    .modal { border-radius: 28px 28px 0 0; }
   }
 </style>
 </head>
@@ -535,29 +534,29 @@ function drawChart() {
   // gridlines
   [0, 0.25, 0.5, 0.75, 1].forEach(p => {
     const v = minV + range2 * p, y = pxY(v);
-    svg += `<line x1="${pad}" x2="${W - padR}" y1="${y}" y2="${y}" stroke="#2e3350" stroke-width="1"/>
-            <text x="${pad - 6}" y="${y + 4}" fill="#8892b0" font-size="9" text-anchor="end">${fmtK(Math.round(v))}</text>`;
+    svg += `<line x1="${pad}" x2="${W - padR}" y1="${y}" y2="${y}" stroke="#3a3a3c" stroke-width="1"/>
+            <text x="${pad - 6}" y="${y + 4}" fill="#a1a1a6" font-size="9" text-anchor="end">${fmtK(Math.round(v))}</text>`;
   });
   // goal line
   if (data.goal && data.goal >= minV && data.goal <= maxV) {
     const gy = pxY(data.goal);
-    svg += `<line x1="${pad}" x2="${W - padR}" y1="${gy}" y2="${gy}" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="5,3"/>
-            <text x="${W - padR}" y="${gy - 5}" fill="#a78bfa" font-size="9" text-anchor="end">Goal ${fmtK(data.goal)}</text>`;
+    svg += `<line x1="${pad}" x2="${W - padR}" y1="${gy}" y2="${gy}" stroke="#bf5af2" stroke-width="1.5" stroke-dasharray="5,3"/>
+            <text x="${W - padR}" y="${gy - 5}" fill="#bf5af2" font-size="9" text-anchor="end">Goal ${fmtK(data.goal)}</text>`;
   }
   // area + line
   const pts = s.map((x, i) => `${pxX(i)},${pxY(x.followers)}`).join(' ');
   const areaPts = `${pad},${pxY(minV)} ${pts} ${pxX(s.length - 1)},${pxY(minV)}`;
   svg += `<polygon points="${areaPts}" fill="url(#grGrad)" opacity="0.25"/>`;
-  svg += `<defs><linearGradient id="grGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6c8cff"/><stop offset="1" stop-color="#6c8cff" stop-opacity="0"/></linearGradient></defs>`;
-  svg += `<polyline points="${pts}" fill="none" stroke="#6c8cff" stroke-width="2.5" stroke-linejoin="round"/>`;
+  svg += `<defs><linearGradient id="grGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2997ff"/><stop offset="1" stop-color="#2997ff" stop-opacity="0"/></linearGradient></defs>`;
+  svg += `<polyline points="${pts}" fill="none" stroke="#2997ff" stroke-width="2.5" stroke-linejoin="round"/>`;
   s.forEach((x, i) => {
-    svg += `<circle cx="${pxX(i)}" cy="${pxY(x.followers)}" r="3.5" fill="#6c8cff"><title>${fmtDate(x.date)}: ${x.followers.toLocaleString()}</title></circle>`;
+    svg += `<circle cx="${pxX(i)}" cy="${pxY(x.followers)}" r="3.5" fill="#2997ff"><title>${fmtDate(x.date)}: ${x.followers.toLocaleString()}</title></circle>`;
   });
   // x labels — thin out if crowded
   const step = Math.ceil(s.length / 8);
   s.forEach((x, i) => {
     if (i % step !== 0 && i !== s.length - 1) return;
-    svg += `<text x="${pxX(i)}" y="${H - padB + 18}" fill="#8892b0" font-size="9" text-anchor="middle">${shortDate(x.date)}</text>`;
+    svg += `<text x="${pxX(i)}" y="${H - padB + 18}" fill="#a1a1a6" font-size="9" text-anchor="middle">${shortDate(x.date)}</text>`;
   });
   svg += '</svg>';
   wrap.innerHTML = svg;

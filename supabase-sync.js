@@ -360,31 +360,31 @@ const VpcSync = {
         const cloudDate = new Date(c.cloudTs).toLocaleString();
         const localSize = (localStorage.getItem(c.key) || '').length;
         const cloudSize = JSON.stringify(c.value).length;
-        return `<div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:8px;padding:14px;margin-bottom:12px;">
-        <div style="font-size:0.82rem;font-weight:700;margin-bottom:8px;color:var(--yellow,#fbbf24)">⚠ Conflict: <code style="font-size:0.78rem;background:rgba(0,0,0,0.2);padding:2px 6px;border-radius:4px">${c.key}</code></div>
+        return `<div style="background:rgba(255, 214, 10,0.08);border:1px solid rgba(255, 214, 10,0.3);border-radius:8px;padding:14px;margin-bottom:12px;">
+        <div style="font-size:0.82rem;font-weight:600;margin-bottom:8px;color:var(--yellow,#ffd60a)">⚠ Conflict: <code style="font-size:0.78rem;background:rgba(0,0,0,0.2);padding:2px 6px;border-radius:8px">${c.key}</code></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.75rem;">
-          <div style="background:rgba(0,0,0,0.2);border-radius:6px;padding:8px;">
-            <div style="color:#8892b0;margin-bottom:4px">Local Version</div>
+          <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:8px;">
+            <div style="color:#a1a1a6;margin-bottom:4px">Local Version</div>
             <div>Modified: ${localDate}</div>
-            <div style="color:#8892b0">${localSize} chars</div>
+            <div style="color:#a1a1a6">${localSize} chars</div>
           </div>
-          <div style="background:rgba(0,0,0,0.2);border-radius:6px;padding:8px;">
-            <div style="color:#8892b0;margin-bottom:4px">Cloud Version</div>
+          <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:8px;">
+            <div style="color:#a1a1a6;margin-bottom:4px">Cloud Version</div>
             <div>Modified: ${cloudDate}</div>
-            <div style="color:#8892b0">${cloudSize} chars</div>
+            <div style="color:#a1a1a6">${cloudSize} chars</div>
           </div>
         </div>
       </div>`;
       })
       .join('');
     modal.innerHTML = `
-      <div style="background:var(--surface,#1a1d27);border:1px solid var(--border,#2e3350);border-radius:14px;padding:28px;width:560px;max-width:95vw;max-height:80vh;overflow-y:auto;">
-        <div style="font-size:1rem;font-weight:700;margin-bottom:6px;">Sync Conflict Detected</div>
-        <div style="font-size:0.78rem;color:#8892b0;margin-bottom:20px;">Both local and cloud data were modified. Choose which version to keep for each key.</div>
+      <div style="background:var(--surface,#1c1c1e);border:1px solid var(--border,#3a3a3c);border-radius:12px;padding:28px;width:560px;max-width:95vw;max-height:80vh;overflow-y:auto;">
+        <div style="font-size:1rem;font-weight:600;margin-bottom:6px;">Sync Conflict Detected</div>
+        <div style="font-size:0.78rem;color:#a1a1a6;margin-bottom:20px;">Both local and cloud data were modified. Choose which version to keep for each key.</div>
         ${items}
         <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap;">
-          <button id="vpc-conf-local" style="background:var(--surface2,#22263a);border:1px solid var(--border,#2e3350);color:#e2e8f0;border-radius:7px;padding:8px 16px;font-size:0.82rem;font-weight:600;cursor:pointer;font-family:inherit;">Keep Local (my changes)</button>
-          <button id="vpc-conf-cloud" style="background:var(--accent,#6c8cff);border:none;color:#fff;border-radius:7px;padding:8px 16px;font-size:0.82rem;font-weight:600;cursor:pointer;font-family:inherit;">Use Cloud (discard local)</button>
+          <button id="vpc-conf-local" style="background:var(--surface2,#2c2c2e);border:1px solid var(--border,#3a3a3c);color:#f5f5f7;border-radius:8px;padding:8px 16px;font-size:0.82rem;font-weight:600;cursor:pointer;font-family:inherit;">Keep Local (my changes)</button>
+          <button id="vpc-conf-cloud" style="background:var(--accent,#2997ff);border:none;color:#fff;border-radius:8px;padding:8px 16px;font-size:0.82rem;font-weight:600;cursor:pointer;font-family:inherit;">Use Cloud (discard local)</button>
         </div>
       </div>`;
 
@@ -483,11 +483,11 @@ const VpcSync = {
     const el = document.getElementById('vpc-sync-dot');
     if (!el) return;
     const cfg = {
-      syncing: { color: '#6c8cff', label: 'Syncing…', pulse: true },
-      synced: { color: '#34d399', label: 'Synced', pulse: false },
-      error: { color: '#f87171', label: 'Sync error', pulse: false },
-      offline: { color: '#fbbf24', label: 'Offline', pulse: false },
-      idle: { color: '#4b5563', label: 'Cloud sync', pulse: false },
+      syncing: { color: '#2997ff', label: 'Syncing…', pulse: true },
+      synced: { color: '#30d158', label: 'Synced', pulse: false },
+      error: { color: '#ff6961', label: 'Sync error', pulse: false },
+      offline: { color: '#ffd60a', label: 'Offline', pulse: false },
+      idle: { color: '#636366', label: 'Cloud sync', pulse: false },
     };
     const c = cfg[status] || cfg.idle;
     el.style.background = c.color;
@@ -517,16 +517,16 @@ const VpcSync = {
     chip.style.cssText = `
       display:inline-flex;align-items:center;gap:5px;cursor:pointer;
       padding:4px 10px;border-radius:99px;
-      border:1px solid #2e3350;background:#1a1d27;
+      border:1px solid #3a3a3c;background:#1c1c1e;
       transition:border-color .15s;user-select:none;
     `;
     chip.innerHTML = `
-      <span id="vpc-sync-dot" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#4b5563;flex-shrink:0;"></span>
-      <span id="vpc-sync-label" style="font-size:.7rem;color:#8892b0;">Cloud sync</span>
+      <span id="vpc-sync-dot" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#636366;flex-shrink:0;"></span>
+      <span id="vpc-sync-label" style="font-size:0.75rem;color:#a1a1a6;">Cloud sync</span>
     `;
     chip.addEventListener('click', () => VpcSync.sync());
-    chip.addEventListener('mouseenter', () => (chip.style.borderColor = '#6c8cff'));
-    chip.addEventListener('mouseleave', () => (chip.style.borderColor = '#2e3350'));
+    chip.addEventListener('mouseenter', () => (chip.style.borderColor = '#2997ff'));
+    chip.addEventListener('mouseleave', () => (chip.style.borderColor = '#3a3a3c'));
 
     // User + sign-out chip
     const userChip = document.createElement('div');
@@ -535,23 +535,23 @@ const VpcSync = {
     if (email) {
       const emailSpan = document.createElement('span');
       emailSpan.style.cssText =
-        'font-size:.7rem;color:#8892b0;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+        'font-size:.7rem;color:#a1a1a6;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
       emailSpan.textContent = email;
 
       const signOutBtn = document.createElement('button');
       signOutBtn.textContent = 'Sign Out';
       signOutBtn.style.cssText = `
-        background:none;border:1px solid #2e3350;border-radius:5px;
-        color:#8892b0;padding:3px 8px;font-size:.65rem;font-weight:600;
+        background:none;border:1px solid #3a3a3c;border-radius:5px;
+        color:#a1a1a6;padding:3px 8px;font-size:.65rem;font-weight:600;
         cursor:pointer;transition:all .15s;font-family:inherit;
       `;
       signOutBtn.addEventListener('mouseenter', () => {
-        signOutBtn.style.borderColor = '#f87171';
-        signOutBtn.style.color = '#f87171';
+        signOutBtn.style.borderColor = '#ff6961';
+        signOutBtn.style.color = '#ff6961';
       });
       signOutBtn.addEventListener('mouseleave', () => {
-        signOutBtn.style.borderColor = '#2e3350';
-        signOutBtn.style.color = '#8892b0';
+        signOutBtn.style.borderColor = '#3a3a3c';
+        signOutBtn.style.color = '#a1a1a6';
       });
       signOutBtn.addEventListener('click', () => VpcAuth.signOut());
 
