@@ -25,6 +25,7 @@
   --surface2: #2c2c2e; /* raised: inner tiles, hover rows */
   --fill: rgba(118, 118, 128, 0.24); /* inputs, quiet buttons, tracks */
   --fill-2: rgba(118, 118, 128, 0.12); /* hover on quiet rows */
+  --thumb: #636366; /* the selected segment of a segmented control */
   --separator: rgba(255, 255, 255, 0.1); /* hairlines */
   --label: #f5f5f7;
   --label-2: #a1a1a6;
@@ -125,6 +126,10 @@
 }
 
 /* ── Base reset ── */
+/* hidden always hides, even on elements that set their own display */
+[hidden] {
+  display: none !important;
+}
 *,
 *::before,
 *::after {
@@ -581,6 +586,137 @@ header .brand span,
 header h1 span {
   color: inherit;
 }
+/* Optional one-line subtitle under a title (e.g. "47 orders · last one today") */
+.title-stack {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  flex: 1;
+}
+.title-sub {
+  font-size: 0.75rem;
+  color: var(--label-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Segmented control (shared.js: vpcSeg) ── */
+.seg {
+  display: inline-flex;
+  flex: none;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 9px;
+  background: var(--fill);
+}
+.seg button {
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--label);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.seg button:hover {
+  background: var(--fill-2);
+}
+.seg button:active {
+  transform: none;
+}
+.seg button[aria-checked='true'] {
+  background: var(--thumb);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+@media (pointer: coarse) {
+  .seg button {
+    min-height: 36px;
+  }
+}
+
+/* ── Needs-attention rows: one job each, with a chevron ── */
+.attn-list {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.attn-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 16px;
+  border-radius: 0;
+  background: none;
+  color: var(--label);
+  text-decoration: none;
+  text-align: left;
+  font-weight: 400;
+}
+.attn-row:active {
+  transform: none;
+}
+.attn-row + .attn-row::before {
+  /* inset hairline, starting under the text like a grouped list */
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 38px;
+  right: 0;
+  border-top: 1px solid var(--separator);
+}
+.attn-row:hover {
+  background: var(--fill-2);
+}
+.attn-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--label-3);
+  flex: none;
+}
+.attn-row[data-tone='orange'] .attn-dot {
+  background: var(--orange);
+}
+.attn-row[data-tone='red'] .attn-dot {
+  background: var(--red);
+}
+.attn-row[data-tone='blue'] .attn-dot {
+  background: var(--accent);
+}
+.attn-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.attn-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+.attn-sub {
+  font-size: 0.8125rem;
+  color: var(--label-2);
+}
+.attn-end {
+  font-size: 0.8125rem;
+  color: var(--label-2);
+  white-space: nowrap;
+}
+.attn-row > .vpc-ico {
+  width: 16px;
+  height: 16px;
+  color: var(--label-3);
+}
 
 /* ══════════════════════════════════════════════════
    APP NAVIGATION (built by shared.js)
@@ -738,6 +874,9 @@ header h1 span {
 .vpc-nav-link.is-danger,
 .vpc-nav-link.is-danger .vpc-ico {
   color: var(--red);
+}
+.vpc-nav-link.is-action {
+  color: var(--label-2);
 }
 .vpc-sidebar-foot {
   margin-top: 8px;

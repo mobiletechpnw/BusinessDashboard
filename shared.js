@@ -9,51 +9,58 @@
 // with a More sheet on phones and tablets. A page provides only its <header>
 // (title and page actions); search and the account menu live here, so no
 // page can drift out of sync or dead-end the user.
+const VAULT = 'vault-pine-collective.html';
+// Sales Hub sections are links too (#hash), so the hub needs no section row.
 const NAV = [
   {
     items: [
-      ['index.html', 'home', 'Home'],
-      ['review.html', 'review', 'Daily Review'],
+      { href: 'index.html', icon: 'home', label: 'Home', tab: 'home' },
+      { href: 'review.html', icon: 'review', label: 'Daily Review' },
     ],
   },
   {
     label: 'Sales',
     items: [
-      ['vault-pine-collective.html', 'sales', 'Sales Hub'],
-      ['inventory.html', 'cards', 'Card Inventory'],
+      { href: VAULT + '#sales', icon: 'sales', label: 'Sales Hub', tab: 'sales' },
+      { href: 'inventory.html', icon: 'cards', label: 'Card Inventory' },
+      { href: VAULT + '#jettags', icon: 'tag', label: 'Jet Tags', tab: 'sales' },
+      { href: VAULT + '#pins', icon: 'pin', label: 'Pins', tab: 'sales' },
+      { categories: true }, // product categories you add on the Sales Hub
+      { action: 'newcat', icon: 'plus', label: 'New category' },
     ],
   },
   {
     label: 'Operations',
     items: [
-      ['production.html', 'production', 'Production'],
-      ['events.html', 'events', 'Events'],
+      { href: 'production.html', icon: 'production', label: 'Production', tab: 'production' },
+      { href: 'events.html', icon: 'events', label: 'Events', tab: 'events' },
     ],
   },
   {
     label: 'Money',
     items: [
-      ['analytics.html', 'analytics', 'Analytics'],
-      ['expenses.html', 'expenses', 'Personal Expenses'],
-      ['guru.html', 'guru', 'Guru'],
+      { href: 'analytics.html', icon: 'analytics', label: 'Analytics' },
+      { href: VAULT + '#expenses', icon: 'receipt', label: 'Business Expenses' },
+      { href: 'expenses.html', icon: 'expenses', label: 'Personal Expenses' },
+      { href: 'guru.html', icon: 'guru', label: 'Guru' },
     ],
   },
   {
     label: 'Growth',
     items: [
-      ['goals-dashboard.html', 'goals', 'Goals'],
-      ['content.html', 'content', 'Content'],
-      ['growth.html', 'growth', 'Instagram'],
+      { href: 'goals-dashboard.html', icon: 'goals', label: 'Goals' },
+      { href: 'content.html', icon: 'content', label: 'Content' },
+      { href: 'growth.html', icon: 'growth', label: 'Instagram' },
     ],
   },
 ];
 
 // The four places used most get a tab on phones; everything else is in More.
 const NAV_TABS = [
-  ['index.html', 'home', 'Home'],
-  ['vault-pine-collective.html', 'sales', 'Sales'],
-  ['production.html', 'production', 'Production'],
-  ['events.html', 'events', 'Events'],
+  { key: 'home', href: 'index.html', icon: 'home', label: 'Home' },
+  { key: 'sales', href: VAULT + '#sales', icon: 'sales', label: 'Sales' },
+  { key: 'production', href: 'production.html', icon: 'production', label: 'Production' },
+  { key: 'events', href: 'events.html', icon: 'events', label: 'Events' },
 ];
 
 // Line icons on a 24px grid, stroked in currentColor.
@@ -65,11 +72,17 @@ const NAV_ICONS = {
     '<path d="M5 8h14l-1 12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
   cards:
     '<rect x="3" y="7" width="13" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/>',
+  tag: '<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
+  pin: '<path d="M9 3h6l-1 6 3 3v2H7v-2l3-3-1-6z"/><path d="M12 14v7"/>',
+  category:
+    '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
   production:
     '<path d="M12 3 20 7.5v9L12 21l-8-4.5v-9L12 3z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/>',
   events:
     '<path d="M4 6h16a1 1 0 0 1 1 1v3a2 2 0 0 0 0 4v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3a2 2 0 0 0 0-4V7a1 1 0 0 1 1-1z"/><path d="M15 8v8" stroke-dasharray="1.5 2.5"/>',
   analytics: '<path d="M4 20h16M7 16v-4M12 16V7M17 16v-7"/>',
+  receipt: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><path d="M9 8h6M9 12h6M9 16h3"/>',
   expenses: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h3"/>',
   guru: '<path d="M2 9.5 12 5l10 4.5-10 4.5L2 9.5z"/><path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5M22 9.5V14"/>',
   goals:
@@ -84,32 +97,98 @@ const NAV_ICONS = {
   keyboard:
     '<rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6.5 10h.01M10 10h.01M14 10h.01M17.5 10h.01M8 14h8" stroke-width="2"/>',
   activity: '<path d="M3 12h4l3-8 4 16 3-8h4"/>',
+  archive:
+    '<rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9M10 13h4"/>',
   signout: '<path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="m15 16 4-4-4-4M19 12H9"/>',
   chevrons: '<path d="m8 9 4-4 4 4M8 15l4 4 4-4"/>',
+  chevron: '<path d="m9 6 6 6-6 6"/>',
   close: '<path d="M6 6l12 12M18 6 6 18"/>',
 };
 
 function navIcon(name) {
   return `<svg class="vpc-ico" viewBox="0 0 24 24" aria-hidden="true">${NAV_ICONS[name] || ''}</svg>`;
 }
+window.vpcIcon = navIcon;
 function navEsc(s) {
   return String(s).replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 }
 function navCurrentPage() {
   return location.pathname.split('/').pop() || 'index.html';
 }
-function navLinksHTML(cur) {
-  return NAV.map(
-    (g) =>
-      (g.label ? `<div class="vpc-nav-label">${g.label}</div>` : '') +
-      g.items
-        .map(
-          ([href, icon, label]) =>
-            `<a href="${href}" class="vpc-nav-link"${href === cur ? ' aria-current="page"' : ''}>${navIcon(icon)}<span>${label}</span></a>`
-        )
-        .join('')
-  ).join('');
+// The nav groups with your product categories filled in.
+function navGroups() {
+  let cats = [];
+  try {
+    cats = window.VPCUtil?.customCategories?.() || [];
+  } catch (e) {}
+  return NAV.map((g) => ({
+    ...g,
+    items: g.items.flatMap((i) =>
+      i.categories
+        ? cats.map((c) => ({
+            href: `${VAULT}#cat-${c.id}`,
+            icon: 'category',
+            label: c.name,
+            tab: 'sales',
+          }))
+        : [i]
+    ),
+  }));
 }
+// The link for where you are. A Sales Hub section matches by its #hash; any
+// other hash on a page falls back to that page's first link.
+function navCurrentItem(groups) {
+  const page = navCurrentPage();
+  const links = groups.flatMap((g) => g.items).filter((i) => i.href);
+  return (
+    links.find((i) => i.href === page + location.hash) ||
+    links.find((i) => i.href.split('#')[0] === page) ||
+    null
+  );
+}
+function navLinksHTML(groups = navGroups()) {
+  const cur = navCurrentItem(groups);
+  return groups
+    .map(
+      (g) =>
+        (g.label ? `<div class="vpc-nav-label">${g.label}</div>` : '') +
+        g.items
+          .map((i) =>
+            i.action
+              ? `<button type="button" class="vpc-nav-link is-action" data-nav-action="${i.action}">${navIcon(i.icon)}<span>${i.label}</span></button>`
+              : `<a href="${i.href}" class="vpc-nav-link"${i === cur ? ' aria-current="page"' : ''}>${navIcon(i.icon)}<span>${navEsc(i.label)}</span></a>`
+          )
+          .join('')
+    )
+    .join('');
+}
+function navTabsHTML(groups = navGroups()) {
+  const tab = navCurrentItem(groups)?.tab;
+  return (
+    '<div class="vpc-tabbar-inner">' +
+    NAV_TABS.map(
+      (t) =>
+        `<a href="${t.href}"${t.key === tab ? ' aria-current="page"' : ''}>${navIcon(t.icon)}<span>${t.label}</span></a>`
+    ).join('') +
+    `<button type="button" data-nav-action="more" aria-haspopup="dialog" aria-expanded="false"${tab ? '' : ' class="is-current"'}>${navIcon('more')}<span>More</span></button>` +
+    '</div>'
+  );
+}
+// Re-mark where you are (and pick up new or renamed categories). The tab
+// bar's buttons are kept, so focus and an open More sheet are undisturbed.
+window.vpcRefreshNav = function () {
+  const groups = navGroups();
+  document.querySelectorAll('.vpc-nav').forEach((n) => (n.innerHTML = navLinksHTML(groups)));
+  const tab = navCurrentItem(groups)?.tab;
+  document.querySelectorAll('.vpc-tabbar a').forEach((a, i) => {
+    if (NAV_TABS[i]?.key === tab) a.setAttribute('aria-current', 'page');
+    else a.removeAttribute('aria-current');
+  });
+  document
+    .querySelector('.vpc-tabbar [data-nav-action="more"]')
+    ?.classList.toggle('is-current', !tab);
+};
+window.addEventListener('hashchange', () => window.vpcRefreshNav());
 function navSearchHTML() {
   const mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
   return `<button type="button" class="vpc-search" data-nav-action="search">${navIcon('search')}<span>Search</span><kbd>${mac ? '⌘K' : 'Ctrl K'}</kbd></button>`;
@@ -130,6 +209,7 @@ function navAccountActions({ keyboard }) {
   const acts = [{ value: 'sync', label: 'Sync now', icon: 'sync' }];
   if ('Notification' in window && Notification.permission === 'default')
     acts.push({ value: 'reminders', label: 'Turn on reminders', icon: 'bell' });
+  acts.push({ value: 'backoffice', label: 'Back office', icon: 'archive' });
   if (keyboard) acts.push({ value: 'shortcuts', label: 'Keyboard shortcuts', icon: 'keyboard' });
   acts.push({ value: 'activity', label: 'Activity log', icon: 'activity' });
   acts.push({ value: 'signout', label: 'Sign out', icon: 'signout', danger: true });
@@ -137,32 +217,24 @@ function navAccountActions({ keyboard }) {
 }
 
 function injectAppNav() {
-  const cur = navCurrentPage();
+  const groups = navGroups();
 
   const side = document.createElement('div');
   side.className = 'vpc-sidebar';
   side.innerHTML =
     '<a class="vpc-brand" href="index.html"><span class="vpc-brand-mark" aria-hidden="true">🌲</span>Vault &amp; Pine</a>' +
     navSearchHTML() +
-    `<nav class="vpc-nav" aria-label="Main">${navLinksHTML(cur)}</nav>` +
+    `<nav class="vpc-nav" aria-label="Main">${navLinksHTML(groups)}</nav>` +
     '<div class="vpc-sidebar-foot"><button type="button" class="vpc-account" data-nav-action="account" aria-haspopup="menu" aria-expanded="false">' +
     navWhoHTML() +
     navIcon('chevrons') +
     '</button></div>';
   document.body.prepend(side);
 
-  const inTabs = NAV_TABS.some(([href]) => href === cur);
   const tabs = document.createElement('nav');
   tabs.className = 'vpc-tabbar';
   tabs.setAttribute('aria-label', 'Main');
-  tabs.innerHTML =
-    '<div class="vpc-tabbar-inner">' +
-    NAV_TABS.map(
-      ([href, icon, label]) =>
-        `<a href="${href}"${href === cur ? ' aria-current="page"' : ''}>${navIcon(icon)}<span>${label}</span></a>`
-    ).join('') +
-    `<button type="button" data-nav-action="more" aria-haspopup="dialog" aria-expanded="false"${inTabs ? '' : ' class="is-current"'}>${navIcon('more')}<span>More</span></button>` +
-    '</div>';
+  tabs.innerHTML = navTabsHTML(groups);
   document.body.appendChild(tabs);
 
   // Wide windows have no More tab, so close the sheet if the window grows.
@@ -208,7 +280,7 @@ function openMoreSheet(trigger) {
       </div>
       <div class="vpc-sheet-body">
         ${navSearchHTML()}
-        <nav class="vpc-nav" aria-label="All pages">${navLinksHTML(navCurrentPage())}</nav>
+        <nav class="vpc-nav" aria-label="All pages">${navLinksHTML()}</nav>
         <div class="vpc-nav-label">Account</div>
         <div class="vpc-sheet-who">${navWhoHTML()}</div>
         ${navAccountActions({ keyboard: false })
@@ -286,11 +358,21 @@ function runNavAction(action, el) {
   else if (action === 'activity') {
     closeMoreSheet(false);
     showAuditLog();
+  } else if (action === 'newcat') {
+    closeMoreSheet(false);
+    if (navCurrentPage() === VAULT && typeof window.openCatModal === 'function') openCatModal();
+    else location.href = VAULT + '#newcat';
+  } else if (action === 'backoffice') {
+    closeMoreSheet(false);
+    location.href = VAULT + '#backoffice';
   } else if (action === 'signout') window.VpcAuth?.signOut();
 }
 document.addEventListener('click', (e) => {
   const el = e.target.closest('[data-nav-action]');
   if (el) runNavAction(el.dataset.navAction, el);
+  // A link to another part of this page (a Sales Hub section) changes only
+  // the #hash, so close the sheet rather than leave it covering the page.
+  else if (e.target.closest('.vpc-sheet a[href]')) closeMoreSheet(false);
 });
 
 // ── STATUS MENU ────────────────────────────────────
@@ -397,6 +479,46 @@ window.vpcMenu = function (anchor, { label, options, current, onSelect, header, 
   window.addEventListener('resize', onViewport);
   _vpcMenuClose = close;
   _vpcMenuAnchor = anchor;
+};
+
+// ── SEGMENTED CONTROL ──────────────────────────────
+// Replaces rows of pills: <div class="seg" aria-label="…"> holding
+// <button data-value="…" aria-checked="true|false"> options. Click or the
+// arrow keys pick one, and the group is a single tab stop.
+//   const seg = vpcSeg(el, (value) => …);   seg.set(value) selects quietly.
+window.vpcSeg = function (el, onChange) {
+  const opts = [...el.querySelectorAll('button')];
+  el.setAttribute('role', 'radiogroup');
+  const pick = (btn, { focus = false, fire = true } = {}) => {
+    opts.forEach((o) => {
+      const on = o === btn;
+      o.setAttribute('aria-checked', String(on));
+      o.tabIndex = on ? 0 : -1;
+    });
+    if (focus) btn.focus();
+    if (fire && onChange) onChange(btn.dataset.value, btn);
+  };
+  opts.forEach((o) => {
+    o.type = 'button';
+    o.setAttribute('role', 'radio');
+    o.addEventListener('click', () => {
+      if (o.getAttribute('aria-checked') !== 'true') pick(o);
+    });
+  });
+  el.addEventListener('keydown', (e) => {
+    const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+    if (!step) return;
+    e.preventDefault();
+    const i = opts.findIndex((o) => o.getAttribute('aria-checked') === 'true');
+    pick(opts[(i + step + opts.length) % opts.length], { focus: true });
+  });
+  pick(opts.find((o) => o.getAttribute('aria-checked') === 'true') || opts[0], { fire: false });
+  return {
+    set(value) {
+      const btn = opts.find((o) => o.dataset.value === value);
+      if (btn) pick(btn, { fire: false });
+    },
+  };
 };
 
 // ── GLOBAL SEARCH ──────────────────────────────────

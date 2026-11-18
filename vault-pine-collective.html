@@ -17,29 +17,16 @@
 
   /* Header and cross-page nav come from styles.css, same as every page. */
 
-  /* ── Section row (Sales / Business Expenses / trackers) ──
-     Sits under the cross-page nav and scrolls with the page; written like
-     the shared tab bar so it reads as part of the same site. */
-  .main-nav {
-    display: flex; gap: 0; padding: 0 32px;
-    border-bottom: 1px solid var(--glass-border);
-    background: rgba(22, 22, 23, 0.7);
-    overflow-x: auto; scrollbar-width: none;
-  }
-  .main-nav::-webkit-scrollbar { display: none; }
-  .main-tab {
-    padding: 14px 20px; font-size: 0.84rem; font-weight: 600; color: var(--text2);
-    cursor: pointer; border-bottom: 2px solid transparent;
-    transition: all 0.15s; user-select: none; white-space: nowrap;
-  }
-  .main-tab:hover { color: var(--text); }
-  .main-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  /* ── Title bar: section title, the date range (Overview) and one main action ── */
+  header { gap: 12px; }
+  header .vpc-primary { display: inline-flex; align-items: center; gap: 6px; flex: none; }
+  header .vpc-primary .vpc-ico { width: 18px; height: 18px; stroke-width: 2.2; }
 
-  /* ── KPI bar (Sales) ── */
-  .kpi-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
-  .kpi { background: var(--surface); padding: 16px 22px; }
-  .kpi-val { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.5px; }
-  .kpi-label { font-size: 0.75rem; color: var(--text2); margin-top: 3px; }
+  /* ── KPI tiles (Sales › Overview): label above the number ── */
+  .kpi-bar { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .kpi { display: flex; flex-direction: column; background: var(--surface); border-radius: var(--r-lg); padding: 16px 18px; min-width: 0; }
+  .kpi-val { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kpi-label { order: -1; font-size: 0.75rem; color: var(--text2); margin-bottom: 4px; }
   .kpi-sub { font-size: 0.75rem; margin-top: 4px; }
 
   /* ── Sales sub-tab bar ── */
@@ -228,23 +215,17 @@
   .toast { position: fixed; bottom: calc(24px + var(--chrome-bottom)); right: 24px; background: var(--surface); border: 1px solid var(--accent); color: var(--text); padding: 11px 18px; border-radius: 8px; font-size: 0.83rem; z-index: 600; transform: translateY(80px); opacity: 0; transition: all 0.25s; }
   .toast.show { transform: translateY(0); opacity: 1; }
 
-  /* ── Date range filter bar ── */
-  .range-bar { display: flex; align-items: center; gap: 6px; padding: 10px 24px; border-bottom: 1px solid var(--border); background: var(--surface); flex-wrap: wrap; }
-  .range-btn { background: transparent; border: 1px solid var(--border); color: var(--text2); font-size: 0.75rem; font-weight: 600; padding: 5px 12px; border-radius: 999px; cursor: pointer; transition: all 0.15s; }
-  .range-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .range-btn.active { background: var(--accent-fill); color: #fff; border-color: var(--accent); }
-  .range-label { font-size: 0.75rem; color: var(--text2); margin-right: 4px; }
-
   @media (max-width: 700px) {
-    .main-nav { padding: 0 8px; }
-    .main-tab { padding: 12px 14px; font-size: 0.78rem; }
     .tab-bar { padding: 0 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-wrap: nowrap; }
     .tab-bar::-webkit-scrollbar { display: none; }
     .tab { white-space: nowrap; padding: 12px 14px; font-size: 0.78rem; }
     .exp-tab-bar { padding: 0 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-wrap: nowrap; }
     .exp-tab-bar::-webkit-scrollbar { display: none; }
     .exp-tab { white-space: nowrap; }
-    .kpi-bar { grid-template-columns: repeat(2, 1fr); }
+    .kpi-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .kpi:last-child { grid-column: span 2; }
+    .kpi { padding: 12px 14px; }
+    .kpi-val { font-size: 1.25rem; }
     .jt-stat-bar, .pin-stat-bar, .exp-stat-bar { grid-template-columns: repeat(2, 1fr); }
     .grid-2, .grid-3 { grid-template-columns: 1fr; }
     #filamentKpis { grid-template-columns: repeat(2, 1fr) !important; }
@@ -256,6 +237,14 @@
     .search-input { width: 100%; }
     .btn-primary, .btn-ghost { padding: 8px 14px; font-size: 0.78rem; min-height: 44px; }
     #backup-banner { width: 92%; flex-wrap: wrap; }
+    /* Phones: the range gets its own row under the title; the main action
+       is a + button, like a navigation bar. */
+    header { flex-wrap: wrap; row-gap: 0; }
+    #rangeSeg { order: 3; flex: 1 0 100%; margin-bottom: 8px; }
+    #rangeSeg button { flex: 1; padding: 0 4px; }
+    header .vpc-primary { width: 44px; height: 44px; min-height: 44px; padding: 0; justify-content: center; background: none; color: var(--accent); margin-right: -10px; }
+    header .vpc-primary span { display: none; }
+    header .vpc-primary .vpc-ico { width: 24px; height: 24px; }
   }
   @media (max-width: 480px) {
     .modal { position: fixed; bottom: 0; left: 0; right: 0; width: 100% !important; max-width: 100% !important; border-radius: 28px 28px 0 0; max-height: 85vh; }
@@ -269,60 +258,24 @@
 <body>
 
 <header>
-  <div class="brand">Sales Hub</div>
+  <div class="title-stack">
+    <div class="brand" id="vpcTitle">Sales</div>
+    <div class="title-sub" id="vpcSub"></div>
+  </div>
+  <div class="seg" id="rangeSeg" aria-label="Date range">
+    <button data-value="all" aria-checked="true">All</button>
+    <button data-value="ytd">YTD</button>
+    <button data-value="6m">6M</button>
+    <button data-value="3m">3M</button>
+    <button data-value="30d">30D</button>
+    <button data-value="7d">7D</button>
+  </div>
+  <button class="btn-primary vpc-primary" id="vpcPrimary" type="button" onclick="vpcPrimaryAction()"><svg class="vpc-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span id="vpcPrimaryLabel">New Order</span></button>
 </header>
 
 
-<!-- Section row: switches between the Sales Hub's own sections -->
-<div class="main-nav">
-  <div class="main-tab active" data-section="sales">Sales</div>
-  <div class="main-tab" data-section="expenses" title="Business costs — separate from the Personal Expenses page">Business Expenses</div>
-  <div class="main-tab" data-section="jettags">🏷 Jet Tags</div>
-  <div class="main-tab" data-section="pins">📌 Pins</div>
-  <div class="main-tab" data-section="backoffice">⚙ Back Office</div>
-  <div class="main-tab" data-action="newcat" title="Create a new product category" style="color:var(--text2)">＋ New Category</div>
-</div>
-
 <!-- ══════════════════════════════════════════ SALES SECTION ══ -->
 <div class="section active" id="section-sales">
-
-  <div class="range-bar" id="sales-range-bar">
-    <span class="range-label">Range:</span>
-    <button class="range-btn active" data-range="all">All Time</button>
-    <button class="range-btn" data-range="ytd">YTD</button>
-    <button class="range-btn" data-range="6m">6 Months</button>
-    <button class="range-btn" data-range="3m">3 Months</button>
-    <button class="range-btn" data-range="30d">30 Days</button>
-    <button class="range-btn" data-range="7d">7 Days</button>
-  </div>
-
-  <div class="kpi-bar">
-    <div class="kpi">
-      <div class="kpi-val" id="kpiRevenue">—</div>
-      <div class="kpi-label">Total Revenue</div>
-      <div class="kpi-sub" id="kpiRevSub" style="color:var(--text2)"></div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-val" id="kpiProfit">—</div>
-      <div class="kpi-label">Gross Profit</div>
-      <div class="kpi-sub" id="kpiProfitSub" style="color:var(--text2)"></div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-val" id="kpiRoi">—</div>
-      <div class="kpi-label">Gross Margin</div>
-      <div class="kpi-sub" id="kpiRoiSub" style="color:var(--text2)"></div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-val" id="kpiOrders">—</div>
-      <div class="kpi-label">Orders</div>
-      <div class="kpi-sub" id="kpiOrdersSub" style="color:var(--text2)"></div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-val" id="kpiCustomers">—</div>
-      <div class="kpi-label">Avg Order Value</div>
-      <div class="kpi-sub" id="kpiCustSub" style="color:var(--text2)"></div>
-    </div>
-  </div>
 
   <div class="tab-bar">
     <div class="tab active" data-tab="overview">Overview</div>
@@ -336,9 +289,39 @@
   <main>
     <!-- Overview -->
     <div class="panel active" id="panel-overview">
-      <div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px">
-        <div class="filter-chip" id="toPrintLink" style="display:none;margin-right:auto" title="Show the orders that still need printing" onclick="showPrintQueue()"></div>
-        <button class="btn-primary" onclick="openAddOrder()">+ Log New Order</button>
+      <div class="kpi-bar">
+        <div class="kpi">
+          <div class="kpi-val" id="kpiRevenue">—</div>
+          <div class="kpi-label">Total Revenue</div>
+          <div class="kpi-sub" id="kpiRevSub" style="color:var(--text2)"></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val" id="kpiProfit">—</div>
+          <div class="kpi-label">Gross Profit</div>
+          <div class="kpi-sub" id="kpiProfitSub" style="color:var(--text2)"></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val" id="kpiRoi">—</div>
+          <div class="kpi-label">Gross Margin</div>
+          <div class="kpi-sub" id="kpiRoiSub" style="color:var(--text2)"></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val" id="kpiOrders">—</div>
+          <div class="kpi-label">Orders</div>
+          <div class="kpi-sub" id="kpiOrdersSub" style="color:var(--text2)"></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val" id="kpiCustomers">—</div>
+          <div class="kpi-label">Avg Order Value</div>
+          <div class="kpi-sub" id="kpiCustSub" style="color:var(--text2)"></div>
+        </div>
+      </div>
+      <div class="attn-list" id="toPrintList" hidden style="margin-bottom:20px">
+        <button type="button" class="attn-row" data-tone="orange" onclick="showPrintQueue()">
+          <span class="attn-dot"></span>
+          <span class="attn-text"><span class="attn-title" id="toPrintTitle"></span><span class="attn-sub" id="toPrintSub"></span></span>
+          <svg class="vpc-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </button>
       </div>
       <div class="card" style="margin-bottom:20px">
         <div class="card-title">Monthly Revenue &amp; Profit</div>
@@ -478,10 +461,6 @@
 
     <!-- Filament -->
     <div class="panel" id="panel-filament">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
-        <div></div>
-        <button class="btn-primary" onclick="openAddFilament()">+ Log Purchase</button>
-      </div>
       <div id="filamentKpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;border:1px solid var(--border)"></div>
       <div class="grid-2" style="margin-bottom:20px">
         <div class="card">
@@ -603,9 +582,6 @@
 
     <!-- Overview -->
     <div class="exp-panel active" id="exppanel-overview">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:20px">
-        <button class="btn-primary" onclick="openExpModal()">+ Add Expense</button>
-      </div>
       <div class="grid-2" style="margin-bottom:20px">
         <div class="card">
           <div class="card-title">Spending by Category</div>
@@ -617,10 +593,7 @@
         </div>
       </div>
       <div class="card">
-        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
-          <span>Recent Expenses</span>
-          <button class="btn-primary" style="padding:6px 13px;font-size:.78rem" onclick="openExpModal()">+ Add</button>
-        </div>
+        <div class="card-title">Recent Expenses</div>
         <div id="expRecentList"></div>
       </div>
     </div>
@@ -630,7 +603,6 @@
       <div class="toolbar">
         <input class="search-input" id="expSearch" placeholder="Search description, category…" oninput="renderExpTable()">
         <div id="expMonthFilters" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
-        <button class="btn-primary" style="margin-left:auto" onclick="openExpModal()">+ Add Expense</button>
       </div>
       <div class="card">
         <div class="table-wrap">
@@ -653,9 +625,6 @@
 
     <!-- By Category -->
     <div class="exp-panel" id="exppanel-categories">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:20px">
-        <button class="btn-primary" onclick="openExpModal()">+ Add Expense</button>
-      </div>
       <div class="exp-cat-grid" id="expCatGrid"></div>
     </div>
 
@@ -846,7 +815,6 @@
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn-ghost" onclick="openJtCharModal()">+ New Character</button>
         <button class="btn-ghost" onclick="openJtRestockModal()">+ Restock</button>
-        <button class="btn-primary" onclick="openJtSaleModal()">+ Log Sale</button>
       </div>
     </div>
 
@@ -1022,7 +990,6 @@
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn-ghost" onclick="openPinCharModal()">+ New Character</button>
         <button class="btn-ghost" onclick="openPinRestockModal()">+ Restock</button>
-        <button class="btn-primary" onclick="openPinSaleModal()">+ Log Sale</button>
       </div>
     </div>
 
@@ -1273,7 +1240,6 @@
 
 <!-- ══════════════════════════════════════════ FAB ══ -->
 <!-- Context-aware FAB: shows the right "add" modal for the active section/tab -->
-<button class="fab" id="vpc-fab" onclick="vpcFabAction()" title="Quick add" aria-label="Add">＋</button>
 
 <!-- ══════════════════════════════════════════ BACK OFFICE ══ -->
 <div class="section" id="section-backoffice">
@@ -1317,18 +1283,37 @@
 
 <script>
 // ── Context-aware FAB ──
-function vpcFabAction() {
-  const activeSection = document.querySelector('.section.active');
-  const sectionId = activeSection ? activeSection.id : 'section-sales';
-  if (sectionId === 'section-expenses') { openExpModal(); return; }
-  if (sectionId === 'section-jettags') { openJtSaleModal(); return; }
-  if (sectionId === 'section-pins') { openPinSaleModal(); return; }
-  if (sectionId.startsWith('section-cat-')) { openCatSaleModal(sectionId.slice('section-cat-'.length)); return; }
-  // Sales section — check which sub-tab is active
-  const activeTab = document.querySelector('#section-sales .tab.active');
-  const tabId = activeTab ? activeTab.dataset.tab : 'overview';
-  if (tabId === 'filament') { openAddFilament(); return; }
-  openAddOrder();
+// ── Title bar: the one main action follows the section and the Sales tab ──
+function activeSectionId() {
+  return (document.querySelector('.section.active')?.id || 'section-sales').slice('section-'.length);
+}
+function salesTab() {
+  return document.querySelector('#section-sales .tab.active')?.dataset.tab || 'overview';
+}
+function primaryActionFor(section) {
+  if (section === 'expenses') return { label: 'Add Expense', run: () => openExpModal() };
+  if (section === 'jettags') return { label: 'Log Sale', run: () => openJtSaleModal() };
+  if (section === 'pins') return { label: 'Log Sale', run: () => openPinSaleModal() };
+  if (section.startsWith('cat-')) return { label: 'Log Sale', run: () => openCatSaleModal(section.slice(4)) };
+  if (section === 'sales') {
+    return salesTab() === 'filament'
+      ? { label: 'Log Purchase', run: () => openAddFilament() }
+      : { label: 'New Order', run: () => openAddOrder() };
+  }
+  return null; // Back Office has no main action
+}
+function vpcPrimaryAction() { primaryActionFor(activeSectionId())?.run(); }
+function updateTitleBar() {
+  const section = activeSectionId();
+  const act = primaryActionFor(section);
+  const btn = document.getElementById('vpcPrimary');
+  btn.hidden = !act;
+  if (act) {
+    document.getElementById('vpcPrimaryLabel').textContent = act.label;
+    btn.setAttribute('aria-label', act.label);
+  }
+  // The date range only changes the Overview (its KPIs and units sold).
+  document.getElementById('rangeSeg').hidden = !(section === 'sales' && salesTab() === 'overview');
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1388,21 +1373,45 @@ function toast(msg) {
 //  MAIN NAV
 // ══════════════════════════════════════════════════════════════
 // Delegated so tabs created at runtime (custom categories) work too.
-function activateMainTab(t) {
-  document.querySelectorAll('.main-tab').forEach(x => x.classList.remove('active'));
-  document.querySelectorAll('.section').forEach(x => x.classList.remove('active'));
-  t.classList.add('active');
-  const section = document.getElementById('section-' + t.dataset.section);
-  if (section) section.classList.add('active');
-  const fab = document.getElementById('vpc-fab');
-  if (fab) fab.style.display = t.dataset.section === 'backoffice' ? 'none' : '';
+// ── Sections are chosen from the app navigation, by #hash ──
+const SECTION_TITLES = { sales: 'Sales', expenses: 'Business Expenses', jettags: 'Jet Tags', pins: 'Pins', backoffice: 'Back Office' };
+function showSection(id) {
+  if (!document.getElementById('section-' + id)) id = 'sales';
+  const prev = activeSectionId();
+  document.querySelectorAll('.section').forEach(x => x.classList.toggle('active', x.id === 'section-' + id));
+  const cat = id.startsWith('cat-') ? catById(id.slice(4)) : null;
+  const title = cat ? cat.name : SECTION_TITLES[id];
+  document.getElementById('vpcTitle').textContent = title;
+  document.getElementById('vpcSub').hidden = id !== 'sales';
+  document.title = `${title} — Vault & Pine Collective`;
+  updateTitleBar();
+  if (prev !== id) window.scrollTo(0, 0);
 }
-document.querySelector('.main-nav').addEventListener('click', (e) => {
-  const t = e.target.closest('.main-tab');
-  if (!t) return;
-  if (t.dataset.action === 'newcat') { openCatModal(); return; }
-  if (t.dataset.section) activateMainTab(t);
-});
+// Switch section through the #hash, so Back and the nav stay in step.
+function goSection(id) {
+  if (location.hash.slice(1) === id) showSection(id);
+  else location.hash = id;
+}
+function selectSalesTab(tab) {
+  document.querySelector(`#section-sales .tab[data-tab="${tab}"]`)?.click();
+}
+function routeFromHash() {
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (h === 'newcat') {
+    history.replaceState(null, '', location.pathname + location.search);
+    showSection('sales');
+    openCatModal();
+  } else if (h === 'print-queue') {
+    showSection('sales');
+    showPrintQueue();
+  } else if (h === 'orders') {
+    showSection('sales');
+    selectSalesTab('orders');
+  } else {
+    showSection(h || 'sales');
+  }
+}
+window.addEventListener('hashchange', routeFromHash);
 
 // ══════════════════════════════════════════════════════════════
 //  DATE RANGE FILTER
@@ -1427,13 +1436,10 @@ function getFilteredOrders() {
   return all.filter(o => o.date && new Date(o.date + 'T00:00:00') >= start);
 }
 
-document.querySelectorAll('.range-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    ACTIVE_RANGE = btn.dataset.range;
-    renderSalesAll();
-  });
+const RANGE_LABELS = { all: 'All time', ytd: 'Year to date', '6m': 'Last 6 months', '3m': 'Last 3 months', '30d': 'Last 30 days', '7d': 'Last 7 days' };
+// The range is a segmented control in the title bar (vpcSeg is in shared.js).
+document.addEventListener('DOMContentLoaded', () => {
+  vpcSeg(document.getElementById('rangeSeg'), (v) => { ACTIVE_RANGE = v; renderSalesAll(); });
 });
 
 // ══════════════════════════════════════════════════════════════
@@ -1740,12 +1746,13 @@ function printQueueSummary() {
 function fmtHours(h) { return (Math.round(h * 10) / 10).toLocaleString('en-US') + ' h'; }
 function renderPrintQueue() {
   const q = printQueueSummary();
-  const hrs = q.timed ? ` · ≈ ${fmtHours(q.hours)}${q.timed < q.count ? ` for ${q.timed} of ${q.count}` : ''}` : '';
   document.getElementById('orderPrintFilter').innerHTML =
     `<div class="filter-chip ${orderNotPrintedOnly ? 'active' : ''}" title="Show only orders not yet printed" onclick="toggleNotPrintedFilter()">⏳ Not Printed (${q.count})</div>`;
-  const link = document.getElementById('toPrintLink');
-  link.style.display = q.count ? '' : 'none';
-  link.textContent = `⏳ ${q.count} order${q.count === 1 ? '' : 's'} to print${hrs}`;
+  document.getElementById('toPrintList').hidden = !q.count;
+  document.getElementById('toPrintTitle').textContent = `${q.count} order${q.count === 1 ? '' : 's'} to print`;
+  document.getElementById('toPrintSub').textContent = q.timed
+    ? `About ${fmtHours(q.hours)} of printing${q.timed < q.count ? ` for ${q.timed} of them` : ''}`
+    : 'Open the print queue';
 }
 function toggleNotPrintedFilter() { orderNotPrintedOnly = !orderNotPrintedOnly; orderPage = 0; renderOrderTable(); }
 function showPrintQueue() {
@@ -2388,7 +2395,7 @@ function renderUnitsSold() {
         <div style="font-size:0.75rem;color:var(--text2);margin-top:6px">${t.orders} order${t.orders === 1 ? '' : 's'} · ${fmt$(t.revenue)}</div>
       </div>`;
   }).join('');
-  const rangeLabel = document.querySelector('.range-btn.active')?.textContent.trim() || 'All Time';
+  const rangeLabel = RANGE_LABELS[ACTIVE_RANGE] || 'All time';
   const customNote = lines.custom
     ? `<div style="font-size:0.75rem;color:var(--text2);margin-top:14px">Custom orders aren't counted under a product. To move them, open each one on the Orders tab, choose its product, and check the Sale Price and COGS before saving — choosing a saved product refills them.</div>`
     : '';
@@ -2541,10 +2548,26 @@ document.querySelectorAll('.tab').forEach(t => {
     // Recompute live insights each time the tab is opened so they always
     // reflect the latest order data (and refresh the "updated" timestamp).
     if (t.dataset.tab === 'insights') renderInsights();
+    updateTitleBar();
   });
 });
 
+function relDay(d) {
+  const days = Math.round((todayDate() - new Date(d + 'T00:00:00')) / 864e5);
+  if (days <= 0) return 'today';
+  if (days === 1) return 'yesterday';
+  if (days < 7) return `${days} days ago`;
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+function renderTitleSub() {
+  const all = getOrders();
+  const last = all.length ? all[all.length - 1].date : '';
+  document.getElementById('vpcSub').textContent = all.length
+    ? `${all.length} order${all.length === 1 ? '' : 's'} · last one ${relDay(last)}`
+    : 'No orders yet';
+}
 function renderSalesAll() {
+  renderTitleSub();
   renderKPIs();
   renderMonthlyChart();
   renderPipeline();
@@ -4836,7 +4859,6 @@ function catSectionHtml(cat) {
         <button class="btn-ghost" onclick="openCatModal('${cat.id}')" title="Rename, restyle, or delete this category">✎ Edit</button>
         <button class="btn-ghost" onclick="openCatItemModal('${cat.id}')">+ New Item</button>
         <button class="btn-ghost" onclick="openCatOrderModal('${cat.id}')">+ Restock</button>
-        <button class="btn-primary" onclick="openCatSaleModal('${cat.id}')">+ Log Sale</button>
       </div>
     </div>
     <div class="grid-2" style="margin-bottom:20px">
@@ -4883,24 +4905,19 @@ function catSectionHtml(cat) {
 </div>`;
 }
 
-// (Re)build every category tab + section. Tabs sit between Pins and Back Office.
+// (Re)build every category section. Their links live in the app navigation.
 function buildCatUI(activateCatId) {
-  const prevActive = document.querySelector('.section.active')?.id || '';
-  document.querySelectorAll('.main-tab[data-cat], .section[data-cat]').forEach(el => el.remove());
-  const evTab     = document.querySelector('.main-tab[data-section="backoffice"]');
+  const prevActive = activeSectionId();
+  document.querySelectorAll('.section[data-cat]').forEach(el => el.remove());
   const evSection = document.getElementById('section-backoffice');
   getCats().forEach(cat => {
-    evTab.insertAdjacentHTML('beforebegin',
-      `<div class="main-tab" data-section="cat-${cat.id}" data-cat="${cat.id}">${esc(catEmoji(cat))} ${esc(cat.name)}</div>`);
     evSection.insertAdjacentHTML('beforebegin', catSectionHtml(cat));
     renderCatSection(cat.id);
   });
-  const wantSection = activateCatId ? `section-cat-${activateCatId}` : prevActive;
-  if (activateCatId || !document.querySelector('.section.active')) {
-    const tab = document.querySelector(`.main-tab[data-section="${wantSection.replace(/^section-/, '')}"]`)
-      || document.querySelector('.main-tab[data-section="sales"]');
-    activateMainTab(tab);
-  }
+  window.vpcRefreshNav?.();
+  if (activateCatId) goSection('cat-' + activateCatId);
+  else if (document.getElementById('section-' + prevActive)) showSection(prevActive);
+  else goSection('sales');
 }
 
 function renderCatSection(catId) {
@@ -5412,10 +5429,12 @@ initOrders();
 initFilament();
 renderSalesAll();
 renderExpensesAll();
+routeFromHash();
 
 
 // Full re-render hook — called by VpcSync after pulling fresh cloud data
 window.renderAll = function() {
+  try { buildCatUI();        } catch(e) {}
   try { renderSalesAll();    } catch(e) {}
   try { renderExpensesAll(); } catch(e) {}
   try { renderJtAll();       } catch(e) {}
