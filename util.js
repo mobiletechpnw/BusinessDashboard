@@ -252,30 +252,587 @@
   };
 
   // Revenue and sale count across every product line — riser orders, Jet
+  // ── Orders: the built-in history ───────────────────
+  // The 47 orders logged before this app existed. The Sales Hub seeds them
+  // into a device's order store once; until then (or on pages that read
+  // orders before the Sales Hub was ever opened) orderList() shows them
+  // without writing anything, so a first visit to Home isn't all $0.
+  const HISTORICAL_ORDERS = Object.freeze([
+    {
+      id: 'h1',
+      date: '2025-12-27',
+      customer: 'Jay',
+      product: 'Large Risers (10)',
+      sets: 0,
+      salePrice: 40,
+      cogs: 10.5,
+      referredBy: '1st Buyer',
+      notes: '',
+    },
+    {
+      id: 'h2',
+      date: '2025-12-28',
+      customer: 'Kevin',
+      product: 'Large Risers (12)',
+      sets: 0,
+      salePrice: 48,
+      cogs: 12.6,
+      referredBy: 'Jay',
+      notes: '',
+    },
+    {
+      id: 'h3',
+      date: '2026-01-03',
+      customer: 'Kaiden',
+      product: 'Large + Small + End Caps',
+      sets: 0,
+      salePrice: 80,
+      cogs: 27.34,
+      referredBy: 'Me',
+      notes: '',
+    },
+    {
+      id: 'h4',
+      date: '2026-01-25',
+      customer: 'Mike',
+      product: 'Large + Med + Small + Caps',
+      sets: 0,
+      salePrice: 60,
+      cogs: 18.32,
+      referredBy: 'Me',
+      notes: '',
+    },
+    {
+      id: 'h5',
+      date: '2026-01-31',
+      customer: 'Jay',
+      product: 'Large + Small + End Caps',
+      sets: 0,
+      salePrice: 40,
+      cogs: 12.24,
+      referredBy: 'Me',
+      notes: 'Repeat buyer',
+    },
+    {
+      id: 'h6',
+      date: '2026-02-08',
+      customer: 'Ali',
+      product: 'Large Risers + Caps',
+      sets: 1,
+      salePrice: 36,
+      cogs: 10.26,
+      referredBy: 'Me',
+      notes: '',
+    },
+    {
+      id: 'h7',
+      date: '2026-02-09',
+      customer: 'Ali',
+      product: 'Large Risers + Caps (27)',
+      sets: 1,
+      salePrice: 108,
+      cogs: 30.78,
+      referredBy: 'Me',
+      notes: 'Repeat',
+    },
+    {
+      id: 'h8',
+      date: '2026-02-08',
+      customer: 'Mike',
+      product: 'Large + Med + Caps',
+      sets: 1,
+      salePrice: 50,
+      cogs: 13.65,
+      referredBy: 'Me',
+      notes: '',
+    },
+    {
+      id: 'h9',
+      date: '2026-02-09',
+      customer: 'VIC - TCGVIC (Zion)',
+      product: '18 Med Risers + 8 Caps',
+      sets: 1,
+      salePrice: 100,
+      cogs: 21.36,
+      referredBy: 'Me',
+      notes: 'White color',
+    },
+    {
+      id: 'h10',
+      date: '2026-02-08',
+      customer: 'Mons + Mana',
+      product: '21 Large + 7 Small',
+      sets: 1,
+      salePrice: 100,
+      cogs: 27.3,
+      referredBy: 'Me',
+      notes: '',
+    },
+    {
+      id: 'h11',
+      date: '2026-02-15',
+      customer: 'Max',
+      product: '3 sets: Large + Caps',
+      sets: 3,
+      salePrice: 225,
+      cogs: 67.5,
+      referredBy: 'Me',
+      notes: '3 sets @ $75 each',
+    },
+    {
+      id: 'h12',
+      date: '2026-02-21',
+      customer: 'Richard',
+      product: '18 Large + 6 Caps',
+      sets: 1,
+      salePrice: 80,
+      cogs: 22.5,
+      referredBy: 'Me',
+      notes: '',
+    },
+    {
+      id: 'h13',
+      date: '2026-03-07',
+      customer: 'Damian',
+      product: '18 Large + 6 Caps',
+      sets: 1,
+      salePrice: 85,
+      cogs: 22.5,
+      referredBy: 'Me',
+      notes: '',
+    },
+    {
+      id: 'h14',
+      date: '2026-03-14',
+      customer: 'Sam',
+      product: '18 Large + 9 Caps',
+      sets: 1,
+      salePrice: 100,
+      cogs: 23.31,
+      referredBy: 'Me',
+      notes: '',
+    },
+    {
+      id: 'h15',
+      date: '2026-03-14',
+      customer: 'Izeah - Baichu',
+      product: '18 Large + 9 Caps',
+      sets: 1,
+      salePrice: 85,
+      cogs: 23.31,
+      referredBy: 'Mike',
+      notes: '',
+    },
+    {
+      id: 'h16',
+      date: '2026-03-14',
+      customer: 'Jonathan (jlin730)',
+      product: '18 Large + 9 Caps',
+      sets: 1,
+      salePrice: 80,
+      cogs: 23.31,
+      referredBy: 'Richard & Jay',
+      notes: 'Instagram: @jlin730',
+    },
+    {
+      id: 'h17',
+      date: '2026-03-21',
+      customer: 'Baichu',
+      product: '18 Large + 9 Caps',
+      sets: 1,
+      salePrice: 85,
+      cogs: 23.31,
+      referredBy: 'Mike',
+      notes: '',
+    },
+    {
+      id: 'h18',
+      date: '2026-03-21',
+      customer: 'Baichu',
+      product: '18 Large + 9 Caps (2nd)',
+      sets: 1,
+      salePrice: 85,
+      cogs: 23.31,
+      referredBy: 'Mike',
+      notes: 'Repeat same day',
+    },
+    {
+      id: 'h19',
+      date: '2026-03-21',
+      customer: "Nahk - Let's Rips",
+      product: '18 Large + 9 Caps + Rental',
+      sets: 1,
+      salePrice: 113,
+      cogs: 23.31,
+      referredBy: 'Me',
+      notes: '$85 set + $40 rental – $12 shipping',
+    },
+    {
+      id: 'h20',
+      date: '2026-03-28',
+      customer: 'Diego',
+      product: '18 Large + 9 Caps',
+      sets: 1,
+      salePrice: 85,
+      cogs: 21.33,
+      referredBy: 'Damian',
+      notes: '',
+    },
+    {
+      id: 'h21',
+      date: '2026-03-28',
+      customer: 'TCG Dodge',
+      product: '18 Large + 9 Caps',
+      sets: 1,
+      salePrice: 85,
+      cogs: 21.33,
+      referredBy: '',
+      notes: '',
+    },
+    {
+      id: 'h22',
+      date: '2026-03-29',
+      customer: 'Sanjil',
+      product: '18 Large + 9 Caps',
+      sets: 1,
+      salePrice: 85,
+      cogs: 18.9,
+      referredBy: '',
+      notes: '',
+    },
+    {
+      id: 'h23',
+      date: '2026-04-05',
+      customer: 'Tyler - tyscardcorner1',
+      product: '18 Large + 9 Caps',
+      sets: 1,
+      salePrice: 85,
+      cogs: 21.33,
+      referredBy: 'Mike',
+      notes: '',
+    },
+    {
+      id: 'h24',
+      date: '2026-04-05',
+      customer: 'Tyler - tyscardcorner1',
+      product: '18 Large + 9 Caps (2nd)',
+      sets: 1,
+      salePrice: 85,
+      cogs: 21.33,
+      referredBy: 'Mike',
+      notes: 'Repeat same day',
+    },
+    {
+      id: 'h25',
+      date: '2026-04-05',
+      customer: 'tcgnes',
+      product: '18 Large + 9 Caps',
+      sets: 1,
+      salePrice: 80,
+      cogs: 21.33,
+      referredBy: '',
+      notes: '',
+    },
+    {
+      id: 'h26',
+      date: '2026-04-06',
+      customer: 'Benze - Big Belly TCG',
+      product: '18 Large + 9 Caps',
+      sets: 1,
+      salePrice: 86,
+      cogs: 21.33,
+      referredBy: '',
+      notes: 'Shipped 4 lbs 3 oz',
+    },
+    {
+      id: 'h27',
+      date: '2026-04-12',
+      customer: 'Chris - Pokemon Go',
+      product: '18 Large + 9 Caps',
+      sets: 1,
+      salePrice: 100,
+      cogs: 21.33,
+      referredBy: 'Mike',
+      notes: 'Tournament player',
+    },
+    {
+      id: 'h28',
+      date: '2026-04-12',
+      customer: 'Sanjil',
+      product: '18 Large + 9 Caps (2nd)',
+      sets: 1,
+      salePrice: 85,
+      cogs: 21.33,
+      referredBy: '',
+      notes: 'Repeat',
+    },
+    {
+      id: 'h29',
+      date: '2026-04-18',
+      customer: 'Damian',
+      product: '18 Large + 9 Caps (2nd)',
+      sets: 1,
+      salePrice: 85,
+      cogs: 21.33,
+      referredBy: '',
+      notes: 'Repeat',
+    },
+    {
+      id: 'h30',
+      date: '2026-04-18',
+      customer: 'Ruben - Holy Collectz',
+      product: '18 Large + 9 Caps',
+      sets: 1,
+      salePrice: 90,
+      cogs: 21.33,
+      referredBy: '',
+      notes: '',
+    },
+    {
+      id: 'h31',
+      date: '2026-04-19',
+      customer: 'Richard',
+      product: '18 Large + 9 Caps',
+      sets: 1,
+      salePrice: 90,
+      cogs: 21.33,
+      referredBy: '',
+      notes: 'Repeat',
+    },
+    {
+      id: 'h32',
+      date: '2026-04-19',
+      customer: 'Richard',
+      product: '18 Large + 9 Caps (2nd)',
+      sets: 1,
+      salePrice: 90,
+      cogs: 21.33,
+      referredBy: '',
+      notes: '',
+    },
+    {
+      id: 'h33',
+      date: '2026-04-28',
+      customer: 'Jdrops',
+      product: '18 Large + 9 Caps',
+      sets: 1,
+      salePrice: 90,
+      cogs: 21.33,
+      referredBy: '',
+      notes: 'Ships to FL',
+    },
+    {
+      id: 'h34',
+      date: '2026-04-28',
+      customer: 'Jdrops',
+      product: '18 Large + 9 Caps (2nd)',
+      sets: 1,
+      salePrice: 90,
+      cogs: 21.33,
+      referredBy: '',
+      notes: 'Ships to FL',
+    },
+    {
+      id: 'h35',
+      date: '2026-04-30',
+      customer: 'Jeff Nelson',
+      product: '18 Large + 9 Caps',
+      sets: 1,
+      salePrice: 90,
+      cogs: 21.33,
+      referredBy: '',
+      notes: 'Prepaid $180 for 2 sets',
+    },
+    {
+      id: 'h36',
+      date: '2026-04-30',
+      customer: 'Jeff Nelson',
+      product: '18 Large + 9 Caps (2nd)',
+      sets: 1,
+      salePrice: 90,
+      cogs: 21.33,
+      referredBy: '',
+      notes: 'Prepaid',
+    },
+    {
+      id: 'h37',
+      date: '2026-05-10',
+      customer: 'binbreon.tcg',
+      product: '18 Large + 9 Caps',
+      sets: 1,
+      salePrice: 90,
+      cogs: 21.33,
+      referredBy: '',
+      notes: 'Delivery 5/16',
+    },
+    {
+      id: 'h38',
+      date: '2026-05-11',
+      customer: 'Big Belly (Benze)',
+      product: '18 Large + 9 Caps',
+      sets: 1,
+      salePrice: 90,
+      cogs: 21.33,
+      referredBy: '',
+      notes: 'Delivery 5/17; repeat',
+    },
+    {
+      id: 'h39',
+      date: '2026-05-28',
+      customer: 'Luke - iyekul_collectibles',
+      product: '18 Large + 9 Caps',
+      sets: 1,
+      salePrice: 90,
+      cogs: 21.33,
+      referredBy: '',
+      notes: 'Delivery 5/30',
+    },
+    {
+      id: 'h40',
+      date: '2026-05-29',
+      customer: 'Raymond - Sleepy PokeShop',
+      product: '18 Large + 9 Caps',
+      sets: 1,
+      salePrice: 90,
+      cogs: 21.33,
+      referredBy: '',
+      notes: 'Deliver 6/6 — Emerald+Cardfest',
+    },
+    {
+      id: 'h41',
+      date: '2026-05-29',
+      customer: 'Raymond - Sleepy PokeShop',
+      product: '18 Large + 9 Caps (2nd)',
+      sets: 1,
+      salePrice: 90,
+      cogs: 21.33,
+      referredBy: '',
+      notes: 'Deliver 6/6',
+    },
+    {
+      id: 'h42',
+      date: '2026-05-29',
+      customer: 'boxheadtc - Joe Mendez',
+      product: '18 Large + 9 Caps',
+      sets: 1,
+      salePrice: 100,
+      cogs: 21.33,
+      referredBy: '',
+      notes: 'Pickup 6/6',
+    },
+    {
+      id: 'h43',
+      date: '2026-05-31',
+      customer: 'Argcardz',
+      product: '18 Large + 9 Caps',
+      sets: 1,
+      salePrice: 100,
+      cogs: 21.33,
+      referredBy: '',
+      notes: 'Pick up 5/31',
+    },
+    {
+      id: 'h44',
+      date: '2026-05-31',
+      customer: 'pipstle.tcg',
+      product: '18 Large + 9 Caps',
+      sets: 1,
+      salePrice: 100,
+      cogs: 21.33,
+      referredBy: '',
+      notes: 'Pick up 5/31',
+    },
+    {
+      id: 'h45',
+      date: '2026-06-02',
+      customer: 'Yash - Silver Clash TCG',
+      product: '18 Large + 9 Caps',
+      sets: 1,
+      salePrice: 90,
+      cogs: 21.33,
+      referredBy: '',
+      notes: 'Deliver 6/20',
+    },
+    {
+      id: 'h46',
+      date: '2026-06-02',
+      customer: 'Yash - Silver Clash TCG',
+      product: '18 Large + 9 Caps (2nd)',
+      sets: 1,
+      salePrice: 90,
+      cogs: 21.33,
+      referredBy: '',
+      notes: 'Deliver 6/20',
+    },
+    {
+      id: 'h47',
+      date: '2026-06-02',
+      customer: 'Yash - Silver Clash TCG',
+      product: '18 Large + 9 Caps (3rd)',
+      sets: 1,
+      salePrice: 90,
+      cogs: 21.33,
+      referredBy: '',
+      notes: 'Deliver 6/20',
+    },
+  ]);
+
+  // Stored orders, or the built-in history when this device has none yet.
+  // An emptied list stays empty; only a missing key falls back.
+  const orderList = (store = localStorage) => {
+    if (store.getItem(KEYS.orders) == null) return HISTORICAL_ORDERS.map((o) => ({ ...o }));
+    return readArr(store, KEYS.orders);
+  };
+
+  // First run on a device: write the history (plus any legacy orders) into
+  // the store. The seed is stamped as older than any cloud copy (__ts = 1),
+  // so the first sync replaces it with your real orders instead of the seed
+  // looking newer and hiding them. Legacy orders, which only this device
+  // has, keep the normal stamp.
+  const seedOrders = (store = localStorage, legacyKey = 'riser_orders_v1') => {
+    if (store.getItem(KEYS.orders) != null) return false;
+    const legacy = readArr(store, legacyKey);
+    store.setItem(
+      KEYS.orders,
+      JSON.stringify([...HISTORICAL_ORDERS.map((o) => ({ ...o })), ...legacy])
+    );
+    if (!legacy.length) store.setItem(KEYS.orders + '__ts', '1');
+    return true;
+  };
+
   // Tags, Pins, and custom-category sales — for dates starting with `prefix`
   // ('YYYY-MM' for a month, '' for all time). One rule, so "This Month" and
   // "All-Time" on Home and the Daily Review always count the same things.
   // Custom-category sales count only while their category exists, matching
   // customCatTotals.
-  const salesInPeriod = (prefix = '', store = localStorage) => {
+  const saleAmounts = (store, keep) => {
     const live = new Set(customCategories(store).map((c) => c.id));
-    const inPeriod = (x) => String((x && x.date) || '').startsWith(prefix);
     const amounts = [
-      ...readArr(store, KEYS.orders)
-        .filter(inPeriod)
+      ...orderList(store)
+        .filter(keep)
         .map((o) => o.salePrice),
       ...readArr(store, KEYS.jetTags)
-        .filter(inPeriod)
+        .filter(keep)
         .map((x) => x.revenue),
       ...readArr(store, KEYS.pins)
-        .filter(inPeriod)
+        .filter(keep)
         .map((x) => x.revenue),
       ...readArr(store, KEYS.catSales)
-        .filter((x) => live.has(x.catId) && inPeriod(x))
+        .filter((x) => live.has(x.catId) && keep(x))
         .map((x) => x.revenue),
     ];
     return { revenue: sumMoney(amounts), count: amounts.length };
   };
+  const dateOf = (x) => String((x && x.date) || '');
+  const salesInPeriod = (prefix = '', store = localStorage) =>
+    saleAmounts(store, (x) => dateOf(x).startsWith(prefix));
+  // The same sales between two 'YYYY-MM-DD' dates, inclusive — for "this
+  // month so far against the same days last month".
+  const salesBetween = (from, to, store = localStorage) =>
+    saleAmounts(store, (x) => {
+      const d = dateOf(x).slice(0, 10);
+      return d >= from && d <= to;
+    });
 
   const api = {
     money,
@@ -294,6 +851,10 @@
     customCategories,
     customCatTotals,
     salesInPeriod,
+    salesBetween,
+    HISTORICAL_ORDERS,
+    orderList,
+    seedOrders,
   };
 
   // Browser global + CommonJS (for the test runner).

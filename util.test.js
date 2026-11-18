@@ -200,3 +200,59 @@ test('salesInPeriod counts every product line for the month and all time', () =>
   assert.deepStrictEqual(U.salesInPeriod('', store), { revenue: 210.6, count: 5 });
   assert.deepStrictEqual(U.salesInPeriod('2026-12', store), { revenue: 0, count: 0 });
 });
+
+// A store that can also be written to (seedOrders writes).
+function writableStore(data = {}) {
+  const m = new Map(Object.entries(data).map(([k, v]) => [k, JSON.stringify(v)]));
+  return {
+    getItem: (k) => (m.has(k) ? m.get(k) : null),
+    setItem: (k, v) => m.set(k, String(v)),
+  };
+}
+
+test('orderList shows the built-in history only when a device has no orders yet', () => {
+  assert.strictEqual(U.HISTORICAL_ORDERS.length, 47);
+  assert.strictEqual(U.orderList(fakeStore({})).length, 47);
+  assert.deepStrictEqual(U.orderList(fakeStore({ [U.KEYS.orders]: [] })), []);
+  const mine = [{ id: 'x', date: '2026-11-01', salePrice: 5 }];
+  assert.deepStrictEqual(U.orderList(fakeStore({ [U.KEYS.orders]: mine })), mine);
+  // A first visit to Home counts the history instead of showing $0.
+  const all = U.salesInPeriod('', fakeStore({}));
+  assert.strictEqual(all.count, 47);
+  assert.ok(all.revenue > 4000);
+});
+
+test('seedOrders writes the history once, stamped older than any cloud copy', () => {
+  const store = writableStore();
+  assert.strictEqual(U.seedOrders(store), true);
+  assert.strictEqual(JSON.parse(store.getItem(U.KEYS.orders)).length, 47);
+  assert.strictEqual(store.getItem(U.KEYS.orders + '__ts'), '1');
+  // Never overwrites an existing store.
+  assert.strictEqual(U.seedOrders(store), false);
+  // Legacy orders exist only on this device, so they keep the normal stamp.
+  const legacy = writableStore({
+    riser_orders_v1: [{ id: 'old', date: '2025-01-01', salePrice: 1 }],
+  });
+  U.seedOrders(legacy);
+  assert.strictEqual(JSON.parse(legacy.getItem(U.KEYS.orders)).length, 48);
+  assert.strictEqual(legacy.getItem(U.KEYS.orders + '__ts'), null);
+});
+
+test('salesBetween sums every product line inside an inclusive date range', () => {
+  const store = fakeStore({
+    [U.KEYS.orders]: [
+      { date: '2026-10-01', salePrice: 40 },
+      { date: '2026-10-18', salePrice: 60 },
+      { date: '2026-10-19', salePrice: 500 },
+    ],
+    [U.KEYS.pins]: [{ date: '2026-10-05', revenue: 8 }],
+  });
+  assert.deepStrictEqual(U.salesBetween('2026-10-01', '2026-10-18', store), {
+    revenue: 108,
+    count: 3,
+  });
+  assert.deepStrictEqual(U.salesBetween('2026-11-01', '2026-11-30', store), {
+    revenue: 0,
+    count: 0,
+  });
+});
