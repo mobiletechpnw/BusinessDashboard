@@ -1,4 +1,4 @@
-const CACHE = 'vpc-v13';
+const CACHE = 'vpc-v14';
 
 // Static assets that rarely change → safe to serve cache-first.
 const STATIC_ASSETS = ['/styles.css', '/manifest.json', '/icon.svg'];

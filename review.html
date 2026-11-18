@@ -15,14 +15,6 @@
 <style>
   body { min-height: 100vh; display: flex; flex-direction: column; }
 
-  header {
-    background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 0 32px; display: flex; align-items: center;
-    justify-content: space-between; min-height: 58px;
-    position: sticky; top: 0; z-index: 200;
-  }
-  .brand { font-size: 1.05rem; font-weight: 600; }
-  .brand span { color: inherit; }
 
   main { max-width: 1100px; margin: 0 auto; padding: 28px 24px; width: 100%; flex: 1; }
 
@@ -198,7 +190,6 @@
   }
 
   @media (max-width: 700px) {
-    header { padding: 0 12px; min-height: 52px; }
     main { padding: 14px 10px; }
     .review-grid { grid-template-columns: 1fr; }
     .section-full { grid-column: 1; }
@@ -221,10 +212,9 @@
 <body>
 
 <header>
-  <div class="brand">📋 Daily <span>Review</span></div>
+  <div class="brand">Daily Review</div>
 </header>
 
-<nav class="dash-nav"></nav>
 
 <main>
   <div class="review-header">

@@ -1,45 +1,297 @@
 /* ═══════════════════════════════════════════════════
-   shared.js — Theme · Search · Shortcuts
-               Audit Log · Notifications · Alerts
+   shared.js — Navigation · Search · Shortcuts
+               Audit Log · Notifications · Menus
    Vault & Pine Collective
 ═══════════════════════════════════════════════════ */
 
-// ── UNIFIED NAVIGATION ─────────────────────────────
-// One nav, every page, same order — injected here so a page can never
-// drift out of sync or dead-end the user again.
-const DASH_NAV = [
-  ['index.html', '⌂', 'Home'],
-  ['vault-pine-collective.html', '📊', 'Sales Hub'],
-  ['inventory.html', '🃏', 'Card Inventory'],
-  ['goals-dashboard.html', '🎯', 'Goals'],
-  ['expenses.html', '💸', 'Personal Expenses'],
-  ['analytics.html', '📈', 'Analytics'],
-  ['production.html', '🖨️', 'Production'],
-  ['events.html', '🎪', 'Events'],
-  ['content.html', '📱', 'Content'],
-  ['growth.html', '🚀', 'Growth'],
-  ['review.html', '📋', 'Review'],
-  ['guru.html', '🥋', 'Guru'],
+// ── APP NAVIGATION ─────────────────────────────────
+// One navigation for every page: a sidebar on wide screens, and a tab bar
+// with a More sheet on phones and tablets. A page provides only its <header>
+// (title and page actions); search and the account menu live here, so no
+// page can drift out of sync or dead-end the user.
+const NAV = [
+  {
+    items: [
+      ['index.html', 'home', 'Home'],
+      ['review.html', 'review', 'Daily Review'],
+    ],
+  },
+  {
+    label: 'Sales',
+    items: [
+      ['vault-pine-collective.html', 'sales', 'Sales Hub'],
+      ['inventory.html', 'cards', 'Card Inventory'],
+    ],
+  },
+  {
+    label: 'Operations',
+    items: [
+      ['production.html', 'production', 'Production'],
+      ['events.html', 'events', 'Events'],
+    ],
+  },
+  {
+    label: 'Money',
+    items: [
+      ['analytics.html', 'analytics', 'Analytics'],
+      ['expenses.html', 'expenses', 'Personal Expenses'],
+      ['guru.html', 'guru', 'Guru'],
+    ],
+  },
+  {
+    label: 'Growth',
+    items: [
+      ['goals-dashboard.html', 'goals', 'Goals'],
+      ['content.html', 'content', 'Content'],
+      ['growth.html', 'growth', 'Instagram'],
+    ],
+  },
 ];
 
-function injectDashNav() {
-  const cur = location.pathname.split('/').pop() || 'index.html';
-  const html = DASH_NAV.map(
-    ([href, icon, label]) =>
-      `<a href="${href}" class="dash-nav-link${href === cur ? ' active' : ''}">${icon} ${label}</a>`
-  ).join('');
-  let nav = document.querySelector('nav.dash-nav');
-  if (!nav) {
-    nav = document.createElement('nav');
-    nav.className = 'dash-nav';
-    const header = document.querySelector('header');
-    if (header) header.insertAdjacentElement('afterend', nav);
-    else document.body.prepend(nav);
-  }
-  nav.innerHTML = html;
-  // On mobile the bar scrolls horizontally — keep the current page visible
-  nav.querySelector('.active')?.scrollIntoView({ inline: 'center', block: 'nearest' });
+// The four places used most get a tab on phones; everything else is in More.
+const NAV_TABS = [
+  ['index.html', 'home', 'Home'],
+  ['vault-pine-collective.html', 'sales', 'Sales'],
+  ['production.html', 'production', 'Production'],
+  ['events.html', 'events', 'Events'],
+];
+
+// Line icons on a 24px grid, stroked in currentColor.
+const NAV_ICONS = {
+  home: '<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/>',
+  review:
+    '<path d="M9 4H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2"/><rect x="9" y="2.5" width="6" height="3.5" rx="1"/><path d="m9 13.5 2 2 4-4"/>',
+  sales:
+    '<path d="M5 8h14l-1 12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
+  cards:
+    '<rect x="3" y="7" width="13" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/>',
+  production:
+    '<path d="M12 3 20 7.5v9L12 21l-8-4.5v-9L12 3z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/>',
+  events:
+    '<path d="M4 6h16a1 1 0 0 1 1 1v3a2 2 0 0 0 0 4v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3a2 2 0 0 0 0-4V7a1 1 0 0 1 1-1z"/><path d="M15 8v8" stroke-dasharray="1.5 2.5"/>',
+  analytics: '<path d="M4 20h16M7 16v-4M12 16V7M17 16v-7"/>',
+  expenses: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h3"/>',
+  guru: '<path d="M2 9.5 12 5l10 4.5-10 4.5L2 9.5z"/><path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5M22 9.5V14"/>',
+  goals:
+    '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill="currentColor"/>',
+  content:
+    '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m3 16 5-5 5 5M13 14l3-3 5 5"/>',
+  growth: '<path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
+  more: '<circle cx="12" cy="12" r="9"/><path d="M8 12h.01M12 12h.01M16 12h.01" stroke-width="2.6"/>',
+  sync: '<path d="M20 12a8 8 0 0 1-14.3 4.9M4 12a8 8 0 0 1 14.3-4.9"/><path d="M18.5 3v4.2h-4.2M5.5 21v-4.2h4.2"/>',
+  bell: '<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15L6 16z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
+  keyboard:
+    '<rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6.5 10h.01M10 10h.01M14 10h.01M17.5 10h.01M8 14h8" stroke-width="2"/>',
+  activity: '<path d="M3 12h4l3-8 4 16 3-8h4"/>',
+  signout: '<path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="m15 16 4-4-4-4M19 12H9"/>',
+  chevrons: '<path d="m8 9 4-4 4 4M8 15l4 4 4-4"/>',
+  close: '<path d="M6 6l12 12M18 6 6 18"/>',
+};
+
+function navIcon(name) {
+  return `<svg class="vpc-ico" viewBox="0 0 24 24" aria-hidden="true">${NAV_ICONS[name] || ''}</svg>`;
 }
+function navEsc(s) {
+  return String(s).replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
+}
+function navCurrentPage() {
+  return location.pathname.split('/').pop() || 'index.html';
+}
+function navLinksHTML(cur) {
+  return NAV.map(
+    (g) =>
+      (g.label ? `<div class="vpc-nav-label">${g.label}</div>` : '') +
+      g.items
+        .map(
+          ([href, icon, label]) =>
+            `<a href="${href}" class="vpc-nav-link"${href === cur ? ' aria-current="page"' : ''}>${navIcon(icon)}<span>${label}</span></a>`
+        )
+        .join('')
+  ).join('');
+}
+function navSearchHTML() {
+  const mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+  return `<button type="button" class="vpc-search" data-nav-action="search">${navIcon('search')}<span>Search</span><kbd>${mac ? '⌘K' : 'Ctrl K'}</kbd></button>`;
+}
+// Avatar, email and live sync status (supabase-sync.js keeps the label
+// current; the dot is coloured from data-sync on <html>).
+function navWhoHTML() {
+  const email = window.VpcAuth?.get()?.user?.email || '';
+  const status = window.VpcSync?.label?.() || 'Cloud sync';
+  return (
+    `<span class="vpc-avatar" aria-hidden="true">${navEsc((email[0] || '?').toUpperCase())}</span>` +
+    `<span class="vpc-account-text"><span class="vpc-account-email">${navEsc(email || 'Signed in')}</span>` +
+    `<span class="vpc-account-sync"><span class="vpc-sync-dot"></span><span class="vpc-sync-label">${status}</span></span></span>`
+  );
+}
+// Account actions, shared by the sidebar's menu and the More sheet.
+function navAccountActions({ keyboard }) {
+  const acts = [{ value: 'sync', label: 'Sync now', icon: 'sync' }];
+  if ('Notification' in window && Notification.permission === 'default')
+    acts.push({ value: 'reminders', label: 'Turn on reminders', icon: 'bell' });
+  if (keyboard) acts.push({ value: 'shortcuts', label: 'Keyboard shortcuts', icon: 'keyboard' });
+  acts.push({ value: 'activity', label: 'Activity log', icon: 'activity' });
+  acts.push({ value: 'signout', label: 'Sign out', icon: 'signout', danger: true });
+  return acts;
+}
+
+function injectAppNav() {
+  const cur = navCurrentPage();
+
+  const side = document.createElement('div');
+  side.className = 'vpc-sidebar';
+  side.innerHTML =
+    '<a class="vpc-brand" href="index.html"><span class="vpc-brand-mark" aria-hidden="true">🌲</span>Vault &amp; Pine</a>' +
+    navSearchHTML() +
+    `<nav class="vpc-nav" aria-label="Main">${navLinksHTML(cur)}</nav>` +
+    '<div class="vpc-sidebar-foot"><button type="button" class="vpc-account" data-nav-action="account" aria-haspopup="menu" aria-expanded="false">' +
+    navWhoHTML() +
+    navIcon('chevrons') +
+    '</button></div>';
+  document.body.prepend(side);
+
+  const inTabs = NAV_TABS.some(([href]) => href === cur);
+  const tabs = document.createElement('nav');
+  tabs.className = 'vpc-tabbar';
+  tabs.setAttribute('aria-label', 'Main');
+  tabs.innerHTML =
+    '<div class="vpc-tabbar-inner">' +
+    NAV_TABS.map(
+      ([href, icon, label]) =>
+        `<a href="${href}"${href === cur ? ' aria-current="page"' : ''}>${navIcon(icon)}<span>${label}</span></a>`
+    ).join('') +
+    `<button type="button" data-nav-action="more" aria-haspopup="dialog" aria-expanded="false"${inTabs ? '' : ' class="is-current"'}>${navIcon('more')}<span>More</span></button>` +
+    '</div>';
+  document.body.appendChild(tabs);
+
+  // Wide windows have no More tab, so close the sheet if the window grows.
+  window
+    .matchMedia('(min-width: 1024px)')
+    .addEventListener?.('change', (e) => e.matches && closeMoreSheet(false));
+
+  trackHeaderHeight();
+}
+
+// Sticky bars sit under the title bar. Its height changes with the page and
+// the screen (and when a header wraps), so measure it rather than hard-code it.
+function trackHeaderHeight() {
+  const header = document.querySelector('body > header');
+  if (!header) return;
+  const set = () =>
+    document.documentElement.style.setProperty('--header-h', header.offsetHeight + 'px');
+  set();
+  if ('ResizeObserver' in window) new ResizeObserver(set).observe(header);
+}
+
+function openAccountMenu(anchor) {
+  vpcMenu(anchor, {
+    label: 'Account',
+    header: navWhoHTML(),
+    options: navAccountActions({ keyboard: true }).map((o) => ({ ...o, icon: navIcon(o.icon) })),
+    matchWidth: true,
+    onSelect: (value) => runNavAction(value, anchor),
+  });
+}
+
+let _moreSheet = null;
+function openMoreSheet(trigger) {
+  if (_moreSheet) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'vpc-sheet-wrap';
+  wrap.innerHTML = `
+    <div class="vpc-sheet-scrim" data-nav-action="close-sheet"></div>
+    <div class="vpc-sheet" role="dialog" aria-modal="true" aria-labelledby="vpc-sheet-title" tabindex="-1">
+      <div class="vpc-sheet-head">
+        <h2 id="vpc-sheet-title">More</h2>
+        <button type="button" class="vpc-sheet-close" data-nav-action="close-sheet" aria-label="Close">${navIcon('close')}</button>
+      </div>
+      <div class="vpc-sheet-body">
+        ${navSearchHTML()}
+        <nav class="vpc-nav" aria-label="All pages">${navLinksHTML(navCurrentPage())}</nav>
+        <div class="vpc-nav-label">Account</div>
+        <div class="vpc-sheet-who">${navWhoHTML()}</div>
+        ${navAccountActions({ keyboard: false })
+          .map(
+            (a) =>
+              `<button type="button" class="vpc-nav-link${a.danger ? ' is-danger' : ''}" data-nav-action="${a.value}">${navIcon(a.icon)}<span>${a.label}</span></button>`
+          )
+          .join('')}
+      </div>
+    </div>`;
+  document.body.appendChild(wrap);
+  document.documentElement.classList.add('vpc-sheet-open');
+  trigger?.setAttribute('aria-expanded', 'true');
+  const sheet = wrap.querySelector('.vpc-sheet');
+  sheet.focus();
+  // Two frames so the closed position is painted before the slide starts.
+  requestAnimationFrame(() => requestAnimationFrame(() => wrap.classList.add('is-open')));
+  wrap.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeMoreSheet(true);
+    } else if (e.key === 'Tab') {
+      // Keep focus inside the sheet while it is open.
+      const f = [...sheet.querySelectorAll('a[href], button')];
+      const first = f[0];
+      const last = f[f.length - 1];
+      const at = document.activeElement;
+      if (e.shiftKey && (at === first || at === sheet)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && at === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  });
+  _moreSheet = { wrap, trigger };
+}
+function closeMoreSheet(restoreFocus) {
+  if (!_moreSheet) return;
+  const { wrap, trigger } = _moreSheet;
+  _moreSheet = null;
+  document.documentElement.classList.remove('vpc-sheet-open');
+  trigger?.setAttribute('aria-expanded', 'false');
+  wrap.classList.remove('is-open');
+  const remove = () => wrap.remove();
+  wrap.querySelector('.vpc-sheet').addEventListener('transitionend', remove, { once: true });
+  setTimeout(remove, 600);
+  if (restoreFocus) trigger?.focus();
+}
+
+// Notification permission is asked for from the account menu, never on load.
+function enableReminders() {
+  if (!('Notification' in window)) return;
+  Promise.resolve(Notification.requestPermission()).then((p) => {
+    if (p !== 'default')
+      document.querySelectorAll('[data-nav-action="reminders"]').forEach((b) => b.remove());
+    if (p === 'granted') {
+      localStorage.removeItem('vpc_notif_last_check');
+      checkAndNotify();
+    }
+  });
+}
+
+function runNavAction(action, el) {
+  if (action === 'search') {
+    closeMoreSheet(false);
+    openSearch();
+  } else if (action === 'account') openAccountMenu(el);
+  else if (action === 'more') openMoreSheet(el);
+  else if (action === 'close-sheet') closeMoreSheet(true);
+  else if (action === 'sync') window.VpcSync?.sync();
+  else if (action === 'reminders') enableReminders();
+  else if (action === 'shortcuts') showShortcutsPanel();
+  else if (action === 'activity') {
+    closeMoreSheet(false);
+    showAuditLog();
+  } else if (action === 'signout') window.VpcAuth?.signOut();
+}
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-nav-action]');
+  if (el) runNavAction(el.dataset.navAction, el);
+});
 
 // ── STATUS MENU ────────────────────────────────────
 // A small popover listing every option, so a status never changes on a
@@ -47,39 +299,55 @@ function injectDashNav() {
 //   vpcMenu(buttonEl, { label, current, options: [{ value, label, color }], onSelect })
 // The anchor may carry data-menu-key; after a re-render, focus returns to
 // the element with the same key.
+// Without `current` it is a menu of actions ({ value, label, icon, danger })
+// instead of a choice; `header` adds a line of context above the items.
 let _vpcMenuClose = null;
-window.vpcMenu = function (anchor, { label, options, current, onSelect }) {
-  if (_vpcMenuClose) _vpcMenuClose(false);
+let _vpcMenuAnchor = null;
+window.vpcMenu = function (anchor, { label, options, current, onSelect, header, matchWidth }) {
+  if (_vpcMenuClose) {
+    // A second click on the button that opened the menu closes it.
+    const same = _vpcMenuAnchor === anchor;
+    _vpcMenuClose(same);
+    if (same) return;
+  }
+  const isChoice = current !== undefined;
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
   const menu = document.createElement('div');
   menu.className = 'vpc-menu';
   menu.setAttribute('role', 'menu');
   if (label) menu.setAttribute('aria-label', label);
-  menu.innerHTML = options
-    .map(
-      (o) =>
-        `<button type="button" role="menuitemradio" aria-checked="${o.value === current}" data-value="${esc(o.value)}">` +
-        `<span class="vpc-menu-check" aria-hidden="true">✓</span>${esc(o.label)}` +
-        `<span class="vpc-menu-dot" aria-hidden="true" style="background:${o.color || 'var(--text2)'}"></span></button>`
-    )
-    .join('');
+  menu.innerHTML =
+    (header ? `<div class="vpc-menu-head" aria-hidden="true">${header}</div>` : '') +
+    options
+      .map((o) =>
+        isChoice
+          ? `<button type="button" role="menuitemradio" aria-checked="${o.value === current}" data-value="${esc(o.value)}">` +
+            `<span class="vpc-menu-check" aria-hidden="true">✓</span>${esc(o.label)}` +
+            `<span class="vpc-menu-dot" aria-hidden="true" style="background:${o.color || 'var(--text2)'}"></span></button>`
+          : `<button type="button" role="menuitem" data-value="${esc(o.value)}"${o.danger ? ' class="is-danger"' : ''}>` +
+            `${o.icon || ''}${esc(o.label)}</button>`
+      )
+      .join('');
   document.body.appendChild(menu);
 
   const r = anchor.getBoundingClientRect();
+  if (matchWidth) menu.style.minWidth = r.width + 'px';
   const left = Math.min(Math.max(8, r.left), window.innerWidth - menu.offsetWidth - 8);
   let top = r.bottom + 6;
-  if (top + menu.offsetHeight > window.innerHeight - 8)
+  if (top + menu.offsetHeight > window.innerHeight - 8) {
     top = Math.max(8, r.top - menu.offsetHeight - 6);
+    menu.style.transformOrigin = 'bottom left';
+  }
   menu.style.left = left + 'px';
   menu.style.top = top + 'px';
   anchor.setAttribute('aria-expanded', 'true');
 
-  const items = [...menu.querySelectorAll('[role="menuitemradio"]')];
+  const items = [...menu.querySelectorAll('[role^="menuitem"]')];
   (items.find((i) => i.getAttribute('aria-checked') === 'true') || items[0]).focus();
   const key = anchor.dataset.menuKey;
 
   function onOutside(e) {
-    if (!menu.contains(e.target) && e.target !== anchor) close(false);
+    if (!menu.contains(e.target) && !anchor.contains(e.target)) close(false);
   }
   const openedAt = performance.now();
   function onViewport(e) {
@@ -95,11 +363,17 @@ window.vpcMenu = function (anchor, { label, options, current, onSelect }) {
     window.removeEventListener('scroll', onViewport, true);
     window.removeEventListener('resize', onViewport);
     _vpcMenuClose = null;
+    _vpcMenuAnchor = null;
     if (restoreFocus) anchor.focus();
   }
   menu.addEventListener('click', (e) => {
-    const item = e.target.closest('[role="menuitemradio"]');
+    const item = e.target.closest('[role^="menuitem"]');
     if (!item) return;
+    if (!isChoice) {
+      close(true);
+      onSelect(item.dataset.value);
+      return;
+    }
     close(false);
     if (item.dataset.value !== current) onSelect(item.dataset.value);
     requestAnimationFrame(() => {
@@ -122,6 +396,7 @@ window.vpcMenu = function (anchor, { label, options, current, onSelect }) {
   window.addEventListener('scroll', onViewport, true);
   window.addEventListener('resize', onViewport);
   _vpcMenuClose = close;
+  _vpcMenuAnchor = anchor;
 };
 
 // ── GLOBAL SEARCH ──────────────────────────────────
@@ -406,38 +681,6 @@ window.runSearch = function (q) {
     .join('');
 };
 
-function injectSearchBtn() {
-  const btn = document.createElement('button');
-  btn.id = 'vpc-search-btn';
-  btn.title = 'Search (Ctrl+K)';
-  btn.onclick = openSearch;
-  btn.style.cssText = `
-    background:none;border:1px solid var(--border);border-radius:6px;
-    padding:5px 10px;cursor:pointer;font-size:0.82rem;color:var(--text2);
-    transition:all 0.2s;flex-shrink:0;display:flex;align-items:center;gap:6px;
-    min-height:36px;
-  `;
-  // Show label only on desktop
-  btn.innerHTML = `<span>🔍</span><span class="search-btn-label" style="font-size:0.75rem">Ctrl+K</span>`;
-  // Hide label on narrow screens
-  if (!document.getElementById('search-btn-responsive-style')) {
-    const s = document.createElement('style');
-    s.id = 'search-btn-responsive-style';
-    s.textContent = '@media(max-width:600px){.search-btn-label{display:none}}';
-    document.head.appendChild(s);
-  }
-  btn.onmouseover = () => {
-    btn.style.borderColor = 'var(--accent)';
-    btn.style.color = 'var(--accent)';
-  };
-  btn.onmouseout = () => {
-    btn.style.borderColor = 'var(--border)';
-    btn.style.color = 'var(--text2)';
-  };
-  const header = document.querySelector('header');
-  if (header) header.appendChild(btn);
-}
-
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
@@ -682,129 +925,12 @@ window.checkAndNotify = function () {
     } catch (e) {}
   };
 
-  if (Notification.permission === 'granted') {
-    runChecks();
-  } else if (Notification.permission === 'default' && !localStorage.getItem('vpc_notif_declined')) {
-    setTimeout(() => {
-      const t = document.createElement('div');
-      t.style.cssText =
-        'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:0.82rem;color:var(--text);z-index:9500;display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,0.3);white-space:nowrap;';
-      t.innerHTML = `<span>🔔</span><span>Enable deadline reminders?</span>
-        <button onclick="Notification.requestPermission().then(p=>{if(p==='granted')checkAndNotify();});this.closest('div').remove();" style="background:var(--accent-fill);color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:inherit;">Enable</button>
-        <button onclick="localStorage.setItem('vpc_notif_declined','1');this.closest('div').remove();" style="background:none;border:1px solid var(--border);border-radius:8px;color:var(--text2);padding:5px 10px;font-size:0.78rem;cursor:pointer;font-family:inherit;">No thanks</button>`;
-      document.body.appendChild(t);
-      setTimeout(() => t.remove(), 9000);
-    }, 6000);
-  }
+  if (Notification.permission === 'granted') runChecks();
 };
-
-// ── TREND ALERTS ───────────────────────────────────
-window.checkTrendAlerts = function () {
-  const alerts = [];
-  const now = new Date();
-  const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const lmDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const lastMonth = `${lmDate.getFullYear()}-${String(lmDate.getMonth() + 1).padStart(2, '0')}`;
-
-  try {
-    const exps = JSON.parse(localStorage.getItem('vpc_personal_expenses_v1') || '[]');
-    const thisTot = exps
-      .filter((e) => (e.date || '').startsWith(thisMonth))
-      .reduce((s, e) => s + (e.amount || 0), 0);
-    const lastTot = exps
-      .filter((e) => (e.date || '').startsWith(lastMonth))
-      .reduce((s, e) => s + (e.amount || 0), 0);
-    if (lastTot > 0 && thisTot > 0) {
-      const dom = now.getDate();
-      const dim = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-      const proj = (thisTot / dom) * dim;
-      if (proj > lastTot * 1.2)
-        alerts.push({
-          type: 'warning',
-          msg: `Spending on track to be ${Math.round((proj / lastTot - 1) * 100)}% above last month`,
-          url: 'expenses.html',
-        });
-    }
-    const budget = JSON.parse(localStorage.getItem('vpc_expense_budget_v1') || '{"total":0}');
-    if (budget.total > 0 && thisTot > budget.total * 0.85) {
-      const pct = Math.round((thisTot / budget.total) * 100);
-      alerts.push({
-        type: pct >= 100 ? 'danger' : 'warning',
-        msg: `Budget ${pct >= 100 ? 'exceeded' : 'at ' + pct + '%'} this month`,
-        url: 'expenses.html',
-      });
-    }
-  } catch (e) {}
-
-  try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const week = new Date(today);
-    week.setDate(week.getDate() + 7);
-    const g = JSON.parse(localStorage.getItem('goals_dashboard_v1') || '{"goals":[]}');
-    const od = (g.goals || []).filter(
-      (x) => !x.done && x.due && new Date(x.due + 'T00:00:00') < today
-    );
-    if (od.length)
-      alerts.push({
-        type: 'danger',
-        msg: `${od.length} goal${od.length > 1 ? 's' : ''} overdue`,
-        url: 'goals-dashboard.html',
-      });
-    const soon = (g.goals || []).filter(
-      (x) =>
-        !x.done &&
-        x.due &&
-        new Date(x.due + 'T00:00:00') <= week &&
-        new Date(x.due + 'T00:00:00') >= today
-    );
-    if (soon.length)
-      alerts.push({
-        type: 'warning',
-        msg: `${soon.length} goal${soon.length > 1 ? 's' : ''} due this week`,
-        url: 'goals-dashboard.html',
-      });
-  } catch (e) {}
-
-  return alerts;
-};
-
-function injectTrendAlerts() {
-  const alerts = checkTrendAlerts();
-  if (!alerts.length) return;
-  const container = document.createElement('div');
-  container.id = 'trend-alerts';
-  container.style.cssText =
-    'position:fixed;top:68px;right:16px;z-index:8000;display:flex;flex-direction:column;gap:6px;max-width:310px;';
-  alerts.forEach((a) => {
-    const c =
-      a.type === 'danger'
-        ? { border: 'var(--red)', icon: '⚠' }
-        : { border: 'var(--yellow)', icon: '⚡' };
-    const el = document.createElement('div');
-    el.style.cssText = `background:var(--surface);border:1px solid ${c.border};border-left:3px solid ${c.border};border-radius:8px;padding:9px 12px;font-size:0.75rem;color:var(--text);display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,0.25);cursor:pointer;animation:alertSlide 0.3s ease;`;
-    el.innerHTML = `<span style="color:${c.border};font-size:0.9rem;flex-shrink:0">${c.icon}</span><span style="flex:1">${a.msg}</span><button onclick="event.stopPropagation();this.closest('div').remove()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:0.75rem;padding:0;flex-shrink:0;font-family:inherit;">✕</button>`;
-    el.addEventListener('click', (e) => {
-      if (e.target.tagName !== 'BUTTON') location.href = a.url;
-    });
-    container.appendChild(el);
-  });
-  document.body.appendChild(container);
-  // Inject animation keyframe once
-  if (!document.getElementById('alert-anim-style')) {
-    const s = document.createElement('style');
-    s.id = 'alert-anim-style';
-    s.textContent =
-      '@keyframes alertSlide{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}';
-    document.head.appendChild(s);
-  }
-  setTimeout(() => container.remove(), 12000);
-}
 
 // ══════════════════════════════════════════════════
-//  BUSINESS SENSEI — contextual coaching engine
-//  Tips are categorized by page; the engine auto-
-//  selects relevant ones and injects a slide-up panel.
+//  BUSINESS SENSEI — coaching tips, by topic.
+//  Shown in the Sensei card on Home.
 // ══════════════════════════════════════════════════
 const SENSEI_TIPS = {
   sales: [
@@ -1030,203 +1156,6 @@ const SENSEI_TIPS = {
   ],
 };
 
-// Page → tip pool mapping
-const SENSEI_PAGE_MAP = {
-  'vault-pine-collective.html': 'sales',
-  'goals-dashboard.html': 'goals',
-  'expenses.html': 'expenses',
-  'analytics.html': 'analytics',
-  'events.html': 'events',
-  'production.html': 'production',
-  'content.html': 'content',
-  'review.html': 'general',
-  'guru.html': 'general',
-};
-
-// ── DATA-AWARE COACHING BAR ────────────────────────
-// Reads real business data and generates a contextual insight,
-// then injects it as a subtle banner below the dash-nav.
-function injectSenseiInsightBar() {
-  const page = location.pathname.split('/').pop() || 'index.html';
-  if (page === 'login.html' || page === 'reset-password.html') return;
-  // Home has its own Sensei card in the grid — a second tip strip there
-  // would just repeat it.
-  if (page === 'index.html') return;
-
-  let insight = null;
-
-  try {
-    if (page === 'goals-dashboard.html') {
-      const g = JSON.parse(localStorage.getItem('goals_dashboard_v1') || '{"goals":[]}');
-      const goals = g.goals || [];
-      const active = goals.filter((x) => !x.done);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const overdue = active.filter((x) => x.due && new Date(x.due + 'T00:00:00') < today);
-      const noDate = active.filter((x) => !x.due);
-      if (overdue.length) {
-        insight = {
-          icon: '⚠️',
-          color: 'var(--yellow)',
-          text: `${overdue.length} overdue goal${overdue.length > 1 ? 's' : ''}. Sensei says: a goal without a new deadline is a wish. Update the due date or close it.`,
-        };
-      } else if (noDate.length) {
-        insight = {
-          icon: '🎯',
-          color: 'var(--accent)',
-          text: `${noDate.length} active goal${noDate.length > 1 ? 's have' : ' has'} no deadline. Sensei says: a goal without a date is a wish. Add a target date to create urgency.`,
-        };
-      } else if (active.length > 5) {
-        insight = {
-          icon: '🧠',
-          color: 'var(--accent2)',
-          text: `You have ${active.length} active goals. Sensei says: research shows focus fractures beyond 3 goals. Consider pausing the lowest-priority ones.`,
-        };
-      } else if (active.length === 0) {
-        insight = {
-          icon: '🎯',
-          color: 'var(--green)',
-          text: `No active goals set. Sensei says: start with one 90-day goal. Specific → Measurable → Achievable → Time-bound.`,
-        };
-      } else {
-        insight = {
-          icon: '✅',
-          color: 'var(--green)',
-          text: `${active.length} active goal${active.length > 1 ? 's' : ''} on track. Sensei says: weekly 10-min check-ins are the #1 habit of goal achievers.`,
-        };
-      }
-    } else if (page === 'expenses.html') {
-      const now = new Date();
-      const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-      const exps = JSON.parse(localStorage.getItem('vpc_personal_expenses_v1') || '[]');
-      const budget = JSON.parse(localStorage.getItem('vpc_expense_budget_v1') || '{"total":0}');
-      const spent = exps
-        .filter((e) => (e.date || '').startsWith(prefix))
-        .reduce((s, e) => s + (e.amount || 0), 0);
-      const pct = budget.total > 0 ? (spent / budget.total) * 100 : 0;
-      if (budget.total === 0) {
-        insight = {
-          icon: '💡',
-          color: 'var(--accent)',
-          text: `No budget set. Sensei says: set a monthly budget now — even a rough number creates accountability and changes spending behaviour.`,
-        };
-      } else if (pct > 100) {
-        insight = {
-          icon: '🚨',
-          color: 'var(--red)',
-          text: `Budget exceeded at ${Math.round(pct)}% ($${spent.toFixed(0)} of $${budget.total}). Sensei says: find one category to freeze for the rest of the month.`,
-        };
-      } else if (pct > 80) {
-        insight = {
-          icon: '⚠️',
-          color: 'var(--yellow)',
-          text: `Budget ${Math.round(pct)}% used with ${now.getDate()} of ${new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()} days elapsed. Sensei says: review your biggest category before spending more.`,
-        };
-      } else {
-        insight = {
-          icon: '✅',
-          color: 'var(--green)',
-          text: `Budget ${Math.round(pct)}% used this month. Sensei says: track categories, not just totals — knowing where money goes is half the battle.`,
-        };
-      }
-    } else if (page === 'vault-pine-collective.html') {
-      const orders = JSON.parse(localStorage.getItem('vp_orders_v2') || '[]');
-      if (orders.length === 0) {
-        insight = {
-          icon: '📊',
-          color: 'var(--accent)',
-          text: `No sales logged yet. Sensei says: log every sale the same day — even cash sales. Data you don't capture is money you can't analyse.`,
-        };
-      } else {
-        const totalRev = orders.reduce((s, o) => s + (o.salePrice || 0), 0);
-        const totalCost = orders.reduce((s, o) => s + (o.cogs || 0), 0);
-        const margin = totalRev > 0 ? ((totalRev - totalCost) / totalRev) * 100 : 0;
-        if (margin < 30) {
-          insight = {
-            icon: '📉',
-            color: 'var(--red)',
-            text: `Gross margin is ${margin.toFixed(1)}%. Sensei says: healthy product businesses target 40–60%. Check if COGS are logged accurately or if pricing needs a lift.`,
-          };
-        } else if (margin < 40) {
-          insight = {
-            icon: '⚡',
-            color: 'var(--yellow)',
-            text: `Gross margin is ${margin.toFixed(1)}% — below the 40% target. Sensei says: a 10% price increase often has less customer pushback than you'd expect.`,
-          };
-        } else {
-          insight = {
-            icon: '💪',
-            color: 'var(--green)',
-            text: `Gross margin is ${margin.toFixed(1)}% — solid. Sensei says: now focus on volume. Your pricing is healthy; grow the top line.`,
-          };
-        }
-      }
-    } else if (page === 'analytics.html') {
-      const orders = JSON.parse(localStorage.getItem('vp_orders_v2') || '[]');
-      if (orders.length < 5) {
-        insight = {
-          icon: '📈',
-          color: 'var(--accent)',
-          text: `Not enough data for trends yet. Sensei says: log at least 10 sales across 2 months before drawing conclusions from charts.`,
-        };
-      } else {
-        insight = {
-          icon: '🧠',
-          color: 'var(--accent2)',
-          text: `Sensei says: when reviewing analytics, ask "what caused this?" before asking "what does this mean?" Causes lead to action; patterns alone lead to guessing.`,
-        };
-      }
-    }
-  } catch (e) {}
-
-  // Fallback: a random tip from this page's own pool (general if it has none)
-  if (!insight) {
-    const pool = SENSEI_TIPS[SENSEI_PAGE_MAP[page]] || SENSEI_TIPS.general;
-    const t = pool[Math.floor(Math.random() * pool.length)];
-    insight = {
-      icon: '🧠',
-      color: 'var(--accent2)',
-      text: `Sensei — ${t.cat}: ${t.head}. ${t.body}`,
-    };
-  }
-
-  // Inject bar after .dash-nav
-  const bar = document.createElement('div');
-  bar.id = 'sensei-insight-bar';
-  bar.style.cssText = `
-    background: linear-gradient(90deg, color-mix(in srgb, ${insight.color} 6%, transparent) 0%, transparent 60%);
-    border-bottom: 1px solid color-mix(in srgb, ${insight.color} 18%, transparent);
-    padding: 9px 32px; display: flex; align-items: center; gap: 10px;
-    font-size: 0.76rem; color: #a1a1a6; line-height: 1.5;
-    position: relative; z-index: 130;
-    animation: insightSlide 0.4s ease both;
-  `;
-  bar.innerHTML = `
-    <span style="font-size:0.9rem;flex-shrink:0;">${insight.icon}</span>
-    <span style="flex:1;">${insight.text}</span>
-    <button onclick="this.closest('#sensei-insight-bar').remove()" style="background:none;border:none;color:#a1a1a6;cursor:pointer;font-size:0.75rem;padding:2px 6px;border-radius:8px;flex-shrink:0;opacity:0.6;font-family:inherit;min-height:unset;" title="Dismiss">✕</button>
-  `;
-  if (!document.getElementById('insight-bar-anim')) {
-    const s = document.createElement('style');
-    s.id = 'insight-bar-anim';
-    s.textContent =
-      '@keyframes insightSlide{from{transform:translateY(-6px);opacity:0}to{transform:none;opacity:1}}';
-    document.head.appendChild(s);
-  }
-
-  // Insert after .dash-nav
-  function tryInject() {
-    const nav = document.querySelector('nav.dash-nav');
-    if (nav) {
-      nav.insertAdjacentElement('afterend', bar);
-    } else {
-      document.body.insertBefore(bar, document.querySelector('main') || document.body.firstChild);
-    }
-  }
-  // Wait briefly so dash-nav injection runs first
-  setTimeout(tryInject, 200);
-}
-
 // Expose tips for use by individual pages
 window.SENSEI_TIPS = SENSEI_TIPS;
 
@@ -1272,75 +1201,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   sessionStorage.setItem('vpc_last_page', _curPage);
-  injectDashNav();
-  injectSearchBtn();
-  injectSenseiInsightBar();
+  injectAppNav();
   registerSW();
-  injectMobileNav();
-  // Deferred enhancements
-  setTimeout(() => {
-    checkAndNotify();
-    injectTrendAlerts();
-  }, 2000);
+  // Deferred: daily reminder check (only if reminders are turned on)
+  setTimeout(checkAndNotify, 2000);
 });
-
-// ── Mobile bottom navigation ──
-function injectMobileNav() {
-  if (window.location.pathname.endsWith('login.html')) return;
-
-  const style = document.createElement('style');
-  style.textContent = `
-    .mobile-bottom-nav {
-      display: none;
-      position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
-      background: rgba(22, 22, 23,0.96);
-      backdrop-filter: blur(20px) saturate(1.4);
-      border-top: 1px solid rgba(255,255,255,0.08);
-      padding: 0 0 env(safe-area-inset-bottom, 0);
-    }
-    .mobile-bottom-nav ul {
-      display: flex; list-style: none; margin: 0; padding: 0;
-      height: 56px;
-    }
-    .mobile-bottom-nav li { flex: 1; }
-    .mobile-bottom-nav a {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      height: 100%; text-decoration: none; color: #a1a1a6;
-      font-size: 0.75rem; font-weight: 600; gap: 3px; transition: color 0.15s;
-    }
-    .mobile-bottom-nav a .nav-icon { font-size: 1.15rem; line-height: 1; }
-    .mobile-bottom-nav a.active { color: #2997ff; }
-    .mobile-bottom-nav a:hover { color: #c8d0e8; }
-    @media (max-width: 768px) {
-      .mobile-bottom-nav { display: block; }
-      body { padding-bottom: 60px; }
-    }
-  `;
-  document.head.appendChild(style);
-
-  const currentPath = window.location.pathname;
-  const links = [
-    { href: 'index.html', icon: '⌂', label: 'Home' },
-    { href: 'vault-pine-collective.html', icon: '📊', label: 'Sales' },
-    { href: 'events.html', icon: '🎪', label: 'Events' },
-    { href: 'expenses.html', icon: '💸', label: 'Personal' },
-    { href: 'analytics.html', icon: '📈', label: 'Analytics' },
-  ];
-
-  const nav = document.createElement('nav');
-  nav.className = 'mobile-bottom-nav';
-  nav.setAttribute('aria-label', 'Mobile navigation');
-  nav.innerHTML = `<ul>${links
-    .map((l) => {
-      const isActive =
-        currentPath.endsWith(l.href) ||
-        (l.href === 'index.html' &&
-          (currentPath.endsWith('/') || currentPath.endsWith('index.html')));
-      return `<li><a href="${l.href}"${isActive ? ' class="active"' : ''}>
-      <span class="nav-icon">${l.icon}</span>
-      <span>${l.label}</span>
-    </a></li>`;
-    })
-    .join('')}</ul>`;
-  document.body.appendChild(nav);
-}

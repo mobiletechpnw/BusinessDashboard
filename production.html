@@ -15,20 +15,13 @@
 <style>
   body { min-height: 100vh; }
 
-  header {
-    background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 0 32px; display: flex; align-items: center;
-    justify-content: space-between; min-height: 58px; position: sticky; top: 0; z-index: 200;
-  }
-  .brand { font-size: 1.05rem; font-weight: 600; }
-  .brand span { color: inherit; }
 
   /* Alert banner */
   .alert-banner { background: rgba(255, 214, 10,0.12); border-bottom: 1px solid rgba(255, 214, 10,0.3); padding: 10px 32px; display: flex; align-items: center; gap: 10px; font-size: 0.84rem; }
   .alert-banner strong { color: var(--yellow); }
   .alert-banner.hidden { display: none; }
 
-  .tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 32px; background: var(--surface); position: sticky; top: 98px; z-index: 150; }
+  .tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 32px; background: var(--surface); position: sticky; top: var(--header-h); z-index: 150; }
   .tab { padding: 14px 20px; font-size: 0.84rem; font-weight: 600; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; user-select: none; }
   .tab:hover { color: var(--text); }
   .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
@@ -128,9 +121,8 @@
 
   @media (max-width: 680px) {
     .kpi-strip { grid-template-columns: 1fr 1fr; }
-    header { padding: 0 16px; min-height: auto; flex-wrap: wrap; gap: 8px; padding: 10px 16px; }
     main { padding: 16px; }
-    .tab-bar { top: 92px; padding: 0 8px; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
+    .tab-bar { padding: 0 8px; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
     .tab-bar::-webkit-scrollbar { display: none; }
     .tab { padding: 12px 14px; font-size: 0.78rem; white-space: nowrap; min-height: 44px; }
     .job-card { flex-wrap: wrap; gap: 10px; }
@@ -154,10 +146,9 @@
 <body>
 
 <header>
-  <div class="brand">🖨️ <span>Production</span> Hub</div>
+  <div class="brand">Production Hub</div>
 </header>
 
-<nav class="dash-nav"></nav>
 
 <!-- Low-stock alert banner -->
 <div class="alert-banner hidden" id="low-stock-banner">

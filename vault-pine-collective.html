@@ -16,8 +16,6 @@
   body { min-height: 100vh; }
 
   /* Header and cross-page nav come from styles.css, same as every page. */
-  .brand { font-size: 1rem; font-weight: 600; letter-spacing: -.3px; white-space: nowrap; }
-  .brand span { color: inherit; }
 
   /* ── Section row (Sales / Business Expenses / trackers) ──
      Sits under the cross-page nav and scrolls with the page; written like
@@ -48,7 +46,7 @@
   .tab-bar {
     display: flex; gap: 0; border-bottom: 1px solid var(--border);
     padding: 0 32px; background: var(--surface);
-    position: sticky; top: 98px; z-index: 150;
+    position: sticky; top: var(--header-h); z-index: 150;
   }
   .tab { padding: 13px 18px; font-size: 0.83rem; font-weight: 600; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; user-select: none; }
   .tab:hover { color: var(--text); }
@@ -152,7 +150,7 @@
   .estat { background: var(--surface); padding: 14px 22px; }
   .estat-num { font-size: 1.4rem; font-weight: 600; }
   .estat-label { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
-  .exp-tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 32px; background: var(--surface); position: sticky; top: 98px; z-index: 150; }
+  .exp-tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 32px; background: var(--surface); position: sticky; top: var(--header-h); z-index: 150; }
   .exp-tab { padding: 13px 18px; font-size: 0.83rem; font-weight: 600; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; user-select: none; }
   .exp-tab:hover { color: var(--text); }
   .exp-tab.active { color: var(--red); border-bottom-color: var(--red); }
@@ -227,7 +225,7 @@
   .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
 
   /* ── Toast ── */
-  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--accent); color: var(--text); padding: 11px 18px; border-radius: 8px; font-size: 0.83rem; z-index: 600; transform: translateY(80px); opacity: 0; transition: all 0.25s; }
+  .toast { position: fixed; bottom: calc(24px + var(--chrome-bottom)); right: 24px; background: var(--surface); border: 1px solid var(--accent); color: var(--text); padding: 11px 18px; border-radius: 8px; font-size: 0.83rem; z-index: 600; transform: translateY(80px); opacity: 0; transition: all 0.25s; }
   .toast.show { transform: translateY(0); opacity: 1; }
 
   /* ── Date range filter bar ── */
@@ -240,11 +238,10 @@
   @media (max-width: 700px) {
     .main-nav { padding: 0 8px; }
     .main-tab { padding: 12px 14px; font-size: 0.78rem; }
-    /* Sticky offset under the shared mobile header + nav (see styles.css) */
-    .tab-bar { top: 77px; padding: 0 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-wrap: nowrap; }
+    .tab-bar { padding: 0 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-wrap: nowrap; }
     .tab-bar::-webkit-scrollbar { display: none; }
     .tab { white-space: nowrap; padding: 12px 14px; font-size: 0.78rem; }
-    .exp-tab-bar { top: 77px; padding: 0 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-wrap: nowrap; }
+    .exp-tab-bar { padding: 0 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-wrap: nowrap; }
     .exp-tab-bar::-webkit-scrollbar { display: none; }
     .exp-tab { white-space: nowrap; }
     .kpi-bar { grid-template-columns: repeat(2, 1fr); }
@@ -272,10 +269,9 @@
 <body>
 
 <header>
-  <div class="brand">Sales <span>Hub</span></div>
+  <div class="brand">Sales Hub</div>
 </header>
 
-<nav class="dash-nav"></nav>
 
 <!-- Section row: switches between the Sales Hub's own sections -->
 <div class="main-nav">

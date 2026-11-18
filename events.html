@@ -19,9 +19,6 @@ html, body { height:auto; }
 body { display:block; overflow-x:hidden; }
 
 /* HEADER */
-header { background:var(--surface); border-bottom:1px solid var(--border); padding:0 24px; display:flex; align-items:center; justify-content:space-between; height:54px; flex-shrink:0; z-index:100; gap:12px; }
-.brand { font-size:1rem; font-weight:600; letter-spacing:-.3px; white-space:nowrap; }
-.brand span { color: inherit; }
 .header-right { display:flex; align-items:center; gap:8px; }
 .btn-primary { background:var(--accent-fill); color:#fff; border:none; border-radius:999px; padding:7px 16px; font-size:.8rem; font-weight:600; cursor:pointer; transition:all .2s; white-space:nowrap; box-shadow:none; }
 .btn-primary:hover { opacity:.9; transform:translateY(-1px); box-shadow:none; }
@@ -250,7 +247,6 @@ main { padding:0 0 24px; }
 @media(max-width:700px) {
   main { padding:0 12px 12px; }
   .stat-bar { grid-template-columns:repeat(3,1fr); padding:10px 12px; gap:8px; }
-  header { padding:0 12px; }
   .ev-tab-bar { padding:0 8px; overflow-x:auto; scrollbar-width:none; }
   .ev-tab-bar::-webkit-scrollbar { display:none; }
 }
@@ -267,7 +263,7 @@ main { padding:0 0 24px; }
 <body>
 
 <header>
-  <div class="brand">Events <span>&amp; Tables</span></div>
+  <div class="brand">Events &amp; Tables</div>
   <div class="header-right">
     <button class="btn-ghost" onclick="generateShareLink()" title="Generate a shareable link for vendors">📤 Share Calendar</button>
     <button class="btn-ghost" onclick="openVendorModal()">+ Vendor</button>
@@ -275,7 +271,6 @@ main { padding:0 0 24px; }
   </div>
 </header>
 
-<nav class="dash-nav"></nav>
 
 <div class="stat-bar">
   <div class="stat-cell"><div class="stat-val" id="st-events">0</div><div class="stat-lbl">Events</div></div>
@@ -1588,6 +1583,6 @@ if (document.readyState === 'loading') {
   loadSignups();
 }
 </script>
-<button class="fab" onclick="openEventModal()" title="Add Event" style="bottom:calc(24px + env(safe-area-inset-bottom));right:24px;position:fixed;z-index:300;background:var(--accent-fill);color:#fff;border:none;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:none;">＋</button>
+<button class="fab" onclick="openEventModal()" title="Add Event" aria-label="Add Event">＋</button>
 </body>
 </html>
