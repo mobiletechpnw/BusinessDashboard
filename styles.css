@@ -260,6 +260,83 @@ strong {
   color: var(--purple-pill);
 }
 
+/* ── Status pill that opens a menu (see vpcMenu in shared.js) ── */
+.badge.status-btn {
+  position: relative;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  min-height: 20px;
+  padding: 3px 9px;
+}
+.badge.status-btn::after {
+  /* invisible slop: a 44px-tall tap area around a 20px pill */
+  content: '';
+  position: absolute;
+  inset: -12px -4px;
+}
+.badge.status-btn:hover {
+  filter: brightness(1.15);
+}
+
+/* ── Status menu ── */
+.vpc-menu {
+  position: fixed;
+  z-index: 1100;
+  min-width: 190px;
+  background: var(--surface2);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-pop);
+  padding: 6px;
+  transform-origin: top left;
+  animation: vpc-menu-in var(--t-move) var(--spring);
+}
+@keyframes vpc-menu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.vpc-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 36px;
+  padding: 0 12px 0 8px;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 400;
+  text-align: left;
+}
+.vpc-menu button:hover,
+.vpc-menu button:focus-visible {
+  background: var(--accent-fill);
+  color: var(--on-accent);
+  outline: none;
+}
+.vpc-menu-check {
+  width: 14px;
+  visibility: hidden;
+  font-weight: 600;
+}
+.vpc-menu button[aria-checked='true'] .vpc-menu-check {
+  visibility: visible;
+}
+.vpc-menu-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+  margin-left: auto;
+}
+
 /* ── Shared modal (sheet) ── */
 .modal-overlay {
   display: none;
@@ -659,6 +736,26 @@ main {
   }
 }
 
+/* ── Touch screens of any size: 44px targets for small controls ── */
+@media (pointer: coarse) {
+  .icon-btn,
+  .act-btn,
+  .page-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .filter-chip,
+  .range-btn {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .vpc-menu button {
+    min-height: 44px;
+    font-size: 1rem;
+  }
+}
+
 /* ── Tab bars scroll horizontally on mobile ── */
 @media (max-width: 700px) {
   .tab-bar {
@@ -1018,10 +1115,11 @@ body {
 
 /* iOS Safari auto-zooms the viewport whenever a focused form control has a
    font-size below 16px (and then won't zoom back). Every page's inputs are
-   0.78–0.9rem, so force 16px on touch-width screens. !important is needed to
-   beat the per-page `.field input` rules. Checkbox/radio/range excluded —
+   0.78–0.9rem, so force 16px on narrow screens and on every touch screen
+   (iPads are wider than 700px but zoom too). !important is needed to beat
+   the per-page `.field input` rules. Checkbox/radio/range excluded —
    font-size doesn't apply and we don't want to touch their box sizing. */
-@media (max-width: 700px) {
+@media (max-width: 700px), (pointer: coarse) {
   input:not([type='checkbox']):not([type='radio']):not([type='range']),
   select,
   textarea {

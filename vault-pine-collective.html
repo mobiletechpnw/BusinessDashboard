@@ -101,16 +101,13 @@
   .badge-none { background: var(--surface2); color: var(--text2); }
 
   /* ── Payment / Fulfillment status badges ── */
-  .badge-paid       { background: #203d28; color: var(--green); cursor: pointer; }
-  .badge-partial    { background: #453e1a; color: var(--yellow); cursor: pointer; }
-  .badge-unpaid     { background: #452323; color: var(--red); cursor: pointer; }
-  .badge-completed  { background: #203d28; color: var(--green); cursor: pointer; }
-  .badge-in_progress{ background: #192f46; color: var(--accent); cursor: pointer; }
-  .badge-printed    { background: #203d28; color: var(--green); cursor: pointer; }
-  .badge-not_printed{ background: #453e1a; color: var(--yellow); cursor: pointer; }
-  .badge-paid:hover, .badge-partial:hover, .badge-unpaid:hover,
-  .badge-completed:hover, .badge-in_progress:hover,
-  .badge-printed:hover, .badge-not_printed:hover { filter: brightness(1.25); }
+  .badge-paid       { background: var(--green-tint); color: var(--green); }
+  .badge-partial,
+  .badge-unpaid,
+  .badge-not_printed{ background: var(--orange-tint); color: var(--orange); }
+  .badge-in_progress{ background: var(--blue-tint); color: var(--blue-pill); }
+  .badge-completed,
+  .badge-printed    { background: var(--fill); color: var(--text2); }
 
   /* ── Search / filter ── */
   .toolbar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
@@ -1787,9 +1784,9 @@ function renderOrderTable() {
   const totalProf = orders.reduce((s,o) => s + o.salePrice - o.cogs, 0);
   const totalCogs = orders.reduce((s,o) => s + o.cogs, 0);
 
-  const PAY_LABELS  = { paid: '✅ Paid', partial: '🟡 Partial', unpaid: '🔴 Unpaid' };
-  const FILL_LABELS = { completed: '✅ Done', in_progress: '🔵 In Progress' };
-  const PRINT_LABELS = { printed: '🖨️ Printed', not_printed: '⏳ Not Printed' };
+  const PAY_LABELS  = { paid: 'Paid', partial: 'Partial', unpaid: 'Unpaid' };
+  const FILL_LABELS = { completed: 'Done', in_progress: 'In progress' };
+  const PRINT_LABELS = { printed: 'Printed', not_printed: 'Not printed' };
 
   const rows = pageOrders.map(o => {
     const profit   = o.salePrice - o.cogs;
@@ -1797,10 +1794,12 @@ function renderOrderTable() {
     const roiColor = roi < 0 ? 'var(--red)' : 'var(--text)';
     const pay      = o.payStatus     || 'paid';
     const fill     = o.fulfillStatus || 'completed';
-    const payBadge  = `<span class="badge badge-${pay}"  title="Click to cycle" onclick="togglePayStatus('${o.id}')">${PAY_LABELS[pay]||pay}</span>`;
-    const fillBadge = `<span class="badge badge-${fill}" title="Click to toggle" onclick="toggleFulfillStatus('${o.id}')">${FILL_LABELS[fill]||fill}</span>`;
+    const statusBtn = (kind, val, text, title) =>
+      `<button type="button" class="badge badge-${val} status-btn" aria-haspopup="menu" aria-expanded="false" data-menu-key="${o.id}-${kind}" title="${title}" onclick="openStatusMenu(event,'${o.id}','${kind}')">${text}</button>`;
+    const payBadge  = statusBtn('pay', pay, PAY_LABELS[pay] || pay, 'Change payment status');
+    const fillBadge = statusBtn('fill', fill, FILL_LABELS[fill] || fill, 'Change fulfilment status');
     const print     = printStatusOf(o);
-    const printBadge = `<span class="badge badge-${print}" title="Click to toggle" onclick="togglePrintStatus('${o.id}')">${PRINT_LABELS[print]}</span>`;
+    const printBadge = statusBtn('print', print, PRINT_LABELS[print], 'Change print status');
     const actions   =
       `<button class="icon-btn" title="Edit order" onclick="openAddOrder('${o.id}')">✏️</button>
        <button class="icon-btn" title="Delete order" onclick="deleteOrder('${o.id}')">✕</button>`;
@@ -2486,37 +2485,52 @@ function deleteOrder(id) {
   toast('Order deleted.');
 }
 
-function togglePayStatus(id) {
-  const arr = rawOrders();
-  const o = arr.find(x => x.id === id);
-  if (!o) return;
-  const cycle = { paid: 'partial', partial: 'unpaid', unpaid: 'paid' };
-  o.payStatus = cycle[o.payStatus || 'paid'] || 'paid';
-  localStorage.setItem(LS_ORDERS, JSON.stringify(arr));
-  renderOrderTable();
-}
 // Orders logged before the Printed column existed have no printStatus:
 // treat finished orders as printed and open ones as not yet printed.
 function printStatusOf(o) {
   if (o.printStatus === 'printed' || o.printStatus === 'not_printed') return o.printStatus;
   return (o.fulfillStatus || 'completed') === 'completed' ? 'printed' : 'not_printed';
 }
-function togglePrintStatus(id) {
-  const arr = rawOrders();
-  const o = arr.find(x => x.id === id);
-  if (!o) return;
-  o.printStatus = printStatusOf(o) === 'printed' ? 'not_printed' : 'printed';
-  // Not printed means it can't be done yet.
-  if (o.printStatus === 'not_printed' && (o.fulfillStatus || 'completed') === 'completed') o.fulfillStatus = 'in_progress';
-  localStorage.setItem(LS_ORDERS, JSON.stringify(arr));
-  renderOrderTable();
+// Status pills open a menu with every option (vpcMenu in shared.js), so a
+// status never changes on a stray tap.
+const STATUS_MENUS = {
+  pay: { label: 'Payment status', options: [
+    { value: 'paid', label: 'Paid', color: 'var(--green)' },
+    { value: 'partial', label: 'Partial', color: 'var(--orange)' },
+    { value: 'unpaid', label: 'Unpaid', color: 'var(--orange)' },
+  ] },
+  print: { label: 'Print status', options: [
+    { value: 'not_printed', label: 'Not printed', color: 'var(--orange)' },
+    { value: 'printed', label: 'Printed', color: 'var(--text2)' },
+  ] },
+  fill: { label: 'Fulfilment status', options: [
+    { value: 'in_progress', label: 'In progress', color: 'var(--blue-pill)' },
+    { value: 'completed', label: 'Done', color: 'var(--text2)' },
+  ] },
+};
+function openStatusMenu(e, id, kind) {
+  e.stopPropagation();
+  const o = rawOrders().find(x => x.id === id);
+  if (!o || !STATUS_MENUS[kind]) return;
+  const current = kind === 'pay' ? (o.payStatus || 'paid')
+    : kind === 'print' ? printStatusOf(o)
+    : (o.fulfillStatus || 'completed');
+  vpcMenu(e.currentTarget, { ...STATUS_MENUS[kind], current, onSelect: v => setOrderStatus(id, kind, v) });
 }
-function toggleFulfillStatus(id) {
+function setOrderStatus(id, kind, value) {
   const arr = rawOrders();
   const o = arr.find(x => x.id === id);
   if (!o) return;
-  o.fulfillStatus = (o.fulfillStatus === 'completed') ? 'in_progress' : 'completed';
-  if (o.fulfillStatus === 'completed') o.printStatus = 'printed';   // Done implies Printed
+  if (kind === 'pay') o.payStatus = value;
+  if (kind === 'print') {
+    o.printStatus = value;
+    // Not printed means it can't be done yet.
+    if (value === 'not_printed' && (o.fulfillStatus || 'completed') === 'completed') o.fulfillStatus = 'in_progress';
+  }
+  if (kind === 'fill') {
+    o.fulfillStatus = value;
+    if (value === 'completed') o.printStatus = 'printed';   // Done implies Printed
+  }
   localStorage.setItem(LS_ORDERS, JSON.stringify(arr));
   renderOrderTable();
 }

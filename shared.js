@@ -41,6 +41,89 @@ function injectDashNav() {
   nav.querySelector('.active')?.scrollIntoView({ inline: 'center', block: 'nearest' });
 }
 
+// ── STATUS MENU ────────────────────────────────────
+// A small popover listing every option, so a status never changes on a
+// stray tap (it replaces click-to-cycle pills). Usage:
+//   vpcMenu(buttonEl, { label, current, options: [{ value, label, color }], onSelect })
+// The anchor may carry data-menu-key; after a re-render, focus returns to
+// the element with the same key.
+let _vpcMenuClose = null;
+window.vpcMenu = function (anchor, { label, options, current, onSelect }) {
+  if (_vpcMenuClose) _vpcMenuClose(false);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
+  const menu = document.createElement('div');
+  menu.className = 'vpc-menu';
+  menu.setAttribute('role', 'menu');
+  if (label) menu.setAttribute('aria-label', label);
+  menu.innerHTML = options
+    .map(
+      (o) =>
+        `<button type="button" role="menuitemradio" aria-checked="${o.value === current}" data-value="${esc(o.value)}">` +
+        `<span class="vpc-menu-check" aria-hidden="true">✓</span>${esc(o.label)}` +
+        `<span class="vpc-menu-dot" aria-hidden="true" style="background:${o.color || 'var(--text2)'}"></span></button>`
+    )
+    .join('');
+  document.body.appendChild(menu);
+
+  const r = anchor.getBoundingClientRect();
+  const left = Math.min(Math.max(8, r.left), window.innerWidth - menu.offsetWidth - 8);
+  let top = r.bottom + 6;
+  if (top + menu.offsetHeight > window.innerHeight - 8)
+    top = Math.max(8, r.top - menu.offsetHeight - 6);
+  menu.style.left = left + 'px';
+  menu.style.top = top + 'px';
+  anchor.setAttribute('aria-expanded', 'true');
+
+  const items = [...menu.querySelectorAll('[role="menuitemradio"]')];
+  (items.find((i) => i.getAttribute('aria-checked') === 'true') || items[0]).focus();
+  const key = anchor.dataset.menuKey;
+
+  function onOutside(e) {
+    if (!menu.contains(e.target) && e.target !== anchor) close(false);
+  }
+  const openedAt = performance.now();
+  function onViewport(e) {
+    // Ignore the scroll that brought the pill into view, or a list still
+    // coasting from a swipe, so the menu doesn't vanish as it opens.
+    if (e && e.type === 'scroll' && performance.now() - openedAt < 250) return;
+    close(false);
+  }
+  function close(restoreFocus) {
+    menu.remove();
+    anchor.setAttribute('aria-expanded', 'false');
+    document.removeEventListener('pointerdown', onOutside, true);
+    window.removeEventListener('scroll', onViewport, true);
+    window.removeEventListener('resize', onViewport);
+    _vpcMenuClose = null;
+    if (restoreFocus) anchor.focus();
+  }
+  menu.addEventListener('click', (e) => {
+    const item = e.target.closest('[role="menuitemradio"]');
+    if (!item) return;
+    close(false);
+    if (item.dataset.value !== current) onSelect(item.dataset.value);
+    requestAnimationFrame(() => {
+      const target = key ? document.querySelector(`[data-menu-key="${key}"]`) : anchor;
+      if (target && document.contains(target)) target.focus();
+    });
+  });
+  menu.addEventListener('keydown', (e) => {
+    const i = items.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown') items[(i + 1) % items.length].focus();
+    else if (e.key === 'ArrowUp') items[(i - 1 + items.length) % items.length].focus();
+    else if (e.key === 'Home') items[0].focus();
+    else if (e.key === 'End') items[items.length - 1].focus();
+    else if (e.key === 'Escape') close(true);
+    else if (e.key === 'Tab') close(false);
+    else return;
+    if (e.key !== 'Tab') e.preventDefault();
+  });
+  setTimeout(() => document.addEventListener('pointerdown', onOutside, true), 0);
+  window.addEventListener('scroll', onViewport, true);
+  window.addEventListener('resize', onViewport);
+  _vpcMenuClose = close;
+};
+
 // ── GLOBAL SEARCH ──────────────────────────────────
 function buildSearchIndex() {
   const results = [];
