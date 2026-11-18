@@ -23,7 +23,7 @@
     position:sticky; top:0; z-index:200;
   }
   .brand { font-size:1.05rem; font-weight:600; }
-  .brand span { color:var(--accent); }
+  .brand span { color: inherit; }
   .header-right { display:flex; align-items:center; gap:10px; }
   .btn-primary { background:var(--accent-fill); color:#fff; border:none; border-radius:999px; padding:9px 16px; font-size:.82rem; font-weight:600; cursor:pointer; font-family:inherit; transition:opacity .15s; }
   .btn-primary:hover { opacity:.9; }
@@ -148,7 +148,7 @@
 
 <div class="stat-bar">
   <div class="stat-cell">
-    <div class="stat-val" style="color:var(--green)" id="st-value">$0.00</div>
+    <div class="stat-val" id="st-value">$0.00</div>
     <div class="stat-lbl">Market Value</div>
     <div class="stat-sub" id="st-units">0 items</div>
   </div>
@@ -163,7 +163,7 @@
     <div class="stat-sub" id="st-gain-pct">—</div>
   </div>
   <div class="stat-cell">
-    <div class="stat-val" style="color:var(--accent)" id="st-top">—</div>
+    <div class="stat-val" id="st-top">—</div>
     <div class="stat-lbl">Biggest Bucket</div>
     <div class="stat-sub" id="st-top-sub">by market value</div>
   </div>

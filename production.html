@@ -21,7 +21,7 @@
     justify-content: space-between; min-height: 58px; position: sticky; top: 0; z-index: 200;
   }
   .brand { font-size: 1.05rem; font-weight: 600; }
-  .brand span { color: var(--orange); }
+  .brand span { color: inherit; }
 
   /* Alert banner */
   .alert-banner { background: rgba(255, 214, 10,0.12); border-bottom: 1px solid rgba(255, 214, 10,0.3); padding: 10px 32px; display: flex; align-items: center; gap: 10px; font-size: 0.84rem; }
@@ -327,7 +327,7 @@ function switchTab(id) {
 function kpiStrip(id, items) {
   $(id).innerHTML = items.map(i => `
     <div class="kpi">
-      <div class="kpi-val" style="color:${i.color||'var(--text)'}">${i.val}</div>
+      <div class="kpi-val">${i.val}</div>
       <div class="kpi-label">${i.label}</div>
     </div>`).join('');
 }

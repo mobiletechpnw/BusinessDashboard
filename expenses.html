@@ -23,7 +23,7 @@
     position: sticky; top: 0; z-index: 200;
   }
   .brand { font-size: 1.05rem; font-weight: 600; }
-  .brand span { color: var(--red); }
+  .brand span { color: inherit; }
 
   /* ── KPI Strip ── */
   .kpi-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
@@ -129,7 +129,7 @@
   .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
   .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 999px; font-size: 0.83rem; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.15s; }
   .btn:hover { opacity: 0.85; }
-  .btn-primary { background: var(--red); color: #fff; }
+  .btn-primary { background: var(--accent-fill); color: #fff; }
   .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
 
   /* ── Category pill selector ── */

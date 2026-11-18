@@ -17,7 +17,7 @@
 
   /* Header and cross-page nav come from styles.css, same as every page. */
   .brand { font-size: 1rem; font-weight: 600; letter-spacing: -.3px; white-space: nowrap; }
-  .brand span { color: var(--accent); }
+  .brand span { color: inherit; }
 
   /* ── Section row (Sales / Business Expenses / trackers) ──
      Sits under the cross-page nav and scrolls with the page; written like
@@ -169,16 +169,16 @@
   .jtat-num { font-size: 1.4rem; font-weight: 600; }
   .jtat-label { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
   .jt-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; transition: border-color 0.15s; }
-  .jt-card:hover { border-color: #8b5cf6; }
+  .jt-card:hover { border-color: rgba(255,255,255,0.16); }
   .jt-name { font-size: 0.82rem; font-weight: 600; }
   .jt-bar-bg { background: var(--surface); border-radius: 99px; height: 4px; overflow: hidden; }
-  .jt-bar-fill { height: 100%; border-radius: 99px; background: #8b5cf6; transition: width 0.4s; }
+  .jt-bar-fill { height: 100%; border-radius: 99px; background: var(--accent); transition: width 0.4s; }
   .jt-bar-fill.sold-out { background: var(--red); }
   .jt-bar-fill.low { background: var(--yellow); }
   .jt-nums { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text2); }
   .jt-char-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 999px; color: var(--text2); padding: 7px 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; }
-  .jt-char-btn.selected { background: #2e1f4a; border-color: #8b5cf6; color: #c4b5fd; }
-  .jt-char-btn:hover { border-color: #8b5cf6; color: var(--text); }
+  .jt-char-btn.selected { background: var(--accent-tint); border-color: var(--accent); color: var(--accent); }
+  .jt-char-btn:hover { border-color: var(--accent); color: var(--text); }
 
   /* ── Pins section ── */
   .pin-stat-bar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
@@ -186,16 +186,16 @@
   .pintat-num { font-size: 1.4rem; font-weight: 600; }
   .pintat-label { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
   .pin-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; transition: border-color 0.15s; }
-  .pin-card:hover { border-color: #2dd4bf; }
+  .pin-card:hover { border-color: rgba(255,255,255,0.16); }
   .pin-name { font-size: 0.82rem; font-weight: 600; }
   .pin-bar-bg { background: var(--surface); border-radius: 99px; height: 4px; overflow: hidden; }
-  .pin-bar-fill { height: 100%; border-radius: 99px; background: #2dd4bf; transition: width 0.4s; }
+  .pin-bar-fill { height: 100%; border-radius: 99px; background: var(--accent); transition: width 0.4s; }
   .pin-bar-fill.sold-out { background: var(--red); }
   .pin-bar-fill.low { background: var(--yellow); }
   .pin-nums { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text2); }
   .pin-char-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 999px; color: var(--text2); padding: 7px 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; }
-  .pin-char-btn.selected { background: #0d2e2c; border-color: #2dd4bf; color: #99f6e4; }
-  .pin-char-btn:hover { border-color: #2dd4bf; color: var(--text); }
+  .pin-char-btn.selected { background: var(--accent-tint); border-color: var(--accent); color: var(--accent); }
+  .pin-char-btn:hover { border-color: var(--accent); color: var(--text); }
 
   /* ── Empty state ── */
   .empty { grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--text2); }
@@ -305,17 +305,17 @@
 
   <div class="kpi-bar">
     <div class="kpi">
-      <div class="kpi-val green" id="kpiRevenue">—</div>
+      <div class="kpi-val" id="kpiRevenue">—</div>
       <div class="kpi-label">Total Revenue</div>
       <div class="kpi-sub" id="kpiRevSub" style="color:var(--text2)"></div>
     </div>
     <div class="kpi">
-      <div class="kpi-val" style="color:var(--accent)" id="kpiProfit">—</div>
+      <div class="kpi-val" id="kpiProfit">—</div>
       <div class="kpi-label">Gross Profit</div>
       <div class="kpi-sub" id="kpiProfitSub" style="color:var(--text2)"></div>
     </div>
     <div class="kpi">
-      <div class="kpi-val" style="color:var(--yellow)" id="kpiRoi">—</div>
+      <div class="kpi-val" id="kpiRoi">—</div>
       <div class="kpi-label">Gross Margin</div>
       <div class="kpi-sub" id="kpiRoiSub" style="color:var(--text2)"></div>
     </div>
@@ -585,11 +585,11 @@
       <div class="estat-label">This Month Spend</div>
     </div>
     <div class="estat">
-      <div class="estat-num" style="color:var(--accent)" id="eskpiFixed">$0.00</div>
+      <div class="estat-num" id="eskpiFixed">$0.00</div>
       <div class="estat-label">Fixed Costs</div>
     </div>
     <div class="estat">
-      <div class="estat-num" style="color:var(--yellow)" id="eskpiVar">$0.00</div>
+      <div class="estat-num" id="eskpiVar">$0.00</div>
       <div class="estat-label">Variable Costs</div>
     </div>
     <div class="estat">
@@ -611,7 +611,7 @@
     <!-- Overview -->
     <div class="exp-panel active" id="exppanel-overview">
       <div style="display:flex;justify-content:flex-end;margin-bottom:20px">
-        <button class="btn-primary" style="background:var(--red)" onclick="openExpModal()">+ Add Expense</button>
+        <button class="btn-primary" onclick="openExpModal()">+ Add Expense</button>
       </div>
       <div class="grid-2" style="margin-bottom:20px">
         <div class="card">
@@ -626,7 +626,7 @@
       <div class="card">
         <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
           <span>Recent Expenses</span>
-          <button class="btn-primary" style="background:var(--red);padding:6px 13px;font-size:.78rem" onclick="openExpModal()">+ Add</button>
+          <button class="btn-primary" style="padding:6px 13px;font-size:.78rem" onclick="openExpModal()">+ Add</button>
         </div>
         <div id="expRecentList"></div>
       </div>
@@ -637,7 +637,7 @@
       <div class="toolbar">
         <input class="search-input" id="expSearch" placeholder="Search description, category…" oninput="renderExpTable()">
         <div id="expMonthFilters" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
-        <button class="btn-primary" style="background:var(--red);margin-left:auto" onclick="openExpModal()">+ Add Expense</button>
+        <button class="btn-primary" style="margin-left:auto" onclick="openExpModal()">+ Add Expense</button>
       </div>
       <div class="card">
         <div class="table-wrap">
@@ -661,7 +661,7 @@
     <!-- By Category -->
     <div class="exp-panel" id="exppanel-categories">
       <div style="display:flex;justify-content:flex-end;margin-bottom:20px">
-        <button class="btn-primary" style="background:var(--red)" onclick="openExpModal()">+ Add Expense</button>
+        <button class="btn-primary" onclick="openExpModal()">+ Add Expense</button>
       </div>
       <div class="exp-cat-grid" id="expCatGrid"></div>
     </div>
@@ -826,7 +826,7 @@
     <div class="field"><label>Amount ($)</label><input type="number" id="expAmount" placeholder="0.00" step="0.01" min="0"></div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeExpModal()">Cancel</button>
-      <button class="btn-primary" style="background:var(--red)" onclick="saveExpense()">Save Expense</button>
+      <button class="btn-primary" onclick="saveExpense()">Save Expense</button>
     </div>
   </div>
 </div>
@@ -836,11 +836,11 @@
 
   <div class="jt-stat-bar" id="jtStatBar">
     <div class="jtat"><div class="jtat-num green" id="jtRevenue">$0.00</div><div class="jtat-label">Revenue</div></div>
-    <div class="jtat"><div class="jtat-num" style="color:var(--accent)" id="jtProfit">$0.00</div><div class="jtat-label">Gross Profit</div></div>
-    <div class="jtat"><div class="jtat-num" style="color:var(--yellow)" id="jtMargin">—</div><div class="jtat-label">Gross Margin</div></div>
+    <div class="jtat"><div class="jtat-num" id="jtProfit">$0.00</div><div class="jtat-label">Gross Profit</div></div>
+    <div class="jtat"><div class="jtat-num" id="jtMargin">—</div><div class="jtat-label">Gross Margin</div></div>
     <div class="jtat"><div class="jtat-num" style="color:var(--text2)" id="jtCogs">$0.00</div><div class="jtat-label">COGS</div></div>
     <div class="jtat"><div class="jtat-num" style="color:var(--text2)" id="jtInvCost">$0.00</div><div class="jtat-label" id="jtInvCostLabel">Inventory Cost</div></div>
-    <div class="jtat"><div class="jtat-num" style="color:var(--accent2)" id="jtSold">0</div><div class="jtat-label">Tags Sold</div></div>
+    <div class="jtat"><div class="jtat-num" id="jtSold">0</div><div class="jtat-label">Tags Sold</div></div>
     <div class="jtat"><div class="jtat-num" id="jtRemaining">0</div><div class="jtat-label">In Stock</div></div>
   </div>
 
@@ -853,7 +853,7 @@
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn-ghost" onclick="openJtCharModal()">+ New Character</button>
         <button class="btn-ghost" onclick="openJtRestockModal()">+ Restock</button>
-        <button class="btn-primary" style="background:#8b5cf6" onclick="openJtSaleModal()">+ Log Sale</button>
+        <button class="btn-primary" onclick="openJtSaleModal()">+ Log Sale</button>
       </div>
     </div>
 
@@ -954,7 +954,7 @@
     <div class="field"><label>Notes (optional)</label><input type="text" id="jtNotes" placeholder="e.g. Card show, Whatnot, eBay"></div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeJtModal()">Cancel</button>
-      <button class="btn-primary" style="background:#8b5cf6" onclick="saveJtSale()">Save Sale</button>
+      <button class="btn-primary" onclick="saveJtSale()">Save Sale</button>
     </div>
   </div>
 </div>
@@ -981,7 +981,7 @@
     <div class="field"><label>Notes (optional)</label><input type="text" id="jtRestockNotes" placeholder="e.g. July vendor order"></div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeJtRestockModal()">Cancel</button>
-      <button class="btn-primary" style="background:#8b5cf6" onclick="saveJtOrder()">Save Order</button>
+      <button class="btn-primary" onclick="saveJtOrder()">Save Order</button>
     </div>
   </div>
 </div>
@@ -1002,7 +1002,7 @@
     <div class="field"><label>Notes (optional)</label><input type="text" id="jtCharNotes" placeholder="e.g. First batch of this character"></div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeJtCharModal()">Cancel</button>
-      <button class="btn-primary" style="background:#8b5cf6" onclick="saveJtCharacter()">Add Character</button>
+      <button class="btn-primary" onclick="saveJtCharacter()">Add Character</button>
     </div>
   </div>
 </div>
@@ -1012,11 +1012,11 @@
 
   <div class="pin-stat-bar">
     <div class="pintat"><div class="pintat-num green" id="pinRevenue">$0.00</div><div class="pintat-label">Revenue</div></div>
-    <div class="pintat"><div class="pintat-num" style="color:#2dd4bf" id="pinProfit">$0.00</div><div class="pintat-label">Gross Profit</div></div>
-    <div class="pintat"><div class="pintat-num" style="color:var(--yellow)" id="pinMargin">—</div><div class="pintat-label">Gross Margin</div></div>
+    <div class="pintat"><div class="pintat-num" id="pinProfit">$0.00</div><div class="pintat-label">Gross Profit</div></div>
+    <div class="pintat"><div class="pintat-num" id="pinMargin">—</div><div class="pintat-label">Gross Margin</div></div>
     <div class="pintat"><div class="pintat-num" style="color:var(--text2)" id="pinCogs">$0.00</div><div class="pintat-label">COGS</div></div>
     <div class="pintat"><div class="pintat-num" style="color:var(--text2)" id="pinInvCost">$0.00</div><div class="pintat-label" id="pinInvCostLabel">Inventory Cost</div></div>
-    <div class="pintat"><div class="pintat-num" style="color:var(--accent2)" id="pinSold">0</div><div class="pintat-label">Pins Sold</div></div>
+    <div class="pintat"><div class="pintat-num" id="pinSold">0</div><div class="pintat-label">Pins Sold</div></div>
     <div class="pintat"><div class="pintat-num" id="pinRemaining">0</div><div class="pintat-label">In Stock</div></div>
   </div>
 
@@ -1029,7 +1029,7 @@
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn-ghost" onclick="openPinCharModal()">+ New Character</button>
         <button class="btn-ghost" onclick="openPinRestockModal()">+ Restock</button>
-        <button class="btn-primary" style="background:#0d9488" onclick="openPinSaleModal()">+ Log Sale</button>
+        <button class="btn-primary" onclick="openPinSaleModal()">+ Log Sale</button>
       </div>
     </div>
 
@@ -1126,7 +1126,7 @@
     <div class="field"><label>Notes (optional)</label><input type="text" id="pinNotes" placeholder="e.g. Card show, Whatnot, eBay"></div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closePinModal()">Cancel</button>
-      <button class="btn-primary" style="background:#0d9488" onclick="savePinSale()">Save Sale</button>
+      <button class="btn-primary" onclick="savePinSale()">Save Sale</button>
     </div>
   </div>
 </div>
@@ -1153,7 +1153,7 @@
     <div class="field"><label>Notes (optional)</label><input type="text" id="pinRestockNotes" placeholder="e.g. July vendor order"></div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closePinRestockModal()">Cancel</button>
-      <button class="btn-primary" style="background:#0d9488" onclick="savePinOrder()">Save Order</button>
+      <button class="btn-primary" onclick="savePinOrder()">Save Order</button>
     </div>
   </div>
 </div>
@@ -1174,7 +1174,7 @@
     <div class="field"><label>Notes (optional)</label><input type="text" id="pinCharNotes" placeholder="e.g. First batch of this character"></div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closePinCharModal()">Cancel</button>
-      <button class="btn-primary" style="background:#0d9488" onclick="savePinCharacter()">Add Character</button>
+      <button class="btn-primary" onclick="savePinCharacter()">Add Character</button>
     </div>
   </div>
 </div>
@@ -1712,8 +1712,8 @@ function renderThisMonthSnap() {
   const projected = dayOfMo > 0 ? rev / dayOfMo * daysInMo : 0;
   document.getElementById('thisMonthSnap').innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-      <div><div style="font-size:1.5rem;font-weight:600;color:var(--green)">${fmt$(rev)}</div><div style="font-size:0.75rem;color:var(--text2);margin-top:2px">Revenue (${moName})</div></div>
-      <div><div style="font-size:1.5rem;font-weight:600;color:var(--accent)">${fmt$(prof)}</div><div style="font-size:0.75rem;color:var(--text2);margin-top:2px">Profit (${moName})</div></div>
+      <div><div style="font-size:1.5rem;font-weight:600;color:var(--text)">${fmt$(rev)}</div><div style="font-size:0.75rem;color:var(--text2);margin-top:2px">Revenue (${moName})</div></div>
+      <div><div style="font-size:1.5rem;font-weight:600;color:var(--text)">${fmt$(prof)}</div><div style="font-size:0.75rem;color:var(--text2);margin-top:2px">Profit (${moName})</div></div>
     </div>
     <div style="font-size:.83rem;color:var(--text2);margin-bottom:6px"><strong style="color:var(--text)">${mo.length} orders</strong> in ${moName} so far (day ${dayOfMo} of ${daysInMo})</div>
     <div style="font-size:.83rem;color:${changeColor}">${changeSign}${pctChange}% vs ${lastName} (${fmt$(lrev)})</div>
@@ -1794,7 +1794,7 @@ function renderOrderTable() {
   const rows = pageOrders.map(o => {
     const profit   = o.salePrice - o.cogs;
     const roi      = (profit / o.cogs * 100).toFixed(1);
-    const roiColor = roi >= 80 ? 'var(--green)' : roi >= 70 ? 'var(--yellow)' : 'var(--text)';
+    const roiColor = roi < 0 ? 'var(--red)' : 'var(--text)';
     const pay      = o.payStatus     || 'paid';
     const fill     = o.fulfillStatus || 'completed';
     const payBadge  = `<span class="badge badge-${pay}"  title="Click to cycle" onclick="togglePayStatus('${o.id}')">${PAY_LABELS[pay]||pay}</span>`;
@@ -1808,9 +1808,9 @@ function renderOrderTable() {
       <td style="white-space:nowrap">${fmtDate(o.date)}</td>
       <td><strong>${esc(o.customer)}</strong></td>
       <td style="color:var(--text2);font-size:.78rem">${esc(o.product)}</td>
-      <td class="num green">${fmt$(o.salePrice)}</td>
+      <td class="num">${fmt$(o.salePrice)}</td>
       <td class="num" style="color:var(--text2)">${fmt$(o.cogs)}</td>
-      <td class="num" style="color:var(--accent)">${fmt$(profit)}</td>
+      <td class="num">${fmt$(profit)}</td>
       <td class="num" style="color:${roiColor}">${roi}%</td>
       <td style="font-size:.78rem;color:var(--text2)">${esc(o.referredBy||'—')}</td>
       <td style="font-size:.75rem;color:var(--text2);max-width:160px">${esc(o.notes||'')}</td>
@@ -1824,10 +1824,10 @@ function renderOrderTable() {
   // Summary footer row (always shows totals across all filtered orders)
   const footerRow = `<tr style="background:var(--surface2);font-weight:600">
     <td colspan="3" style="color:var(--text2)">Total — ${total} orders${pageCount > 1 ? ` (page ${orderPage+1}/${pageCount})` : ''}</td>
-    <td class="num green">${fmt$(totalRev)}</td>
+    <td class="num">${fmt$(totalRev)}</td>
     <td class="num" style="color:var(--text2)">${fmt$(totalCogs)}</td>
-    <td class="num" style="color:var(--accent)">${fmt$(totalProf)}</td>
-    <td class="num" style="color:var(--yellow)">${totalCogs ? (totalProf/totalCogs*100).toFixed(1) : '0.0'}%</td>
+    <td class="num">${fmt$(totalProf)}</td>
+    <td class="num">${totalCogs ? (totalProf/totalCogs*100).toFixed(1) : '0.0'}%</td>
     <td colspan="6"></td>
   </tr>`;
 
@@ -1930,8 +1930,8 @@ function renderCustomers() {
     return `<tr>
       <td><strong>${esc(name)}</strong></td>
       <td class="num">${d.orders}</td>
-      <td class="num green">${fmt$(d.revenue)}</td>
-      <td class="num" style="color:var(--accent)">${fmt$(d.profit)}</td>
+      <td class="num">${fmt$(d.revenue)}</td>
+      <td class="num">${fmt$(d.profit)}</td>
       <td class="num" style="color:var(--text2)">${fmt$(d.revenue/d.orders)}</td>
       <td style="font-size:.78rem;color:var(--text2)">${esc(d.referredBy||'—')}</td>
       <td style="font-size:.78rem;color:var(--text2)">${fmtDate(d.lastDate)}</td>
@@ -1961,9 +1961,9 @@ function renderProjections() {
     return `<tr>
       <td><strong style="color:${s.color}">${s.label}</strong></td>
       <td class="num">${s.sets}</td><td class="num">${fmt$(s.price)}</td>
-      <td class="num green">${fmt$(moRev)}</td><td class="num" style="color:var(--accent)">${fmt$(moProf)}</td>
-      <td class="num green">${fmt$(moRev*6)}</td><td class="num" style="color:var(--accent)">${fmt$(moProf*6)}</td>
-      <td class="num green">${fmt$(moRev*12)}</td>
+      <td class="num">${fmt$(moRev)}</td><td class="num">${fmt$(moProf)}</td>
+      <td class="num">${fmt$(moRev*6)}</td><td class="num">${fmt$(moProf*6)}</td>
+      <td class="num">${fmt$(moRev*12)}</td>
     </tr>`;
   }).join('');
 
@@ -2383,10 +2383,10 @@ function renderUnitsSold() {
     t.revenue += o.salePrice || 0;
   });
   const order = ['risers', ...saved.map(p => 'p:' + p.id), 'rentals', 'other', 'custom'];
-  const colors = { risers: 'var(--green)', custom: 'var(--yellow)', other: 'var(--text2)', rentals: 'var(--accent2)' };
+  const colors = { custom: 'var(--orange)', other: 'var(--text2)' };
   const tiles = order.filter(k => lines[k]).map(k => {
     const t = lines[k];
-    const col = colors[k] || 'var(--accent)';
+    const col = colors[k] || 'var(--text)';
     return `<div style="background:var(--surface2);border-radius:8px;padding:14px;text-align:center">
         <div style="font-size:2rem;font-weight:600;color:${col};line-height:1">${t.units}</div>
         <div style="font-size:0.75rem;color:var(--text2);margin-top:4px">${esc(t.label)} ${t.unit}</div>
@@ -2794,15 +2794,15 @@ function renderMonthlyGoal() {
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
           <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center">
-            <div style="font-size:1.1rem;font-weight:600;color:var(--green)">${fmt$(Math.max(0, goal - curRev))}</div>
+            <div style="font-size:1.1rem;font-weight:600;color:var(--text)">${fmt$(Math.max(0, goal - curRev))}</div>
             <div style="font-size:0.75rem;color:var(--text2);margin-top:2px;">Still Needed</div>
           </div>
           <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center">
-            <div style="font-size:1.1rem;font-weight:600;color:var(--accent)">${Math.ceil(Math.max(0, goal - curRev) / 90)}</div>
+            <div style="font-size:1.1rem;font-weight:600;color:var(--text)">${Math.ceil(Math.max(0, goal - curRev) / 90)}</div>
             <div style="font-size:0.75rem;color:var(--text2);margin-top:2px;">More Orders</div>
           </div>
           <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center">
-            <div style="font-size:1.1rem;font-weight:600;color:var(--accent2)">${streak}</div>
+            <div style="font-size:1.1rem;font-weight:600;color:var(--text)">${streak}</div>
             <div style="font-size:0.75rem;color:var(--text2);margin-top:2px;">Month Streak</div>
           </div>
         </div>
@@ -2877,19 +2877,19 @@ function renderInstalledBase() {
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:22px">
       <div style="background:var(--surface2);border-radius:8px;padding:14px;text-align:center">
-        <div style="font-size:2rem;font-weight:600;color:var(--green);line-height:1">${totalSets}</div>
+        <div style="font-size:2rem;font-weight:600;color:var(--text);line-height:1">${totalSets}</div>
         <div style="font-size:0.75rem;color:var(--text2);margin-top:4px">Sets in Field</div>
       </div>
       <div style="background:var(--surface2);border-radius:8px;padding:14px;text-align:center">
-        <div style="font-size:2rem;font-weight:600;color:var(--accent);line-height:1">${totalVendors}</div>
+        <div style="font-size:2rem;font-weight:600;color:var(--text);line-height:1">${totalVendors}</div>
         <div style="font-size:0.75rem;color:var(--text2);margin-top:4px">Vendors Using It</div>
       </div>
       <div style="background:var(--surface2);border-radius:8px;padding:14px;text-align:center">
-        <div style="font-size:2rem;font-weight:600;color:var(--accent2);line-height:1">${multiSet.length}</div>
+        <div style="font-size:2rem;font-weight:600;color:var(--text);line-height:1">${multiSet.length}</div>
         <div style="font-size:0.75rem;color:var(--text2);margin-top:4px">Multi-Set Vendors</div>
       </div>
       <div style="background:var(--surface2);border-radius:8px;padding:14px;text-align:center">
-        <div style="font-size:2rem;font-weight:600;color:var(--yellow);line-height:1">${singleSet.length}</div>
+        <div style="font-size:2rem;font-weight:600;color:var(--text);line-height:1">${singleSet.length}</div>
         <div style="font-size:0.75rem;color:var(--text2);margin-top:4px">Expansion Candidates</div>
       </div>
     </div>
@@ -2916,12 +2916,12 @@ function renderInstalledBase() {
       </div>
       <div style="background:var(--surface2);border-radius:8px;padding:12px">
         <div style="font-size:0.75rem;font-weight:600;color:var(--text2);margin-bottom:4px">Full Expansion Value</div>
-        <div style="font-size:1.2rem;font-weight:600;color:var(--yellow)">${fmt$(expansionRev)}</div>
+        <div style="font-size:1.2rem;font-weight:600;color:var(--text)">${fmt$(expansionRev)}</div>
         <div style="font-size:0.75rem;color:var(--text2);margin-top:2px">if every 1-set vendor buys a 2nd</div>
       </div>
       <div style="background:var(--surface2);border-radius:8px;padding:12px">
         <div style="font-size:0.75rem;font-weight:600;color:var(--text2);margin-bottom:4px">Replacement Potential</div>
-        <div style="font-size:1.2rem;font-weight:600;color:var(--accent2)">~${Math.round(totalSets * 0.02)}/mo</div>
+        <div style="font-size:1.2rem;font-weight:600;color:var(--text)">~${Math.round(totalSets * 0.02)}/mo</div>
         <div style="font-size:0.75rem;color:var(--text2);margin-top:2px">orders if ~2% of sets break monthly</div>
       </div>
     </div>`;
@@ -3006,7 +3006,7 @@ function renderFilament() {
     { val: fmt$(latestPR),         label: 'Latest Price / Roll',      sub: `was ${fmt$(firstPR)} at start (${savingPct > 0 ? '-'+savingPct+'%' : '+'+Math.abs(savingPct)+'%'})` },
     { val: (totalSpend / Math.max(totalRev,1) * 100).toFixed(1) + '%', label: 'Filament as % of Revenue', sub: `${fmt$(totalSpend)} of ${fmt$(totalRev)}` },
   ].map(k => `<div style="background:var(--surface);padding:16px 20px">
-    <div style="font-size:1.4rem;font-weight:600;color:var(--accent2)">${k.val}</div>
+    <div style="font-size:1.4rem;font-weight:600;color:var(--text)">${k.val}</div>
     <div style="font-size:0.75rem;color:var(--text2);margin-top:3px">${k.label}</div>
     <div style="font-size:0.75rem;color:var(--text2);margin-top:3px">${k.sub}</div>
   </div>`).join('');
@@ -3160,7 +3160,7 @@ function renderFilamentTable(items) {
     return `<tr style="${rowStyle}">
       <td style="white-space:nowrap">${fmtDate(f.date)}</td>
       <td class="num">${f.qty}</td>
-      <td class="num" style="color:var(--accent2)">${fmt$(f.total)}</td>
+      <td class="num">${fmt$(f.total)}</td>
       <td class="num" style="color:${isBad?'var(--red)':'var(--text)'};font-weight:${f.perRoll<11?'700':'400'}">${fmt$(f.perRoll)}</td>
       <td><span class="badge" style="background:var(--surface2);color:var(--text2)">${f.brand}</span></td>
       <td style="font-size:.75rem;color:${noteCol}">${esc(f.notes)||'—'}</td>
@@ -3171,7 +3171,7 @@ function renderFilamentTable(items) {
   document.getElementById('filamentTbody').innerHTML = rows + `<tr style="background:var(--surface2);font-weight:600">
     <td style="color:var(--text2)">Total — ${items.length} purchases</td>
     <td class="num">${totalRolls} rolls</td>
-    <td class="num" style="color:var(--accent2)">${fmt$(totalSpend)}</td>
+    <td class="num">${fmt$(totalSpend)}</td>
     <td class="num" style="color:var(--text2)">${totalRolls ? fmt$(totalSpend/totalRolls) + ' avg' : '—'}</td>
     <td colspan="2"></td>
   </tr>`;
@@ -3364,7 +3364,7 @@ function renderExpTable() {
       <td><div style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0"></span><strong>${esc(e.description)}</strong></div></td>
       <td><span style="font-size:.75rem;color:${color};font-weight:600">${esc(e.category)}</span></td>
       <td><span class="badge ${e.type==='fixed'?'badge-blue':'badge-yellow'}">${e.type}</span></td>
-      <td class="num" style="color:var(--red)">${fmt$(e.amount)}</td>
+      <td class="num">${fmt$(e.amount)}</td>
       <td style="text-align:right;white-space:nowrap">
         <button class="icon-btn" onclick="openExpModal('${e.id}')">✏️</button>
         <button class="icon-btn" onclick="deleteExpense('${e.id}')">✕</button>
@@ -3374,7 +3374,7 @@ function renderExpTable() {
   document.getElementById('expTbody').innerHTML = rows + (exps.length
     ? `<tr style="background:var(--surface2);font-weight:600">
         <td colspan="4" style="color:var(--text2)">Total — ${exps.length} expense${exps.length!==1?'s':''}</td>
-        <td class="num" style="color:var(--red)">${fmt$(total)}</td><td></td>
+        <td class="num">${fmt$(total)}</td><td></td>
       </tr>`
     : '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:40px">No expenses yet. Click "+ Add Expense" to start.</td></tr>');
 }
@@ -3398,13 +3398,13 @@ function renderExpByCategory() {
   document.getElementById('expCatGrid').innerHTML = sorted.map(([cat, d]) => {
     if (d.total === 0) return '';
     const pct = grandTotal > 0 ? (d.total/grandTotal*100).toFixed(1) : 0;
-    return `<div class="card" style="border-left:3px solid ${d.color}">
+    return `<div class="card">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
         <span style="width:10px;height:10px;border-radius:50%;background:${d.color};flex-shrink:0"></span>
         <span style="font-size:.85rem;font-weight:600;flex:1">${esc(cat)}</span>
         <span class="badge ${d.type==='fixed'?'badge-blue':'badge-yellow'}">${d.type}</span>
       </div>
-      <div style="font-size:1.4rem;font-weight:600;color:${d.color}">${fmt$(d.total)}</div>
+      <div style="font-size:1.4rem;font-weight:600;color:var(--text)">${fmt$(d.total)}</div>
       <div style="font-size:0.75rem;color:var(--text2);margin-top:4px">${d.count} entry${d.count!==1?'s':''} · ${pct}% of total</div>
       <div style="background:var(--surface2);border-radius:99px;height:4px;margin-top:10px">
         <div style="width:${pct}%;background:${d.color};border-radius:99px;height:4px;opacity:.85"></div>
@@ -3427,12 +3427,12 @@ function renderExpVsRevenue() {
     const exp   = expMonthly[mk] || 0;
     const net   = gross - exp;
     const margin = rev > 0 ? (net/rev*100).toFixed(1) : '—';
-    const netColor = net >= 0 ? 'var(--green)' : 'var(--red)';
+    const netColor = net >= 0 ? 'var(--text)' : 'var(--red)';
     return `<tr>
       <td style="font-weight:600">${monthLabel(mk)}</td>
-      <td class="num green">${fmt$(rev)}</td>
-      <td class="num" style="color:var(--accent)">${fmt$(gross)}</td>
-      <td class="num" style="color:var(--red)">${exp > 0 ? fmt$(exp) : '—'}</td>
+      <td class="num">${fmt$(rev)}</td>
+      <td class="num">${fmt$(gross)}</td>
+      <td class="num">${exp > 0 ? fmt$(exp) : '—'}</td>
       <td class="num" style="color:${netColor}">${fmt$(net)}</td>
       <td class="num" style="color:${netColor}">${margin !== '—' ? margin + '%' : '—'}</td>
     </tr>`;
@@ -3450,9 +3450,9 @@ function renderExpVsRevenue() {
     <tbody>${rows}
     <tr style="background:var(--surface2);font-weight:600">
       <td>All Time</td>
-      <td class="num green">${fmt$(totRev)}</td>
-      <td class="num" style="color:var(--accent)">${fmt$(totGross)}</td>
-      <td class="num" style="color:var(--red)">${fmt$(totExp)}</td>
+      <td class="num">${fmt$(totRev)}</td>
+      <td class="num">${fmt$(totGross)}</td>
+      <td class="num">${fmt$(totExp)}</td>
       <td class="num" style="color:${totNet>=0?'var(--green)':'var(--red)'}">${fmt$(totNet)}</td>
       <td class="num" style="color:${totNet>=0?'var(--green)':'var(--red)'}">${totRev>0?(totNet/totRev*100).toFixed(1)+'%':'—'}</td>
     </tr></tbody>
@@ -3762,7 +3762,7 @@ function renderJtStatBar() {
   const t = jtTotals();
   document.getElementById('jtRevenue').textContent   = fmt$(t.revenue);
   document.getElementById('jtProfit').textContent    = fmt$(t.profit);
-  document.getElementById('jtProfit').style.color    = t.profit >= 0 ? 'var(--accent)' : 'var(--red)';
+  document.getElementById('jtProfit').style.color    = t.profit >= 0 ? '' : 'var(--red)';
   const marginEl = document.getElementById('jtMargin');
   marginEl.textContent  = t.revenue > 0 ? t.margin.toFixed(1) + '%' : '—';
   marginEl.style.color  = t.margin >= 60 ? 'var(--green)' : t.margin >= 40 ? 'var(--yellow)' : 'var(--red)';
@@ -3791,7 +3791,7 @@ function renderJtInventoryGrid() {
     const barCls    = left === 0 ? 'sold-out' : left <= 2 ? 'low' : '';
     const numCol    = left === 0 ? 'color:var(--red)' : left <= 2 ? 'color:var(--yellow)' : 'color:var(--green)';
     const breakdown = restocked > 0
-      ? `<div style="font-size:0.75rem;color:#bf5af2">↺ ${base} original + ${restocked} reordered</div>`
+      ? `<div style="font-size:0.75rem;color:var(--text2)">↺ ${base} original + ${restocked} reordered</div>`
       : '';
     return `<div class="jt-card">
       <div class="jt-name">${esc(c.name)}</div>
@@ -3824,7 +3824,7 @@ function renderJtSalesLog() {
       <td>${fmtDate(s.date)}</td>
       <td>${esc(chars || '—')}</td>
       <td class="num">${s.qty}</td>
-      <td class="num green">${fmt$(s.revenue)}</td>
+      <td class="num">${fmt$(s.revenue)}</td>
       <td class="num" style="color:var(--text2)">${fmt$(cogs)}</td>
       <td class="num" style="color:${profit>=0?'var(--accent)':'var(--red)'}">${fmt$(profit)}</td>
       <td style="color:var(--text2);font-size:0.78rem">${esc(s.notes||'')}</td>
@@ -3851,7 +3851,7 @@ function renderJtTopSellers() {
     const pct = (c.sold / max * 100).toFixed(0);
     const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉'
       : `<span style="display:inline-block;width:18px;text-align:center;font-size:0.75rem;color:var(--text2);font-weight:600">${i+1}</span>`;
-    const barColor = i === 0 ? '#f59e0b' : i === 1 ? '#a1a1a6' : i === 2 ? '#cd7f32' : '#8b5cf6';
+    const barColor = i === 0 ? '#f59e0b' : i === 1 ? '#a1a1a6' : i === 2 ? '#cd7f32' : 'var(--accent)';
     return `<div style="margin-bottom:11px">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
         <span style="font-size:.83rem;font-weight:600;display:flex;align-items:center;gap:5px">${medal} ${esc(c.name)}</span>
@@ -3928,7 +3928,7 @@ function renderJtOrderHistory() {
   tbody.innerHTML = rows.map(r => {
     const type = r.kind === 'original' ? badge('var(--surface2)', 'var(--text2)', '📦 Original')
       : r.kind === 'new' ? badge('rgba(48, 209, 88,0.12)', 'var(--green)', '🆕 New character')
-      : badge('rgba(139,92,246,0.14)', '#bf5af2', '↺ Reorder');
+      : badge('var(--orange-tint)', 'var(--orange)', '↺ Reorder');
     const costTxt = r.cost != null ? fmt$(r.cost) : '—';
     const unitTxt = (r.cost != null && r.qty > 0) ? fmt$(r.cost / r.qty) : '—';
     const del = r.kind === 'restock'
@@ -4309,7 +4309,7 @@ function renderPinStatBar() {
   const t = pinTotals();
   document.getElementById('pinRevenue').textContent   = fmt$(t.revenue);
   document.getElementById('pinProfit').textContent    = fmt$(t.profit);
-  document.getElementById('pinProfit').style.color    = t.profit >= 0 ? '#2dd4bf' : 'var(--red)';
+  document.getElementById('pinProfit').style.color    = t.profit >= 0 ? '' : 'var(--red)';
   const marginEl = document.getElementById('pinMargin');
   marginEl.textContent  = t.revenue > 0 ? t.margin.toFixed(1) + '%' : '—';
   marginEl.style.color  = t.margin >= 60 ? 'var(--green)' : t.margin >= 40 ? 'var(--yellow)' : 'var(--red)';
@@ -4338,7 +4338,7 @@ function renderPinInventoryGrid() {
     const barCls    = left === 0 ? 'sold-out' : left <= 3 ? 'low' : '';
     const numCol    = left === 0 ? 'color:var(--red)' : left <= 3 ? 'color:var(--yellow)' : 'color:var(--green)';
     const breakdown = restocked > 0
-      ? `<div style="font-size:0.75rem;color:#2dd4bf">↺ ${base} original + ${restocked} reordered</div>`
+      ? `<div style="font-size:0.75rem;color:var(--text2)">↺ ${base} original + ${restocked} reordered</div>`
       : '';
     return `<div class="pin-card">
       <div class="pin-name">${esc(c.name)}</div>
@@ -4371,9 +4371,9 @@ function renderPinSalesLog() {
       <td>${fmtDate(s.date)}</td>
       <td>${esc(chars || '—')}</td>
       <td class="num">${s.qty}</td>
-      <td class="num green">${fmt$(s.revenue)}</td>
+      <td class="num">${fmt$(s.revenue)}</td>
       <td class="num" style="color:var(--text2)">${fmt$(cogs)}</td>
-      <td class="num" style="color:${profit>=0?'#2dd4bf':'var(--red)'}">${fmt$(profit)}</td>
+      <td class="num" style="color:${profit>=0?'var(--text)':'var(--red)'}">${fmt$(profit)}</td>
       <td style="color:var(--text2);font-size:0.78rem">${esc(s.notes||'')}</td>
       <td><button class="icon-btn" onclick="deletePinSale('${s.id}')" title="Delete">✕</button></td>
     </tr>`;
@@ -4398,7 +4398,7 @@ function renderPinTopSellers() {
     const pct = (c.sold / max * 100).toFixed(0);
     const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉'
       : `<span style="display:inline-block;width:18px;text-align:center;font-size:0.75rem;color:var(--text2);font-weight:600">${i+1}</span>`;
-    const barColor = i === 0 ? '#f59e0b' : i === 1 ? '#a1a1a6' : i === 2 ? '#cd7f32' : '#2dd4bf';
+    const barColor = i === 0 ? '#f59e0b' : i === 1 ? '#a1a1a6' : i === 2 ? '#cd7f32' : 'var(--accent)';
     return `<div style="margin-bottom:11px">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
         <span style="font-size:.83rem;font-weight:600;display:flex;align-items:center;gap:5px">${medal} ${esc(c.name)}</span>
@@ -4475,7 +4475,7 @@ function renderPinOrderHistory() {
   tbody.innerHTML = rows.map(r => {
     const type = r.kind === 'original' ? badge('var(--surface2)', 'var(--text2)', '📦 Original')
       : r.kind === 'new' ? badge('rgba(48, 209, 88,0.12)', 'var(--green)', '🆕 New character')
-      : badge('rgba(45,212,191,0.14)', '#2dd4bf', '↺ Reorder');
+      : badge('var(--orange-tint)', 'var(--orange)', '↺ Reorder');
     const costTxt = r.cost != null ? fmt$(r.cost) : '—';
     const unitTxt = (r.cost != null && r.qty > 0) ? fmt$(r.cost / r.qty) : '—';
     const del = r.kind === 'restock'
@@ -4567,7 +4567,7 @@ function pinUpdateRevPreview() {
     preview.style.display = 'block';
     preview.innerHTML = `<strong style="color:var(--text)">Preview:</strong>
       ${qty} pin${qty>1?'s':''} × ${fmt$(price)} = <strong style="color:var(--green)">${fmt$(revenue)}</strong>
-      &nbsp;·&nbsp; COGS ${fmt$(cogs)} &nbsp;·&nbsp; Profit <strong style="color:#2dd4bf">${fmt$(profit)}</strong>`;
+      &nbsp;·&nbsp; COGS ${fmt$(cogs)} &nbsp;·&nbsp; Profit <strong>${fmt$(profit)}</strong>`;
   } else { preview.style.display = 'none'; }
 }
 
@@ -4809,11 +4809,11 @@ function catSectionHtml(cat) {
   return `<div class="section" id="section-cat-${cat.id}" data-cat="${cat.id}">
   <div class="pin-stat-bar">
     <div class="pintat"><div class="pintat-num green" data-hook="revenue">$0.00</div><div class="pintat-label">Revenue</div></div>
-    <div class="pintat"><div class="pintat-num" style="color:${color}" data-hook="profit">$0.00</div><div class="pintat-label">Gross Profit</div></div>
-    <div class="pintat"><div class="pintat-num" style="color:var(--yellow)" data-hook="margin">—</div><div class="pintat-label">Gross Margin</div></div>
+    <div class="pintat"><div class="pintat-num" data-hook="profit">$0.00</div><div class="pintat-label">Gross Profit</div></div>
+    <div class="pintat"><div class="pintat-num" data-hook="margin">—</div><div class="pintat-label">Gross Margin</div></div>
     <div class="pintat"><div class="pintat-num" style="color:var(--text2)" data-hook="cogs">$0.00</div><div class="pintat-label">COGS</div></div>
     <div class="pintat"><div class="pintat-num" style="color:var(--text2)" data-hook="invcost">$0.00</div><div class="pintat-label" data-hook="invcostlabel">Inventory Cost</div></div>
-    <div class="pintat"><div class="pintat-num" style="color:var(--accent2)" data-hook="sold">0</div><div class="pintat-label">${esc(catCap(catPlural(cat, 2)))} Sold</div></div>
+    <div class="pintat"><div class="pintat-num" data-hook="sold">0</div><div class="pintat-label">${esc(catCap(catPlural(cat, 2)))} Sold</div></div>
     <div class="pintat"><div class="pintat-num" data-hook="remaining">0</div><div class="pintat-label">In Stock</div></div>
   </div>
   <main>
@@ -4826,7 +4826,7 @@ function catSectionHtml(cat) {
         <button class="btn-ghost" onclick="openCatModal('${cat.id}')" title="Rename, restyle, or delete this category">✎ Edit</button>
         <button class="btn-ghost" onclick="openCatItemModal('${cat.id}')">+ New Item</button>
         <button class="btn-ghost" onclick="openCatOrderModal('${cat.id}')">+ Restock</button>
-        <button class="btn-primary" style="background:${color}" onclick="openCatSaleModal('${cat.id}')">+ Log Sale</button>
+        <button class="btn-primary" onclick="openCatSaleModal('${cat.id}')">+ Log Sale</button>
       </div>
     </div>
     <div class="grid-2" style="margin-bottom:20px">
@@ -4902,7 +4902,7 @@ function renderCatSection(catId) {
   const color = catAccent(cat), unit = catUnit(cat);
   q('revenue').textContent = fmt$(t.revenue);
   q('profit').textContent  = fmt$(t.profit);
-  q('profit').style.color  = t.profit >= 0 ? color : 'var(--red)';
+  q('profit').style.color  = t.profit >= 0 ? '' : 'var(--red)';
   const margin = t.revenue > 0 ? (t.profit / t.revenue * 100) : 0;
   q('margin').textContent = t.revenue > 0 ? margin.toFixed(1) + '%' : '—';
   q('margin').style.color = margin >= 60 ? 'var(--green)' : margin >= 40 ? 'var(--yellow)' : 'var(--red)';
@@ -4935,7 +4935,7 @@ function renderCatInvGrid(cat, t, el) {
     const barCls = s.left === 0 ? 'sold-out' : s.left <= 3 ? 'low' : '';
     const numCol = s.left === 0 ? 'color:var(--red)' : s.left <= 3 ? 'color:var(--yellow)' : 'color:var(--green)';
     const breakdown = restocked > 0
-      ? `<div style="font-size:0.75rem;color:${catAccent(cat)}">↺ ${base} original + ${restocked} reordered</div>`
+      ? `<div style="font-size:0.75rem;color:var(--text2)">↺ ${base} original + ${restocked} reordered</div>`
       : '';
     return `<div class="pin-card">
       <div class="pin-name">${esc(s.name)}</div>
@@ -4973,7 +4973,7 @@ function renderCatOrderHistory(cat, tbody) {
   tbody.innerHTML = rows.map(r => {
     const type = r.kind === 'new'
       ? badge('rgba(48, 209, 88,0.12)', 'var(--green)', '🆕 New item')
-      : badge(hexRgba(color, 0.14), color, '↺ Reorder');
+      : badge('var(--orange-tint)', 'var(--orange)', '↺ Reorder');
     const costTxt = r.cost != null ? fmt$(r.cost) : '—';
     const unitTxt = (r.cost != null && r.qty > 0) ? fmt$(r.cost / r.qty) : '—';
     const del = r.kind === 'restock'
@@ -5009,9 +5009,9 @@ function renderCatSalesLog(cat, t, tbody) {
       <td>${fmtDate(s.date)}</td>
       <td>${esc(items || '—')}</td>
       <td class="num">${s.qty}</td>
-      <td class="num green">${fmt$(s.revenue)}</td>
+      <td class="num">${fmt$(s.revenue)}</td>
       <td class="num" style="color:var(--text2)">${fmt$(cogs)}</td>
-      <td class="num" style="color:${profit >= 0 ? color : 'var(--red)'}">${fmt$(profit)}</td>
+      <td class="num" style="color:${profit >= 0 ? 'var(--text)' : 'var(--red)'}">${fmt$(profit)}</td>
       <td style="color:var(--text2);font-size:0.78rem">${esc(s.notes || '')}</td>
       <td><button class="icon-btn" onclick="deleteCatSale('${cat.id}','${s.id}')" title="Delete">✕</button></td>
     </tr>`;
@@ -5152,7 +5152,6 @@ function openCatItemModal(catId) {
   document.getElementById('ciQty').value   = 10;
   document.getElementById('ciCost').value  = '';
   document.getElementById('ciNotes').value = '';
-  document.getElementById('ciSave').style.background = catAccent(cat);
   document.getElementById('catItemModal').classList.add('open');
 }
 
@@ -5191,7 +5190,6 @@ function openCatOrderModal(catId) {
   document.getElementById('coCost').value  = '';
   document.getElementById('coNotes').value = '';
   document.getElementById('coNewItems').innerHTML = '';
-  document.getElementById('coSave').style.background = catAccent(cat);
   document.getElementById('coQtyGrid').innerHTML = t.stock.length ? t.stock.map(s => {
     const leftCol = s.left === 0 ? 'var(--red)' : s.left <= 3 ? 'var(--yellow)' : 'var(--text2)';
     return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px">
@@ -5309,7 +5307,6 @@ function openCatSaleModal(catId) {
   document.getElementById('csPrice').value = cat.sellPrice != null ? (+cat.sellPrice).toFixed(2) : '';
   document.getElementById('csNotes').value = '';
   document.getElementById('csPriceLabel').textContent = `Sale Price per ${catCap(catUnit(cat))} ($)`;
-  document.getElementById('csSave').style.background = catAccent(cat);
   document.getElementById('csItemSelect').innerHTML = t.stock.length ? t.stock.map(s => {
     const disabled = s.left <= 0 ? 'style="opacity:0.4;pointer-events:none"' : '';
     return `<div class="pin-char-btn" data-itemid="${s.id}" onclick="catToggleItem(this)" ${disabled}>
@@ -5335,7 +5332,7 @@ function catUpdateRevPreview() {
     preview.style.display = 'block';
     preview.innerHTML = `<strong style="color:var(--text)">Preview:</strong>
       ${qty} ${esc(catPlural(cat, qty))} × ${fmt$(price)} = <strong style="color:var(--green)">${fmt$(revenue)}</strong>
-      &nbsp;·&nbsp; COGS ${fmt$(cogs)} &nbsp;·&nbsp; Profit <strong style="color:${catAccent(cat)}">${fmt$(profit)}</strong>`;
+      &nbsp;·&nbsp; COGS ${fmt$(cogs)} &nbsp;·&nbsp; Profit <strong>${fmt$(profit)}</strong>`;
   } else { preview.style.display = 'none'; }
 }
 

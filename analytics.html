@@ -16,7 +16,7 @@
   body { min-height: 100vh; }
 
   .brand { font-size: 1.05rem; font-weight: 600; }
-  .brand span { color: var(--accent); }
+  .brand span { color: inherit; }
 
   .tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 32px; background: var(--surface); position: sticky; top: 98px; z-index: 150; }
   .tab { padding: 14px 20px; font-size: 0.84rem; font-weight: 600; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; user-select: none; }
@@ -349,7 +349,7 @@ function switchTab(id) {
 function kpiStrip(id, items) {
   $(id).innerHTML = items.map(i => `
     <div class="kpi">
-      <div class="kpi-val" style="color:${i.color||'var(--text)'}">${i.val}</div>
+      <div class="kpi-val">${i.val}</div>
       <div class="kpi-label">${i.label}</div>
       ${i.sub ? `<div class="kpi-sub" style="color:var(--text2)">${i.sub}</div>` : ''}
     </div>`).join('');
@@ -459,8 +459,8 @@ function renderMargins() {
       <td>${name}</td>
       <td class="num">${d.units}</td>
       <td class="num">${fmt(d.rev)}</td>
-      <td class="num" style="color:var(--red)">${fmt(d.cogs)}</td>
-      <td class="num" style="color:var(--green)">${fmt(profit)}</td>
+      <td class="num">${fmt(d.cogs)}</td>
+      <td class="num"${profit < 0 ? ' style="color:var(--red)"' : ''}>${fmt(profit)}</td>
       <td class="num">
         <span style="color:${clr(m)}">${m.toFixed(1)}%</span>
         <span class="margin-bar-wrap"><span class="margin-bar" style="width:${barW}%;background:${clr(m)}"></span></span>
@@ -681,7 +681,7 @@ function renderTrends() {
       <div style="flex:1">
         <div style="font-size:0.82rem;font-weight:600">${esc(n)}</div>
         <div style="background:var(--surface2);border-radius:3px;height:4px;margin-top:4px">
-          <div style="background:var(--accent2);width:${(r/maxProd*100).toFixed(0)}%;height:4px;border-radius:3px"></div>
+          <div style="background:var(--accent);width:${(r/maxProd*100).toFixed(0)}%;height:4px;border-radius:3px"></div>
         </div>
       </div>
       <span style="font-size:0.82rem;font-weight:600;color:var(--accent2)">${fmt(r)}</span>

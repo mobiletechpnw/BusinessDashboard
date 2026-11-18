@@ -21,7 +21,7 @@ body { display:block; overflow-x:hidden; }
 /* HEADER */
 header { background:var(--surface); border-bottom:1px solid var(--border); padding:0 24px; display:flex; align-items:center; justify-content:space-between; height:54px; flex-shrink:0; z-index:100; gap:12px; }
 .brand { font-size:1rem; font-weight:600; letter-spacing:-.3px; white-space:nowrap; }
-.brand span { color:var(--accent); }
+.brand span { color: inherit; }
 .header-right { display:flex; align-items:center; gap:8px; }
 .btn-primary { background:var(--accent-fill); color:#fff; border:none; border-radius:999px; padding:7px 16px; font-size:.8rem; font-weight:600; cursor:pointer; transition:all .2s; white-space:nowrap; box-shadow:none; }
 .btn-primary:hover { opacity:.9; transform:translateY(-1px); box-shadow:none; }
@@ -280,9 +280,9 @@ main { padding:0 0 24px; }
 <div class="stat-bar">
   <div class="stat-cell"><div class="stat-val" id="st-events">0</div><div class="stat-lbl">Events</div></div>
   <div class="stat-cell"><div class="stat-val" id="st-vendors">0</div><div class="stat-lbl">Vendors</div></div>
-  <div class="stat-cell"><div class="stat-val" style="color:var(--accent)" id="st-booked">0</div><div class="stat-lbl">Tables Booked</div></div>
-  <div class="stat-cell"><div class="stat-val" style="color:var(--green)" id="st-collected">$0</div><div class="stat-lbl">Collected</div></div>
-  <div class="stat-cell"><div class="stat-val" style="color:var(--yellow)" id="st-outstanding">$0</div><div class="stat-lbl">Outstanding</div></div>
+  <div class="stat-cell"><div class="stat-val" id="st-booked">0</div><div class="stat-lbl">Tables Booked</div></div>
+  <div class="stat-cell"><div class="stat-val" id="st-collected">$0</div><div class="stat-lbl">Collected</div></div>
+  <div class="stat-cell"><div class="stat-val" id="st-outstanding">$0</div><div class="stat-lbl">Outstanding</div></div>
 </div>
 
 <div class="ev-tab-bar">
@@ -1269,11 +1269,11 @@ function renderROI() {
   const totalRoi = totalTableCost > 0 ? ((totalNet / totalTableCost) * 100).toFixed(0) + '%' : '—';
   roiKpis.innerHTML = [
     { val: events.length, label: 'Events', color: 'var(--text)' },
-    { val: fmtMoney(totalTableCost), label: 'Table & Booth Costs', color: 'var(--red)' },
-    { val: fmtMoney(totalRevenue), label: 'Total Revenue', color: 'var(--accent)' },
-    { val: fmtMoney(totalNet), label: 'Net After Costs', color: totalNet >= 0 ? 'var(--green)' : 'var(--red)' },
+    { val: fmtMoney(totalTableCost), label: 'Table & Booth Costs', color: 'var(--text)' },
+    { val: fmtMoney(totalRevenue), label: 'Total Revenue', color: 'var(--text)' },
+    { val: fmtMoney(totalNet), label: 'Net After Costs', color: totalNet >= 0 ? 'var(--text)' : 'var(--red)' },
     // A name, not a number: smaller and on one line, full name on hover.
-    { val: esc(bestName), label: 'Best Event (net)', color: 'var(--accent2)',
+    { val: esc(bestName), label: 'Best Event (net)', color: 'var(--text)',
       style: 'font-size:.95rem;line-height:1.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis', title: bestName },
   ].map(k => `
     <div class="kpi">

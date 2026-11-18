@@ -20,7 +20,7 @@ body{min-height:100vh;}
 /* HEADER */
 header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;justify-content:space-between;min-height:58px;position:sticky;top:0;z-index:100;gap:12px;flex-wrap:wrap;}
 .brand{font-size:1rem;font-weight:600;letter-spacing:-0.3px;white-space:nowrap;}
-.brand span{color:var(--accent);}
+.brand span { color: inherit; }
 .header-tabs{display:flex;align-items:stretch;gap:0;}
 .h-tab{padding:0 18px;font-size:0.82rem;font-weight:600;color:var(--text2);cursor:pointer;border-bottom:3px solid transparent;transition:all .15s;display:flex;align-items:center;min-height:58px;}
 .h-tab:hover{color:var(--text);}
@@ -251,10 +251,10 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
 <!-- STAT BAR -->
 <div class="stat-bar">
   <div class="stat-cell"><div class="stat-val" id="st-total">0</div><div class="stat-lbl">Total Planned</div></div>
-  <div class="stat-cell"><div class="stat-val" style="color:var(--yellow)" id="st-ready">0</div><div class="stat-lbl">Ready to Post</div></div>
-  <div class="stat-cell"><div class="stat-val" style="color:var(--green)" id="st-scheduled">0</div><div class="stat-lbl">Scheduled</div></div>
-  <div class="stat-cell"><div class="stat-val" style="color:var(--accent)" id="st-posted">0</div><div class="stat-lbl">Posted This Month</div></div>
-  <div class="stat-cell"><div class="stat-val" style="color:var(--accent2)" id="st-week">0</div><div class="stat-lbl">This Week</div></div>
+  <div class="stat-cell"><div class="stat-val" id="st-ready">0</div><div class="stat-lbl">Ready to Post</div></div>
+  <div class="stat-cell"><div class="stat-val" id="st-scheduled">0</div><div class="stat-lbl">Scheduled</div></div>
+  <div class="stat-cell"><div class="stat-val" id="st-posted">0</div><div class="stat-lbl">Posted This Month</div></div>
+  <div class="stat-cell"><div class="stat-val" id="st-week">0</div><div class="stat-lbl">This Week</div></div>
 </div>
 
 <main>
