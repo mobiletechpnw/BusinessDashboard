@@ -65,8 +65,8 @@
     border-radius: 12px; padding: 9px 18px; font-size: 0.8rem; font-weight: 600;
     cursor: pointer; transition: all 0.15s; font-family: inherit;
   }
-  .gtab:hover { color: var(--text); border-color: rgba(191, 90, 242,0.4); }
-  .gtab.active { background: rgba(191, 90, 242,0.12); border-color: rgba(191, 90, 242,0.45); color: var(--accent2); }
+  .gtab:hover { color: var(--text); }
+  .gtab.active { background: var(--accent-tint); border-color: transparent; color: var(--accent); }
 
   /* ── Academy: belts & lessons ── */
   .belt-section { margin-bottom: 30px; }
@@ -139,12 +139,12 @@
   .tool-why { font-size: 0.75rem; color: var(--text2); line-height: 1.55; margin-bottom: 14px; }
   .tool-card .field { margin-bottom: 10px; }
   .tool-result {
-    background: rgba(191, 90, 242,0.07); border: 1px solid rgba(191, 90, 242,0.22);
+    background: var(--surface2); border: 1px solid transparent;
     border-radius: 12px; padding: 12px 14px; margin-top: 12px;
     font-size: 0.8rem; line-height: 1.7; color: var(--text2);
   }
   .tool-result b { color: var(--text); font-size: 0.95rem; }
-  .tool-result .big { font-size: 1.25rem; font-weight: 700; color: var(--accent2); letter-spacing: -0.5px; }
+  .tool-result .big { font-size: 1.25rem; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
 
   .sub-table { width: 100%; font-size: 0.78rem; }
   .sub-table td { padding: 7px 4px; }
@@ -175,10 +175,10 @@
   .lm-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
   .lm-action-link {
     display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
-    background: rgba(191, 90, 242,0.1); border: 1px solid rgba(191, 90, 242,0.3); color: var(--accent2);
+    background: var(--accent-tint); border: 1px solid transparent; color: var(--accent);
     border-radius: 12px; padding: 9px 16px; font-size: 0.78rem; font-weight: 600; transition: all 0.15s;
   }
-  .lm-action-link:hover { background: rgba(191, 90, 242,0.18); }
+  .lm-action-link:hover { background: var(--accent-fill); color: var(--on-accent); }
   .btn-complete { background: var(--green); color: #07211a; font-weight: 600; }
   .btn-complete.is-done { background: rgba(48, 209, 88,0.15); color: var(--green); border: 1px solid rgba(48, 209, 88,0.35); cursor: default; }
 
@@ -201,8 +201,8 @@
     display: flex; flex-direction: column;
   }
   .nw-chart-head { display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; font-weight: 600; color: var(--text2); margin-bottom: 8px; }
-  .btn-snapshot { background: rgba(191, 90, 242,0.1); border: 1px solid rgba(191, 90, 242,0.3); color: var(--accent2); border-radius: 999px; padding: 5px 12px; font-size: 0.75rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
-  .btn-snapshot:hover { background: rgba(191, 90, 242,0.2); }
+  .btn-snapshot { background: var(--accent-tint); border: 1px solid transparent; color: var(--accent); border-radius: 999px; padding: 5px 12px; font-size: 0.75rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .btn-snapshot:hover { background: var(--accent-fill); color: var(--on-accent); }
   #nw-chart { width: 100%; height: 130px; display: block; flex: 1; }
   .nw-chart-hint { font-size: 0.75rem; color: var(--text2); text-align: center; margin-top: 6px; }
 
@@ -262,10 +262,10 @@
   .rr-delta { font-size: 0.8rem; font-weight: 600; white-space: nowrap; min-width: 78px; text-align: right; }
   .rr-delta.up { color: var(--green); } .rr-delta.down { color: var(--red); } .rr-delta.flat { color: var(--text2); }
   .report-pace {
-    margin-top: 18px; background: linear-gradient(160deg, rgba(191, 90, 242,0.06) 0%, rgba(255,255,255,0.01) 100%);
-    border: 1px solid rgba(191, 90, 242,0.18); border-radius: 12px; padding: 16px 18px;
+    margin-top: 18px; background: var(--surface2);
+    border: 1px solid transparent; border-radius: 12px; padding: 16px 18px;
   }
-  .report-pace h4 { font-size: 0.75rem; color: var(--accent2); margin-bottom: 12px; }
+  .report-pace h4 { font-size: 0.75rem; color: var(--text2); margin-bottom: 12px; }
   .pace-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 14px; }
   .pace-val { font-size: 1.1rem; font-weight: 600; font-variant-numeric: tabular-nums; }
   .pace-lbl { font-size: 0.75rem; color: var(--text2); margin-top: 3px; }
