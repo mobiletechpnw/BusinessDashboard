@@ -102,6 +102,9 @@ const NAV_ICONS = {
   signout: '<path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="m15 16 4-4-4-4M19 12H9"/>',
   chevrons: '<path d="m8 9 4-4 4 4M8 15l4 4 4-4"/>',
   chevron: '<path d="m9 6 6 6-6 6"/>',
+  pencil: '<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="m13.5 6.5 4 4"/>',
+  check: '<path d="m5 12.5 4.5 4.5L19 7"/>',
+  trash: '<path d="M4 7h16M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13M9 7V4h6v3"/>',
   close: '<path d="M6 6l12 12M18 6 6 18"/>',
 };
 
@@ -385,7 +388,7 @@ document.addEventListener('click', (e) => {
 // instead of a choice; `header` adds a line of context above the items.
 let _vpcMenuClose = null;
 let _vpcMenuAnchor = null;
-window.vpcMenu = function (anchor, { label, options, current, onSelect, header, matchWidth }) {
+window.vpcMenu = function (anchor, { label, options, current, onSelect, header, matchWidth, at }) {
   if (_vpcMenuClose) {
     // A second click on the button that opened the menu closes it.
     const same = _vpcMenuAnchor === anchor;
@@ -412,7 +415,10 @@ window.vpcMenu = function (anchor, { label, options, current, onSelect, header, 
       .join('');
   document.body.appendChild(menu);
 
-  const r = anchor.getBoundingClientRect();
+  // `at` ({ x, y }) opens the menu at the pointer, as a context menu.
+  const r = at
+    ? { left: at.x, right: at.x, top: at.y, bottom: at.y, width: 0 }
+    : anchor.getBoundingClientRect();
   if (matchWidth) menu.style.minWidth = r.width + 'px';
   const left = Math.min(Math.max(8, r.left), window.innerWidth - menu.offsetWidth - 8);
   let top = r.bottom + 6;

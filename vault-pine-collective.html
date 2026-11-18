@@ -96,7 +96,36 @@
 
   /* ── Search / filter ── */
   .toolbar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
-  .search-input { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 8px 14px; font-size: 0.82rem; outline: none; width: 240px; }
+
+  /* ── Orders: filters, an 8-column table, list rows on phones, a details sheet ── */
+  .orders-toolbar .search-input { flex: 1; min-width: 200px; }
+  .month-select { background: var(--fill); border: none; border-radius: var(--r-md); color: var(--text); padding: 8px 12px; font: inherit; font-size: 0.875rem; }
+  .seg-count { color: var(--text2); font-weight: 500; margin-left: 3px; font-variant-numeric: tabular-nums; }
+  #orderTable tbody tr[data-id] { cursor: pointer; }
+  #orderTable tbody tr[data-id]:hover { background: var(--fill-2); }
+  .cust-sub { display: block; margin-top: 2px; font-size: 0.75rem; color: var(--text2); }
+  .tfoot-row td { background: var(--surface2); font-weight: 600; }
+  .order-list { display: none; flex-direction: column; background: var(--surface); border-radius: var(--r-lg); overflow: hidden; }
+  .order-row { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 10px 14px; border-radius: 0; background: none; color: var(--text); font-weight: 400; text-align: left; }
+  .order-row:active { transform: none; background: var(--fill-2); }
+  .order-row + .order-row::before { content: ''; position: absolute; top: 0; left: 14px; right: 0; border-top: 1px solid var(--separator); }
+  .or-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .or-title, .or-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .or-title { font-size: 0.9375rem; font-weight: 600; }
+  .or-sub { font-size: 0.8125rem; color: var(--text2); }
+  .or-end { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .or-amount { font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
+  .or-flags { display: flex; gap: 4px; }
+  .order-row > .vpc-ico { width: 16px; height: 16px; color: var(--label-3); }
+  .order-empty { padding: 28px 16px; text-align: center; color: var(--text2); font-size: 0.875rem; }
+  .order-sheet .sheet-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+  .order-sheet h2 { margin: 0; overflow-wrap: anywhere; }
+  .sheet-sub { margin-top: 3px; font-size: 0.8125rem; color: var(--text2); }
+  .sheet-close { flex: none; width: 30px; height: 30px; min-height: 0; padding: 0; display: grid; place-items: center; border-radius: 50%; background: var(--fill); color: var(--text2); }
+  .sheet-close .vpc-ico { width: 14px; height: 14px; stroke-width: 2.4; }
+  .order-sheet .modal-actions .btn-danger-text { margin-right: auto; background: none; color: var(--red); padding-left: 4px; padding-right: 4px; }
+  .search-input { background: var(--fill); border: 1px solid transparent; border-radius: var(--r-md); color: var(--text); padding: 8px 14px; font-size: 0.875rem; outline: none; width: 240px; }
+  .search-input:focus { border-color: var(--accent); }
   .search-input:focus { border-color: var(--accent); }
   .filter-chip { background: var(--surface2); border: 1px solid var(--border); color: var(--text2); padding: 6px 13px; border-radius: 99px; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
   .filter-chip.active { background: var(--accent-fill); color: #fff; border-color: var(--accent); }
@@ -234,6 +263,10 @@
     table { font-size: 0.75rem; }
     .card { padding: 14px; }
     .toolbar { flex-direction: column; gap: 8px; }
+    .orders-toolbar { align-items: stretch; }
+    .orders-toolbar .seg button { flex: 1; }
+    #orderTableCard { display: none; }
+    .order-list { display: flex; }
     .search-input { width: 100%; }
     .btn-primary, .btn-ghost { padding: 8px 14px; font-size: 0.78rem; min-height: 44px; }
     #backup-banner { width: 92%; flex-wrap: wrap; }
@@ -348,29 +381,29 @@
 
     <!-- Orders -->
     <div class="panel" id="panel-orders">
-      <div class="toolbar">
-        <input class="search-input" id="orderSearch" placeholder="Search customer, product, referral…" oninput="orderPage=0; renderOrderTable()">
-        <div id="orderMonthFilters" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
-        <div id="orderPrintFilter"></div>
+      <div class="toolbar orders-toolbar">
+        <div class="seg" id="orderFilterSeg" aria-label="Show orders">
+          <button data-value="all" aria-checked="true">All</button>
+          <button data-value="notprinted">Not printed<span class="seg-count" id="cntNotPrinted"></span></button>
+          <button data-value="unpaid">Unpaid<span class="seg-count" id="cntUnpaid"></span></button>
+        </div>
+        <input class="search-input" id="orderSearch" type="search" placeholder="Search orders" aria-label="Search orders" oninput="orderPage=0; renderOrderTable()">
+        <select class="month-select" id="orderMonth" aria-label="Month" onchange="setMonthFilter(this.value)"></select>
       </div>
-      <div class="card">
+      <div class="order-list" id="orderList"></div>
+      <div class="card" id="orderTableCard">
         <div class="table-wrap">
           <table id="orderTable">
             <thead>
               <tr>
-                <th onclick="sortTable('date')">Date ↕</th>
-                <th onclick="sortTable('customer')">Customer ↕</th>
-                <th onclick="sortTable('product')">Product</th>
-                <th class="num" onclick="sortTable('salePrice')">Sale ↕</th>
-                <th class="num" onclick="sortTable('cogs')">COGS ↕</th>
-                <th class="num" onclick="sortTable('profit')">Profit ↕</th>
-                <th class="num" onclick="sortTable('roi')">ROI ↕</th>
-                <th>Referred By</th>
-                <th>Notes</th>
+                <th onclick="sortTable('date')" style="cursor:pointer">Date ↕</th>
+                <th onclick="sortTable('customer')" style="cursor:pointer">Customer ↕</th>
+                <th class="num" onclick="sortTable('sets')" style="cursor:pointer">Qty ↕</th>
+                <th class="num" onclick="sortTable('salePrice')" style="cursor:pointer">Sale ↕</th>
+                <th class="num" onclick="sortTable('profit')" style="cursor:pointer">Profit ↕</th>
                 <th onclick="sortTable('payStatus')" style="cursor:pointer">Payment ↕</th>
                 <th onclick="sortTable('printStatus')" style="cursor:pointer">Printed ↕</th>
                 <th onclick="sortTable('fulfillStatus')" style="cursor:pointer">Status ↕</th>
-                <th style="text-align:right">Actions</th>
               </tr>
             </thead>
             <tbody id="orderTbody"></tbody>
@@ -660,6 +693,33 @@
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeAddDelivery()">Cancel</button>
       <button class="btn-primary" onclick="saveDelivery()">Add Delivery</button>
+    </div>
+  </div>
+</div>
+
+<!-- Order details: opens from a row (a sheet on phones). Statuses apply at once. -->
+<div class="modal-overlay" id="orderSheet">
+  <div class="modal order-sheet" role="dialog" aria-modal="true" aria-labelledby="osTitle">
+    <div class="sheet-head">
+      <div style="min-width:0"><h2 id="osTitle">Order</h2><div class="sheet-sub" id="osSub"></div></div>
+      <button type="button" class="sheet-close" onclick="closeOrderSheet()" aria-label="Close"><svg class="vpc-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <div class="glist" id="osFacts"></div>
+    <div class="glist-label">Status</div>
+    <div class="glist">
+      <div class="glist-row"><span>Payment</span>
+        <div class="seg" id="osPay" aria-label="Payment"><button data-value="paid">Paid</button><button data-value="partial">Partial</button><button data-value="unpaid">Unpaid</button></div>
+      </div>
+      <div class="glist-row"><label for="osPrinted">Printed</label>
+        <input type="checkbox" class="switch" id="osPrinted" onchange="sheetSet('print', this.checked ? 'printed' : 'not_printed')">
+      </div>
+      <div class="glist-row"><span>Order</span>
+        <div class="seg" id="osFill" aria-label="Order status"><button data-value="in_progress">In progress</button><button data-value="completed">Done</button></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-danger-text" onclick="deleteFromSheet()">Delete</button>
+      <button type="button" class="btn-primary" onclick="editFromSheet()">Edit Order</button>
     </div>
   </div>
 </div>
@@ -1404,6 +1464,9 @@ function routeFromHash() {
   } else if (h === 'print-queue') {
     showSection('sales');
     showPrintQueue();
+  } else if (h === 'unpaid') {
+    showSection('sales');
+    showUnpaidOrders();
   } else if (h === 'orders') {
     showSection('sales');
     selectSalesTab('orders');
@@ -1515,7 +1578,7 @@ function deleteDelivery(id) {
 
 const LS_ORDERS    = VPCUtil.KEYS.orders;      // unified, fully-editable order store
 const LS_ORDERS_V1 = 'riser_orders_v1';   // legacy custom-orders store (pre-migration)
-let sortCol = 'date', sortDir = -1, orderMonthFilter = 'all', orderNotPrintedOnly = false;
+let sortCol = 'date', sortDir = -1, orderMonthFilter = 'all', orderFilter = 'all';
 const ORDER_PAGE_SIZE = 50;
 let orderPage = 0;
 
@@ -1723,10 +1786,9 @@ function renderThisMonthSnap() {
 function renderOrderMonthFilters() {
   const orders = getOrders();
   const months = [...new Set(orders.map(o => monthKey(o.date)))].sort();
-  document.getElementById('orderMonthFilters').innerHTML = ['all', ...months].map(mk => {
-    const label = mk === 'all' ? 'All' : monthLabel(mk);
-    return `<div class="filter-chip ${orderMonthFilter===mk?'active':''}" onclick="setMonthFilter('${mk}')">${label}</div>`;
-  }).join('');
+  document.getElementById('orderMonth').innerHTML = ['all', ...months.reverse()].map(mk =>
+    `<option value="${mk}"${orderMonthFilter === mk ? ' selected' : ''}>${mk === 'all' ? 'All months' : monthLabel(mk)}</option>`
+  ).join('');
 }
 function setMonthFilter(mk) { orderMonthFilter = mk; orderPage = 0; renderOrderMonthFilters(); renderOrderTable(); }
 
@@ -1746,31 +1808,51 @@ function printQueueSummary() {
 function fmtHours(h) { return (Math.round(h * 10) / 10).toLocaleString('en-US') + ' h'; }
 function renderPrintQueue() {
   const q = printQueueSummary();
-  document.getElementById('orderPrintFilter').innerHTML =
-    `<div class="filter-chip ${orderNotPrintedOnly ? 'active' : ''}" title="Show only orders not yet printed" onclick="toggleNotPrintedFilter()">⏳ Not Printed (${q.count})</div>`;
   document.getElementById('toPrintList').hidden = !q.count;
   document.getElementById('toPrintTitle').textContent = `${q.count} order${q.count === 1 ? '' : 's'} to print`;
   document.getElementById('toPrintSub').textContent = q.timed
     ? `About ${fmtHours(q.hours)} of printing${q.timed < q.count ? ` for ${q.timed} of them` : ''}`
     : 'Open the print queue';
 }
-function toggleNotPrintedFilter() { orderNotPrintedOnly = !orderNotPrintedOnly; orderPage = 0; renderOrderTable(); }
-function showPrintQueue() {
-  orderNotPrintedOnly = true; orderPage = 0;
-  document.querySelector('#section-sales .tab[data-tab="orders"]').click();
+// The orders filter: All · Not printed · Unpaid (a segmented control).
+let orderFilterSeg = null;
+const isUnpaid = o => (o.payStatus || 'paid') !== 'paid';
+function setOrderFilter(v) {
+  orderFilter = v; orderPage = 0;
+  orderFilterSeg?.set(v);
   renderOrderTable();
 }
+function showPrintQueue() { setOrderFilter('notprinted'); selectSalesTab('orders'); }
+function showUnpaidOrders() { setOrderFilter('unpaid'); selectSalesTab('orders'); }
+
+function fmtShortDate(d) {
+  const dt = new Date(d + 'T00:00:00');
+  const opts = { month: 'short', day: 'numeric' };
+  if (dt.getFullYear() !== NOW.getFullYear()) opts.year = 'numeric';
+  return dt.toLocaleDateString('en-US', opts);
+}
+const PAY_LABELS   = { paid: 'Paid', partial: 'Partial', unpaid: 'Unpaid' };
+const FILL_LABELS  = { completed: 'Done', in_progress: 'In progress' };
+const PRINT_LABELS = { printed: 'Printed', not_printed: 'Not printed' };
+const orderQty = o => Math.max(1, parseInt(o.sets) || 1);
 
 function renderOrderTable() {
   const q = (document.getElementById('orderSearch').value || '').toLowerCase();
   let orders = getOrders();
   if (orderMonthFilter !== 'all') orders = orders.filter(o => o.date.startsWith(orderMonthFilter));
-  if (orderNotPrintedOnly) orders = orders.filter(o => printStatusOf(o) === 'not_printed');
   if (q) orders = orders.filter(o => [o.customer, o.product, o.referredBy, o.notes].join(' ').toLowerCase().includes(q));
+  // Counts on the filter reflect the month and search, before the filter itself.
+  document.getElementById('cntNotPrinted').textContent = orders.filter(o => printStatusOf(o) === 'not_printed').length || '';
+  document.getElementById('cntUnpaid').textContent = orders.filter(isUnpaid).length || '';
+  if (orderFilter === 'notprinted') orders = orders.filter(o => printStatusOf(o) === 'not_printed');
+  if (orderFilter === 'unpaid') orders = orders.filter(isUnpaid);
+  const sortVal = o => sortCol === 'printStatus' ? printStatusOf(o)
+    : sortCol === 'profit' ? o.salePrice - o.cogs
+    : sortCol === 'sets' ? orderQty(o)
+    : (o[sortCol] ?? '');
   orders.sort((a, b) => {
-    let av = sortCol === 'printStatus' ? printStatusOf(a) : a[sortCol];
-    let bv = sortCol === 'printStatus' ? printStatusOf(b) : b[sortCol];
-    if (typeof av === 'string') return av.localeCompare(bv) * sortDir;
+    const av = sortVal(a), bv = sortVal(b);
+    if (typeof av === 'string' || typeof bv === 'string') return String(av).localeCompare(String(bv)) * sortDir;
     return (av - bv) * sortDir;
   });
 
@@ -1785,63 +1867,58 @@ function renderOrderTable() {
   // Totals span all filtered orders (not just the current page)
   const totalRev  = orders.reduce((s,o) => s + o.salePrice, 0);
   const totalProf = orders.reduce((s,o) => s + o.salePrice - o.cogs, 0);
-  const totalCogs = orders.reduce((s,o) => s + o.cogs, 0);
-
-  const PAY_LABELS  = { paid: 'Paid', partial: 'Partial', unpaid: 'Unpaid' };
-  const FILL_LABELS = { completed: 'Done', in_progress: 'In progress' };
-  const PRINT_LABELS = { printed: 'Printed', not_printed: 'Not printed' };
+  const totalQty  = orders.reduce((s,o) => s + orderQty(o), 0);
 
   const rows = pageOrders.map(o => {
     const profit   = o.salePrice - o.cogs;
-    const roi      = (profit / o.cogs * 100).toFixed(1);
-    const roiColor = roi < 0 ? 'var(--red)' : 'var(--text)';
     const pay      = o.payStatus     || 'paid';
     const fill     = o.fulfillStatus || 'completed';
+    const print    = printStatusOf(o);
     const statusBtn = (kind, val, text, title) =>
       `<button type="button" class="badge badge-${val} status-btn" aria-haspopup="menu" aria-expanded="false" data-menu-key="${o.id}-${kind}" title="${title}" onclick="openStatusMenu(event,'${o.id}','${kind}')">${text}</button>`;
-    const payBadge  = statusBtn('pay', pay, PAY_LABELS[pay] || pay, 'Change payment status');
-    const fillBadge = statusBtn('fill', fill, FILL_LABELS[fill] || fill, 'Change fulfilment status');
-    const print     = printStatusOf(o);
-    const printBadge = statusBtn('print', print, PRINT_LABELS[print], 'Change print status');
-    const actions   =
-      `<button class="icon-btn" title="Edit order" onclick="openAddOrder('${o.id}')">✏️</button>
-       <button class="icon-btn" title="Delete order" onclick="deleteOrder('${o.id}')">✕</button>`;
-    return `<tr>
+    return `<tr data-id="${o.id}" tabindex="0" onclick="openOrderSheet('${o.id}')" onkeydown="if(event.key==='Enter'&&event.target===this)openOrderSheet('${o.id}')" oncontextmenu="orderContextMenu(event,'${o.id}')">
       <td style="white-space:nowrap">${fmtDate(o.date)}</td>
-      <td><strong>${esc(o.customer)}</strong></td>
-      <td style="color:var(--text2);font-size:.78rem">${esc(o.product)}</td>
+      <td><strong>${esc(o.customer)}</strong><span class="cust-sub">${esc(o.product)}</span></td>
+      <td class="num">${orderQty(o)}</td>
       <td class="num">${fmt$(o.salePrice)}</td>
-      <td class="num" style="color:var(--text2)">${fmt$(o.cogs)}</td>
-      <td class="num">${fmt$(profit)}</td>
-      <td class="num" style="color:${roiColor}">${roi}%</td>
-      <td style="font-size:.78rem;color:var(--text2)">${esc(o.referredBy||'—')}</td>
-      <td style="font-size:.75rem;color:var(--text2);max-width:160px">${esc(o.notes||'')}</td>
-      <td>${payBadge}</td>
-      <td style="white-space:nowrap">${printBadge}</td>
-      <td>${fillBadge}</td>
-      <td style="text-align:right;white-space:nowrap">${actions}</td>
+      <td class="num"${profit < 0 ? ' style="color:var(--red)"' : ''}>${fmt$(profit)}</td>
+      <td>${statusBtn('pay', pay, PAY_LABELS[pay] || pay, 'Change payment status')}</td>
+      <td style="white-space:nowrap">${statusBtn('print', print, PRINT_LABELS[print], 'Change print status')}</td>
+      <td>${statusBtn('fill', fill, FILL_LABELS[fill] || fill, 'Change order status')}</td>
     </tr>`;
   }).join('');
 
   // Summary footer row (always shows totals across all filtered orders)
-  const footerRow = `<tr style="background:var(--surface2);font-weight:600">
-    <td colspan="3" style="color:var(--text2)">Total — ${total} orders${pageCount > 1 ? ` (page ${orderPage+1}/${pageCount})` : ''}</td>
+  const footerRow = total ? `<tr class="tfoot-row">
+    <td colspan="2" style="color:var(--text2)">Total — ${total} order${total === 1 ? '' : 's'}${pageCount > 1 ? ` (page ${orderPage+1}/${pageCount})` : ''}</td>
+    <td class="num">${totalQty}</td>
     <td class="num">${fmt$(totalRev)}</td>
-    <td class="num" style="color:var(--text2)">${fmt$(totalCogs)}</td>
     <td class="num">${fmt$(totalProf)}</td>
-    <td class="num">${totalCogs ? (totalProf/totalCogs*100).toFixed(1) : '0.0'}%</td>
-    <td colspan="6"></td>
-  </tr>`;
-
+    <td colspan="3"></td>
+  </tr>` : `<tr><td colspan="8" class="order-empty">No orders match.</td></tr>`;
   document.getElementById('orderTbody').innerHTML = rows + footerRow;
-  renderPrintQueue();
 
-  // Render pagination controls below the table card
+  // Phones: one row per order. Colour only where something needs doing.
+  document.getElementById('orderList').innerHTML = pageOrders.map(o => {
+    const pay = o.payStatus || 'paid';
+    const flags = (isUnpaid(o) ? `<span class="badge badge-${pay}">${PAY_LABELS[pay]}</span>` : '')
+      + (printStatusOf(o) === 'not_printed' ? '<span class="badge badge-not_printed">Not printed</span>' : '');
+    return `<button type="button" class="order-row" onclick="openOrderSheet('${o.id}')">
+      <span class="or-main"><span class="or-title">${esc(o.customer)}</span><span class="or-sub">${esc(o.product)} · ${fmtShortDate(o.date)}</span></span>
+      <span class="or-end"><span class="or-amount">${fmt$(o.salePrice)}</span>${flags ? `<span class="or-flags">${flags}</span>` : ''}</span>
+      <svg class="vpc-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </button>`;
+  }).join('') || '<div class="order-empty">No orders match.</div>';
+
+  renderPrintQueue();
+  if (sheetOrderId) refreshOrderSheet();
+
+  // Render pagination controls below the orders
   let pgEl = document.getElementById('orderPagination');
   if (!pgEl) {
     pgEl = document.createElement('div');
     pgEl.id = 'orderPagination';
-    document.getElementById('panel-orders').querySelector('.card').after(pgEl);
+    document.getElementById('orderTableCard').after(pgEl);
   }
   if (pageCount <= 1) {
     pgEl.innerHTML = '';
@@ -1859,6 +1936,72 @@ function renderOrderTable() {
     </div>`;
   }
 }
+
+// ── Order details sheet ──
+let sheetOrderId = null, osPay = null, osFill = null;
+function openOrderSheet(id) {
+  sheetOrderId = id;
+  if (!refreshOrderSheet()) return;
+  document.getElementById('orderSheet').classList.add('open');
+  setTimeout(() => document.querySelector('#orderSheet .sheet-close')?.focus(), 50);
+}
+function refreshOrderSheet() {
+  const o = rawOrders().find(x => x.id === sheetOrderId);
+  if (!o) { closeOrderSheet(); return false; }
+  const profit = o.salePrice - o.cogs;
+  const row = (k, v) => `<div class="glist-row"><span>${k}</span><span class="glist-val">${v}</span></div>`;
+  document.getElementById('osTitle').textContent = o.customer;
+  document.getElementById('osSub').textContent =
+    `${new Date(o.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })} · ${o.product}`;
+  document.getElementById('osFacts').innerHTML =
+    row('Quantity', orderQty(o)) + row('Sale price', fmt$(o.salePrice)) + row('Cost', fmt$(o.cogs)) +
+    row('Profit', fmt$(profit)) +
+    row('Margin', o.salePrice ? (profit / o.salePrice * 100).toFixed(1) + '%' : '—') +
+    row('Return on cost', o.cogs ? (profit / o.cogs * 100).toFixed(1) + '%' : '—') +
+    (o.referredBy ? row('Referred by', esc(o.referredBy)) : '') +
+    (o.notes ? row('Notes', esc(o.notes)) : '');
+  osPay?.set(o.payStatus || 'paid');
+  osFill?.set(o.fulfillStatus || 'completed');
+  document.getElementById('osPrinted').checked = printStatusOf(o) === 'printed';
+  return true;
+}
+function closeOrderSheet() {
+  sheetOrderId = null;
+  document.getElementById('orderSheet').classList.remove('open');
+}
+// Done implies Printed, and Not printed reopens the order (setOrderStatus).
+function sheetSet(kind, value) { if (sheetOrderId) setOrderStatus(sheetOrderId, kind, value); }
+function editFromSheet() { const id = sheetOrderId; closeOrderSheet(); openAddOrder(id); }
+function deleteFromSheet() { if (deleteOrder(sheetOrderId)) closeOrderSheet(); }
+
+// Right-click a row: the common jobs, without opening the order.
+function orderContextMenu(e, id) {
+  e.preventDefault();
+  const o = rawOrders().find(x => x.id === id);
+  if (!o) return;
+  const opts = [{ value: 'open', label: 'Open', icon: vpcIcon('chevron') }, { value: 'edit', label: 'Edit order', icon: vpcIcon('pencil') }];
+  if (isUnpaid(o)) opts.push({ value: 'paid', label: 'Mark paid', icon: vpcIcon('check') });
+  if (printStatusOf(o) === 'not_printed') opts.push({ value: 'printed', label: 'Mark printed', icon: vpcIcon('check') });
+  opts.push({ value: 'delete', label: 'Delete', icon: vpcIcon('trash'), danger: true });
+  vpcMenu(e.currentTarget, {
+    label: 'Order', options: opts, at: { x: e.clientX, y: e.clientY },
+    onSelect: v => {
+      if (v === 'open') openOrderSheet(id);
+      else if (v === 'edit') openAddOrder(id);
+      else if (v === 'paid') setOrderStatus(id, 'pay', 'paid');
+      else if (v === 'printed') setOrderStatus(id, 'print', 'printed');
+      else if (v === 'delete') deleteOrder(id);
+    },
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  orderFilterSeg = vpcSeg(document.getElementById('orderFilterSeg'), v => setOrderFilter(v));
+  orderFilterSeg.set(orderFilter);
+  osPay = vpcSeg(document.getElementById('osPay'), v => sheetSet('pay', v));
+  osFill = vpcSeg(document.getElementById('osFill'), v => sheetSet('fill', v));
+});
+document.getElementById('orderSheet').addEventListener('click', e => { if (e.target === e.currentTarget) closeOrderSheet(); });
 
 function setOrderPage(p) {
   orderPage = p;
@@ -2481,11 +2624,12 @@ function saveNewOrder() {
 }
 
 function deleteOrder(id) {
-  if (!confirm('Delete this order? This cannot be undone.')) return;
+  if (!confirm('Delete this order? This cannot be undone.')) return false;
   localStorage.setItem(LS_ORDERS, JSON.stringify(rawOrders().filter(x => x.id !== id)));
   if (typeof auditLog === 'function') auditLog('DELETE_ORDER', VPCUtil.KEYS.orders, `Order deleted`);
   renderSalesAll();
   toast('Order deleted.');
+  return true;
 }
 
 // Orders logged before the Printed column existed have no printStatus:
