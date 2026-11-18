@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0f1117">
+<meta name="theme-color" content="#1c1c1e">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
@@ -16,7 +16,7 @@
   body { min-height: 100vh; }
 
   /* Header and cross-page nav come from styles.css, same as every page. */
-  .brand { font-size: 1rem; font-weight: 800; letter-spacing: -.3px; white-space: nowrap; }
+  .brand { font-size: 1rem; font-weight: 600; letter-spacing: -.3px; white-space: nowrap; }
   .brand span { color: var(--accent); }
 
   /* ── Section row (Sales / Business Expenses / trackers) ──
@@ -25,7 +25,7 @@
   .main-nav {
     display: flex; gap: 0; padding: 0 32px;
     border-bottom: 1px solid var(--glass-border);
-    background: rgba(13, 15, 22, 0.7);
+    background: rgba(22, 22, 23, 0.7);
     overflow-x: auto; scrollbar-width: none;
   }
   .main-nav::-webkit-scrollbar { display: none; }
@@ -40,9 +40,9 @@
   /* ── KPI bar (Sales) ── */
   .kpi-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
   .kpi { background: var(--surface); padding: 16px 22px; }
-  .kpi-val { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; }
-  .kpi-label { font-size: 0.68rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px; }
-  .kpi-sub { font-size: 0.7rem; margin-top: 4px; }
+  .kpi-val { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.5px; }
+  .kpi-label { font-size: 0.75rem; color: var(--text2); margin-top: 3px; }
+  .kpi-sub { font-size: 0.75rem; margin-top: 4px; }
 
   /* ── Sales sub-tab bar ── */
   .tab-bar {
@@ -62,11 +62,10 @@
   .section.active { display: block; }
 
   /* ── Section title ── */
-  .section-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text2); margin-bottom: 14px; }
+  .section-title { font-size: 0.75rem; font-weight: 600; color: var(--text2); margin-bottom: 14px; }
 
   /* ── Cards ── */
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
-  .card-title { font-size: 0.85rem; font-weight: 700; color: var(--text2); margin-bottom: 16px; }
 
   /* ── Grid layouts ── */
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -79,9 +78,9 @@
   /* ── Table ── */
   .table-wrap { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-  th { text-align: left; padding: 10px 12px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); border-bottom: 1px solid var(--border); white-space: nowrap; cursor: pointer; user-select: none; }
+  th { text-align: left; padding: 10px 12px; font-size: 0.75rem; font-weight: 600; color: var(--text2); border-bottom: 1px solid var(--border); white-space: nowrap; cursor: pointer; user-select: none; }
   th:hover { color: var(--accent); }
-  td { padding: 10px 12px; border-bottom: 1px solid #1e2138; vertical-align: top; }
+  td { padding: 10px 12px; border-bottom: 1px solid #2c2c2e; vertical-align: top; }
   tr:hover td { background: var(--surface2); }
   tr:last-child td { border-bottom: none; }
   .num { text-align: right; font-variant-numeric: tabular-nums; }
@@ -90,25 +89,25 @@
   .red { color: var(--red); }
 
   /* ── Badges ── */
-  .badge { display: inline-block; font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.3px; }
-  .badge-green { background: #0d3320; color: var(--green); }
-  .badge-yellow { background: #3b2e12; color: var(--yellow); }
-  .badge-blue { background: #12213b; color: var(--accent); }
-  .badge-purple { background: #251235; color: var(--accent2); }
-  .badge-red { background: #3b1212; color: var(--red); }
-  .badge-high { background: #3b1212; color: var(--red); }
-  .badge-medium { background: #3b2e12; color: var(--yellow); }
-  .badge-low { background: #123b20; color: var(--green); }
+  .badge { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 2px 7px; border-radius: 99px; }
+  .badge-green { background: #203d28; color: var(--green); }
+  .badge-yellow { background: #453e1a; color: var(--yellow); }
+  .badge-blue { background: #192f46; color: var(--accent); }
+  .badge-purple { background: #392744; color: var(--accent2); }
+  .badge-red { background: #452323; color: var(--red); }
+  .badge-high { background: #452323; color: var(--red); }
+  .badge-medium { background: #453e1a; color: var(--yellow); }
+  .badge-low { background: #203d28; color: var(--green); }
   .badge-none { background: var(--surface2); color: var(--text2); }
 
   /* ── Payment / Fulfillment status badges ── */
-  .badge-paid       { background: #0d3320; color: var(--green); cursor: pointer; }
-  .badge-partial    { background: #3b2e12; color: var(--yellow); cursor: pointer; }
-  .badge-unpaid     { background: #3b1212; color: var(--red); cursor: pointer; }
-  .badge-completed  { background: #0d3320; color: var(--green); cursor: pointer; }
-  .badge-in_progress{ background: #12213b; color: var(--accent); cursor: pointer; }
-  .badge-printed    { background: #0d3320; color: var(--green); cursor: pointer; }
-  .badge-not_printed{ background: #3b2e12; color: var(--yellow); cursor: pointer; }
+  .badge-paid       { background: #203d28; color: var(--green); cursor: pointer; }
+  .badge-partial    { background: #453e1a; color: var(--yellow); cursor: pointer; }
+  .badge-unpaid     { background: #452323; color: var(--red); cursor: pointer; }
+  .badge-completed  { background: #203d28; color: var(--green); cursor: pointer; }
+  .badge-in_progress{ background: #192f46; color: var(--accent); cursor: pointer; }
+  .badge-printed    { background: #203d28; color: var(--green); cursor: pointer; }
+  .badge-not_printed{ background: #453e1a; color: var(--yellow); cursor: pointer; }
   .badge-paid:hover, .badge-partial:hover, .badge-unpaid:hover,
   .badge-completed:hover, .badge-in_progress:hover,
   .badge-printed:hover, .badge-not_printed:hover { filter: brightness(1.25); }
@@ -118,7 +117,7 @@
   .search-input { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 8px 14px; font-size: 0.82rem; outline: none; width: 240px; }
   .search-input:focus { border-color: var(--accent); }
   .filter-chip { background: var(--surface2); border: 1px solid var(--border); color: var(--text2); padding: 6px 13px; border-radius: 99px; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
-  .filter-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .filter-chip.active { background: var(--accent-fill); color: #fff; border-color: var(--accent); }
 
   /* ── Insight cards ── */
   .insight-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
@@ -126,18 +125,18 @@
   .insight-card.warn { border-left-color: var(--yellow); }
   .insight-card.good { border-left-color: var(--green); }
   .insight-card.action { border-left-color: var(--orange); }
-  .insight-type { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); margin-bottom: 6px; }
-  .insight-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
+  .insight-type { font-size: 0.75rem; font-weight: 600; color: var(--text2); margin-bottom: 6px; }
+  .insight-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; }
   .insight-body { font-size: 0.82rem; color: var(--text2); line-height: 1.6; }
   .insight-body strong { color: var(--text); }
 
   /* ── Pipeline ── */
-  .pipeline-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #1e2138; }
+  .pipeline-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #2c2c2e; }
   .pipeline-item:last-child { border-bottom: none; }
   .pipeline-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--yellow); flex-shrink: 0; }
   .pipeline-dot.urgent { background: var(--red); }
   .pipeline-dot.ok { background: var(--green); }
-  .pipeline-date { font-size: 0.75rem; font-weight: 700; color: var(--text2); width: 70px; flex-shrink: 0; }
+  .pipeline-date { font-size: 0.75rem; font-weight: 600; color: var(--text2); width: 70px; flex-shrink: 0; }
   .pipeline-name { font-size: 0.85rem; font-weight: 600; flex: 1; }
   .pipeline-note { font-size: 0.75rem; color: var(--text2); }
 
@@ -147,15 +146,15 @@
   .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
 
   /* ── Icon buttons ── */
-  .icon-btn { background: none; border: none; color: var(--text2); padding: 4px 6px; font-size: 0.85rem; border-radius: 5px; cursor: pointer; }
+  .icon-btn { background: none; border: none; color: var(--text2); padding: 4px 6px; font-size: 0.85rem; border-radius: 999px; cursor: pointer; }
   .icon-btn:hover { background: var(--surface2); color: var(--text); }
 
 
   /* ── Expense section ── */
   .exp-stat-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
   .estat { background: var(--surface); padding: 14px 22px; }
-  .estat-num { font-size: 1.4rem; font-weight: 800; }
-  .estat-label { font-size: 0.68rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+  .estat-num { font-size: 1.4rem; font-weight: 600; }
+  .estat-label { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
   .exp-tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 32px; background: var(--surface); position: sticky; top: 98px; z-index: 150; }
   .exp-tab { padding: 13px 18px; font-size: 0.83rem; font-weight: 600; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; user-select: none; }
   .exp-tab:hover { color: var(--text); }
@@ -167,34 +166,34 @@
   /* ── Jet Tags section ── */
   .jt-stat-bar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
   .jtat { background: var(--surface); padding: 14px 22px; }
-  .jtat-num { font-size: 1.4rem; font-weight: 800; }
-  .jtat-label { font-size: 0.68rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
-  .jt-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; transition: border-color 0.15s; }
+  .jtat-num { font-size: 1.4rem; font-weight: 600; }
+  .jtat-label { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
+  .jt-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; transition: border-color 0.15s; }
   .jt-card:hover { border-color: #8b5cf6; }
-  .jt-name { font-size: 0.82rem; font-weight: 700; }
+  .jt-name { font-size: 0.82rem; font-weight: 600; }
   .jt-bar-bg { background: var(--surface); border-radius: 99px; height: 4px; overflow: hidden; }
   .jt-bar-fill { height: 100%; border-radius: 99px; background: #8b5cf6; transition: width 0.4s; }
   .jt-bar-fill.sold-out { background: var(--red); }
   .jt-bar-fill.low { background: var(--yellow); }
-  .jt-nums { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text2); }
-  .jt-char-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; color: var(--text2); padding: 7px 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; }
+  .jt-nums { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text2); }
+  .jt-char-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 999px; color: var(--text2); padding: 7px 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; }
   .jt-char-btn.selected { background: #2e1f4a; border-color: #8b5cf6; color: #c4b5fd; }
   .jt-char-btn:hover { border-color: #8b5cf6; color: var(--text); }
 
   /* ── Pins section ── */
   .pin-stat-bar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
   .pintat { background: var(--surface); padding: 14px 22px; }
-  .pintat-num { font-size: 1.4rem; font-weight: 800; }
-  .pintat-label { font-size: 0.68rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
-  .pin-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; transition: border-color 0.15s; }
+  .pintat-num { font-size: 1.4rem; font-weight: 600; }
+  .pintat-label { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
+  .pin-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; transition: border-color 0.15s; }
   .pin-card:hover { border-color: #2dd4bf; }
-  .pin-name { font-size: 0.82rem; font-weight: 700; }
+  .pin-name { font-size: 0.82rem; font-weight: 600; }
   .pin-bar-bg { background: var(--surface); border-radius: 99px; height: 4px; overflow: hidden; }
   .pin-bar-fill { height: 100%; border-radius: 99px; background: #2dd4bf; transition: width 0.4s; }
   .pin-bar-fill.sold-out { background: var(--red); }
   .pin-bar-fill.low { background: var(--yellow); }
-  .pin-nums { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text2); }
-  .pin-char-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; color: var(--text2); padding: 7px 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; }
+  .pin-nums { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text2); }
+  .pin-char-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 999px; color: var(--text2); padding: 7px 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; }
   .pin-char-btn.selected { background: #0d2e2c; border-color: #2dd4bf; color: #99f6e4; }
   .pin-char-btn:hover { border-color: #2dd4bf; color: var(--text); }
 
@@ -210,11 +209,11 @@
      action buttons stay tappable on phones. */
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center; }
   .modal-overlay.open { display: flex; }
-  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 26px; width: 500px; max-width: 95vw; max-height: 90vh; overflow-y: auto; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 28px; padding: 26px; width: 500px; max-width: 95vw; max-height: 90vh; overflow-y: auto; }
   .modal h2 { font-size: 1rem; margin-bottom: 20px; }
   .field { margin-bottom: 14px; }
-  .field label { display: block; font-size: 0.72rem; color: var(--text2); margin-bottom: 5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
-  .field input, .field textarea, .field select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; color: var(--text); padding: 9px 12px; font-size: 0.85rem; outline: none; font-family: inherit; }
+  .field label { display: block; font-size: 0.75rem; color: var(--text2); margin-bottom: 5px; font-weight: 600; }
+  .field input, .field textarea, .field select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 9px 12px; font-size: 0.85rem; outline: none; font-family: inherit; }
   .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); }
   .field select option { background: var(--surface); }
   .field textarea { resize: vertical; min-height: 70px; }
@@ -222,24 +221,24 @@
   .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
 
   /* ── Buttons ── */
-  button { cursor: pointer; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; padding: 9px 16px; transition: all 0.15s; }
-  .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover { background: #7d9bff; }
+  button { cursor: pointer; border: none; border-radius: 999px; font-size: 0.85rem; font-weight: 600; padding: 9px 16px; transition: all 0.15s; }
+  .btn-primary { background: var(--accent-fill); color: #fff; }
+  .btn-primary:hover { background: #0077ed; }
   .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
   .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
   .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
   .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
 
   /* ── Toast ── */
-  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--accent); color: var(--text); padding: 11px 18px; border-radius: 9px; font-size: 0.83rem; z-index: 600; transform: translateY(80px); opacity: 0; transition: all 0.25s; }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--accent); color: var(--text); padding: 11px 18px; border-radius: 8px; font-size: 0.83rem; z-index: 600; transform: translateY(80px); opacity: 0; transition: all 0.25s; }
   .toast.show { transform: translateY(0); opacity: 1; }
 
   /* ── Date range filter bar ── */
   .range-bar { display: flex; align-items: center; gap: 6px; padding: 10px 24px; border-bottom: 1px solid var(--border); background: var(--surface); flex-wrap: wrap; }
-  .range-btn { background: transparent; border: 1px solid var(--border); color: var(--text2); font-size: 0.72rem; font-weight: 600; padding: 5px 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s; }
+  .range-btn { background: transparent; border: 1px solid var(--border); color: var(--text2); font-size: 0.75rem; font-weight: 600; padding: 5px 12px; border-radius: 999px; cursor: pointer; transition: all 0.15s; }
   .range-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .range-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .range-label { font-size: 0.7rem; color: var(--text2); margin-right: 4px; }
+  .range-btn.active { background: var(--accent-fill); color: #fff; border-color: var(--accent); }
+  .range-label { font-size: 0.75rem; color: var(--text2); margin-right: 4px; }
 
   @media (max-width: 700px) {
     .main-nav { padding: 0 8px; }
@@ -257,7 +256,7 @@
     #filamentKpis { grid-template-columns: repeat(2, 1fr) !important; }
     main { padding: 12px; }
     .table-wrap { overflow-x: auto; }
-    table { font-size: 0.72rem; }
+    table { font-size: 0.75rem; }
     .card { padding: 14px; }
     .toolbar { flex-direction: column; gap: 8px; }
     .search-input { width: 100%; }
@@ -265,7 +264,7 @@
     #backup-banner { width: 92%; flex-wrap: wrap; }
   }
   @media (max-width: 480px) {
-    .modal { position: fixed; bottom: 0; left: 0; right: 0; width: 100% !important; max-width: 100% !important; border-radius: 16px 16px 0 0; max-height: 85vh; }
+    .modal { position: fixed; bottom: 0; left: 0; right: 0; width: 100% !important; max-width: 100% !important; border-radius: 28px 28px 0 0; max-height: 85vh; }
     .kpi-bar, .jt-stat-bar, .pin-stat-bar, .exp-stat-bar { grid-template-columns: 1fr 1fr; }
     .field-row { grid-template-columns: 1fr; }
     .modal-actions { flex-direction: column-reverse; }
@@ -356,7 +355,7 @@
         <div class="card">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
             <div class="card-title" style="margin-bottom:0">Upcoming Deliveries</div>
-            <button onclick="openAddDelivery()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2);border-radius:6px;padding:3px 10px;font-size:.72rem;cursor:pointer">+ Add</button>
+            <button onclick="openAddDelivery()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:3px 10px;font-size:0.75rem;cursor:pointer">+ Add</button>
           </div>
           <div id="pipelineList"></div>
         </div>
@@ -443,7 +442,7 @@
       <div class="card" style="margin-bottom:20px">
         <div class="card-title">Revenue Projection — Next 6 Months</div>
         <div class="proj-legend">
-          <div class="legend-item"><div class="legend-dot" style="background:#34d399"></div><span>Actual</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#30d158"></div><span>Actual</span></div>
           <div class="legend-item"><div class="legend-dot" style="background:var(--text2);opacity:.5"></div><span>Conservative (8 sets/mo)</span></div>
           <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div><span>Moderate (12 sets/mo)</span></div>
           <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div><span>Growth (16 sets/mo)</span></div>
@@ -476,8 +475,8 @@
     <div class="panel" id="panel-insights">
       <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:18px;flex-wrap:wrap;gap:10px">
         <div>
-          <div style="font-size:1rem;font-weight:800;display:flex;align-items:center;gap:7px">🤖 Smart Insights</div>
-          <div id="insightMeta" style="font-size:.72rem;color:var(--text2);margin-top:3px">Live analysis of your current sales data.</div>
+          <div style="font-size:1rem;font-weight:600;display:flex;align-items:center;gap:7px">🤖 Smart Insights</div>
+          <div id="insightMeta" style="font-size:0.75rem;color:var(--text2);margin-top:3px">Live analysis of your current sales data.</div>
         </div>
         <button class="btn-secondary" onclick="renderInsights()" style="padding:7px 14px;font-size:.78rem">↻ Refresh</button>
       </div>
@@ -490,7 +489,7 @@
         <div></div>
         <button class="btn-primary" onclick="openAddFilament()">+ Log Purchase</button>
       </div>
-      <div id="filamentKpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;border:1px solid var(--border)"></div>
+      <div id="filamentKpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;border:1px solid var(--border)"></div>
       <div class="grid-2" style="margin-bottom:20px">
         <div class="card">
           <div class="card-title">Cost per Roll — Trend</div>
@@ -596,7 +595,7 @@
     <div class="estat">
       <div class="estat-num" id="eskpiNet">$0.00</div>
       <div class="estat-label">Operating Profit</div>
-      <div style="font-size:0.72rem;color:var(--text2);margin-top:2px" id="eskpiExpRatio"></div>
+      <div style="font-size:0.75rem;color:var(--text2);margin-top:2px" id="eskpiExpRatio"></div>
     </div>
   </div>
 
@@ -784,7 +783,7 @@
       <div class="field"><label>Print Time per Unit (hours)</label><input type="number" id="opHours" step="0.25" min="0" placeholder="e.g. 1.5 (optional)"></div>
       <div class="field"><label>Filament per Unit (g)</label><input type="number" id="opFilament" step="1" min="0" placeholder="e.g. 40 (optional)" oninput="renderFilamentCostHint()"></div>
     </div>
-    <div id="opFilamentHint" style="font-size:0.74rem;color:var(--text2);margin:-6px 0 14px;display:none"></div>
+    <div id="opFilamentHint" style="font-size:0.75rem;color:var(--text2);margin:-6px 0 14px;display:none"></div>
     <div class="modal-actions" style="justify-content:space-between">
       <button class="btn-ghost" id="opDelete" style="color:var(--red);border-color:var(--red);display:none" onclick="deleteOrderProduct()">Delete Product</button>
       <div style="display:flex;gap:10px;margin-left:auto">
@@ -848,7 +847,7 @@
   <main>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px">
       <div>
-        <div style="font-size:1rem;font-weight:800">Pokémon Jet Tags Tracker</div>
+        <div style="font-size:1rem;font-weight:600">Pokémon Jet Tags Tracker</div>
         <div style="font-size:0.78rem;color:var(--text2);margin-top:3px" id="jtSubtitle">150 tags purchased · $112 total cost ($0.75/ea) · Sell price $5.00/ea</div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -875,7 +874,7 @@
       <div class="card" style="grid-column:1/-1">
         <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
           <span>Inventory by Character</span>
-          <span style="font-size:0.72rem;color:var(--text2)" id="jtInventoryDate"></span>
+          <span style="font-size:0.75rem;color:var(--text2)" id="jtInventoryDate"></span>
         </div>
         <div id="jtInventoryGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:4px"></div>
       </div>
@@ -885,7 +884,7 @@
       <!-- Order & restock history: every batch bought, what it cost, reorder vs new -->
       <div class="card" style="grid-column:1/-1">
         <div class="card-title">📦 Order &amp; Restock History</div>
-        <div style="font-size:0.74rem;color:var(--text2);margin-bottom:10px">Every batch you've bought — original stock, reorders, and new characters — with what each one cost you.</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-bottom:10px">Every batch you've bought — original stock, reorders, and new characters — with what each one cost you.</div>
         <div class="table-wrap">
           <table>
             <thead>
@@ -911,7 +910,7 @@
       <div class="card" style="grid-column:1/-1">
         <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
           <span>Sales Log</span>
-          <button class="btn-ghost" style="font-size:0.72rem;padding:5px 10px" onclick="renderJtSalesLog()">↺ Refresh</button>
+          <button class="btn-ghost" style="font-size:0.75rem;padding:5px 10px" onclick="renderJtSalesLog()">↺ Refresh</button>
         </div>
         <div class="table-wrap">
           <table>
@@ -1024,7 +1023,7 @@
   <main>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px">
       <div>
-        <div style="font-size:1rem;font-weight:800">Pokémon Pins Tracker</div>
+        <div style="font-size:1rem;font-weight:600">Pokémon Pins Tracker</div>
         <div style="font-size:0.78rem;color:var(--text2);margin-top:3px" id="pinSubtitle">240 pins purchased · $228 total cost ($0.95/ea) · Sell price tracked per sale</div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -1050,7 +1049,7 @@
       <div class="card" style="grid-column:1/-1">
         <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
           <span>Inventory by Character</span>
-          <span style="font-size:0.72rem;color:var(--text2)" id="pinInventoryDate"></span>
+          <span style="font-size:0.75rem;color:var(--text2)" id="pinInventoryDate"></span>
         </div>
         <div id="pinInventoryGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:4px"></div>
       </div>
@@ -1060,7 +1059,7 @@
       <!-- Order & restock history: every batch bought, what it cost, reorder vs new -->
       <div class="card" style="grid-column:1/-1">
         <div class="card-title">📦 Order &amp; Restock History</div>
-        <div style="font-size:0.74rem;color:var(--text2);margin-bottom:10px">Every batch you've bought — original stock, reorders, and new characters — with what each one cost you.</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-bottom:10px">Every batch you've bought — original stock, reorders, and new characters — with what each one cost you.</div>
         <div class="table-wrap">
           <table>
             <thead>
@@ -1084,7 +1083,7 @@
     <div class="card">
       <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
         <span>Sales Log</span>
-        <button class="btn-ghost" style="font-size:0.72rem;padding:5px 10px" onclick="renderPinSalesLog()">↺ Refresh</button>
+        <button class="btn-ghost" style="font-size:0.75rem;padding:5px 10px" onclick="renderPinSalesLog()">↺ Refresh</button>
       </div>
       <div class="table-wrap">
         <table>
@@ -1287,7 +1286,7 @@
 <div class="section" id="section-backoffice">
   <main style="max-width:740px;margin:0 auto">
     <div style="margin-bottom:28px">
-      <div style="font-size:1.1rem;font-weight:800;margin-bottom:4px">⚙ Back Office</div>
+      <div style="font-size:1.1rem;font-weight:600;margin-bottom:4px">⚙ Back Office</div>
       <div style="font-size:0.8rem;color:var(--text2)">Data management, backups, and cloud sync controls.</div>
     </div>
 
@@ -1631,8 +1630,8 @@ function renderMonthlyChart() {
   [0, 0.25, 0.5, 0.75, 1].forEach(pct => {
     const y = pad + (H - pad * 2) * (1 - pct);
     const val = Math.round(maxRev * pct);
-    axes += `<line x1="${pad}" x2="${W-10}" y1="${y}" y2="${y}" stroke="#2e3350" stroke-width="1"/>
-             <text x="${pad-6}" y="${y+4}" fill="#8892b0" font-size="9" text-anchor="end">$${val>=1000?(val/1000).toFixed(0)+'k':val}</text>`;
+    axes += `<line x1="${pad}" x2="${W-10}" y1="${y}" y2="${y}" stroke="#3a3a3c" stroke-width="1"/>
+             <text x="${pad-6}" y="${y+4}" fill="#a1a1a6" font-size="9" text-anchor="end">$${val>=1000?(val/1000).toFixed(0)+'k':val}</text>`;
   });
   months.forEach((mk, i) => {
     const x = pad + i * stride;
@@ -1643,11 +1642,11 @@ function renderMonthlyChart() {
     bars += `
       <rect x="${x}" y="${ry}" width="${barW}" height="${rH}" fill="#34d39955" rx="3"/>
       <rect x="${x+barW+4}" y="${py}" width="${barW}" height="${pH}" fill="var(--accent)" opacity="0.8" rx="3"/>
-      <text x="${x+barW}" y="${H-pad+14}" fill="#8892b0" font-size="9" text-anchor="middle">${monthLabel(mk)}</text>
-      <text x="${x+barW/2}" y="${ry-3}" fill="#34d399" font-size="8.5" text-anchor="middle">$${m.revenue>=1000?(m.revenue/1000).toFixed(1)+'k':m.revenue}</text>
+      <text x="${x+barW}" y="${H-pad+14}" fill="#a1a1a6" font-size="9" text-anchor="middle">${monthLabel(mk)}</text>
+      <text x="${x+barW/2}" y="${ry-3}" fill="#30d158" font-size="8.5" text-anchor="middle">$${m.revenue>=1000?(m.revenue/1000).toFixed(1)+'k':m.revenue}</text>
       <text x="${x+barW+barW/2+4}" y="${py-3}" fill="var(--accent)" font-size="8.5" text-anchor="middle">$${m.profit>=1000?(m.profit/1000).toFixed(1)+'k':Math.round(m.profit)}</text>`;
   });
-  const legend = `<text x="${W-160}" y="18" fill="#34d399" font-size="10" font-weight="600">■ Revenue</text>
+  const legend = `<text x="${W-160}" y="18" fill="#30d158" font-size="10" font-weight="600">■ Revenue</text>
                   <text x="${W-80}" y="18" fill="var(--accent)" font-size="10" font-weight="600">■ Profit</text>`;
   document.getElementById('monthlyChartWrap').innerHTML =
     `<svg class="chart" viewBox="0 0 ${W} ${H}" style="min-width:${W}px;height:${H}px">${axes}${bars}${legend}</svg>`;
@@ -1713,8 +1712,8 @@ function renderThisMonthSnap() {
   const projected = dayOfMo > 0 ? rev / dayOfMo * daysInMo : 0;
   document.getElementById('thisMonthSnap').innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-      <div><div style="font-size:1.5rem;font-weight:800;color:var(--green)">${fmt$(rev)}</div><div style="font-size:.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-top:2px">Revenue (${moName})</div></div>
-      <div><div style="font-size:1.5rem;font-weight:800;color:var(--accent)">${fmt$(prof)}</div><div style="font-size:.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-top:2px">Profit (${moName})</div></div>
+      <div><div style="font-size:1.5rem;font-weight:600;color:var(--green)">${fmt$(rev)}</div><div style="font-size:0.75rem;color:var(--text2);margin-top:2px">Revenue (${moName})</div></div>
+      <div><div style="font-size:1.5rem;font-weight:600;color:var(--accent)">${fmt$(prof)}</div><div style="font-size:0.75rem;color:var(--text2);margin-top:2px">Profit (${moName})</div></div>
     </div>
     <div style="font-size:.83rem;color:var(--text2);margin-bottom:6px"><strong style="color:var(--text)">${mo.length} orders</strong> in ${moName} so far (day ${dayOfMo} of ${daysInMo})</div>
     <div style="font-size:.83rem;color:${changeColor}">${changeSign}${pctChange}% vs ${lastName} (${fmt$(lrev)})</div>
@@ -1823,7 +1822,7 @@ function renderOrderTable() {
   }).join('');
 
   // Summary footer row (always shows totals across all filtered orders)
-  const footerRow = `<tr style="background:var(--surface2);font-weight:700">
+  const footerRow = `<tr style="background:var(--surface2);font-weight:600">
     <td colspan="3" style="color:var(--text2)">Total — ${total} orders${pageCount > 1 ? ` (page ${orderPage+1}/${pageCount})` : ''}</td>
     <td class="num green">${fmt$(totalRev)}</td>
     <td class="num" style="color:var(--text2)">${fmt$(totalCogs)}</td>
@@ -1897,7 +1896,7 @@ function renderCustomers() {
       <div style="background:var(--surface2);border-radius:99px;height:6px">
         <div style="width:${pct}%;background:var(--accent);border-radius:99px;height:6px"></div>
       </div>
-      <div style="font-size:.7rem;color:var(--text2);margin-top:2px">${d.orders} order${d.orders>1?'s':''} · ${fmt$(d.profit)} profit</div>
+      <div style="font-size:0.75rem;color:var(--text2);margin-top:2px">${d.orders} order${d.orders>1?'s':''} · ${fmt$(d.profit)} profit</div>
     </div>`;
   }).join('');
 
@@ -1986,21 +1985,21 @@ function renderProjections() {
   let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" style="min-width:${W}px;height:${H}px">`;
   [0, 0.25, 0.5, 0.75, 1].forEach(pct => {
     const y = pxY(maxVal * pct), v = Math.round(maxVal * pct);
-    svg += `<line x1="${pad}" x2="${W-10}" y1="${y}" y2="${y}" stroke="#2e3350" stroke-width="1"/>
-            <text x="${pad-6}" y="${y+4}" fill="#8892b0" font-size="9" text-anchor="end">${v>=1000?(v/1000).toFixed(0)+'k':v}</text>`;
+    svg += `<line x1="${pad}" x2="${W-10}" y1="${y}" y2="${y}" stroke="#3a3a3c" stroke-width="1"/>
+            <text x="${pad-6}" y="${y+4}" fill="#a1a1a6" font-size="9" text-anchor="end">${v>=1000?(v/1000).toFixed(0)+'k':v}</text>`;
   });
   const divX = pxX(months.length - 0.5);
-  svg += `<line x1="${divX}" x2="${divX}" y1="${pad}" y2="${H-pad}" stroke="#3d4460" stroke-width="1" stroke-dasharray="4,3"/>
-          <text x="${divX+4}" y="${pad-4}" fill="#8892b0" font-size="9">Projected →</text>`;
+  svg += `<line x1="${divX}" x2="${divX}" y1="${pad}" y2="${H-pad}" stroke="#48484a" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="${divX+4}" y="${pad-4}" fill="#a1a1a6" font-size="9">Projected →</text>`;
   const actPts = months.map((mk, i) => `${pxX(i)},${pxY(monthly[mk].revenue)}`).join(' ');
-  svg += `<polyline points="${actPts}" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linejoin="round"/>`;
-  months.forEach((mk, i) => { svg += `<circle cx="${pxX(i)}" cy="${pxY(monthly[mk].revenue)}" r="4" fill="#34d399"/>`; });
+  svg += `<polyline points="${actPts}" fill="none" stroke="#30d158" stroke-width="2.5" stroke-linejoin="round"/>`;
+  months.forEach((mk, i) => { svg += `<circle cx="${pxX(i)}" cy="${pxY(monthly[mk].revenue)}" r="4" fill="#30d158"/>`; });
   scenarios.forEach(s => {
     const pts = futureMonths.map((mk, i) => `${pxX(months.length+i)},${pxY(s.sets*s.price)}`).join(' ');
     svg += `<polyline points="${pxX(months.length-1)},${pxY(monthly[lastMonth].revenue)} ${pts}" fill="none" stroke="${s.color}" stroke-width="2" stroke-dasharray="5,3" stroke-linejoin="round"/>`;
   });
   allMonths.forEach((mk, i) => {
-    svg += `<text x="${pxX(i)}" y="${H-pad+14}" fill="${i>=months.length?'#556':'#8892b0'}" font-size="9" text-anchor="middle">${monthLabel(mk)}</text>`;
+    svg += `<text x="${pxX(i)}" y="${H-pad+14}" fill="${i>=months.length?'#556':'#a1a1a6'}" font-size="9" text-anchor="middle">${monthLabel(mk)}</text>`;
   });
   svg += '</svg>';
   document.getElementById('projChartWrap').innerHTML = svg;
@@ -2282,7 +2281,7 @@ function renderFilamentCostHint() {
   const cost = g * rate.perGram;
   el.style.display = '';
   el.innerHTML = `≈ <strong style="color:var(--text)">${fmt$(cost)}</strong> of filament per unit, at your average ${fmt$(rate.perRoll)} per roll (assuming 1 kg rolls). ` +
-    `<button type="button" class="btn-ghost" style="font-size:0.72rem;padding:3px 9px;margin-left:4px" onclick="document.getElementById('opCost').value='${cost.toFixed(2)}'">Use as cost</button>`;
+    `<button type="button" class="btn-ghost" style="font-size:0.75rem;padding:3px 9px;margin-left:4px" onclick="document.getElementById('opCost').value='${cost.toFixed(2)}'">Use as cost</button>`;
 }
 function openOrderProductModal(name) {
   const p = name ? orderProductByName(name) : null;
@@ -2389,18 +2388,18 @@ function renderUnitsSold() {
     const t = lines[k];
     const col = colors[k] || 'var(--accent)';
     return `<div style="background:var(--surface2);border-radius:8px;padding:14px;text-align:center">
-        <div style="font-size:2rem;font-weight:800;color:${col};line-height:1">${t.units}</div>
-        <div style="font-size:.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;margin-top:4px">${esc(t.label)} ${t.unit}</div>
-        <div style="font-size:.7rem;color:var(--text2);margin-top:6px">${t.orders} order${t.orders === 1 ? '' : 's'} · ${fmt$(t.revenue)}</div>
+        <div style="font-size:2rem;font-weight:600;color:${col};line-height:1">${t.units}</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-top:4px">${esc(t.label)} ${t.unit}</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-top:6px">${t.orders} order${t.orders === 1 ? '' : 's'} · ${fmt$(t.revenue)}</div>
       </div>`;
   }).join('');
   const rangeLabel = document.querySelector('.range-btn.active')?.textContent.trim() || 'All Time';
   const customNote = lines.custom
-    ? `<div style="font-size:.74rem;color:var(--text2);margin-top:14px">Custom orders aren't counted under a product. To move them, open each one on the Orders tab, choose its product, and check the Sale Price and COGS before saving — choosing a saved product refills them.</div>`
+    ? `<div style="font-size:0.75rem;color:var(--text2);margin-top:14px">Custom orders aren't counted under a product. To move them, open each one on the Orders tab, choose its product, and check the Sale Price and COGS before saving — choosing a saved product refills them.</div>`
     : '';
   card.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:18px">
-      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2)">📊 Units Sold</div>
+      <div style="font-size:0.75rem;font-weight:600;color:var(--text2)">📊 Units Sold</div>
       <div style="font-size:.78rem;color:var(--text2)">${esc(rangeLabel)} · risers counted in sets, products in units</div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px">${tiles}</div>
@@ -2614,12 +2613,12 @@ function printerCardHTML(printer) {
   const accentCol = printer.id === 'p1' ? 'var(--accent)' : 'var(--accent2)';
 
   const statusBadge = isPaidOff
-    ? `<div style="background:#0d3320;border:1px solid var(--green);border-radius:8px;padding:7px 14px;text-align:center;white-space:nowrap">
-        <div style="font-size:.68rem;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px">✅ PAID OFF</div>
+    ? `<div style="background:#203d28;border:1px solid var(--green);border-radius:8px;padding:7px 14px;text-align:center;white-space:nowrap">
+        <div style="font-size:0.75rem;font-weight:600;color:var(--green);">✅ PAID OFF</div>
        </div>`
-    : `<div style="background:#3b2e12;border:1px solid var(--yellow);border-radius:8px;padding:7px 14px;text-align:center;white-space:nowrap">
-        <div style="font-size:.68rem;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:.5px">In Progress</div>
-        <div style="font-size:.72rem;color:var(--text2);margin-top:2px">${fmt$(remaining)} left</div>
+    : `<div style="background:#453e1a;border:1px solid var(--yellow);border-radius:8px;padding:7px 14px;text-align:center;white-space:nowrap">
+        <div style="font-size:0.75rem;font-weight:600;color:var(--yellow);">In Progress</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-top:2px">${fmt$(remaining)} left</div>
        </div>`;
 
   // Milestone pills
@@ -2629,8 +2628,8 @@ function printerCardHTML(printer) {
     const hitEntry = credits.find((_, i) => credits.slice(0, i + 1).reduce((s, e) => s + e.amount, 0) >= target);
     const col = p === 1 ? 'var(--green)' : accentCol;
     return `<div style="text-align:center;flex:1;min-width:72px;padding:8px 4px">
-      <div style="font-size:1rem;font-weight:800;color:${reached ? col : 'var(--border)'}">${(p*100).toFixed(0)}%</div>
-      <div style="font-size:.68rem;color:${reached ? 'var(--text2)' : 'var(--border)'};margin-top:2px">${reached && hitEntry ? fmtDate(hitEntry.date) : '—'}</div>
+      <div style="font-size:1rem;font-weight:600;color:${reached ? col : 'var(--border)'}">${(p*100).toFixed(0)}%</div>
+      <div style="font-size:0.75rem;color:${reached ? 'var(--text2)' : 'var(--border)'};margin-top:2px">${reached && hitEntry ? fmtDate(hitEntry.date) : '—'}</div>
     </div>`;
   });
   const pillsHTML = milestones.reduce((acc, p, i) =>
@@ -2638,17 +2637,17 @@ function printerCardHTML(printer) {
 
   // Credit log rows (most recent first)
   const logRows = [...credits].reverse().map(e => `
-    <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #1e2138">
+    <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #2c2c2e">
       <div style="font-size:.75rem;color:var(--text2);width:68px;flex-shrink:0">${fmtDate(e.date)}</div>
-      <div style="font-size:.82rem;font-weight:700;color:${accentCol};width:68px;flex-shrink:0">${fmt$(e.amount)}</div>
+      <div style="font-size:.82rem;font-weight:600;color:${accentCol};width:68px;flex-shrink:0">${fmt$(e.amount)}</div>
       <div style="font-size:.78rem;color:var(--text2);flex:1">${esc(e.notes || '—')}</div>
       <button class="icon-btn" title="Delete entry" onclick="deletePrinterCredit('${printer.id}','${e.id}');renderPrinterPayoff()">✕</button>
     </div>`).join('');
 
-  return `<div style="background:var(--surface2);border-radius:10px;padding:18px;border-left:3px solid ${accentCol}">
+  return `<div style="background:var(--surface2);border-radius:12px;padding:18px;border-left:3px solid ${accentCol}">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
       <div>
-        <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:${accentCol};margin-bottom:3px">${printer.label} — ${printer.name}</div>
+        <div style="font-size:0.75rem;font-weight:600;color:${accentCol};margin-bottom:3px">${printer.label} — ${printer.name}</div>
         <div style="font-size:.78rem;color:var(--text2)">Bought ${fmtDate(printer.purchaseDate)} · <strong style="color:var(--text)">${fmt$(printer.cost)}</strong></div>
       </div>
       ${statusBadge}
@@ -2656,31 +2655,31 @@ function printerCardHTML(printer) {
 
     <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">
       <span style="font-size:.75rem;color:var(--text2)">Applied: <strong style="color:var(--text)">${fmt$(applied)}</strong> / ${fmt$(printer.cost)}</span>
-      <span style="font-size:.75rem;font-weight:700;color:${isPaidOff ? 'var(--green)' : accentCol}">${pct.toFixed(1)}%</span>
+      <span style="font-size:.75rem;font-weight:600;color:${isPaidOff ? 'var(--green)' : accentCol}">${pct.toFixed(1)}%</span>
     </div>
-    <div style="background:#0f1117;border-radius:99px;height:8px;overflow:hidden;margin-bottom:16px">
+    <div style="background:#1c1c1e;border-radius:99px;height:8px;overflow:hidden;margin-bottom:16px">
       <div style="width:${pct}%;background:linear-gradient(90deg,${accentCol},var(--green));border-radius:99px;height:100%;transition:width .4s"></div>
     </div>
 
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
-      <div style="background:#0f1117;border-radius:7px;padding:10px">
-        <div style="font-size:1.05rem;font-weight:800;color:${accentCol}">${fmt$(applied)}</div>
-        <div style="font-size:.62rem;color:var(--text2);margin-top:1px;text-transform:uppercase;letter-spacing:.4px">Total Applied</div>
+      <div style="background:#1c1c1e;border-radius:8px;padding:10px">
+        <div style="font-size:1.05rem;font-weight:600;color:${accentCol}">${fmt$(applied)}</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-top:1px;">Total Applied</div>
       </div>
-      <div style="background:#0f1117;border-radius:7px;padding:10px">
-        <div style="font-size:1.05rem;font-weight:800;color:${isPaidOff ? 'var(--green)' : 'var(--red)'}">${isPaidOff ? '+' + fmt$(applied - printer.cost) : fmt$(remaining)}</div>
-        <div style="font-size:.62rem;color:var(--text2);margin-top:1px;text-transform:uppercase;letter-spacing:.4px">${isPaidOff ? 'Over Cost' : 'Still Owed'}</div>
+      <div style="background:#1c1c1e;border-radius:8px;padding:10px">
+        <div style="font-size:1.05rem;font-weight:600;color:${isPaidOff ? 'var(--green)' : 'var(--red)'}">${isPaidOff ? '+' + fmt$(applied - printer.cost) : fmt$(remaining)}</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-top:1px;">${isPaidOff ? 'Over Cost' : 'Still Owed'}</div>
       </div>
-      <div style="background:#0f1117;border-radius:7px;padding:10px">
-        <div style="font-size:1.05rem;font-weight:800;color:var(--yellow)">${credits.length}</div>
-        <div style="font-size:.62rem;color:var(--text2);margin-top:1px;text-transform:uppercase;letter-spacing:.4px">Credit Entries</div>
+      <div style="background:#1c1c1e;border-radius:8px;padding:10px">
+        <div style="font-size:1.05rem;font-weight:600;color:var(--yellow)">${credits.length}</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-top:1px;">Credit Entries</div>
       </div>
     </div>
 
-    <div style="display:flex;border:1px solid var(--border);border-radius:7px;overflow:hidden;margin-bottom:16px">${pillsHTML}</div>
+    <div style="display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px">${pillsHTML}</div>
 
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-      <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2)">Credit Log</div>
+      <div style="font-size:0.75rem;font-weight:600;color:var(--text2)">Credit Log</div>
       <button class="btn-primary" style="padding:5px 12px;font-size:.75rem" onclick="openPrinterCreditModal('${printer.id}')">+ Apply Credit</button>
     </div>
     <div style="max-height:180px;overflow-y:auto">
@@ -2700,7 +2699,7 @@ function renderPrinterPayoff() {
   const cardsHTML = PRINTERS.map(p => printerCardHTML(p)).join('');
   card.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
-      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2)">🖨 Printer Payoff Tracker</div>
+      <div style="font-size:0.75rem;font-weight:600;color:var(--text2)">🖨 Printer Payoff Tracker</div>
       <div style="font-size:.78rem;color:var(--text2)">${paidOff}/${PRINTERS.length} paid off &nbsp;·&nbsp; Total hardware: <strong style="color:var(--text)">${fmt$(totalCost)}</strong></div>
     </div>
     <div class="grid-2" style="gap:16px">${cardsHTML}</div>`;
@@ -2733,10 +2732,10 @@ function renderMonthlyGoal() {
   const pct = Math.min(100, (curRev / goal * 100));
   const projPct = Math.min(100, (projected / goal * 100));
   let statusColor, statusLabel, statusBg;
-  if (curRev >= goal)                    { statusColor = 'var(--green)';  statusLabel = '🎯 Goal Hit!';  statusBg = '#0d3320'; }
-  else if (projected >= goal)            { statusColor = 'var(--accent)'; statusLabel = '✅ On Track';   statusBg = '#12213b'; }
-  else if (projected >= goal * 0.75)     { statusColor = 'var(--yellow)'; statusLabel = '⚠️ At Risk';   statusBg = '#3b2e12'; }
-  else                                   { statusColor = 'var(--red)';    statusLabel = '🔴 Behind';     statusBg = '#3b1212'; }
+  if (curRev >= goal)                    { statusColor = 'var(--green)';  statusLabel = '🎯 Goal Hit!';  statusBg = '#203d28'; }
+  else if (projected >= goal)            { statusColor = 'var(--accent)'; statusLabel = '✅ On Track';   statusBg = '#192f46'; }
+  else if (projected >= goal * 0.75)     { statusColor = 'var(--yellow)'; statusLabel = '⚠️ At Risk';   statusBg = '#453e1a'; }
+  else                                   { statusColor = 'var(--red)';    statusLabel = '🔴 Behind';     statusBg = '#452323'; }
   const historyRows = allMonths.map(mk => {
     const rev = monthlyRev[mk] || 0;
     const isCur = mk === CUR_MK;
@@ -2765,52 +2764,52 @@ function renderMonthlyGoal() {
   card.innerHTML = `
     <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px">
       <div>
-        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:6px">🎯 Monthly Revenue Goal</div>
+        <div style="font-size:0.75rem;font-weight:600;color:var(--text2);margin-bottom:6px">🎯 Monthly Revenue Goal</div>
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:.82rem;color:var(--text2)">Target:</span>
-          <span style="font-size:1.4rem;font-weight:800;color:var(--text)">${fmt$(goal)}</span>
-          <button onclick="editGoal()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2);border-radius:6px;padding:3px 10px;font-size:.72rem;cursor:pointer">Edit</button>
+          <span style="font-size:1.4rem;font-weight:600;color:var(--text)">${fmt$(goal)}</span>
+          <button onclick="editGoal()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:3px 10px;font-size:0.75rem;cursor:pointer">Edit</button>
         </div>
       </div>
       <div style="background:${statusBg};border:1px solid ${statusColor};border-radius:8px;padding:8px 16px;text-align:center">
-        <div style="font-size:.82rem;font-weight:700;color:${statusColor}">${statusLabel}</div>
-        <div style="font-size:.72rem;color:var(--text2);margin-top:2px">${daysLeft} days left in month</div>
+        <div style="font-size:.82rem;font-weight:600;color:${statusColor}">${statusLabel}</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-top:2px">${daysLeft} days left in month</div>
       </div>
     </div>
     <div class="grid-2" style="gap:20px">
       <div>
         <div style="display:flex;justify-content:space-between;margin-bottom:6px;align-items:baseline">
           <span style="font-size:.78rem;color:var(--text2)">This month: <strong style="color:var(--text)">${fmt$(curRev)}</strong> of <strong>${fmt$(goal)}</strong></span>
-          <span style="font-size:.78rem;font-weight:700;color:${statusColor}">${pct.toFixed(0)}%</span>
+          <span style="font-size:.78rem;font-weight:600;color:${statusColor}">${pct.toFixed(0)}%</span>
         </div>
         <div style="background:var(--surface2);border-radius:99px;height:10px;overflow:hidden;margin-bottom:6px">
           <div style="width:${pct}%;background:${statusColor};border-radius:99px;height:100%;opacity:.9;transition:width .3s"></div>
         </div>
         <div style="display:flex;justify-content:space-between;margin-bottom:4px;align-items:baseline">
-          <span style="font-size:.74rem;color:var(--text2)">Projected end-of-month: <strong style="color:var(--yellow)">${fmt$(Math.round(projected))}</strong></span>
-          <span style="font-size:.74rem;color:var(--text2)">${projPct.toFixed(0)}% of goal</span>
+          <span style="font-size:0.75rem;color:var(--text2)">Projected end-of-month: <strong style="color:var(--yellow)">${fmt$(Math.round(projected))}</strong></span>
+          <span style="font-size:0.75rem;color:var(--text2)">${projPct.toFixed(0)}% of goal</span>
         </div>
         <div style="background:var(--surface2);border-radius:99px;height:6px;overflow:hidden;margin-bottom:14px">
           <div style="width:${projPct}%;background:var(--yellow);border-radius:99px;height:100%;opacity:.6"></div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-          <div style="background:var(--surface2);border-radius:7px;padding:10px;text-align:center">
-            <div style="font-size:1.1rem;font-weight:800;color:var(--green)">${fmt$(Math.max(0, goal - curRev))}</div>
-            <div style="font-size:.62rem;color:var(--text2);margin-top:2px;text-transform:uppercase;letter-spacing:.3px">Still Needed</div>
+          <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center">
+            <div style="font-size:1.1rem;font-weight:600;color:var(--green)">${fmt$(Math.max(0, goal - curRev))}</div>
+            <div style="font-size:0.75rem;color:var(--text2);margin-top:2px;">Still Needed</div>
           </div>
-          <div style="background:var(--surface2);border-radius:7px;padding:10px;text-align:center">
-            <div style="font-size:1.1rem;font-weight:800;color:var(--accent)">${Math.ceil(Math.max(0, goal - curRev) / 90)}</div>
-            <div style="font-size:.62rem;color:var(--text2);margin-top:2px;text-transform:uppercase;letter-spacing:.3px">More Orders</div>
+          <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center">
+            <div style="font-size:1.1rem;font-weight:600;color:var(--accent)">${Math.ceil(Math.max(0, goal - curRev) / 90)}</div>
+            <div style="font-size:0.75rem;color:var(--text2);margin-top:2px;">More Orders</div>
           </div>
-          <div style="background:var(--surface2);border-radius:7px;padding:10px;text-align:center">
-            <div style="font-size:1.1rem;font-weight:800;color:var(--accent2)">${streak}</div>
-            <div style="font-size:.62rem;color:var(--text2);margin-top:2px;text-transform:uppercase;letter-spacing:.3px">Month Streak</div>
+          <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center">
+            <div style="font-size:1.1rem;font-weight:600;color:var(--accent2)">${streak}</div>
+            <div style="font-size:0.75rem;color:var(--text2);margin-top:2px;">Month Streak</div>
           </div>
         </div>
       </div>
       <div>
-        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:12px">
-          History vs Goal <span style="font-size:.68rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text2)"> — the tick on each bar marks your goal</span>
+        <div style="font-size:0.75rem;font-weight:600;color:var(--text2);margin-bottom:12px">
+          History vs Goal <span style="font-size:0.75rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text2)"> — the tick on each bar marks your goal</span>
         </div>
         ${historyRows}
       </div>
@@ -2863,67 +2862,67 @@ function renderInstalledBase() {
       <div style="flex:1;background:var(--surface2);border-radius:99px;height:8px">
         <div style="width:${pct}%;background:${col};border-radius:99px;height:8px"></div>
       </div>
-      <div style="font-size:.78rem;font-weight:700;color:${col};width:48px;text-align:right">${v.sets} set${v.sets>1?'s':''}</div>
+      <div style="font-size:.78rem;font-weight:600;color:${col};width:48px;text-align:right">${v.sets} set${v.sets>1?'s':''}</div>
     </div>`;
   }).join('');
   const expansionList = singleSet.sort((a,b) => b[1].revenue - a[1].revenue).slice(0,8)
-    .map(([name, v]) => `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #1e2138">
+    .map(([name, v]) => `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #2c2c2e">
       <span style="font-size:.8rem">${esc(name)}</span>
-      <span style="font-size:.72rem;color:var(--text2)">bought ${fmtDate(v.lastDate)} · <strong style="color:var(--yellow)">+$90 if they expand</strong></span>
+      <span style="font-size:0.75rem;color:var(--text2)">bought ${fmtDate(v.lastDate)} · <strong style="color:var(--yellow)">+$90 if they expand</strong></span>
     </div>`).join('');
   card.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:18px">
-      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2)">📦 Installed Base</div>
+      <div style="font-size:0.75rem;font-weight:600;color:var(--text2)">📦 Installed Base</div>
       <div style="font-size:.78rem;color:var(--text2)">Sets currently in the field across all vendors</div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:22px">
       <div style="background:var(--surface2);border-radius:8px;padding:14px;text-align:center">
-        <div style="font-size:2rem;font-weight:800;color:var(--green);line-height:1">${totalSets}</div>
-        <div style="font-size:.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;margin-top:4px">Sets in Field</div>
+        <div style="font-size:2rem;font-weight:600;color:var(--green);line-height:1">${totalSets}</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-top:4px">Sets in Field</div>
       </div>
       <div style="background:var(--surface2);border-radius:8px;padding:14px;text-align:center">
-        <div style="font-size:2rem;font-weight:800;color:var(--accent);line-height:1">${totalVendors}</div>
-        <div style="font-size:.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;margin-top:4px">Vendors Using It</div>
+        <div style="font-size:2rem;font-weight:600;color:var(--accent);line-height:1">${totalVendors}</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-top:4px">Vendors Using It</div>
       </div>
       <div style="background:var(--surface2);border-radius:8px;padding:14px;text-align:center">
-        <div style="font-size:2rem;font-weight:800;color:var(--accent2);line-height:1">${multiSet.length}</div>
-        <div style="font-size:.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;margin-top:4px">Multi-Set Vendors</div>
+        <div style="font-size:2rem;font-weight:600;color:var(--accent2);line-height:1">${multiSet.length}</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-top:4px">Multi-Set Vendors</div>
       </div>
       <div style="background:var(--surface2);border-radius:8px;padding:14px;text-align:center">
-        <div style="font-size:2rem;font-weight:800;color:var(--yellow);line-height:1">${singleSet.length}</div>
-        <div style="font-size:.68rem;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;margin-top:4px">Expansion Candidates</div>
+        <div style="font-size:2rem;font-weight:600;color:var(--yellow);line-height:1">${singleSet.length}</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-top:4px">Expansion Candidates</div>
       </div>
     </div>
     <div class="grid-2" style="gap:20px;margin-bottom:20px">
       <div>
-        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:12px">Sets per Vendor (top ${top.length})</div>
+        <div style="font-size:0.75rem;font-weight:600;color:var(--text2);margin-bottom:12px">Sets per Vendor (top ${top.length})</div>
         ${barRows}
-        ${vendors.length > top.length ? `<div style="font-size:.72rem;color:var(--text2);margin-top:6px">+ ${vendors.length - top.length} more vendors with 1 set each</div>` : ''}
+        ${vendors.length > top.length ? `<div style="font-size:0.75rem;color:var(--text2);margin-top:6px">+ ${vendors.length - top.length} more vendors with 1 set each</div>` : ''}
       </div>
       <div>
-        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:4px">
-          Expansion Candidates <span style="font-size:.68rem;font-weight:400;color:var(--text2);text-transform:none;letter-spacing:0"> — ${singleSet.length} vendors with 1 set</span>
+        <div style="font-size:0.75rem;font-weight:600;color:var(--text2);margin-bottom:4px">
+          Expansion Candidates <span style="font-size:0.75rem;font-weight:400;color:var(--text2);text-transform:none;letter-spacing:0"> — ${singleSet.length} vendors with 1 set</span>
         </div>
         <div style="font-size:.75rem;color:var(--yellow);margin-bottom:10px">If half expand: <strong>${fmt$(Math.round(singleSet.length / 2) * 90)}</strong> in potential revenue</div>
         <div style="max-height:220px;overflow-y:auto">${expansionList}</div>
-        ${singleSet.length > 8 ? `<div style="font-size:.7rem;color:var(--text2);margin-top:6px">+ ${singleSet.length - 8} more</div>` : ''}
+        ${singleSet.length > 8 ? `<div style="font-size:0.75rem;color:var(--text2);margin-top:6px">+ ${singleSet.length - 8} more</div>` : ''}
       </div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
       <div style="background:var(--surface2);border-radius:8px;padding:12px">
-        <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text2);margin-bottom:4px">Avg Sets / Vendor</div>
-        <div style="font-size:1.2rem;font-weight:800;color:var(--text)">${avgSets}</div>
-        <div style="font-size:.7rem;color:var(--text2);margin-top:2px">growing as multi-set orders increase</div>
+        <div style="font-size:0.75rem;font-weight:600;color:var(--text2);margin-bottom:4px">Avg Sets / Vendor</div>
+        <div style="font-size:1.2rem;font-weight:600;color:var(--text)">${avgSets}</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-top:2px">growing as multi-set orders increase</div>
       </div>
       <div style="background:var(--surface2);border-radius:8px;padding:12px">
-        <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text2);margin-bottom:4px">Full Expansion Value</div>
-        <div style="font-size:1.2rem;font-weight:800;color:var(--yellow)">${fmt$(expansionRev)}</div>
-        <div style="font-size:.7rem;color:var(--text2);margin-top:2px">if every 1-set vendor buys a 2nd</div>
+        <div style="font-size:0.75rem;font-weight:600;color:var(--text2);margin-bottom:4px">Full Expansion Value</div>
+        <div style="font-size:1.2rem;font-weight:600;color:var(--yellow)">${fmt$(expansionRev)}</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-top:2px">if every 1-set vendor buys a 2nd</div>
       </div>
       <div style="background:var(--surface2);border-radius:8px;padding:12px">
-        <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text2);margin-bottom:4px">Replacement Potential</div>
-        <div style="font-size:1.2rem;font-weight:800;color:var(--accent2)">~${Math.round(totalSets * 0.02)}/mo</div>
-        <div style="font-size:.7rem;color:var(--text2);margin-top:2px">orders if ~2% of sets break monthly</div>
+        <div style="font-size:0.75rem;font-weight:600;color:var(--text2);margin-bottom:4px">Replacement Potential</div>
+        <div style="font-size:1.2rem;font-weight:600;color:var(--accent2)">~${Math.round(totalSets * 0.02)}/mo</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-top:2px">orders if ~2% of sets break monthly</div>
       </div>
     </div>`;
 }
@@ -3007,9 +3006,9 @@ function renderFilament() {
     { val: fmt$(latestPR),         label: 'Latest Price / Roll',      sub: `was ${fmt$(firstPR)} at start (${savingPct > 0 ? '-'+savingPct+'%' : '+'+Math.abs(savingPct)+'%'})` },
     { val: (totalSpend / Math.max(totalRev,1) * 100).toFixed(1) + '%', label: 'Filament as % of Revenue', sub: `${fmt$(totalSpend)} of ${fmt$(totalRev)}` },
   ].map(k => `<div style="background:var(--surface);padding:16px 20px">
-    <div style="font-size:1.4rem;font-weight:800;color:var(--accent2)">${k.val}</div>
-    <div style="font-size:.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-top:3px">${k.label}</div>
-    <div style="font-size:.7rem;color:var(--text2);margin-top:3px">${k.sub}</div>
+    <div style="font-size:1.4rem;font-weight:600;color:var(--accent2)">${k.val}</div>
+    <div style="font-size:0.75rem;color:var(--text2);margin-top:3px">${k.label}</div>
+    <div style="font-size:0.75rem;color:var(--text2);margin-top:3px">${k.sub}</div>
   </div>`).join('');
   renderFilamentTrend(real);
   renderFilamentMonthly(items);
@@ -3033,13 +3032,13 @@ function renderFilamentTrend(items) {
   let grid = '', dots = '', labels = '';
   [minPR, (minPR+maxPR)/2, maxPR].forEach(v => {
     const y = py(v);
-    grid += `<line x1="${pad}" x2="${W}" y1="${y}" y2="${y}" stroke="#2e3350" stroke-width="1"/>
-             <text x="${pad-4}" y="${y+4}" fill="#8892b0" font-size="9" text-anchor="end">${fmt$(v)}</text>`;
+    grid += `<line x1="${pad}" x2="${W}" y1="${y}" y2="${y}" stroke="#3a3a3c" stroke-width="1"/>
+             <text x="${pad-4}" y="${y+4}" fill="#a1a1a6" font-size="9" text-anchor="end">${fmt$(v)}</text>`;
   });
   const avg = items.reduce((s,f) => s + f.perRoll, 0) / items.length;
   const ay = py(avg);
-  grid += `<line x1="${pad}" x2="${W}" y1="${ay}" y2="${ay}" stroke="#8892b0" stroke-width="1" stroke-dasharray="3,3"/>
-           <text x="${W-2}" y="${ay-3}" fill="#8892b0" font-size="8" text-anchor="end">avg ${fmt$(avg)}</text>`;
+  grid += `<line x1="${pad}" x2="${W}" y1="${ay}" y2="${ay}" stroke="#a1a1a6" stroke-width="1" stroke-dasharray="3,3"/>
+           <text x="${W-2}" y="${ay-3}" fill="#a1a1a6" font-size="8" text-anchor="end">avg ${fmt$(avg)}</text>`;
   const pts = items.map((f,i) => `${px(i)},${py(f.perRoll)}`).join(' ');
   const areaBase = py(minPR);
   const areaPath = `M${px(0)},${areaBase} ` + items.map((f,i) => `L${px(i)},${py(f.perRoll)}`).join(' ') + ` L${px(items.length-1)},${areaBase} Z`;
@@ -3051,8 +3050,8 @@ function renderFilamentTrend(items) {
     dots += `<circle cx="${px(i)}" cy="${py(f.perRoll)}" r="${isBad?5:3.5}" fill="${color}"/>`;
     if (i === 0 || i === items.length - 1) labels += `<text x="${px(i)}" y="${py(f.perRoll)-6}" fill="${color}" font-size="8.5" text-anchor="middle">${fmt$(f.perRoll)}</text>`;
   });
-  const startLabel = `<text x="${px(0)}" y="${H-4}" fill="#8892b0" font-size="8" text-anchor="middle">${fmtDate(items[0].date)}</text>`;
-  const endLabel = `<text x="${px(items.length-1)}" y="${H-4}" fill="#8892b0" font-size="8" text-anchor="middle">${fmtDate(items[items.length-1].date)}</text>`;
+  const startLabel = `<text x="${px(0)}" y="${H-4}" fill="#a1a1a6" font-size="8" text-anchor="middle">${fmtDate(items[0].date)}</text>`;
+  const endLabel = `<text x="${px(items.length-1)}" y="${H-4}" fill="#a1a1a6" font-size="8" text-anchor="middle">${fmtDate(items[items.length-1].date)}</text>`;
   document.getElementById('filamentTrendChart').innerHTML =
     `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px">${grid}${line}${dots}${labels}${startLabel}${endLabel}
      <text x="${W-2}" y="14" fill="var(--red)" font-size="8.5" text-anchor="end">● bad batch</text></svg>`;
@@ -3076,15 +3075,15 @@ function renderFilamentMonthly(items) {
   let bars = '', axes = '';
   [0, 0.5, 1].forEach(pct => {
     const y = pad + (H - pad * 2) * (1 - pct);
-    axes += `<line x1="${pad}" x2="${W}" y1="${y}" y2="${y}" stroke="#2e3350" stroke-width="1"/>
-             <text x="${pad-4}" y="${y+4}" fill="#8892b0" font-size="9" text-anchor="end">$${Math.round(maxVal*pct)}</text>`;
+    axes += `<line x1="${pad}" x2="${W}" y1="${y}" y2="${y}" stroke="#3a3a3c" stroke-width="1"/>
+             <text x="${pad-4}" y="${y+4}" fill="#a1a1a6" font-size="9" text-anchor="end">$${Math.round(maxVal*pct)}</text>`;
   });
   months.forEach((mk,i) => {
     const x = pad + i * (barW + 42), m = monthMap[mk];
     const h = Math.max(3, (m.total / maxVal) * (H - pad * 2)), y = H - pad - h;
     bars += `<rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="var(--accent2)" opacity=".8" rx="3"/>
              <text x="${x+barW/2}" y="${y-3}" fill="var(--accent2)" font-size="8.5" text-anchor="middle">$${Math.round(m.total)}</text>
-             <text x="${x+barW/2}" y="${H-pad+13}" fill="#8892b0" font-size="8.5" text-anchor="middle">${monthLabel(mk)}</text>
+             <text x="${x+barW/2}" y="${H-pad+13}" fill="#a1a1a6" font-size="8.5" text-anchor="middle">${monthLabel(mk)}</text>
              <text x="${x+barW/2}" y="${H-pad+23}" fill="#556" font-size="7.5" text-anchor="middle">${m.rolls}r</text>`;
   });
   document.getElementById('filamentMonthlyChart').innerHTML =
@@ -3112,13 +3111,13 @@ function renderFilamentBrands(items) {
     const col = colors[i] || 'var(--text2)';
     return `<div style="margin-bottom:14px">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
-        <span style="font-size:.85rem;font-weight:700;color:${col}">${brand}</span>
+        <span style="font-size:.85rem;font-weight:600;color:${col}">${brand}</span>
         <span style="font-size:.8rem;color:var(--text2)">${fmt$(d.total)} · ${d.rolls} rolls · ${d.purchases} orders</span>
       </div>
       <div style="background:var(--surface2);border-radius:99px;height:7px;margin-bottom:4px">
         <div style="width:${pct}%;background:${col};border-radius:99px;height:7px;opacity:.85"></div>
       </div>
-      <div style="font-size:.72rem;color:var(--text2)">Avg <strong style="color:${col}">${fmt$(avgPR)}</strong>/roll · range ${fmt$(Math.min(...d.priceHistory))}–${fmt$(Math.max(...d.priceHistory))}</div>
+      <div style="font-size:0.75rem;color:var(--text2)">Avg <strong style="color:${col}">${fmt$(avgPR)}</strong>/roll · range ${fmt$(Math.min(...d.priceHistory))}–${fmt$(Math.max(...d.priceHistory))}</div>
     </div>`;
   }).join('');
 }
@@ -3134,7 +3133,7 @@ function renderFilamentRatio(items, orders) {
   orders.forEach(o => { const mk = o.date.slice(0,7); if (!revMonthly[mk]) revMonthly[mk] = 0; revMonthly[mk] += o.salePrice; });
   const allMonths = [...new Set([...Object.keys(filMonthly), ...Object.keys(revMonthly)])].sort();
   document.getElementById('filamentRatioChart').innerHTML =
-    `<div style="font-size:.72rem;color:var(--text2);margin-bottom:12px">Green &lt;15% · Yellow 15–30% · Red &gt;30%</div>` +
+    `<div style="font-size:0.75rem;color:var(--text2);margin-bottom:12px">Green &lt;15% · Yellow 15–30% · Red &gt;30%</div>` +
     allMonths.map(mk => {
       const fil = filMonthly[mk] || 0, rev = revMonthly[mk] || 0;
       const pct = rev > 0 ? (fil / rev * 100) : 0;
@@ -3142,12 +3141,12 @@ function renderFilamentRatio(items, orders) {
       return `<div style="margin-bottom:10px">
         <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px">
           <span style="font-size:.8rem;font-weight:600">${monthLabel(mk)}</span>
-          <span style="font-size:.78rem;color:${col};font-weight:700">${pct.toFixed(1)}%</span>
+          <span style="font-size:.78rem;color:${col};font-weight:600">${pct.toFixed(1)}%</span>
         </div>
         <div style="background:var(--surface2);border-radius:99px;height:6px">
           <div style="width:${Math.min(pct*2,100)}%;background:${col};border-radius:99px;height:6px;opacity:.85"></div>
         </div>
-        <div style="font-size:.68rem;color:var(--text2);margin-top:2px">${fmt$(fil)} filament of ${fmt$(rev)} revenue</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-top:2px">${fmt$(fil)} filament of ${fmt$(rev)} revenue</div>
       </div>`;
     }).join('');
 }
@@ -3156,7 +3155,7 @@ function renderFilamentTable(items) {
   const rows = [...items].reverse().map(f => {
     const isBad = f.notes.toLowerCase().includes('bad');
     const isAdj = f.notes.toLowerCase().includes('found') || f.perRoll < 1;
-    const rowStyle = isBad ? 'background:#1e1010' : isAdj ? 'background:#12183b' : '';
+    const rowStyle = isBad ? 'background:#1e1010' : isAdj ? 'background:#192f46' : '';
     const noteCol = isBad ? 'var(--red)' : isAdj ? 'var(--accent)' : 'var(--text2)';
     return `<tr style="${rowStyle}">
       <td style="white-space:nowrap">${fmtDate(f.date)}</td>
@@ -3169,7 +3168,7 @@ function renderFilamentTable(items) {
   }).join('');
   const totalSpend = items.reduce((s,f) => s + f.total, 0);
   const totalRolls = items.reduce((s,f) => s + f.qty, 0);
-  document.getElementById('filamentTbody').innerHTML = rows + `<tr style="background:var(--surface2);font-weight:700">
+  document.getElementById('filamentTbody').innerHTML = rows + `<tr style="background:var(--surface2);font-weight:600">
     <td style="color:var(--text2)">Total — ${items.length} purchases</td>
     <td class="num">${totalRolls} rolls</td>
     <td class="num" style="color:var(--accent2)">${fmt$(totalSpend)}</td>
@@ -3218,15 +3217,15 @@ document.getElementById('orderProductModal').addEventListener('click', e => { if
 // ══════════════════════════════════════════════════════════════
 const EXP_KEY = VPCUtil.KEYS.expensesLegacy;
 const EXP_CATS = [
-  { name:'Filament / Materials', color:'#fb923c', type:'variable' },
-  { name:'Equipment / Printer',  color:'#a78bfa', type:'variable' },
+  { name:'Filament / Materials', color:'#ff9f0a', type:'variable' },
+  { name:'Equipment / Printer',  color:'#bf5af2', type:'variable' },
   { name:'Shipping Supplies',    color:'#60a5fa', type:'variable' },
-  { name:'Platform / Fees',      color:'#fbbf24', type:'fixed'    },
+  { name:'Platform / Fees',      color:'#ffd60a', type:'fixed'    },
   { name:'Marketing',            color:'#f472b6', type:'variable' },
   { name:'Utilities',            color:'#2dd4bf', type:'fixed'    },
-  { name:'Rent / Storage',       color:'#34d399', type:'fixed'    },
+  { name:'Rent / Storage',       color:'#30d158', type:'fixed'    },
   { name:'Software / Tools',     color:'#818cf8', type:'fixed'    },
-  { name:'Other',                color:'#8892b0', type:'variable' },
+  { name:'Other',                color:'#a1a1a6', type:'variable' },
 ];
 let editExpId = null;
 let expSortCol = 'date', expSortDir = -1, expMonthFilter = 'all', currentExpMonth = 'all';
@@ -3235,7 +3234,7 @@ function getExpenses() {
   try { return JSON.parse(localStorage.getItem(EXP_KEY)) || []; } catch { return []; }
 }
 function saveExpenses(arr) { localStorage.setItem(EXP_KEY, JSON.stringify(arr)); }
-function catColor(name) { return (EXP_CATS.find(c => c.name === name) || {}).color || '#8892b0'; }
+function catColor(name) { return (EXP_CATS.find(c => c.name === name) || {}).color || '#a1a1a6'; }
 
 // ── KPIs ──
 function renderExpenseKPIs() {
@@ -3299,8 +3298,8 @@ function renderExpMonthlyChart() {
   let bars = '', axes = '';
   [0, 0.25, 0.5, 0.75, 1].forEach(pct => {
     const y = pad + (H-pad*2)*(1-pct), v = Math.round(maxVal*pct);
-    axes += `<line x1="${pad}" x2="${W-10}" y1="${y}" y2="${y}" stroke="#2e3350" stroke-width="1"/>
-             <text x="${pad-6}" y="${y+4}" fill="#8892b0" font-size="9" text-anchor="end">$${v>=1000?(v/1000).toFixed(0)+'k':v}</text>`;
+    axes += `<line x1="${pad}" x2="${W-10}" y1="${y}" y2="${y}" stroke="#3a3a3c" stroke-width="1"/>
+             <text x="${pad-6}" y="${y+4}" fill="#a1a1a6" font-size="9" text-anchor="end">$${v>=1000?(v/1000).toFixed(0)+'k':v}</text>`;
   });
   allMks.forEach((mk, i) => {
     const x   = pad + i*(barW*2+gap);
@@ -3309,12 +3308,12 @@ function renderExpMonthlyChart() {
     const ry  = H-pad-rH, ey = H-pad-eH;
     bars += `<rect x="${x}" y="${ry}" width="${barW}" height="${rH}" fill="#34d39944" rx="3"/>
              <rect x="${x+barW+4}" y="${ey}" width="${barW}" height="${eH}" fill="#f8717166" rx="3"/>
-             <text x="${x+barW}" y="${H-pad+14}" fill="#8892b0" font-size="9" text-anchor="middle">${monthLabel(mk)}</text>`;
-    if (rev > 0) bars += `<text x="${x+barW/2}" y="${ry-3}" fill="#34d399" font-size="8" text-anchor="middle">$${rev>=1000?(rev/1000).toFixed(1)+'k':Math.round(rev)}</text>`;
-    if (exp > 0) bars += `<text x="${x+barW+barW/2+4}" y="${ey-3}" fill="#f87171" font-size="8" text-anchor="middle">$${exp>=1000?(exp/1000).toFixed(1)+'k':Math.round(exp)}</text>`;
+             <text x="${x+barW}" y="${H-pad+14}" fill="#a1a1a6" font-size="9" text-anchor="middle">${monthLabel(mk)}</text>`;
+    if (rev > 0) bars += `<text x="${x+barW/2}" y="${ry-3}" fill="#30d158" font-size="8" text-anchor="middle">$${rev>=1000?(rev/1000).toFixed(1)+'k':Math.round(rev)}</text>`;
+    if (exp > 0) bars += `<text x="${x+barW+barW/2+4}" y="${ey-3}" fill="#ff6961" font-size="8" text-anchor="middle">$${exp>=1000?(exp/1000).toFixed(1)+'k':Math.round(exp)}</text>`;
   });
-  const legend = `<text x="${W-180}" y="18" fill="#34d399" font-size="10" font-weight="600">■ Revenue</text>
-                  <text x="${W-100}" y="18" fill="#f87171" font-size="10" font-weight="600">■ Expenses</text>`;
+  const legend = `<text x="${W-180}" y="18" fill="#30d158" font-size="10" font-weight="600">■ Revenue</text>
+                  <text x="${W-100}" y="18" fill="#ff6961" font-size="10" font-weight="600">■ Expenses</text>`;
   document.getElementById('expMonthlyChart').innerHTML =
     `<svg class="chart" viewBox="0 0 ${W} ${H}" style="min-width:${W}px;height:${H}px">${axes}${bars}${legend}</svg>`;
 }
@@ -3323,12 +3322,12 @@ function renderExpMonthlyChart() {
 function renderRecentExpenses() {
   const exps = getExpenses().sort((a,b) => b.date.localeCompare(a.date)).slice(0, 8);
   document.getElementById('expRecentList').innerHTML = exps.length
-    ? exps.map(e => `<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #1e2138">
+    ? exps.map(e => `<div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #2c2c2e">
         <span style="width:9px;height:9px;border-radius:50%;background:${catColor(e.category)};flex-shrink:0"></span>
         <span style="flex:1;font-size:.83rem;font-weight:600">${esc(e.description)}</span>
-        <span style="font-size:.73rem;color:var(--text2)">${esc(e.category)}</span>
+        <span style="font-size:0.75rem;color:var(--text2)">${esc(e.category)}</span>
         <span style="font-size:.83rem;color:var(--red);font-variant-numeric:tabular-nums;white-space:nowrap">${fmt$(e.amount)}</span>
-        <span style="font-size:.72rem;color:var(--text2);white-space:nowrap">${fmtDate(e.date)}</span>
+        <span style="font-size:0.75rem;color:var(--text2);white-space:nowrap">${fmtDate(e.date)}</span>
         <button class="icon-btn" onclick="openExpModal('${e.id}')">✏️</button>
         <button class="icon-btn" onclick="deleteExpense('${e.id}')">✕</button>
       </div>`).join('')
@@ -3363,7 +3362,7 @@ function renderExpTable() {
     return `<tr>
       <td style="white-space:nowrap">${fmtDate(e.date)}</td>
       <td><div style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0"></span><strong>${esc(e.description)}</strong></div></td>
-      <td><span style="font-size:.75rem;color:${color};font-weight:700">${esc(e.category)}</span></td>
+      <td><span style="font-size:.75rem;color:${color};font-weight:600">${esc(e.category)}</span></td>
       <td><span class="badge ${e.type==='fixed'?'badge-blue':'badge-yellow'}">${e.type}</span></td>
       <td class="num" style="color:var(--red)">${fmt$(e.amount)}</td>
       <td style="text-align:right;white-space:nowrap">
@@ -3373,7 +3372,7 @@ function renderExpTable() {
     </tr>`;
   }).join('');
   document.getElementById('expTbody').innerHTML = rows + (exps.length
-    ? `<tr style="background:var(--surface2);font-weight:700">
+    ? `<tr style="background:var(--surface2);font-weight:600">
         <td colspan="4" style="color:var(--text2)">Total — ${exps.length} expense${exps.length!==1?'s':''}</td>
         <td class="num" style="color:var(--red)">${fmt$(total)}</td><td></td>
       </tr>`
@@ -3402,11 +3401,11 @@ function renderExpByCategory() {
     return `<div class="card" style="border-left:3px solid ${d.color}">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
         <span style="width:10px;height:10px;border-radius:50%;background:${d.color};flex-shrink:0"></span>
-        <span style="font-size:.85rem;font-weight:700;flex:1">${esc(cat)}</span>
+        <span style="font-size:.85rem;font-weight:600;flex:1">${esc(cat)}</span>
         <span class="badge ${d.type==='fixed'?'badge-blue':'badge-yellow'}">${d.type}</span>
       </div>
-      <div style="font-size:1.4rem;font-weight:800;color:${d.color}">${fmt$(d.total)}</div>
-      <div style="font-size:.72rem;color:var(--text2);margin-top:4px">${d.count} entry${d.count!==1?'s':''} · ${pct}% of total</div>
+      <div style="font-size:1.4rem;font-weight:600;color:${d.color}">${fmt$(d.total)}</div>
+      <div style="font-size:0.75rem;color:var(--text2);margin-top:4px">${d.count} entry${d.count!==1?'s':''} · ${pct}% of total</div>
       <div style="background:var(--surface2);border-radius:99px;height:4px;margin-top:10px">
         <div style="width:${pct}%;background:${d.color};border-radius:99px;height:4px;opacity:.85"></div>
       </div>
@@ -3449,7 +3448,7 @@ function renderExpVsRevenue() {
       <th class="num">Expenses</th><th class="num">Net Profit</th><th class="num">Net Margin</th>
     </tr></thead>
     <tbody>${rows}
-    <tr style="background:var(--surface2);font-weight:700">
+    <tr style="background:var(--surface2);font-weight:600">
       <td>All Time</td>
       <td class="num green">${fmt$(totRev)}</td>
       <td class="num" style="color:var(--accent)">${fmt$(totGross)}</td>
@@ -3792,13 +3791,13 @@ function renderJtInventoryGrid() {
     const barCls    = left === 0 ? 'sold-out' : left <= 2 ? 'low' : '';
     const numCol    = left === 0 ? 'color:var(--red)' : left <= 2 ? 'color:var(--yellow)' : 'color:var(--green)';
     const breakdown = restocked > 0
-      ? `<div style="font-size:0.68rem;color:#a78bfa">↺ ${base} original + ${restocked} reordered</div>`
+      ? `<div style="font-size:0.75rem;color:#bf5af2">↺ ${base} original + ${restocked} reordered</div>`
       : '';
     return `<div class="jt-card">
       <div class="jt-name">${esc(c.name)}</div>
       <div class="jt-bar-bg"><div class="jt-bar-fill ${barCls}" style="width:${pct}%"></div></div>
       <div class="jt-nums">
-        <span style="${numCol};font-weight:700">${left} left</span>
+        <span style="${numCol};font-weight:600">${left} left</span>
         <span>${sold}/${effective} sold</span>
       </div>${breakdown}
     </div>`;
@@ -3851,17 +3850,17 @@ function renderJtTopSellers() {
     if (c.sold === 0) return '';
     const pct = (c.sold / max * 100).toFixed(0);
     const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉'
-      : `<span style="display:inline-block;width:18px;text-align:center;font-size:.72rem;color:var(--text2);font-weight:700">${i+1}</span>`;
-    const barColor = i === 0 ? '#f59e0b' : i === 1 ? '#94a3b8' : i === 2 ? '#cd7f32' : '#8b5cf6';
+      : `<span style="display:inline-block;width:18px;text-align:center;font-size:0.75rem;color:var(--text2);font-weight:600">${i+1}</span>`;
+    const barColor = i === 0 ? '#f59e0b' : i === 1 ? '#a1a1a6' : i === 2 ? '#cd7f32' : '#8b5cf6';
     return `<div style="margin-bottom:11px">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
         <span style="font-size:.83rem;font-weight:600;display:flex;align-items:center;gap:5px">${medal} ${esc(c.name)}</span>
-        <span style="font-size:.8rem;font-weight:700;color:${barColor};font-variant-numeric:tabular-nums">${c.sold} sold</span>
+        <span style="font-size:.8rem;font-weight:600;color:${barColor};font-variant-numeric:tabular-nums">${c.sold} sold</span>
       </div>
       <div style="background:var(--surface2);border-radius:99px;height:8px;overflow:hidden">
         <div style="width:${pct}%;background:${barColor};border-radius:99px;height:8px"></div>
       </div>
-      <div style="font-size:.7rem;color:var(--text2);margin-top:3px">${(c.sold/c.effective*100).toFixed(0)}% of stock moved · ${c.effective - c.sold} remaining</div>
+      <div style="font-size:0.75rem;color:var(--text2);margin-top:3px">${(c.sold/c.effective*100).toFixed(0)}% of stock moved · ${c.effective - c.sold} remaining</div>
     </div>`;
   }).filter(Boolean).join('');
 }
@@ -3890,16 +3889,16 @@ function renderJtLowStock() {
   listEl.innerHTML = items.map(c => {
     const isSoldOut = c.left === 0;
     const color = isSoldOut ? 'var(--red)' : 'var(--yellow)';
-    const bg    = isSoldOut ? 'rgba(248,113,113,0.08)' : 'rgba(251,191,36,0.08)';
-    const bdr   = isSoldOut ? 'rgba(248,113,113,0.25)' : 'rgba(251,191,36,0.25)';
+    const bg    = isSoldOut ? 'rgba(255, 105, 97,0.08)' : 'rgba(255, 214, 10,0.08)';
+    const bdr   = isSoldOut ? 'rgba(255, 105, 97,0.25)' : 'rgba(255, 214, 10,0.25)';
     const icon  = isSoldOut ? '🚫' : c.left === 1 ? '🔴' : '⚠️';
-    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:9px;background:${bg};margin-bottom:8px;border:1px solid ${bdr}">
+    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;background:${bg};margin-bottom:8px;border:1px solid ${bdr}">
       <span style="font-size:1.1rem;flex-shrink:0">${icon}</span>
       <div style="flex:1;min-width:0">
-        <div style="font-size:.85rem;font-weight:700">${esc(c.name)}</div>
-        <div style="font-size:.7rem;color:var(--text2);margin-top:1px">${(c.sold/c.eff*100).toFixed(0)}% sold · ${c.sold}/${c.eff} moved</div>
+        <div style="font-size:.85rem;font-weight:600">${esc(c.name)}</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-top:1px">${(c.sold/c.eff*100).toFixed(0)}% sold · ${c.sold}/${c.eff} moved</div>
       </div>
-      <span style="font-size:.83rem;font-weight:800;color:${color};white-space:nowrap">${isSoldOut?'SOLD OUT':c.left+' remaining'}</span>
+      <span style="font-size:.83rem;font-weight:600;color:${color};white-space:nowrap">${isSoldOut?'SOLD OUT':c.left+' remaining'}</span>
     </div>`;
   }).join('');
 }
@@ -3925,11 +3924,11 @@ function renderJtOrderHistory() {
   }));
   rows.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   const badge = (bg, color, txt) =>
-    `<span style="font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:99px;background:${bg};color:${color};white-space:nowrap">${txt}</span>`;
+    `<span style="font-size:0.75rem;font-weight:600;padding:2px 8px;border-radius:99px;background:${bg};color:${color};white-space:nowrap">${txt}</span>`;
   tbody.innerHTML = rows.map(r => {
     const type = r.kind === 'original' ? badge('var(--surface2)', 'var(--text2)', '📦 Original')
-      : r.kind === 'new' ? badge('rgba(74,222,128,0.12)', 'var(--green)', '🆕 New character')
-      : badge('rgba(139,92,246,0.14)', '#a78bfa', '↺ Reorder');
+      : r.kind === 'new' ? badge('rgba(48, 209, 88,0.12)', 'var(--green)', '🆕 New character')
+      : badge('rgba(139,92,246,0.14)', '#bf5af2', '↺ Reorder');
     const costTxt = r.cost != null ? fmt$(r.cost) : '—';
     const unitTxt = (r.cost != null && r.qty > 0) ? fmt$(r.cost / r.qty) : '—';
     const del = r.kind === 'restock'
@@ -4002,7 +4001,7 @@ function openJtSaleModal() {
     const left = (c.purchased||0) + (restockMap[c.id]||0) - (soldMap[c.id]||0);
     const disabled = left <= 0 ? 'style="opacity:0.4;pointer-events:none"' : '';
     return `<div class="jt-char-btn" data-charid="${c.id}" onclick="jtToggleChar(this)" ${disabled}>
-      ${esc(c.name)}<br><span style="font-size:0.65rem;font-weight:400;color:var(--text2)">${left} left</span>
+      ${esc(c.name)}<br><span style="font-size:0.75rem;font-weight:400;color:var(--text2)">${left} left</span>
     </div>`;
   }).join('');
   document.getElementById('jtRevPreview').style.display = 'none';
@@ -4066,9 +4065,9 @@ function openJtRestockModal() {
   document.getElementById('jtOrderQtyGrid').innerHTML = jtAllChars().map(c => {
     const left = (c.purchased||0) + (restockMap[c.id]||0) - (soldMap[c.id]||0);
     const leftCol = left === 0 ? 'var(--red)' : left <= 2 ? 'var(--yellow)' : 'var(--text2)';
-    return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 10px">
-      <span style="font-size:0.78rem;font-weight:600;min-width:0">${esc(c.name)}<br><span style="font-size:0.65rem;font-weight:400;color:${leftCol}">${left} left</span></span>
-      <input type="number" min="0" value="0" data-charid="${c.id}" class="jt-order-qty" oninput="jtUpdateOrderPreview()" style="width:64px;padding:6px 8px;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:0.85rem;outline:none">
+    return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px">
+      <span style="font-size:0.78rem;font-weight:600;min-width:0">${esc(c.name)}<br><span style="font-size:0.75rem;font-weight:400;color:${leftCol}">${left} left</span></span>
+      <input type="number" min="0" value="0" data-charid="${c.id}" class="jt-order-qty" oninput="jtUpdateOrderPreview()" style="width:64px;padding:6px 8px;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;outline:none">
     </div>`;
   }).join('');
   jtUpdateOrderPreview();
@@ -4082,8 +4081,8 @@ function jtAddOrderNewCharRow() {
   row.className = 'jt-order-newchar';
   row.style.cssText = 'display:flex;gap:6px;align-items:center;margin-top:6px';
   row.innerHTML = `
-    <input type="text" placeholder="Character name" maxlength="60" class="jt-nc-name" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);padding:7px 10px;font-size:0.82rem;outline:none">
-    <input type="number" min="1" value="10" class="jt-nc-qty" oninput="jtUpdateOrderPreview()" style="width:64px;padding:6px 8px;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:0.85rem;outline:none">
+    <input type="text" placeholder="Character name" maxlength="60" class="jt-nc-name" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 10px;font-size:0.82rem;outline:none">
+    <input type="number" min="1" value="10" class="jt-nc-qty" oninput="jtUpdateOrderPreview()" style="width:64px;padding:6px 8px;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;outline:none">
     <button class="icon-btn" onclick="this.parentElement.remove();jtUpdateOrderPreview()" title="Remove">✕</button>`;
   document.getElementById('jtOrderNewChars').appendChild(row);
   row.querySelector('.jt-nc-name').focus();
@@ -4339,13 +4338,13 @@ function renderPinInventoryGrid() {
     const barCls    = left === 0 ? 'sold-out' : left <= 3 ? 'low' : '';
     const numCol    = left === 0 ? 'color:var(--red)' : left <= 3 ? 'color:var(--yellow)' : 'color:var(--green)';
     const breakdown = restocked > 0
-      ? `<div style="font-size:0.68rem;color:#2dd4bf">↺ ${base} original + ${restocked} reordered</div>`
+      ? `<div style="font-size:0.75rem;color:#2dd4bf">↺ ${base} original + ${restocked} reordered</div>`
       : '';
     return `<div class="pin-card">
       <div class="pin-name">${esc(c.name)}</div>
       <div class="pin-bar-bg"><div class="pin-bar-fill ${barCls}" style="width:${pct}%"></div></div>
       <div class="pin-nums">
-        <span style="${numCol};font-weight:700">${left} left</span>
+        <span style="${numCol};font-weight:600">${left} left</span>
         <span>${sold}/${effective} sold</span>
       </div>${breakdown}
     </div>`;
@@ -4398,17 +4397,17 @@ function renderPinTopSellers() {
     if (c.sold === 0) return '';
     const pct = (c.sold / max * 100).toFixed(0);
     const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉'
-      : `<span style="display:inline-block;width:18px;text-align:center;font-size:.72rem;color:var(--text2);font-weight:700">${i+1}</span>`;
-    const barColor = i === 0 ? '#f59e0b' : i === 1 ? '#94a3b8' : i === 2 ? '#cd7f32' : '#2dd4bf';
+      : `<span style="display:inline-block;width:18px;text-align:center;font-size:0.75rem;color:var(--text2);font-weight:600">${i+1}</span>`;
+    const barColor = i === 0 ? '#f59e0b' : i === 1 ? '#a1a1a6' : i === 2 ? '#cd7f32' : '#2dd4bf';
     return `<div style="margin-bottom:11px">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
         <span style="font-size:.83rem;font-weight:600;display:flex;align-items:center;gap:5px">${medal} ${esc(c.name)}</span>
-        <span style="font-size:.8rem;font-weight:700;color:${barColor};font-variant-numeric:tabular-nums">${c.sold} sold</span>
+        <span style="font-size:.8rem;font-weight:600;color:${barColor};font-variant-numeric:tabular-nums">${c.sold} sold</span>
       </div>
       <div style="background:var(--surface2);border-radius:99px;height:8px;overflow:hidden">
         <div style="width:${pct}%;background:${barColor};border-radius:99px;height:8px"></div>
       </div>
-      <div style="font-size:.7rem;color:var(--text2);margin-top:3px">${(c.sold/c.effective*100).toFixed(0)}% of stock moved · ${c.effective - c.sold} remaining</div>
+      <div style="font-size:0.75rem;color:var(--text2);margin-top:3px">${(c.sold/c.effective*100).toFixed(0)}% of stock moved · ${c.effective - c.sold} remaining</div>
     </div>`;
   }).filter(Boolean).join('');
 }
@@ -4437,16 +4436,16 @@ function renderPinLowStock() {
   listEl.innerHTML = items.map(c => {
     const isSoldOut = c.left === 0;
     const color = isSoldOut ? 'var(--red)' : 'var(--yellow)';
-    const bg    = isSoldOut ? 'rgba(248,113,113,0.08)' : 'rgba(251,191,36,0.08)';
-    const bdr   = isSoldOut ? 'rgba(248,113,113,0.25)' : 'rgba(251,191,36,0.25)';
+    const bg    = isSoldOut ? 'rgba(255, 105, 97,0.08)' : 'rgba(255, 214, 10,0.08)';
+    const bdr   = isSoldOut ? 'rgba(255, 105, 97,0.25)' : 'rgba(255, 214, 10,0.25)';
     const icon  = isSoldOut ? '🚫' : c.left === 1 ? '🔴' : '⚠️';
-    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:9px;background:${bg};margin-bottom:8px;border:1px solid ${bdr}">
+    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;background:${bg};margin-bottom:8px;border:1px solid ${bdr}">
       <span style="font-size:1.1rem;flex-shrink:0">${icon}</span>
       <div style="flex:1;min-width:0">
-        <div style="font-size:.85rem;font-weight:700">${esc(c.name)}</div>
-        <div style="font-size:.7rem;color:var(--text2);margin-top:1px">${(c.sold/c.eff*100).toFixed(0)}% sold · ${c.sold}/${c.eff} moved</div>
+        <div style="font-size:.85rem;font-weight:600">${esc(c.name)}</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-top:1px">${(c.sold/c.eff*100).toFixed(0)}% sold · ${c.sold}/${c.eff} moved</div>
       </div>
-      <span style="font-size:.83rem;font-weight:800;color:${color};white-space:nowrap">${isSoldOut?'SOLD OUT':c.left+' remaining'}</span>
+      <span style="font-size:.83rem;font-weight:600;color:${color};white-space:nowrap">${isSoldOut?'SOLD OUT':c.left+' remaining'}</span>
     </div>`;
   }).join('');
 }
@@ -4472,10 +4471,10 @@ function renderPinOrderHistory() {
   }));
   rows.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   const badge = (bg, color, txt) =>
-    `<span style="font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:99px;background:${bg};color:${color};white-space:nowrap">${txt}</span>`;
+    `<span style="font-size:0.75rem;font-weight:600;padding:2px 8px;border-radius:99px;background:${bg};color:${color};white-space:nowrap">${txt}</span>`;
   tbody.innerHTML = rows.map(r => {
     const type = r.kind === 'original' ? badge('var(--surface2)', 'var(--text2)', '📦 Original')
-      : r.kind === 'new' ? badge('rgba(74,222,128,0.12)', 'var(--green)', '🆕 New character')
+      : r.kind === 'new' ? badge('rgba(48, 209, 88,0.12)', 'var(--green)', '🆕 New character')
       : badge('rgba(45,212,191,0.14)', '#2dd4bf', '↺ Reorder');
     const costTxt = r.cost != null ? fmt$(r.cost) : '—';
     const unitTxt = (r.cost != null && r.qty > 0) ? fmt$(r.cost / r.qty) : '—';
@@ -4549,7 +4548,7 @@ function openPinSaleModal() {
     const left     = (c.purchased||0) + (restockMap[c.id]||0) - (soldMap[c.id]||0);
     const disabled = left <= 0 ? 'style="opacity:0.4;pointer-events:none"' : '';
     return `<div class="pin-char-btn" data-charid="${c.id}" onclick="pinToggleChar(this)" ${disabled}>
-      ${esc(c.name)}<br><span style="font-size:0.65rem;font-weight:400;color:var(--text2)">${left} left</span>
+      ${esc(c.name)}<br><span style="font-size:0.75rem;font-weight:400;color:var(--text2)">${left} left</span>
     </div>`;
   }).join('');
   document.getElementById('pinRevPreview').style.display = 'none';
@@ -4612,9 +4611,9 @@ function openPinRestockModal() {
   document.getElementById('pinOrderQtyGrid').innerHTML = pinAllChars().map(c => {
     const left = (c.purchased||0) + (restockMap[c.id]||0) - (soldMap[c.id]||0);
     const leftCol = left === 0 ? 'var(--red)' : left <= 3 ? 'var(--yellow)' : 'var(--text2)';
-    return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 10px">
-      <span style="font-size:0.78rem;font-weight:600;min-width:0">${esc(c.name)}<br><span style="font-size:0.65rem;font-weight:400;color:${leftCol}">${left} left</span></span>
-      <input type="number" min="0" value="0" data-charid="${c.id}" class="pin-order-qty" oninput="pinUpdateOrderPreview()" style="width:64px;padding:6px 8px;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:0.85rem;outline:none">
+    return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px">
+      <span style="font-size:0.78rem;font-weight:600;min-width:0">${esc(c.name)}<br><span style="font-size:0.75rem;font-weight:400;color:${leftCol}">${left} left</span></span>
+      <input type="number" min="0" value="0" data-charid="${c.id}" class="pin-order-qty" oninput="pinUpdateOrderPreview()" style="width:64px;padding:6px 8px;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;outline:none">
     </div>`;
   }).join('');
   pinUpdateOrderPreview();
@@ -4628,8 +4627,8 @@ function pinAddOrderNewCharRow() {
   row.className = 'pin-order-newchar';
   row.style.cssText = 'display:flex;gap:6px;align-items:center;margin-top:6px';
   row.innerHTML = `
-    <input type="text" placeholder="Character name" maxlength="60" class="pin-nc-name" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);padding:7px 10px;font-size:0.82rem;outline:none">
-    <input type="number" min="1" value="20" class="pin-nc-qty" oninput="pinUpdateOrderPreview()" style="width:64px;padding:6px 8px;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:0.85rem;outline:none">
+    <input type="text" placeholder="Character name" maxlength="60" class="pin-nc-name" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 10px;font-size:0.82rem;outline:none">
+    <input type="number" min="1" value="20" class="pin-nc-qty" oninput="pinUpdateOrderPreview()" style="width:64px;padding:6px 8px;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;outline:none">
     <button class="icon-btn" onclick="this.parentElement.remove();pinUpdateOrderPreview()" title="Remove">✕</button>`;
   document.getElementById('pinOrderNewChars').appendChild(row);
   row.querySelector('.pin-nc-name').focus();
@@ -4820,7 +4819,7 @@ function catSectionHtml(cat) {
   <main>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px">
       <div>
-        <div style="font-size:1rem;font-weight:800">${esc(catEmoji(cat))} ${esc(cat.name)} Tracker</div>
+        <div style="font-size:1rem;font-weight:600">${esc(catEmoji(cat))} ${esc(cat.name)} Tracker</div>
         <div style="font-size:0.78rem;color:var(--text2);margin-top:3px" data-hook="subtitle"></div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -4844,7 +4843,7 @@ function catSectionHtml(cat) {
       <div class="card" style="grid-column:1/-1">
         <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
           <span>Inventory by Item</span>
-          <span style="font-size:0.72rem;color:var(--text2)" data-hook="invdate"></span>
+          <span style="font-size:0.75rem;color:var(--text2)" data-hook="invdate"></span>
         </div>
         <div data-hook="invgrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:4px"></div>
       </div>
@@ -4852,7 +4851,7 @@ function catSectionHtml(cat) {
     <div class="grid-2" style="margin-bottom:20px">
       <div class="card" style="grid-column:1/-1">
         <div class="card-title">📦 Order &amp; Restock History</div>
-        <div style="font-size:0.74rem;color:var(--text2);margin-bottom:10px">Every batch you've bought — new items and reorders — with what each one cost you.</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-bottom:10px">Every batch you've bought — new items and reorders — with what each one cost you.</div>
         <div class="table-wrap">
           <table>
             <thead><tr><th>Date</th><th>Type</th><th>Item</th><th class="num">Qty</th><th class="num">Cost</th><th class="num">Cost/Unit</th><th>Notes</th><th></th></tr></thead>
@@ -4936,13 +4935,13 @@ function renderCatInvGrid(cat, t, el) {
     const barCls = s.left === 0 ? 'sold-out' : s.left <= 3 ? 'low' : '';
     const numCol = s.left === 0 ? 'color:var(--red)' : s.left <= 3 ? 'color:var(--yellow)' : 'color:var(--green)';
     const breakdown = restocked > 0
-      ? `<div style="font-size:0.68rem;color:${catAccent(cat)}">↺ ${base} original + ${restocked} reordered</div>`
+      ? `<div style="font-size:0.75rem;color:${catAccent(cat)}">↺ ${base} original + ${restocked} reordered</div>`
       : '';
     return `<div class="pin-card">
       <div class="pin-name">${esc(s.name)}</div>
       <div class="pin-bar-bg"><div class="pin-bar-fill ${barCls}" style="width:${pct}%"></div></div>
       <div class="pin-nums">
-        <span style="${numCol};font-weight:700">${s.left} left</span>
+        <span style="${numCol};font-weight:600">${s.left} left</span>
         <span>${s.sold}/${s.effective} sold</span>
       </div>${breakdown}
     </div>`;
@@ -4970,10 +4969,10 @@ function renderCatOrderHistory(cat, tbody) {
   rows.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   const color = catAccent(cat);
   const badge = (bg, c, txt) =>
-    `<span style="font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:99px;background:${bg};color:${c};white-space:nowrap">${txt}</span>`;
+    `<span style="font-size:0.75rem;font-weight:600;padding:2px 8px;border-radius:99px;background:${bg};color:${c};white-space:nowrap">${txt}</span>`;
   tbody.innerHTML = rows.map(r => {
     const type = r.kind === 'new'
-      ? badge('rgba(74,222,128,0.12)', 'var(--green)', '🆕 New item')
+      ? badge('rgba(48, 209, 88,0.12)', 'var(--green)', '🆕 New item')
       : badge(hexRgba(color, 0.14), color, '↺ Reorder');
     const costTxt = r.cost != null ? fmt$(r.cost) : '—';
     const unitTxt = (r.cost != null && r.qty > 0) ? fmt$(r.cost / r.qty) : '—';
@@ -5031,17 +5030,17 @@ function renderCatTopSellers(t, el, color) {
     if (i.sold === 0) return '';
     const pct = (i.sold / max * 100).toFixed(0);
     const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉'
-      : `<span style="display:inline-block;width:18px;text-align:center;font-size:.72rem;color:var(--text2);font-weight:700">${idx + 1}</span>`;
-    const barColor = idx === 0 ? '#f59e0b' : idx === 1 ? '#94a3b8' : idx === 2 ? '#cd7f32' : color;
+      : `<span style="display:inline-block;width:18px;text-align:center;font-size:0.75rem;color:var(--text2);font-weight:600">${idx + 1}</span>`;
+    const barColor = idx === 0 ? '#f59e0b' : idx === 1 ? '#a1a1a6' : idx === 2 ? '#cd7f32' : color;
     return `<div style="margin-bottom:11px">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
         <span style="font-size:.83rem;font-weight:600;display:flex;align-items:center;gap:5px">${medal} ${esc(i.name)}</span>
-        <span style="font-size:.8rem;font-weight:700;color:${barColor};font-variant-numeric:tabular-nums">${i.sold} sold</span>
+        <span style="font-size:.8rem;font-weight:600;color:${barColor};font-variant-numeric:tabular-nums">${i.sold} sold</span>
       </div>
       <div style="background:var(--surface2);border-radius:99px;height:8px;overflow:hidden">
         <div style="width:${pct}%;background:${barColor};border-radius:99px;height:8px"></div>
       </div>
-      <div style="font-size:.7rem;color:var(--text2);margin-top:3px">${(i.sold / i.effective * 100).toFixed(0)}% of stock moved · ${i.effective - i.sold} remaining</div>
+      <div style="font-size:0.75rem;color:var(--text2);margin-top:3px">${(i.sold / i.effective * 100).toFixed(0)}% of stock moved · ${i.effective - i.sold} remaining</div>
     </div>`;
   }).filter(Boolean).join('');
 }
@@ -5068,16 +5067,16 @@ function renderCatLowStock(cat, t, titleEl, listEl, cardEl) {
   listEl.innerHTML = items.map(i => {
     const isSoldOut = i.left === 0;
     const color = isSoldOut ? 'var(--red)' : 'var(--yellow)';
-    const bg    = isSoldOut ? 'rgba(248,113,113,0.08)' : 'rgba(251,191,36,0.08)';
-    const bdr   = isSoldOut ? 'rgba(248,113,113,0.25)' : 'rgba(251,191,36,0.25)';
+    const bg    = isSoldOut ? 'rgba(255, 105, 97,0.08)' : 'rgba(255, 214, 10,0.08)';
+    const bdr   = isSoldOut ? 'rgba(255, 105, 97,0.25)' : 'rgba(255, 214, 10,0.25)';
     const icon  = isSoldOut ? '🚫' : i.left === 1 ? '🔴' : '⚠️';
-    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:9px;background:${bg};margin-bottom:8px;border:1px solid ${bdr}">
+    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;background:${bg};margin-bottom:8px;border:1px solid ${bdr}">
       <span style="font-size:1.1rem;flex-shrink:0">${icon}</span>
       <div style="flex:1;min-width:0">
-        <div style="font-size:.85rem;font-weight:700">${esc(i.name)}</div>
-        <div style="font-size:.7rem;color:var(--text2);margin-top:1px">${i.effective ? (i.sold / i.effective * 100).toFixed(0) : 0}% sold · ${i.sold}/${i.effective} moved</div>
+        <div style="font-size:.85rem;font-weight:600">${esc(i.name)}</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-top:1px">${i.effective ? (i.sold / i.effective * 100).toFixed(0) : 0}% sold · ${i.sold}/${i.effective} moved</div>
       </div>
-      <span style="font-size:.83rem;font-weight:800;color:${color};white-space:nowrap">${isSoldOut ? 'SOLD OUT' : i.left + ' remaining'}</span>
+      <span style="font-size:.83rem;font-weight:600;color:${color};white-space:nowrap">${isSoldOut ? 'SOLD OUT' : i.left + ' remaining'}</span>
     </div>`;
   }).join('');
 }
@@ -5195,9 +5194,9 @@ function openCatOrderModal(catId) {
   document.getElementById('coSave').style.background = catAccent(cat);
   document.getElementById('coQtyGrid').innerHTML = t.stock.length ? t.stock.map(s => {
     const leftCol = s.left === 0 ? 'var(--red)' : s.left <= 3 ? 'var(--yellow)' : 'var(--text2)';
-    return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 10px">
-      <span style="font-size:0.78rem;font-weight:600;min-width:0">${esc(s.name)}<br><span style="font-size:0.65rem;font-weight:400;color:${leftCol}">${s.left} left</span></span>
-      <input type="number" min="0" value="0" data-itemid="${s.id}" class="co-order-qty" oninput="catUpdateOrderPreview()" style="width:64px;padding:6px 8px;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:0.85rem;outline:none">
+    return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px">
+      <span style="font-size:0.78rem;font-weight:600;min-width:0">${esc(s.name)}<br><span style="font-size:0.75rem;font-weight:400;color:${leftCol}">${s.left} left</span></span>
+      <input type="number" min="0" value="0" data-itemid="${s.id}" class="co-order-qty" oninput="catUpdateOrderPreview()" style="width:64px;padding:6px 8px;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;outline:none">
     </div>`;
   }).join('') : `<div style="grid-column:1/-1;color:var(--text2);font-size:.8rem;padding:4px 0">No items yet — add the order's items below.</div>`;
   catUpdateOrderPreview();
@@ -5211,8 +5210,8 @@ function catAddOrderNewItemRow() {
   row.className = 'co-order-newitem';
   row.style.cssText = 'display:flex;gap:6px;align-items:center;margin-top:6px';
   row.innerHTML = `
-    <input type="text" placeholder="Item name" maxlength="60" class="co-ni-name" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);padding:7px 10px;font-size:0.82rem;outline:none">
-    <input type="number" min="1" value="10" class="co-ni-qty" oninput="catUpdateOrderPreview()" style="width:64px;padding:6px 8px;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:0.85rem;outline:none">
+    <input type="text" placeholder="Item name" maxlength="60" class="co-ni-name" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 10px;font-size:0.82rem;outline:none">
+    <input type="number" min="1" value="10" class="co-ni-qty" oninput="catUpdateOrderPreview()" style="width:64px;padding:6px 8px;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;outline:none">
     <button class="icon-btn" onclick="this.parentElement.remove();catUpdateOrderPreview()" title="Remove">✕</button>`;
   document.getElementById('coNewItems').appendChild(row);
   row.querySelector('.co-ni-name').focus();
@@ -5314,7 +5313,7 @@ function openCatSaleModal(catId) {
   document.getElementById('csItemSelect').innerHTML = t.stock.length ? t.stock.map(s => {
     const disabled = s.left <= 0 ? 'style="opacity:0.4;pointer-events:none"' : '';
     return `<div class="pin-char-btn" data-itemid="${s.id}" onclick="catToggleItem(this)" ${disabled}>
-      ${esc(s.name)}<br><span style="font-size:0.65rem;font-weight:400;color:var(--text2)">${s.left} left</span>
+      ${esc(s.name)}<br><span style="font-size:0.75rem;font-weight:400;color:var(--text2)">${s.left} left</span>
     </div>`;
   }).join('') : `<div style="grid-column:1/-1;color:var(--text2);font-size:.8rem;padding:4px 0">No items yet — add stock first with + New Item or + Restock.</div>`;
   document.getElementById('csRevPreview').style.display = 'none';

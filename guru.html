@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0f1117">
+<meta name="theme-color" content="#1c1c1e">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
@@ -15,12 +15,12 @@
 <style>
   body { min-height: 100vh; display: flex; flex-direction: column; }
 
-  header h1 { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.3px; }
+  header h1 { font-size: 1.15rem; font-weight: 600; letter-spacing: -0.3px; }
   header h1 span { color: var(--accent2); }
   .rank-chip {
     display: inline-flex; align-items: center; gap: 7px;
-    font-size: 0.72rem; font-weight: 700; padding: 5px 13px; border-radius: 20px;
-    background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.28);
+    font-size: 0.75rem; font-weight: 600; padding: 5px 13px; border-radius: 20px;
+    background: rgba(191, 90, 242,0.1); border: 1px solid rgba(191, 90, 242,0.28);
     color: var(--accent2); white-space: nowrap;
   }
 
@@ -29,17 +29,10 @@
   /* ── HERO: health ring + progress ── */
   .guru-hero {
     display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center;
-    background: linear-gradient(160deg, rgba(167,139,250,0.07) 0%, rgba(108,142,255,0.03) 60%);
-    backdrop-filter: blur(16px) saturate(1.2);
-    border: 1px solid rgba(167,139,250,0.2);
-    border-radius: 22px; padding: 26px 30px; margin-bottom: 22px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px; padding: 26px 30px; margin-bottom: 22px;
     position: relative; overflow: hidden;
-  }
-  .guru-hero::before {
-    content: ''; position: absolute; width: 220px; height: 220px; border-radius: 50%;
-    top: -90px; right: -70px; pointer-events: none;
-    background: radial-gradient(circle, rgba(167,139,250,0.35) 0%, transparent 70%);
-    opacity: 0.25;
   }
   .ring-wrap { position: relative; width: 150px; height: 150px; flex-shrink: 0; }
   .ring-wrap svg { transform: rotate(-90deg); }
@@ -49,237 +42,235 @@
     position: absolute; inset: 0; display: flex; flex-direction: column;
     align-items: center; justify-content: center; text-align: center;
   }
-  .ring-score { font-size: 2.1rem; font-weight: 900; letter-spacing: -1.5px; line-height: 1; font-variant-numeric: tabular-nums; }
-  .ring-label { font-size: 0.56rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text2); margin-top: 4px; }
+  .ring-score { font-size: 2.1rem; font-weight: 700; letter-spacing: -1.5px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .ring-label { font-size: 0.75rem; font-weight: 600; color: var(--text2); margin-top: 4px; }
 
-  .hero-info h2 { font-size: 1.3rem; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .hero-info h2 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; }
   .hero-info h2 em { font-style: normal; color: var(--accent2); }
   .hero-grade { font-size: 0.85rem; color: var(--text2); margin-bottom: 14px; line-height: 1.55; }
   .hero-grade strong { color: var(--text); }
   .hero-stats { display: flex; gap: 22px; flex-wrap: wrap; margin-bottom: 14px; }
   .hstat { display: flex; align-items: baseline; gap: 7px; }
-  .hstat b { font-size: 1.15rem; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
-  .hstat span { font-size: 0.68rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .hstat b { font-size: 1.15rem; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+  .hstat span { font-size: 0.75rem; color: var(--text2); }
   .btn-continue {
-    background: var(--accent2); color: #14101f; border: none; border-radius: 10px;
-    padding: 10px 20px; font-size: 0.84rem; font-weight: 800; cursor: pointer;
-    box-shadow: 0 2px 18px rgba(167,139,250,0.35); transition: all 0.18s; font-family: inherit;
+    background: var(--accent2); color: #14101f; border: none; border-radius: 999px;
+    padding: 10px 20px; font-size: 0.84rem; font-weight: 600; cursor: pointer;
+    box-shadow: none; transition: all 0.18s; font-family: inherit;
   }
-  .btn-continue:hover { box-shadow: 0 4px 26px rgba(167,139,250,0.5); transform: translateY(-1px); }
+  .btn-continue:hover { box-shadow: none; transform: translateY(-1px); }
 
   /* ── Tabs ── */
   .guru-tabs { display: flex; gap: 6px; margin-bottom: 22px; flex-wrap: wrap; }
   .gtab {
     background: var(--surface2); border: 1px solid var(--border); color: var(--text2);
-    border-radius: 10px; padding: 9px 18px; font-size: 0.8rem; font-weight: 700;
+    border-radius: 12px; padding: 9px 18px; font-size: 0.8rem; font-weight: 600;
     cursor: pointer; transition: all 0.15s; font-family: inherit;
   }
-  .gtab:hover { color: var(--text); border-color: rgba(167,139,250,0.4); }
-  .gtab.active { background: rgba(167,139,250,0.12); border-color: rgba(167,139,250,0.45); color: var(--accent2); }
+  .gtab:hover { color: var(--text); border-color: rgba(191, 90, 242,0.4); }
+  .gtab.active { background: rgba(191, 90, 242,0.12); border-color: rgba(191, 90, 242,0.45); color: var(--accent2); }
 
   /* ── Academy: belts & lessons ── */
   .belt-section { margin-bottom: 30px; }
   .belt-head { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
-  .belt-band { width: 38px; height: 12px; border-radius: 4px; flex-shrink: 0; box-shadow: 0 0 14px color-mix(in srgb, var(--belt-c) 40%, transparent); background: var(--belt-c); }
-  .belt-name { font-size: 0.95rem; font-weight: 800; letter-spacing: -0.2px; }
-  .belt-sub { font-size: 0.72rem; color: var(--text2); }
-  .belt-progress { margin-left: auto; font-size: 0.7rem; color: var(--text2); font-weight: 600; white-space: nowrap; }
+  .belt-band { width: 38px; height: 12px; border-radius: 8px; flex-shrink: 0; box-shadow: none; background: var(--belt-c); }
+  .belt-name { font-size: 0.95rem; font-weight: 600; letter-spacing: -0.2px; }
+  .belt-sub { font-size: 0.75rem; color: var(--text2); }
+  .belt-progress { margin-left: auto; font-size: 0.75rem; color: var(--text2); font-weight: 600; white-space: nowrap; }
   .belt-track { height: 4px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; margin-bottom: 14px; }
   .belt-fill { height: 100%; border-radius: 3px; background: var(--belt-c); transition: width 0.6s ease; }
 
   .lesson-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 12px; }
   .lesson-card {
-    background: linear-gradient(160deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.012) 100%);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border); border-radius: 14px;
+    background: var(--surface);
+    border: 1px solid var(--glass-border); border-radius: 12px;
     padding: 15px 17px; cursor: pointer; transition: all 0.18s;
     display: flex; align-items: flex-start; gap: 12px;
   }
   .lesson-card:hover { border-color: color-mix(in srgb, var(--belt-c) 45%, transparent); transform: translateY(-2px); }
   .lesson-card.done { border-color: color-mix(in srgb, var(--green) 30%, transparent); }
   .lesson-num {
-    width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0;
+    width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
-    font-size: 0.72rem; font-weight: 800;
+    font-size: 0.75rem; font-weight: 600;
     background: color-mix(in srgb, var(--belt-c) 12%, transparent);
     border: 1px solid color-mix(in srgb, var(--belt-c) 25%, transparent);
     color: var(--belt-c);
   }
-  .lesson-card.done .lesson-num { background: rgba(52,211,153,0.12); border-color: rgba(52,211,153,0.3); color: var(--green); }
-  .lesson-t { font-size: 0.84rem; font-weight: 700; line-height: 1.35; }
-  .lesson-m { font-size: 0.66rem; color: var(--text2); margin-top: 3px; }
+  .lesson-card.done .lesson-num { background: rgba(48, 209, 88,0.12); border-color: rgba(48, 209, 88,0.3); color: var(--green); }
+  .lesson-t { font-size: 0.84rem; font-weight: 600; line-height: 1.35; }
+  .lesson-m { font-size: 0.75rem; color: var(--text2); margin-top: 3px; }
 
   /* ── Health Score breakdown ── */
   .score-row {
     display: flex; align-items: center; gap: 14px;
-    padding: 14px 18px; border-radius: 14px; margin-bottom: 10px;
-    background: linear-gradient(160deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.01) 100%);
+    padding: 14px 18px; border-radius: 12px; margin-bottom: 10px;
+    background: var(--surface);
     border: 1px solid var(--glass-border);
   }
   .score-icon { font-size: 1.2rem; flex-shrink: 0; width: 34px; text-align: center; }
   .score-info { flex: 1; min-width: 0; }
-  .score-name { font-size: 0.84rem; font-weight: 700; }
-  .score-tip { font-size: 0.72rem; color: var(--text2); margin-top: 3px; line-height: 1.5; }
-  .score-pts { font-size: 0.92rem; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .score-pts small { font-size: 0.68rem; color: var(--text2); font-weight: 600; }
+  .score-name { font-size: 0.84rem; font-weight: 600; }
+  .score-tip { font-size: 0.75rem; color: var(--text2); margin-top: 3px; line-height: 1.5; }
+  .score-pts { font-size: 0.92rem; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .score-pts small { font-size: 0.75rem; color: var(--text2); font-weight: 600; }
 
   /* ── Milestones ── */
   .mile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(230px, 100%), 1fr)); gap: 12px; }
   .mile {
-    background: linear-gradient(160deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.012) 100%);
-    border: 1px solid var(--glass-border); border-radius: 14px;
+    background: var(--surface);
+    border: 1px solid var(--glass-border); border-radius: 12px;
     padding: 18px; text-align: center; transition: all 0.2s;
   }
-  .mile.earned { border-color: rgba(251,191,36,0.35); background: linear-gradient(160deg, rgba(251,191,36,0.07) 0%, rgba(255,255,255,0.01) 100%); }
+  .mile.earned { border-color: rgba(255, 214, 10,0.35); background: linear-gradient(160deg, rgba(255, 214, 10,0.07) 0%, rgba(255,255,255,0.01) 100%); }
   .mile.locked { opacity: 0.45; filter: grayscale(0.7); }
   .mile-ico { font-size: 1.9rem; margin-bottom: 8px; }
-  .mile-name { font-size: 0.8rem; font-weight: 800; margin-bottom: 4px; }
-  .mile-how { font-size: 0.67rem; color: var(--text2); line-height: 1.5; }
-  .mile-tag { display: inline-block; margin-top: 9px; font-size: 0.58rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.7px; padding: 2px 9px; border-radius: 20px; }
-  .mile.earned .mile-tag { background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); color: var(--yellow); }
+  .mile-name { font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; }
+  .mile-how { font-size: 0.75rem; color: var(--text2); line-height: 1.5; }
+  .mile-tag { display: inline-block; margin-top: 9px; font-size: 0.75rem; font-weight: 600; padding: 2px 9px; border-radius: 20px; }
+  .mile.earned .mile-tag { background: rgba(255, 214, 10,0.12); border: 1px solid rgba(255, 214, 10,0.3); color: var(--yellow); }
   .mile.locked .mile-tag { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text2); }
 
   /* ── Tools / calculators ── */
   .tool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(330px, 100%), 1fr)); gap: 16px; }
   .tool-card {
-    background: linear-gradient(160deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.012) 100%);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border); border-radius: 16px; padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px;
   }
-  .tool-title { font-size: 0.86rem; font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
-  .tool-why { font-size: 0.7rem; color: var(--text2); line-height: 1.55; margin-bottom: 14px; }
+  .tool-title { font-size: 0.86rem; font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .tool-why { font-size: 0.75rem; color: var(--text2); line-height: 1.55; margin-bottom: 14px; }
   .tool-card .field { margin-bottom: 10px; }
   .tool-result {
-    background: rgba(167,139,250,0.07); border: 1px solid rgba(167,139,250,0.22);
-    border-radius: 10px; padding: 12px 14px; margin-top: 12px;
+    background: rgba(191, 90, 242,0.07); border: 1px solid rgba(191, 90, 242,0.22);
+    border-radius: 12px; padding: 12px 14px; margin-top: 12px;
     font-size: 0.8rem; line-height: 1.7; color: var(--text2);
   }
   .tool-result b { color: var(--text); font-size: 0.95rem; }
-  .tool-result .big { font-size: 1.25rem; font-weight: 900; color: var(--accent2); letter-spacing: -0.5px; }
+  .tool-result .big { font-size: 1.25rem; font-weight: 700; color: var(--accent2); letter-spacing: -0.5px; }
 
   .sub-table { width: 100%; font-size: 0.78rem; }
   .sub-table td { padding: 7px 4px; }
 
   /* ── Lesson modal extras ── */
   .modal.lesson-modal { width: 560px; }
-  .lm-belt { display: inline-flex; align-items: center; gap: 7px; font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; padding: 3px 11px; border-radius: 20px; margin-bottom: 12px; background: color-mix(in srgb, var(--belt-c) 10%, transparent); border: 1px solid color-mix(in srgb, var(--belt-c) 28%, transparent); color: var(--belt-c); }
-  .lm-title { font-size: 1.15rem; font-weight: 900; letter-spacing: -0.4px; margin-bottom: 14px; line-height: 1.3; }
+  .lm-belt { display: inline-flex; align-items: center; gap: 7px; font-size: 0.75rem; font-weight: 600; padding: 3px 11px; border-radius: 20px; margin-bottom: 12px; background: color-mix(in srgb, var(--belt-c) 10%, transparent); border: 1px solid color-mix(in srgb, var(--belt-c) 28%, transparent); color: var(--belt-c); }
+  .lm-title { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 14px; line-height: 1.3; }
   .lm-body p { font-size: 0.84rem; color: var(--text2); line-height: 1.75; margin-bottom: 12px; }
   .lm-takeaway {
-    background: rgba(52,211,153,0.06); border: 1px solid rgba(52,211,153,0.22);
-    border-left: 3px solid var(--green); border-radius: 10px;
+    background: rgba(48, 209, 88,0.06); border: 1px solid rgba(48, 209, 88,0.22);
+    border-left: 3px solid var(--green); border-radius: 12px;
     padding: 12px 16px; font-size: 0.8rem; line-height: 1.6; margin: 16px 0;
   }
-  .lm-takeaway b { color: var(--green); display: block; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px; }
-  .lm-quiz { background: rgba(108,142,255,0.05); border: 1px solid rgba(108,142,255,0.18); border-radius: 12px; padding: 16px; margin: 16px 0; }
-  .lm-quiz-q { font-size: 0.82rem; font-weight: 700; margin-bottom: 11px; }
+  .lm-takeaway b { color: var(--green); display: block; font-size: 0.75rem; margin-bottom: 5px; }
+  .lm-quiz { background: rgba(10, 132, 255,0.05); border: 1px solid rgba(10, 132, 255,0.18); border-radius: 12px; padding: 16px; margin: 16px 0; }
+  .lm-quiz-q { font-size: 0.82rem; font-weight: 600; margin-bottom: 11px; }
   .lm-quiz-q::before { content: '🧠 Quick check — '; color: var(--accent); }
   .quiz-opt {
     display: block; width: 100%; text-align: left;
     background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--text2);
-    border-radius: 9px; padding: 9px 13px; font-size: 0.78rem; margin-bottom: 7px;
+    border-radius: 8px; padding: 9px 13px; font-size: 0.78rem; margin-bottom: 7px;
     cursor: pointer; transition: all 0.15s; font-family: inherit;
   }
   .quiz-opt:hover { border-color: var(--accent); color: var(--text); }
-  .quiz-opt.right { background: rgba(52,211,153,0.12); border-color: var(--green); color: var(--green); font-weight: 700; }
-  .quiz-opt.wrong { background: rgba(248,113,113,0.1); border-color: var(--red); color: var(--red); }
+  .quiz-opt.right { background: rgba(48, 209, 88,0.12); border-color: var(--green); color: var(--green); font-weight: 600; }
+  .quiz-opt.wrong { background: rgba(255, 105, 97,0.1); border-color: var(--red); color: var(--red); }
   .lm-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
   .lm-action-link {
     display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
-    background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.3); color: var(--accent2);
-    border-radius: 10px; padding: 9px 16px; font-size: 0.78rem; font-weight: 700; transition: all 0.15s;
+    background: rgba(191, 90, 242,0.1); border: 1px solid rgba(191, 90, 242,0.3); color: var(--accent2);
+    border-radius: 12px; padding: 9px 16px; font-size: 0.78rem; font-weight: 600; transition: all 0.15s;
   }
-  .lm-action-link:hover { background: rgba(167,139,250,0.18); }
-  .btn-complete { background: var(--green); color: #07211a; font-weight: 800; }
-  .btn-complete.is-done { background: rgba(52,211,153,0.15); color: var(--green); border: 1px solid rgba(52,211,153,0.35); cursor: default; }
+  .lm-action-link:hover { background: rgba(191, 90, 242,0.18); }
+  .btn-complete { background: var(--green); color: #07211a; font-weight: 600; }
+  .btn-complete.is-done { background: rgba(48, 209, 88,0.15); color: var(--green); border: 1px solid rgba(48, 209, 88,0.35); cursor: default; }
 
   /* ── Net Worth ── */
   .nw-top { display: grid; grid-template-columns: 280px 1fr; gap: 16px; margin-bottom: 16px; }
   .nw-summary {
-    background: linear-gradient(160deg, rgba(52,211,153,0.07) 0%, rgba(255,255,255,0.01) 60%);
-    border: 1px solid rgba(52,211,153,0.2); border-radius: 18px; padding: 22px;
+    background: linear-gradient(160deg, rgba(48, 209, 88,0.07) 0%, rgba(255,255,255,0.01) 60%);
+    border: 1px solid rgba(48, 209, 88,0.2); border-radius: 20px; padding: 22px;
     display: flex; flex-direction: column; justify-content: center;
   }
-  .nw-label { font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text2); }
-  .nw-big { font-size: 2.4rem; font-weight: 900; letter-spacing: -1.5px; line-height: 1.05; margin: 6px 0 4px; font-variant-numeric: tabular-nums; }
-  .nw-delta { font-size: 0.74rem; font-weight: 700; min-height: 18px; }
+  .nw-label { font-size: 0.75rem; font-weight: 600; color: var(--text2); }
+  .nw-big { font-size: 2.4rem; font-weight: 700; letter-spacing: -1.5px; line-height: 1.05; margin: 6px 0 4px; font-variant-numeric: tabular-nums; }
+  .nw-delta { font-size: 0.75rem; font-weight: 600; min-height: 18px; }
   .nw-delta.up { color: var(--green); } .nw-delta.down { color: var(--red); }
-  .nw-split { display: flex; gap: 18px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--glass-border); font-size: 0.72rem; color: var(--text2); }
-  .nw-split b { display: block; color: var(--text); font-size: 0.92rem; font-weight: 800; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .nw-split { display: flex; gap: 18px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--glass-border); font-size: 0.75rem; color: var(--text2); }
+  .nw-split b { display: block; color: var(--text); font-size: 0.92rem; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
   .nw-chart-wrap {
-    background: linear-gradient(160deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
-    border: 1px solid var(--glass-border); border-radius: 18px; padding: 18px 20px;
+    background: var(--surface);
+    border: 1px solid var(--glass-border); border-radius: 20px; padding: 18px 20px;
     display: flex; flex-direction: column;
   }
-  .nw-chart-head { display: flex; align-items: center; justify-content: space-between; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--text2); margin-bottom: 8px; }
-  .btn-snapshot { background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.3); color: var(--accent2); border-radius: 8px; padding: 5px 12px; font-size: 0.7rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.15s; }
-  .btn-snapshot:hover { background: rgba(167,139,250,0.2); }
+  .nw-chart-head { display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; font-weight: 600; color: var(--text2); margin-bottom: 8px; }
+  .btn-snapshot { background: rgba(191, 90, 242,0.1); border: 1px solid rgba(191, 90, 242,0.3); color: var(--accent2); border-radius: 999px; padding: 5px 12px; font-size: 0.75rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .btn-snapshot:hover { background: rgba(191, 90, 242,0.2); }
   #nw-chart { width: 100%; height: 130px; display: block; flex: 1; }
-  .nw-chart-hint { font-size: 0.68rem; color: var(--text2); text-align: center; margin-top: 6px; }
+  .nw-chart-hint { font-size: 0.75rem; color: var(--text2); text-align: center; margin-top: 6px; }
 
   .nw-income-card {
     display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
-    background: linear-gradient(160deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
-    border: 1px solid var(--glass-border); border-radius: 16px; padding: 18px 20px; margin-bottom: 16px;
+    background: var(--surface);
+    border: 1px solid var(--glass-border); border-radius: 20px; padding: 18px 20px; margin-bottom: 16px;
   }
-  .nw-rate { font-size: 0.78rem; font-weight: 800; white-space: nowrap; min-width: 110px; text-align: right; }
+  .nw-rate { font-size: 0.78rem; font-weight: 600; white-space: nowrap; min-width: 110px; text-align: right; }
 
   .nw-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .nw-col {
-    background: linear-gradient(160deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.008) 100%);
-    border: 1px solid var(--glass-border); border-radius: 16px; padding: 16px 18px;
+    background: var(--surface);
+    border: 1px solid var(--glass-border); border-radius: 20px; padding: 16px 18px;
   }
-  .nw-col-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 0.84rem; font-weight: 800; }
-  .nw-col-head small { font-size: 0.64rem; font-weight: 500; color: var(--text2); text-transform: none; letter-spacing: 0; margin-left: 4px; }
-  .nw-add { background: var(--surface2); border: 1px solid var(--border); color: var(--text2); border-radius: 8px; padding: 5px 12px; font-size: 0.72rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .nw-col-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 0.84rem; font-weight: 600; }
+  .nw-col-head small { font-size: 0.75rem; font-weight: 500; color: var(--text2); text-transform: none; letter-spacing: 0; margin-left: 4px; }
+  .nw-add { background: var(--surface2); border: 1px solid var(--border); color: var(--text2); border-radius: 8px; padding: 5px 12px; font-size: 0.75rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
   .nw-add:hover { border-color: var(--accent); color: var(--accent); }
   .nw-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--glass-border); }
   .nw-row:last-child { border-bottom: none; }
   .nw-row-name { flex: 1; font-size: 0.82rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .nw-row-amt { font-size: 0.84rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .nw-row-amt { font-size: 0.84rem; font-weight: 600; font-variant-numeric: tabular-nums; }
   .nw-row-del { background: none; border: none; color: var(--text2); cursor: pointer; font-size: 0.8rem; padding: 2px 5px; min-height: unset; opacity: 0.5; font-family: inherit; transition: opacity 0.15s; }
   .nw-row-del:hover { opacity: 1; color: var(--red); }
-  .nw-empty { font-size: 0.74rem; color: var(--text2); padding: 14px 0; text-align: center; }
-  .nw-chip { background: rgba(108,142,255,0.08); border: 1px solid rgba(108,142,255,0.22); color: var(--accent); border-radius: 20px; padding: 4px 11px; font-size: 0.7rem; cursor: pointer; font-family: inherit; transition: all 0.15s; }
-  .nw-chip:hover { background: rgba(108,142,255,0.18); }
+  .nw-empty { font-size: 0.75rem; color: var(--text2); padding: 14px 0; text-align: center; }
+  .nw-chip { background: rgba(10, 132, 255,0.08); border: 1px solid rgba(10, 132, 255,0.22); color: var(--accent); border-radius: 20px; padding: 4px 11px; font-size: 0.75rem; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .nw-chip:hover { background: rgba(10, 132, 255,0.18); }
 
   /* ── Monthly Report Card ── */
   .report-hero {
     display: flex; align-items: center; gap: 20px;
-    background: linear-gradient(160deg, rgba(108,142,255,0.08) 0%, rgba(255,255,255,0.01) 60%);
-    border: 1px solid rgba(108,142,255,0.2); border-radius: 18px;
+    background: linear-gradient(160deg, rgba(10, 132, 255,0.08) 0%, rgba(255,255,255,0.01) 60%);
+    border: 1px solid rgba(10, 132, 255,0.2); border-radius: 20px;
     padding: 22px 24px; margin-bottom: 18px;
   }
   .report-grade {
     width: 84px; height: 84px; border-radius: 20px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
-    font-size: 2.6rem; font-weight: 900; letter-spacing: -2px;
+    font-size: 2.6rem; font-weight: 700; letter-spacing: -2px;
     background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
   }
-  .report-month { font-size: 1.2rem; font-weight: 900; letter-spacing: -0.4px; }
+  .report-month { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.4px; }
   .report-verdict { font-size: 0.84rem; color: var(--text2); line-height: 1.6; margin-top: 6px; }
   .report-rows { display: grid; gap: 10px; }
   .report-row {
     display: grid; grid-template-columns: 36px 1fr auto auto; gap: 14px; align-items: center;
-    background: linear-gradient(160deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.008) 100%);
-    border: 1px solid var(--glass-border); border-radius: 14px; padding: 13px 18px;
+    background: var(--surface);
+    border: 1px solid var(--glass-border); border-radius: 12px; padding: 13px 18px;
   }
   .rr-icon { font-size: 1.2rem; text-align: center; }
-  .rr-name { font-size: 0.84rem; font-weight: 700; }
-  .rr-sub { font-size: 0.7rem; color: var(--text2); margin-top: 2px; }
+  .rr-name { font-size: 0.84rem; font-weight: 600; }
+  .rr-sub { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
   .rr-vals { text-align: right; }
-  .rr-now { font-size: 1.05rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; }
-  .rr-prev { font-size: 0.64rem; color: var(--text2); }
-  .rr-delta { font-size: 0.8rem; font-weight: 800; white-space: nowrap; min-width: 78px; text-align: right; }
+  .rr-now { font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .rr-prev { font-size: 0.75rem; color: var(--text2); }
+  .rr-delta { font-size: 0.8rem; font-weight: 600; white-space: nowrap; min-width: 78px; text-align: right; }
   .rr-delta.up { color: var(--green); } .rr-delta.down { color: var(--red); } .rr-delta.flat { color: var(--text2); }
   .report-pace {
-    margin-top: 18px; background: linear-gradient(160deg, rgba(167,139,250,0.06) 0%, rgba(255,255,255,0.01) 100%);
-    border: 1px solid rgba(167,139,250,0.18); border-radius: 14px; padding: 16px 18px;
+    margin-top: 18px; background: linear-gradient(160deg, rgba(191, 90, 242,0.06) 0%, rgba(255,255,255,0.01) 100%);
+    border: 1px solid rgba(191, 90, 242,0.18); border-radius: 12px; padding: 16px 18px;
   }
-  .report-pace h4 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.7px; color: var(--accent2); margin-bottom: 12px; }
+  .report-pace h4 { font-size: 0.75rem; color: var(--accent2); margin-bottom: 12px; }
   .pace-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 14px; }
-  .pace-val { font-size: 1.1rem; font-weight: 800; font-variant-numeric: tabular-nums; }
-  .pace-lbl { font-size: 0.62rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.4px; margin-top: 3px; }
+  .pace-val { font-size: 1.1rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .pace-lbl { font-size: 0.75rem; color: var(--text2); margin-top: 3px; }
 
   @media (max-width: 760px) {
     .nw-top { grid-template-columns: 1fr; }
@@ -319,7 +310,7 @@
       <svg width="150" height="150" viewBox="0 0 150 150">
         <circle class="ring-bg"   cx="75" cy="75" r="64"></circle>
         <circle class="ring-fill" id="ring-fill" cx="75" cy="75" r="64"
-                stroke="#a78bfa" stroke-dasharray="402.1" stroke-dashoffset="402.1"></circle>
+                stroke="#bf5af2" stroke-dasharray="402.1" stroke-dashoffset="402.1"></circle>
       </svg>
       <div class="ring-center">
         <div class="ring-score" id="ring-score">0</div>
@@ -411,7 +402,7 @@
         <div id="nw-liab-list"></div>
       </div>
     </div>
-    <p style="font-size:0.68rem;color:var(--text2);line-height:1.6;margin-top:16px;">
+    <p style="font-size:0.75rem;color:var(--text2);line-height:1.6;margin-top:16px;">
       💡 Sensei: net worth is the true scoreboard — income is a snapshot, this is the movie. Update it monthly and save a snapshot to watch the line climb. Include business cash, equipment, and inventory value as assets.
     </p>
   </div>
@@ -426,7 +417,7 @@
     </div>
     <div class="report-rows" id="report-rows"></div>
     <div class="report-pace" id="report-pace"></div>
-    <p style="font-size:0.68rem;color:var(--text2);line-height:1.6;margin-top:16px;">
+    <p style="font-size:0.75rem;color:var(--text2);line-height:1.6;margin-top:16px;">
       💡 Sensei: a business you don't review is a business you don't run. This card compares your last full month to the one before it — revenue, spending, margin, net worth, and your health score — so you see the trend, not just today's number. Read it on the 1st of every month.
     </p>
   </div>
@@ -516,11 +507,11 @@
    CURRICULUM — 25 lessons · 5 belts
 ════════════════════════════════════════════════ */
 const BELTS = [
-  { id: 'white',  name: 'White Belt',  sub: 'Money Foundations',  color: '#e2e8f0' },
-  { id: 'yellow', name: 'Yellow Belt', sub: 'Cash Flow Control',  color: '#fbbf24' },
-  { id: 'green',  name: 'Green Belt',  sub: 'Business Money',     color: '#34d399' },
-  { id: 'brown',  name: 'Brown Belt',  sub: 'Protect & Grow',     color: '#fb923c' },
-  { id: 'black',  name: 'Black Belt',  sub: 'Wealth Mastery',     color: '#a78bfa' },
+  { id: 'white',  name: 'White Belt',  sub: 'Money Foundations',  color: '#f5f5f7' },
+  { id: 'yellow', name: 'Yellow Belt', sub: 'Cash Flow Control',  color: '#ffd60a' },
+  { id: 'green',  name: 'Green Belt',  sub: 'Business Money',     color: '#30d158' },
+  { id: 'brown',  name: 'Brown Belt',  sub: 'Protect & Grow',     color: '#ff9f0a' },
+  { id: 'black',  name: 'Black Belt',  sub: 'Wealth Mastery',     color: '#bf5af2' },
 ];
 
 const LESSONS = [
@@ -871,7 +862,7 @@ function openLesson(id) {
     <div class="lm-quiz">
       <div class="lm-quiz-q">${l.quiz.q}</div>
       ${l.quiz.opts.map((o, i) => `<button class="quiz-opt" data-i="${i}" onclick="answerQuiz(this, ${i}, ${l.quiz.a})">${o}</button>`).join('')}
-      <div id="quiz-feedback" style="font-size:0.74rem;margin-top:6px;min-height:18px;"></div>
+      <div id="quiz-feedback" style="font-size:0.75rem;margin-top:6px;min-height:18px;"></div>
     </div>
     <div class="lm-actions">
       ${l.action ? `<a class="lm-action-link" href="${l.action.url}">⚡ ${l.action.label}</a>` : ''}
@@ -1055,11 +1046,11 @@ function computeHealth() {
 }
 
 function gradeFor(score) {
-  if (score >= 95) return { name: 'Financial Guru', icon: '🥋', color: '#a78bfa', line: 'Full mastery — your money runs on systems, not stress.' };
-  if (score >= 80) return { name: 'Money Master',   icon: '🏆', color: '#34d399', line: 'Strong fundamentals everywhere. Polish the last details.' };
-  if (score >= 60) return { name: 'Practitioner',   icon: '💪', color: '#6c8cff', line: 'Solid habits forming. The score rows below show your next points.' };
-  if (score >= 40) return { name: 'Student',        icon: '📖', color: '#fbbf24', line: 'Foundations are appearing. Focus on budget + logging consistency.' };
-  return { name: 'Apprentice', icon: '🌱', color: '#f87171', line: 'Everyone starts here. Two quick wins: set a budget, log this week\'s expenses.' };
+  if (score >= 95) return { name: 'Financial Guru', icon: '🥋', color: '#bf5af2', line: 'Full mastery — your money runs on systems, not stress.' };
+  if (score >= 80) return { name: 'Money Master',   icon: '🏆', color: '#30d158', line: 'Strong fundamentals everywhere. Polish the last details.' };
+  if (score >= 60) return { name: 'Practitioner',   icon: '💪', color: '#2997ff', line: 'Solid habits forming. The score rows below show your next points.' };
+  if (score >= 40) return { name: 'Student',        icon: '📖', color: '#ffd60a', line: 'Foundations are appearing. Focus on budget + logging consistency.' };
+  return { name: 'Apprentice', icon: '🌱', color: '#ff6961', line: 'Everyone starts here. Two quick wins: set a budget, log this week\'s expenses.' };
 }
 
 function renderHealth() {
@@ -1233,7 +1224,7 @@ function renderSubAudit() {
       <tbody>${rows.map(r => `
         <tr><td>${VPCUtil.esc(r.name || r.category || 'Recurring')}</td>
         <td class="num">${fmt$(r.amount || 0)}</td>
-        <td class="num" style="color:var(--yellow);font-weight:700">${fmt$((r.amount || 0) * 12)}</td></tr>`).join('')}
+        <td class="num" style="color:var(--yellow);font-weight:600">${fmt$((r.amount || 0) * 12)}</td></tr>`).join('')}
       </tbody>
     </table>
     <div class="tool-result" style="margin-top:14px;">
@@ -1352,19 +1343,19 @@ function drawNwChart(snapshots) {
 
   // area
   const grad = ctx.createLinearGradient(0, 0, 0, h);
-  grad.addColorStop(0, 'rgba(52,211,153,0.3)'); grad.addColorStop(1, 'rgba(52,211,153,0)');
+  grad.addColorStop(0, 'rgba(48, 209, 88,0.3)'); grad.addColorStop(1, 'rgba(48, 209, 88,0)');
   ctx.beginPath(); ctx.moveTo(pts[0][0], h - pad);
   pts.forEach(p => ctx.lineTo(p[0], p[1])); ctx.lineTo(pts[pts.length-1][0], h - pad); ctx.closePath();
   ctx.fillStyle = grad; ctx.fill();
 
   // line
   ctx.beginPath(); pts.forEach((p, i) => i === 0 ? ctx.moveTo(p[0], p[1]) : ctx.lineTo(p[0], p[1]));
-  ctx.strokeStyle = '#34d399'; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.stroke();
+  ctx.strokeStyle = '#30d158'; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.stroke();
 
   // end dot
   const [lx, ly] = pts[pts.length - 1];
   ctx.beginPath(); ctx.arc(lx, ly, 5, 0, Math.PI * 2);
-  ctx.fillStyle = '#fff'; ctx.shadowBlur = 12; ctx.shadowColor = '#34d399'; ctx.fill(); ctx.shadowBlur = 0;
+  ctx.fillStyle = '#fff'; ctx.shadowBlur = 12; ctx.shadowColor = '#30d158'; ctx.fill(); ctx.shadowBlur = 0;
 }
 
 function renderNetWorth() {
@@ -1408,7 +1399,7 @@ function renderNetWorth() {
     const spent = readJSON(VPCUtil.KEYS.expenses, []).filter(e => (e.date||'').startsWith(prefix)).reduce((s,e)=>s+(e.amount||0),0);
     const saved = income - spent;
     const rate = income > 0 ? (saved / income * 100) : 0;
-    rateEl.innerHTML = `<span style="color:${rate >= 20 ? 'var(--green)' : rate >= 0 ? 'var(--yellow)' : 'var(--red)'}">${rate.toFixed(0)}%</span><br><span style="font-size:0.6rem;font-weight:500;color:var(--text2)">savings rate</span>`;
+    rateEl.innerHTML = `<span style="color:${rate >= 20 ? 'var(--green)' : rate >= 0 ? 'var(--yellow)' : 'var(--red)'}">${rate.toFixed(0)}%</span><br><span style="font-size:0.75rem;font-weight:500;color:var(--text2)">savings rate</span>`;
   } else { rateEl.innerHTML = ''; }
 
   drawNwChart(snaps);
@@ -1455,7 +1446,7 @@ function captureMonthlyScore() {
 
 function deltaCell(cur, prev, betterUp) {
   if (cur === null || prev === null || cur === undefined || prev === undefined) {
-    return `<div class="rr-delta flat">— <span style="font-weight:500;font-size:0.62rem;color:var(--text2)">no prior</span></div>`;
+    return `<div class="rr-delta flat">— <span style="font-weight:500;font-size:0.75rem;color:var(--text2)">no prior</span></div>`;
   }
   const diff = cur - prev;
   if (Math.abs(diff) < 0.5) return `<div class="rr-delta flat">→ flat</div>`;
@@ -1534,8 +1525,8 @@ function renderReportCard() {
   if (last.margin !== null) { tot++; if (last.margin >= 40) pts++; }
 
   const ratio = tot ? pts / tot : 0.5;
-  const grade = ratio >= 0.9 ? { l: 'A', c: '#34d399' } : ratio >= 0.72 ? { l: 'B', c: '#6c8cff' }
-    : ratio >= 0.52 ? { l: 'C', c: '#fbbf24' } : ratio >= 0.32 ? { l: 'D', c: '#fb923c' } : { l: 'F', c: '#f87171' };
+  const grade = ratio >= 0.9 ? { l: 'A', c: '#30d158' } : ratio >= 0.72 ? { l: 'B', c: '#2997ff' }
+    : ratio >= 0.52 ? { l: 'C', c: '#ffd60a' } : ratio >= 0.32 ? { l: 'D', c: '#ff9f0a' } : { l: 'F', c: '#ff6961' };
   gradeEl.textContent = grade.l;
   gradeEl.style.color = grade.c;
   gradeEl.style.background = `color-mix(in srgb, ${grade.c} 14%, transparent)`;

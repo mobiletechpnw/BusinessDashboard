@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0f1117">
+<meta name="theme-color" content="#1c1c1e">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
@@ -21,7 +21,7 @@
     justify-content: space-between; min-height: 58px;
     position: sticky; top: 0; z-index: 200;
   }
-  .brand { font-size: 1.05rem; font-weight: 800; }
+  .brand { font-size: 1.05rem; font-weight: 600; }
   .brand span { color: var(--accent); }
 
   main { max-width: 1100px; margin: 0 auto; padding: 28px 24px; width: 100%; flex: 1; }
@@ -30,19 +30,19 @@
     display: flex; align-items: center; justify-content: space-between;
     flex-wrap: wrap; gap: 12px; margin-bottom: 28px;
   }
-  .review-title { font-size: 1.6rem; font-weight: 900; letter-spacing: -0.5px; }
+  .review-title { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.5px; }
   .review-title span { color: var(--accent); }
   .review-date { font-size: 0.8rem; color: var(--text2); }
 
   .narrate-btn {
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: 8px; padding: 8px 16px; color: var(--text2);
+    border-radius: 999px; padding: 8px 16px; color: var(--text2);
     font-size: 0.82rem; font-weight: 600; cursor: pointer;
     display: flex; align-items: center; gap: 8px; transition: all 0.15s;
     font-family: inherit;
   }
   .narrate-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .narrate-btn.active { border-color: var(--green); color: var(--green); background: rgba(52,211,153,0.08); }
+  .narrate-btn.active { border-color: var(--green); color: var(--green); background: rgba(48, 209, 88,0.08); }
 
   .review-grid {
     display: grid;
@@ -60,11 +60,10 @@
     margin-bottom: 16px;
   }
   .panel-title {
-    font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.8px; color: var(--text2);
+    font-size: 0.75rem; font-weight: 600; color: var(--text2);
   }
   .panel-link {
-    font-size: 0.72rem; color: var(--accent); text-decoration: none;
+    font-size: 0.75rem; color: var(--accent); text-decoration: none;
     transition: opacity 0.15s;
   }
   .panel-link:hover { opacity: 0.7; }
@@ -76,18 +75,18 @@
     margin-bottom: 8px; font-size: 0.82rem;
   }
   .alert-item:last-child { margin-bottom: 0; }
-  .alert-danger  { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.3); }
-  .alert-warning { background: rgba(251,191,36,0.08);  border: 1px solid rgba(251,191,36,0.3); }
-  .alert-ok      { background: rgba(52,211,153,0.08);  border: 1px solid rgba(52,211,153,0.3); }
+  .alert-danger  { background: rgba(255, 105, 97,0.08); border: 1px solid rgba(255, 105, 97,0.3); }
+  .alert-warning { background: rgba(255, 214, 10,0.08);  border: 1px solid rgba(255, 214, 10,0.3); }
+  .alert-ok      { background: rgba(48, 209, 88,0.08);  border: 1px solid rgba(48, 209, 88,0.3); }
   .alert-icon { font-size: 1rem; flex-shrink: 0; }
   .alert-text { flex: 1; }
-  .alert-action { font-size: 0.72rem; color: var(--accent); text-decoration: none; white-space: nowrap; }
+  .alert-action { font-size: 0.75rem; color: var(--accent); text-decoration: none; white-space: nowrap; }
 
   /* KPI row */
   .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
   .kpi-mini { background: var(--surface2); border-radius: 8px; padding: 12px 14px; }
-  .kpi-mini-val { font-size: 1.3rem; font-weight: 800; line-height: 1; }
-  .kpi-mini-label { font-size: 0.62rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+  .kpi-mini-val { font-size: 1.3rem; font-weight: 600; line-height: 1; }
+  .kpi-mini-label { font-size: 0.75rem; color: var(--text2); margin-top: 4px; }
 
   /* Goal items */
   .goal-item {
@@ -101,25 +100,25 @@
   .goal-check.active { border: 2px solid var(--accent); }
   .goal-check.overdue { border: 2px solid var(--red); }
   .goal-name { flex: 1; }
-  .goal-due { font-size: 0.7rem; white-space: nowrap; }
+  .goal-due { font-size: 0.75rem; white-space: nowrap; }
 
   /* Progress arc */
   .progress-ring-wrap { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
   .progress-arc { flex-shrink: 0; }
   .progress-arc-info { flex: 1; }
-  .progress-arc-pct { font-size: 2rem; font-weight: 900; line-height: 1; }
-  .progress-arc-label { font-size: 0.72rem; color: var(--text2); margin-top: 4px; }
+  .progress-arc-pct { font-size: 2rem; font-weight: 700; line-height: 1; }
+  .progress-arc-label { font-size: 0.75rem; color: var(--text2); margin-top: 4px; }
 
   /* Budget bar */
   .budget-viz { margin-top: 12px; }
-  .budget-track { background: var(--surface2); border-radius: 4px; height: 10px; overflow: hidden; margin-bottom: 6px; }
-  .budget-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
-  .budget-labels { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text2); }
+  .budget-track { background: var(--surface2); border-radius: 8px; height: 10px; overflow: hidden; margin-bottom: 6px; }
+  .budget-fill { height: 100%; border-radius: 8px; transition: width 0.5s; }
+  .budget-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text2); }
 
   /* Forecast */
   .forecast-box { background: var(--surface2); border-radius: 8px; padding: 12px 14px; margin-top: 12px; }
-  .forecast-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); margin-bottom: 6px; }
-  .forecast-val { font-size: 1.1rem; font-weight: 800; }
+  .forecast-label { font-size: 0.75rem; color: var(--text2); margin-bottom: 6px; }
+  .forecast-val { font-size: 1.1rem; font-weight: 600; }
 
   /* Events */
   .event-item {
@@ -127,7 +126,7 @@
     padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.82rem;
   }
   .event-item:last-child { border-bottom: none; }
-  .event-date { font-size: 0.7rem; color: var(--text2); white-space: nowrap; min-width: 70px; }
+  .event-date { font-size: 0.75rem; color: var(--text2); white-space: nowrap; min-width: 70px; }
 
   /* Revenue */
   .rev-stat { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
@@ -137,50 +136,50 @@
 
   /* ── Weekly Money Ritual ── */
   .ritual-card {
-    background: linear-gradient(160deg, rgba(167,139,250,0.08) 0%, rgba(108,142,255,0.03) 60%);
-    border: 1px solid rgba(167,139,250,0.25);
+    background: var(--surface);
+    border: 1px solid var(--border);
     position: relative; overflow: hidden;
   }
   .ritual-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 14px; }
-  .ritual-title { font-size: 1.05rem; font-weight: 900; letter-spacing: -0.3px; }
-  .ritual-sub { font-size: 0.74rem; color: var(--text2); margin-top: 3px; line-height: 1.5; max-width: 540px; }
+  .ritual-title { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.3px; }
+  .ritual-sub { font-size: 0.75rem; color: var(--text2); margin-top: 3px; line-height: 1.5; max-width: 540px; }
   .streak-badge {
     display: flex; flex-direction: column; align-items: center; flex-shrink: 0;
-    background: rgba(251,146,60,0.1); border: 1px solid rgba(251,146,60,0.3);
-    border-radius: 14px; padding: 8px 16px; font-size: 1.35rem; font-weight: 900; color: var(--orange);
+    background: rgba(255, 159, 10,0.1); border: 1px solid rgba(255, 159, 10,0.3);
+    border-radius: 12px; padding: 8px 16px; font-size: 1.35rem; font-weight: 700; color: var(--orange);
     line-height: 1; font-variant-numeric: tabular-nums;
   }
-  .streak-badge small { font-size: 0.55rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text2); margin-top: 4px; }
+  .streak-badge small { font-size: 0.75rem; font-weight: 600; color: var(--text2); margin-top: 4px; }
   .ritual-progress { height: 5px; background: rgba(255,255,255,0.07); border-radius: 3px; overflow: hidden; margin-bottom: 14px; }
-  .ritual-progress-fill { height: 100%; width: 0; border-radius: 3px; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width 0.4s ease; }
+  .ritual-progress-fill { height: 100%; width: 0; border-radius: 3px; background: var(--accent); transition: width 0.4s ease; }
 
   .ritual-step {
     display: flex; align-items: center; gap: 12px; padding: 11px 12px;
-    border-radius: 10px; transition: background 0.12s; cursor: pointer;
+    border-radius: 12px; transition: background 0.12s; cursor: pointer;
     border: 1px solid transparent;
   }
   .ritual-step:hover { background: rgba(255,255,255,0.03); }
-  .ritual-step.done { background: rgba(52,211,153,0.06); border-color: rgba(52,211,153,0.18); }
+  .ritual-step.done { background: rgba(48, 209, 88,0.06); border-color: rgba(48, 209, 88,0.18); }
   .step-check {
-    width: 22px; height: 22px; border-radius: 7px; flex-shrink: 0;
+    width: 22px; height: 22px; border-radius: 8px; flex-shrink: 0;
     border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
     font-size: 0.8rem; color: #07211a; transition: all 0.15s;
   }
   .ritual-step.done .step-check { background: var(--green); border-color: var(--green); }
   .step-icon { font-size: 1.1rem; flex-shrink: 0; }
   .step-body { flex: 1; min-width: 0; }
-  .step-label { font-size: 0.86rem; font-weight: 700; }
+  .step-label { font-size: 0.86rem; font-weight: 600; }
   .ritual-step.done .step-label { text-decoration: line-through; color: var(--text2); }
-  .step-sub { font-size: 0.72rem; color: var(--text2); margin-top: 2px; }
+  .step-sub { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
   .step-link {
-    flex-shrink: 0; font-size: 0.72rem; font-weight: 700; text-decoration: none;
-    color: var(--accent2); background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.25);
+    flex-shrink: 0; font-size: 0.75rem; font-weight: 600; text-decoration: none;
+    color: var(--accent2); background: rgba(191, 90, 242,0.1); border: 1px solid rgba(191, 90, 242,0.25);
     border-radius: 8px; padding: 6px 12px; white-space: nowrap; transition: all 0.15s;
   }
-  .step-link:hover { background: rgba(167,139,250,0.22); }
+  .step-link:hover { background: rgba(191, 90, 242,0.22); }
 
   .ritual-reflect { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--glass-border); }
-  .reflect-label { font-size: 0.7rem; font-weight: 700; color: var(--text2); margin-bottom: 8px; }
+  .reflect-label { font-size: 0.75rem; font-weight: 600; color: var(--text2); margin-bottom: 8px; }
   .reflect-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .reflect-row input {
     background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
@@ -189,7 +188,7 @@
   }
   .reflect-row input:focus { border-color: var(--accent2); }
   .ritual-done-banner {
-    margin-top: 14px; background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.3);
+    margin-top: 14px; background: rgba(48, 209, 88,0.1); border: 1px solid rgba(48, 209, 88,0.3);
     border-radius: 12px; padding: 14px 16px; font-size: 0.86rem; color: var(--text); line-height: 1.55;
   }
   .ritual-done-banner b { color: var(--green); }
@@ -432,7 +431,7 @@ function renderGoals() {
         <div class="progress-arc-info">
           <div class="progress-arc-pct" style="color:${arcColor}">${done}/${total}</div>
           <div class="progress-arc-label">Goals Complete</div>
-          <div style="font-size:0.72rem;color:var(--text2);margin-top:6px">${doneObj}/${allObj.length} objectives done</div>
+          <div style="font-size:0.75rem;color:var(--text2);margin-top:6px">${doneObj}/${allObj.length} objectives done</div>
         </div>
       </div>`;
 
@@ -502,11 +501,11 @@ function renderExpenses() {
     }
 
     if (topCats.length) {
-      el.innerHTML += '<div style="margin-top:14px;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text2);margin-bottom:8px">Top Categories</div>';
+      el.innerHTML += '<div style="margin-top:14px;font-size:0.75rem;font-weight:600;color:var(--text2);margin-bottom:8px">Top Categories</div>';
       el.innerHTML += topCats.map(([cat,amt]) => `
         <div class="rev-stat">
           <span>${cat}</span>
-          <span style="color:var(--red);font-weight:700">${fmtDec(amt)}</span>
+          <span style="color:var(--red);font-weight:600">${fmtDec(amt)}</span>
         </div>`).join('');
     }
 
@@ -519,7 +518,7 @@ function renderExpenses() {
         <div class="forecast-box">
           <div class="forecast-label">Month-End Projection</div>
           <div class="forecast-val" style="color:${projColor}">${fmt(proj)}</div>
-          <div style="font-size:0.7rem;color:var(--text2);margin-top:3px">Based on ${dom} days of spending</div>
+          <div style="font-size:0.75rem;color:var(--text2);margin-top:3px">Based on ${dom} days of spending</div>
         </div>`;
     }
 
@@ -561,7 +560,7 @@ function renderRevenue() {
     ].map(([label, val, color]) => `
       <div class="rev-stat">
         <span style="color:var(--text2)">${label}</span>
-        <span style="font-weight:700;color:${color}">${val}</span>
+        <span style="font-weight:600;color:${color}">${val}</span>
       </div>`).join('');
 
     return { totalRev, monthRev };
@@ -587,7 +586,7 @@ function renderEvents() {
       return `<div class="event-item">
         <span class="event-date" style="${urgency}">${fmtDate(e.start||e.date)} ${diff===0?'(today)':diff===1?'(tomorrow)':''}</span>
         <span style="flex:1">${VPCUtil.esc(e.name)}</span>
-        ${e.boothCost ? `<span style="font-size:0.72rem;color:var(--text2)">${fmt(e.boothCost)}</span>` : ''}
+        ${e.boothCost ? `<span style="font-size:0.75rem;color:var(--text2)">${fmt(e.boothCost)}</span>` : ''}
       </div>`;
     }).join('');
     return upcoming;
@@ -618,7 +617,7 @@ function renderObjectivesDue() {
         const color = diff < 0 ? 'var(--red)' : diff === 0 ? 'var(--yellow)' : 'var(--accent)';
         return `<div style="background:var(--surface2);border-radius:8px;padding:12px 14px;border-left:3px solid ${color}">
           <div style="font-size:0.82rem;font-weight:600">${VPCUtil.esc(o.text)}</div>
-          <div style="font-size:0.7rem;color:var(--text2);margin-top:4px">${VPCUtil.esc(o.goalTitle)} · <span style="color:${color}">${diff<0?-diff+'d overdue':diff===0?'Due today':diff+'d left'}</span></div>
+          <div style="font-size:0.75rem;color:var(--text2);margin-top:4px">${VPCUtil.esc(o.goalTitle)} · <span style="color:${color}">${diff<0?-diff+'d overdue':diff===0?'Due today':diff+'d left'}</span></div>
         </div>`;
       }).join('') + '</div>';
   } catch(e) { el.innerHTML = '<div class="empty-msg">Could not load objectives.</div>'; }
@@ -792,8 +791,8 @@ function renderRitual() {
     banner.innerHTML = `<b>✓ This week's ritual is done.</b> ${streak > 1 ? `That's <b>${streak} weeks</b> in a row — this is exactly how financial discipline compounds.` : 'First week down. Come back next week to start a streak.'} Reviewed ${r.completions.length} week${r.completions.length>1?'s':''} total.`;
   } else {
     banner.style.display = 'block';
-    banner.style.background = 'rgba(108,142,255,0.06)';
-    banner.style.borderColor = 'rgba(108,142,255,0.22)';
+    banner.style.background = 'rgba(10, 132, 255,0.06)';
+    banner.style.borderColor = 'rgba(10, 132, 255,0.22)';
     banner.innerHTML = `<b style="color:var(--accent)">${doneCount}/${steps.length} steps done.</b> Finish all five to log this week${streak ? ` and keep your ${streak}-week streak alive 🔥` : ' and start your streak 🔥'}.`;
   }
 }

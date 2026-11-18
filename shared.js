@@ -41,56 +41,6 @@ function injectDashNav() {
   nav.querySelector('.active')?.scrollIntoView({ inline: 'center', block: 'nearest' });
 }
 
-// ── CURSOR GLOW — soft flashlight that follows the pointer ──
-function injectCursorGlow() {
-  // Pointer-driven effect: skip touch devices and reduced-motion users
-  if (window.matchMedia('(pointer: coarse)').matches) return;
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const glow = document.createElement('div');
-  glow.id = 'cursor-glow';
-  glow.style.cssText = `
-    position:fixed;left:-999px;top:-999px;width:220px;height:220px;
-    border-radius:50%;pointer-events:none;z-index:900;opacity:0;
-    background:radial-gradient(circle,
-      rgba(108,142,255,0.035) 0%,
-      rgba(167,139,250,0.02) 35%,
-      transparent 68%);
-    transform:translate(-50%,-50%);
-    transition:opacity 0.5s ease;
-    mix-blend-mode:screen;will-change:left,top;
-  `;
-  document.body.appendChild(glow);
-  let tx = -999,
-    ty = -999,
-    x = -999,
-    y = -999,
-    raf = null;
-  function loop() {
-    x += (tx - x) * 0.16; // soft lag — feels like light, not a cursor copy
-    y += (ty - y) * 0.16;
-    glow.style.left = x + 'px';
-    glow.style.top = y + 'px';
-    raf = Math.abs(tx - x) > 0.4 || Math.abs(ty - y) > 0.4 ? requestAnimationFrame(loop) : null;
-  }
-  window.addEventListener(
-    'pointermove',
-    (e) => {
-      tx = e.clientX;
-      ty = e.clientY;
-      if (x === -999) {
-        x = tx;
-        y = ty;
-      } // first move: snap, don't fly in
-      glow.style.opacity = '1';
-      if (!raf) raf = requestAnimationFrame(loop);
-    },
-    { passive: true }
-  );
-  document.documentElement.addEventListener('mouseleave', () => {
-    glow.style.opacity = '0';
-  });
-}
-
 // ── GLOBAL SEARCH ──────────────────────────────────
 function buildSearchIndex() {
   const results = [];
@@ -321,7 +271,7 @@ function openSearch() {
         <input id="search-input" placeholder="Search orders, customers, events, goals…"
           style="flex:1;background:none;border:none;outline:none;font-size:0.95rem;color:var(--text);font-family:inherit;"
           oninput="runSearch(this.value)" autofocus>
-        <kbd style="font-size:0.65rem;color:var(--text2);border:1px solid var(--border);border-radius:4px;padding:2px 6px;">ESC</kbd>
+        <kbd style="font-size:0.75rem;color:var(--text2);border:1px solid var(--border);border-radius:8px;padding:2px 6px;">ESC</kbd>
       </div>
       <div id="search-results" style="max-height:420px;overflow-y:auto;padding:8px 0;">
         <div style="padding:20px;text-align:center;color:var(--text2);font-size:0.82rem;">Start typing to search…</div>
@@ -364,9 +314,9 @@ window.runSearch = function (q) {
       <span style="font-size:1.2rem;flex-shrink:0">${r.icon}</span>
       <div style="flex:1;min-width:0;">
         <div style="font-weight:600;font-size:0.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.title}</div>
-        <div style="font-size:0.72rem;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.sub}</div>
+        <div style="font-size:0.75rem;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.sub}</div>
       </div>
-      <span style="font-size:0.62rem;color:var(--text2);border:1px solid var(--border);border-radius:4px;padding:2px 7px;flex-shrink:0">${r.type}</span>
+      <span style="font-size:0.75rem;color:var(--text2);border:1px solid var(--border);border-radius:8px;padding:2px 7px;flex-shrink:0">${r.type}</span>
     </a>
   `
     )
@@ -385,7 +335,7 @@ function injectSearchBtn() {
     min-height:36px;
   `;
   // Show label only on desktop
-  btn.innerHTML = `<span>🔍</span><span class="search-btn-label" style="font-size:0.72rem">Ctrl+K</span>`;
+  btn.innerHTML = `<span>🔍</span><span class="search-btn-label" style="font-size:0.75rem">Ctrl+K</span>`;
   // Hide label on narrow screens
   if (!document.getElementById('search-btn-responsive-style')) {
     const s = document.createElement('style');
@@ -507,17 +457,17 @@ function showShortcutsPanel() {
     .map(
       ([k, d]) => `
     <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);">
-      <kbd style="font-size:0.68rem;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:3px 8px;font-family:monospace;min-width:60px;text-align:center;">${k}</kbd>
+      <kbd style="font-size:0.75rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:3px 8px;font-family:monospace;min-width:60px;text-align:center;">${k}</kbd>
       <span style="font-size:0.82rem;color:var(--text2)">${d}</span>
     </div>`
     )
     .join('');
   overlay.innerHTML = `
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;width:380px;max-width:95vw;">
-      <div style="font-size:0.88rem;font-weight:700;margin-bottom:16px;">Keyboard Shortcuts</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;width:380px;max-width:95vw;">
+      <div style="font-size:0.88rem;font-weight:600;margin-bottom:16px;">Keyboard Shortcuts</div>
       ${rows}
       <div style="margin-top:18px;text-align:right;">
-        <button onclick="document.getElementById('shortcuts-overlay').remove()" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--text2);padding:6px 14px;font-size:0.78rem;cursor:pointer;font-family:inherit;">Close (ESC)</button>
+        <button onclick="document.getElementById('shortcuts-overlay').remove()" style="background:none;border:1px solid var(--border);border-radius:8px;color:var(--text2);padding:6px 14px;font-size:0.78rem;cursor:pointer;font-family:inherit;">Close (ESC)</button>
       </div>
     </div>`;
   overlay.addEventListener('click', (e) => {
@@ -578,15 +528,15 @@ function showAuditLog() {
         .join('')
     : '<div style="color:var(--text2);font-size:0.82rem;padding:24px;text-align:center">No audit entries yet.</div>';
   overlay.innerHTML = `
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;width:740px;max-width:96vw;max-height:82vh;display:flex;flex-direction:column;">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;width:740px;max-width:96vw;max-height:82vh;display:flex;flex-direction:column;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <div style="font-size:0.9rem;font-weight:700;">Audit Log <span style="font-size:0.72rem;color:var(--text2);font-weight:400">(last ${Math.min(log.length, 60)} of ${log.length} entries)</span></div>
+        <div style="font-size:0.9rem;font-weight:600;">Audit Log <span style="font-size:0.75rem;color:var(--text2);font-weight:400">(last ${Math.min(log.length, 60)} of ${log.length} entries)</span></div>
         <div style="display:flex;gap:8px;">
-          <button onclick="localStorage.removeItem('${AUDIT_KEY}');document.getElementById('audit-overlay').remove()" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--red);padding:5px 12px;font-size:0.75rem;cursor:pointer;font-family:inherit;">Clear Log</button>
-          <button onclick="document.getElementById('audit-overlay').remove()" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--text2);padding:5px 12px;font-size:0.75rem;cursor:pointer;font-family:inherit;">✕ Close</button>
+          <button onclick="localStorage.removeItem('${AUDIT_KEY}');document.getElementById('audit-overlay').remove()" style="background:none;border:1px solid var(--border);border-radius:8px;color:var(--red);padding:5px 12px;font-size:0.75rem;cursor:pointer;font-family:inherit;">Clear Log</button>
+          <button onclick="document.getElementById('audit-overlay').remove()" style="background:none;border:1px solid var(--border);border-radius:8px;color:var(--text2);padding:5px 12px;font-size:0.75rem;cursor:pointer;font-family:inherit;">✕ Close</button>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:110px 54px 130px 1fr;gap:10px;padding:0 0 8px;border-bottom:1px solid var(--border);font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text2);">
+      <div style="display:grid;grid-template-columns:110px 54px 130px 1fr;gap:10px;padding:0 0 8px;border-bottom:1px solid var(--border);font-size:0.75rem;font-weight:600;color:var(--text2);">
         <span>Time</span><span>Action</span><span>Key</span><span>Detail</span>
       </div>
       <div style="overflow-y:auto;flex:1;margin-top:4px;">${rows}</div>
@@ -657,8 +607,8 @@ window.checkAndNotify = function () {
       t.style.cssText =
         'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:0.82rem;color:var(--text);z-index:9500;display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,0.3);white-space:nowrap;';
       t.innerHTML = `<span>🔔</span><span>Enable deadline reminders?</span>
-        <button onclick="Notification.requestPermission().then(p=>{if(p==='granted')checkAndNotify();});this.closest('div').remove();" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:inherit;">Enable</button>
-        <button onclick="localStorage.setItem('vpc_notif_declined','1');this.closest('div').remove();" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--text2);padding:5px 10px;font-size:0.78rem;cursor:pointer;font-family:inherit;">No thanks</button>`;
+        <button onclick="Notification.requestPermission().then(p=>{if(p==='granted')checkAndNotify();});this.closest('div').remove();" style="background:var(--accent-fill);color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:inherit;">Enable</button>
+        <button onclick="localStorage.setItem('vpc_notif_declined','1');this.closest('div').remove();" style="background:none;border:1px solid var(--border);border-radius:8px;color:var(--text2);padding:5px 10px;font-size:0.78rem;cursor:pointer;font-family:inherit;">No thanks</button>`;
       document.body.appendChild(t);
       setTimeout(() => t.remove(), 9000);
     }, 6000);
@@ -1164,14 +1114,14 @@ function injectSenseiInsightBar() {
     background: linear-gradient(90deg, color-mix(in srgb, ${insight.color} 6%, transparent) 0%, transparent 60%);
     border-bottom: 1px solid color-mix(in srgb, ${insight.color} 18%, transparent);
     padding: 9px 32px; display: flex; align-items: center; gap: 10px;
-    font-size: 0.76rem; color: #8892b0; line-height: 1.5;
+    font-size: 0.76rem; color: #a1a1a6; line-height: 1.5;
     position: relative; z-index: 130;
     animation: insightSlide 0.4s ease both;
   `;
   bar.innerHTML = `
     <span style="font-size:0.9rem;flex-shrink:0;">${insight.icon}</span>
     <span style="flex:1;">${insight.text}</span>
-    <button onclick="this.closest('#sensei-insight-bar').remove()" style="background:none;border:none;color:#8892b0;cursor:pointer;font-size:0.75rem;padding:2px 6px;border-radius:4px;flex-shrink:0;opacity:0.6;font-family:inherit;min-height:unset;" title="Dismiss">✕</button>
+    <button onclick="this.closest('#sensei-insight-bar').remove()" style="background:none;border:none;color:#a1a1a6;cursor:pointer;font-size:0.75rem;padding:2px 6px;border-radius:8px;flex-shrink:0;opacity:0.6;font-family:inherit;min-height:unset;" title="Dismiss">✕</button>
   `;
   if (!document.getElementById('insight-bar-anim')) {
     const s = document.createElement('style');
@@ -1241,7 +1191,6 @@ document.addEventListener('DOMContentLoaded', () => {
   sessionStorage.setItem('vpc_last_page', _curPage);
   injectDashNav();
   injectSearchBtn();
-  injectCursorGlow();
   injectSenseiInsightBar();
   registerSW();
   injectMobileNav();
@@ -1261,7 +1210,7 @@ function injectMobileNav() {
     .mobile-bottom-nav {
       display: none;
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
-      background: rgba(15,17,23,0.96);
+      background: rgba(22, 22, 23,0.96);
       backdrop-filter: blur(20px) saturate(1.4);
       border-top: 1px solid rgba(255,255,255,0.08);
       padding: 0 0 env(safe-area-inset-bottom, 0);
@@ -1273,12 +1222,11 @@ function injectMobileNav() {
     .mobile-bottom-nav li { flex: 1; }
     .mobile-bottom-nav a {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      height: 100%; text-decoration: none; color: #8892b0;
-      font-size: 0.52rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;
-      gap: 3px; transition: color 0.15s;
+      height: 100%; text-decoration: none; color: #a1a1a6;
+      font-size: 0.75rem; font-weight: 600; gap: 3px; transition: color 0.15s;
     }
     .mobile-bottom-nav a .nav-icon { font-size: 1.15rem; line-height: 1; }
-    .mobile-bottom-nav a.active { color: #6C8EFF; }
+    .mobile-bottom-nav a.active { color: #2997ff; }
     .mobile-bottom-nav a:hover { color: #c8d0e8; }
     @media (max-width: 768px) {
       .mobile-bottom-nav { display: block; }

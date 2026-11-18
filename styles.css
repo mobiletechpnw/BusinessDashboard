@@ -2,31 +2,119 @@
  * styles.css — Shared design tokens & common components
  * Vault & Pine Collective Business Dashboard
  *
- * All pages link this file so brand changes happen in one place.
- * Page-specific rules stay in each file's own <style> block.
+ * Calm system (Nov 2026): neutral surfaces, one blue for interaction,
+ * colour only for state, eight type styles, a 4-pt spacing grid, five radii.
+ * Full system (light + dark, components, rules): the "Design System" artifact.
  *
- * 2026 design language: dark-only · bento/glass surfaces ·
- * ambient gradient mesh · noise texture · accent glows.
+ * The dashboard ships its dark theme. Light mode follows the device once the
+ * remaining inline colours are tokenised (roadmap #10–#11).
+ *
+ * Legacy token names (--text, --text2, --border, --glass-border, --accent2,
+ * --radius) are kept as aliases so every page keeps working.
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap');
 
 /* ── Design Tokens ── */
 :root {
-  --bg: #0d0f16;
-  --surface: rgba(255, 255, 255, 0.035);
-  --surface2: rgba(255, 255, 255, 0.06);
-  --border: rgba(255, 255, 255, 0.09);
-  --accent: #6c8cff;
-  --accent2: #a78bfa;
-  --green: #34d399;
-  --yellow: #fbbf24;
-  --red: #f87171;
-  --orange: #fb923c;
-  --text: #e2e8f0;
-  --text2: #8892b0;
-  --radius: 16px;
-  --glass-border: rgba(255, 255, 255, 0.08);
+  color-scheme: dark;
+
+  /* Neutrals */
+  --bg: #000000; /* page */
+  --surface: #1c1c1e; /* cards, sheets, menus */
+  --surface2: #2c2c2e; /* raised: inner tiles, hover rows */
+  --fill: rgba(118, 118, 128, 0.24); /* inputs, quiet buttons, tracks */
+  --separator: rgba(255, 255, 255, 0.1); /* hairlines */
+  --label: #f5f5f7;
+  --label-2: #a1a1a6;
+  --label-3: #8e8e93; /* placeholders, disabled */
+
+  /* Interaction: one blue */
+  --accent: #2997ff; /* links, icons, selected text */
+  --accent-fill: #0071e3; /* filled buttons, active chips (white text 4.7:1) */
+  --accent-fill-hover: #0077ed;
+  --accent-tint: rgba(10, 132, 255, 0.18);
+  --on-accent: #ffffff;
+  --ring: #2997ff; /* keyboard focus: solid, 4.6:1 or more on every surface */
+
+  /* State: text colour on dark, and the tint behind it in pills */
+  --green: #30d158;
+  --green-tint: #203d28;
+  --orange: #ff9f0a;
+  --orange-tint: #45341a;
+  --red: #ff6961;
+  --red-tint: #452323;
+  --yellow: #ffd60a;
+  --yellow-tint: #453e1a;
+  --blue-pill: #409cff;
+  --blue-tint: #192f46;
+  --purple-pill: #da8fff;
+  --purple-tint: #392744;
+
+  /* Legacy names */
+  --text: var(--label);
+  --text2: var(--label-2);
+  --border: var(--separator);
+  --glass-border: var(--separator);
+  --accent2: #bf5af2; /* decorative purple, retired page by page (roadmap #2) */
+  --radius: var(--r-lg);
+
+  /* Glass: floating chrome only (header, nav bars, the phone tab bar) */
+  --chrome: rgba(22, 22, 23, 0.82);
+  --chrome-blur: saturate(180%) blur(20px);
+
+  /* Type */
+  --font: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Space: 4-pt grid */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 20px;
+  --s6: 24px;
+  --s8: 32px;
+  --s10: 40px;
+  --s12: 48px;
+  --s16: 64px;
+
+  /* Radius */
+  --r-sm: 8px; /* chips, small controls */
+  --r-md: 12px; /* inputs, menus, inner groups */
+  --r-lg: 20px; /* cards */
+  --r-xl: 28px; /* sheets, dialogs */
+  --r-full: 999px; /* buttons, pills */
+
+  /* Elevation: in dark mode surfaces lift; shadows mostly disappear */
+  --shadow-1: 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+  --shadow-2: 0 0 0 0.5px rgba(255, 255, 255, 0.08), 0 16px 40px rgba(0, 0, 0, 0.5);
+  --shadow-pop: 0 0 0 0.5px rgba(255, 255, 255, 0.12), 0 16px 40px rgba(0, 0, 0, 0.6);
+  --highlight: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+  /* Motion */
+  --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
+  --spring: linear(
+    0,
+    0.092 5.6%,
+    0.287 11.1%,
+    0.502 16.7%,
+    0.691 22.2%,
+    0.836 27.8%,
+    0.936 33.3%,
+    0.996 38.9%,
+    1.027 44.4%,
+    1.038 50%,
+    1.031 61.1%,
+    1.015 72.2%,
+    1.004 83.3%,
+    1
+  );
+  --t-fast: 120ms;
+  --t-base: 200ms;
+  --t-move: 320ms;
+  --t-sheet: 420ms;
 }
 
 /* ── Base reset ── */
@@ -41,74 +129,84 @@
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-family: var(--font);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+b,
+strong {
+  font-weight: 600;
+}
+::selection {
+  background: var(--accent-tint);
 }
 
-/* ── 2026: ambient gradient mesh — every page, zero markup ── */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 60% 50% at 12% 8%, rgba(108, 142, 255, 0.09) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 45% at 88% 12%, rgba(167, 139, 250, 0.08) 0%, transparent 60%),
-    radial-gradient(ellipse 55% 50% at 75% 85%, rgba(45, 212, 191, 0.05) 0%, transparent 60%),
-    radial-gradient(ellipse 45% 40% at 20% 90%, rgba(251, 146, 60, 0.04) 0%, transparent 60%);
-  animation: vpc-mesh-drift 26s ease-in-out infinite alternate;
-}
-@keyframes vpc-mesh-drift {
-  from {
-    transform: translate(0, 0) scale(1);
-  }
-  to {
-    transform: translate(-1.5%, 1%) scale(1.04);
-  }
-}
-/* ── 2026: film-grain noise texture ── */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0.35;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.05'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
 @media (prefers-reduced-motion: reduce) {
-  body::before {
-    animation: none;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
-/* ── Shared card — dark glassmorphism ── */
-.card {
-  background: linear-gradient(
-    160deg,
-    rgba(255, 255, 255, 0.045) 0%,
-    rgba(255, 255, 255, 0.012) 55%,
-    rgba(255, 255, 255, 0.03) 100%
-  );
-  backdrop-filter: blur(14px) saturate(1.2);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius);
-  padding: 22px;
-  transition:
-    border-color 0.2s,
-    box-shadow 0.25s;
+/* ── Type: eight styles ── */
+.t-display {
+  font: 600 48px/52px var(--font);
+  letter-spacing: -0.022em;
 }
-.card:hover {
-  border-color: rgba(255, 255, 255, 0.16);
+.t-large {
+  font: 700 34px/41px var(--font);
+  letter-spacing: -0.022em;
+}
+.t-title {
+  font: 600 22px/28px var(--font);
+  letter-spacing: -0.018em;
+}
+.t-headline {
+  font: 600 17px/22px var(--font);
+  letter-spacing: -0.013em;
+}
+.t-body {
+  font: 400 15px/22px var(--font);
+  letter-spacing: -0.009em;
+}
+.t-subhead {
+  font: 400 13px/18px var(--font);
+  letter-spacing: -0.003em;
+}
+.t-caption {
+  font: 500 12px/16px var(--font);
+}
+.t-numeric {
+  font: 600 32px/36px var(--font);
+  letter-spacing: -0.022em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Shared card ── */
+.card {
+  background: var(--surface);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-1), var(--highlight);
 }
 .card-title {
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: var(--text2);
+  font-size: 1.0625rem;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.013em;
+  color: var(--text);
   margin-bottom: 16px;
 }
 
@@ -130,43 +228,44 @@ body::after {
   }
 }
 
-/* ── Shared badge ── */
+/* ── Shared badge (status pill) ── */
 .badge {
-  display: inline-block;
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 99px;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 3px 9px;
+  border-radius: var(--r-full);
 }
 .badge-green {
-  background: #0d3320;
+  background: var(--green-tint);
   color: var(--green);
 }
 .badge-yellow {
-  background: #3b2e12;
+  background: var(--yellow-tint);
   color: var(--yellow);
 }
 .badge-red {
-  background: #3b1212;
+  background: var(--red-tint);
   color: var(--red);
 }
 .badge-blue {
-  background: #12213b;
-  color: var(--accent);
+  background: var(--blue-tint);
+  color: var(--blue-pill);
 }
 .badge-purple {
-  background: #251235;
-  color: var(--accent2);
+  background: var(--purple-tint);
+  color: var(--purple-pill);
 }
 
-/* ── Shared modal ── */
+/* ── Shared modal (sheet) ── */
 .modal-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(0, 0, 0, 0.6);
   z-index: 1000;
   align-items: center;
   justify-content: center;
@@ -175,56 +274,64 @@ body::after {
   display: flex;
 }
 .modal {
-  background: rgba(22, 25, 38, 0.92);
-  backdrop-filter: blur(24px) saturate(1.3);
-  border: 1px solid var(--glass-border);
-  border-radius: 18px;
+  background: var(--surface);
+  border: 1px solid transparent;
+  border-radius: var(--r-xl);
   padding: 28px;
   width: 500px;
   max-width: 95vw;
   max-height: 90vh;
   overflow-y: auto;
+  box-shadow: var(--shadow-pop);
 }
 .modal h2 {
-  font-size: 1rem;
-  font-weight: 800;
+  font-size: 1.375rem;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.018em;
   margin-bottom: 20px;
 }
 .modal-actions {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
-  margin-top: 22px;
+  margin-top: 24px;
 }
 .field {
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 .field label {
   display: block;
-  font-size: 0.72rem;
+  font-size: 0.8125rem;
   color: var(--text2);
-  margin-bottom: 5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
+  margin-bottom: 6px;
+  font-weight: 400;
 }
 .field input,
 .field textarea,
 .field select {
   width: 100%;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 7px;
+  background: var(--fill);
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
   color: var(--text);
   padding: 9px 12px;
-  font-size: 0.85rem;
+  font-size: 0.9375rem;
   outline: none;
   font-family: inherit;
+  transition:
+    border-color var(--t-base) var(--ease),
+    box-shadow var(--t-base) var(--ease);
+}
+.field input::placeholder,
+.field textarea::placeholder {
+  color: var(--label-3);
 }
 .field input:focus,
 .field textarea:focus,
 .field select:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--ring);
 }
 .field select option {
   background: var(--surface);
@@ -239,45 +346,49 @@ body::after {
   gap: 12px;
 }
 
-/* ── Shared buttons ── */
+/* ── Shared buttons: capsules ── */
 button {
   cursor: pointer;
   border: none;
-  border-radius: 10px;
-  font-size: 0.85rem;
+  border-radius: var(--r-full);
+  font-size: 0.9375rem;
   font-weight: 600;
-  padding: 9px 16px;
-  transition: all 0.15s;
+  padding: 9px 18px;
   font-family: inherit;
+  transition:
+    background-color var(--t-base) var(--ease),
+    color var(--t-base) var(--ease),
+    border-color var(--t-base) var(--ease),
+    opacity var(--t-base) var(--ease),
+    transform var(--t-fast) var(--ease);
+}
+button:active {
+  transform: scale(0.97);
 }
 .btn-primary {
-  background: var(--accent);
-  color: #fff;
-  box-shadow: 0 2px 14px rgba(108, 140, 255, 0.3);
+  background: var(--accent-fill);
+  color: var(--on-accent);
 }
 .btn-primary:hover {
-  background: #7d9bff;
-  box-shadow: 0 4px 20px rgba(108, 140, 255, 0.45);
-  transform: translateY(-1px);
+  background: var(--accent-fill-hover);
 }
 .btn-ghost {
-  background: transparent;
-  color: var(--text2);
-  border: 1px solid var(--border);
+  background: var(--fill);
+  color: var(--text);
+  border: 1px solid transparent;
 }
 .btn-ghost:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  background: rgba(118, 118, 128, 0.32);
 }
 .btn-danger {
-  background: var(--red);
-  color: #fff;
+  background: var(--red-tint);
+  color: var(--red);
 }
 .btn-danger:hover {
-  opacity: 0.85;
+  background: #5a2b2b;
 }
 
-/* ── Shared KPI strip — bento tiles ── */
+/* ── Shared KPI strip ── */
 .kpi-strip {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -289,40 +400,32 @@ button {
   margin-bottom: 28px;
 }
 .kpi {
-  background: linear-gradient(
-    160deg,
-    rgba(255, 255, 255, 0.045) 0%,
-    rgba(255, 255, 255, 0.015) 100%
-  );
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid transparent;
   border-radius: var(--radius);
-  padding: 16px 22px;
-  transition:
-    border-color 0.2s,
-    transform 0.18s;
-}
-.kpi:hover {
-  border-color: rgba(255, 255, 255, 0.16);
-  transform: translateY(-2px);
+  padding: 16px 20px;
+  box-shadow: var(--shadow-1), var(--highlight);
 }
 .kpi-val {
-  font-size: 1.5rem;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  line-height: 1;
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  line-height: 1.15;
   font-variant-numeric: tabular-nums;
 }
+/* Label above the value, as in the design system */
 .kpi-label {
-  font-size: 0.65rem;
+  order: -1;
+  font-size: 0.8125rem;
+  line-height: 1.4;
   color: var(--text2);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-top: 5px;
+  margin-bottom: 4px;
 }
 .kpi-sub {
-  font-size: 0.72rem;
-  margin-top: 3px;
+  font-size: 0.75rem;
+  margin-top: 4px;
 }
 @media (max-width: 680px) {
   .kpi-strip {
@@ -334,22 +437,25 @@ button {
 .tab-bar {
   display: flex;
   gap: 0;
-  border-bottom: 1px solid var(--glass-border);
+  border-bottom: 1px solid var(--separator);
   padding: 0 32px;
-  background: rgba(13, 15, 22, 0.7);
-  backdrop-filter: blur(18px) saturate(1.2);
+  background: var(--chrome);
+  -webkit-backdrop-filter: var(--chrome-blur);
+  backdrop-filter: var(--chrome-blur);
   position: sticky;
   top: 98px; /* 58px header + 40px dash-nav */
   z-index: 150;
 }
 .tab {
   padding: 14px 20px;
-  font-size: 0.84rem;
-  font-weight: 600;
+  font-size: 0.875rem;
+  font-weight: 500;
   color: var(--text2);
   cursor: pointer;
   border-bottom: 2px solid transparent;
-  transition: all 0.15s;
+  transition:
+    color var(--t-base) var(--ease),
+    border-color var(--t-base) var(--ease);
   user-select: none;
 }
 .tab:hover {
@@ -357,14 +463,16 @@ button {
 }
 .tab.active {
   color: var(--accent);
+  font-weight: 600;
   border-bottom-color: var(--accent);
 }
 
-/* ── Shared header — frosted glass ── */
+/* ── Shared header (glass is allowed on floating chrome) ── */
 header {
-  background: rgba(13, 15, 22, 0.72);
-  backdrop-filter: blur(20px) saturate(1.3);
-  border-bottom: 1px solid var(--glass-border);
+  background: var(--chrome);
+  -webkit-backdrop-filter: var(--chrome-blur);
+  backdrop-filter: var(--chrome-blur);
+  border-bottom: 1px solid var(--separator);
   padding: 0 32px;
   display: flex;
   align-items: center;
@@ -388,26 +496,24 @@ h1 + #vpc-sync-wrap {
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.84rem;
+  font-size: 0.875rem;
 }
 th {
-  font-size: 0.65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: 0.75rem;
+  font-weight: 600;
   color: var(--text2);
   padding: 8px 12px;
   text-align: left;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--separator);
   white-space: nowrap;
 }
 td {
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--border);
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--separator);
   vertical-align: top;
 }
 tr:hover td {
-  background: var(--surface2);
+  background: rgba(118, 118, 128, 0.12);
 }
 tr:last-child td {
   border-bottom: none;
@@ -425,20 +531,18 @@ tr:last-child td {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  background: rgba(22, 25, 38, 0.92);
-  backdrop-filter: blur(16px);
-  border: 1px solid var(--accent);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.4),
-    0 0 20px rgba(108, 140, 255, 0.12);
+  background: var(--surface2);
+  box-shadow: var(--shadow-pop);
   color: var(--text);
-  padding: 11px 18px;
-  border-radius: 9px;
-  font-size: 0.83rem;
+  padding: 12px 18px;
+  border-radius: var(--r-md);
+  font-size: 0.875rem;
   z-index: 600;
   transform: translateY(80px);
   opacity: 0;
-  transition: all 0.25s;
+  transition:
+    transform var(--t-move) var(--spring),
+    opacity var(--t-base) var(--ease);
 }
 .toast.show {
   transform: translateY(0);
@@ -458,7 +562,7 @@ tr:last-child td {
 }
 .empty p,
 .empty h3 {
-  font-size: 0.88rem;
+  font-size: 0.9375rem;
   line-height: 1.6;
 }
 
@@ -469,32 +573,29 @@ tr:last-child td {
   justify-content: center;
   gap: 8px;
   padding: 16px 0 4px;
-  font-size: 0.82rem;
+  font-size: 0.8125rem;
   color: var(--text2);
 }
 .page-btn {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  color: var(--text2);
-  padding: 5px 12px;
-  border-radius: 6px;
-  font-size: 0.8rem;
+  background: var(--fill);
+  border: 1px solid transparent;
+  color: var(--text);
+  padding: 6px 12px;
+  border-radius: var(--r-full);
+  font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s;
 }
 .page-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  background: rgba(118, 118, 128, 0.32);
 }
 .page-btn:disabled {
   opacity: 0.35;
   cursor: default;
 }
 .page-btn.active {
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
+  background: var(--accent-fill);
+  color: var(--on-accent);
 }
 
 /* ── Main container ── */
@@ -541,7 +642,7 @@ main {
 @media (max-width: 700px) {
   .tab {
     padding: 12px 14px;
-    font-size: 0.78rem;
+    font-size: 0.8125rem;
     min-height: 44px;
   }
   button {
@@ -577,14 +678,14 @@ main {
   }
 }
 
-/* ── Modals: full-width on mobile ── */
+/* ── Modals: bottom sheets on mobile ── */
 @media (max-width: 480px) {
   .modal-overlay {
     align-items: flex-end;
     padding: 0;
   }
   .modal {
-    border-radius: 16px 16px 0 0;
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
     width: 100%;
     max-width: 100%;
     max-height: 92vh;
@@ -611,7 +712,7 @@ main {
     padding: 12px 14px;
   }
   .kpi-val {
-    font-size: 1.2rem;
+    font-size: 1.375rem;
   }
 }
 
@@ -642,7 +743,7 @@ main {
 }
 @media (max-width: 700px) {
   table {
-    font-size: 0.78rem;
+    font-size: 0.8125rem;
   }
   th,
   td {
@@ -674,7 +775,7 @@ main {
     align-items: flex-end !important;
   }
   #search-overlay > div {
-    border-radius: 16px 16px 0 0 !important;
+    border-radius: var(--r-xl) var(--r-xl) 0 0 !important;
     width: 100% !important;
     max-width: 100% !important;
   }
@@ -706,18 +807,16 @@ main {
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
+  background: var(--accent-fill);
+  color: var(--on-accent);
   font-size: 1.5rem;
   display: none;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 20px rgba(108, 140, 255, 0.45);
+  box-shadow: var(--shadow-2);
   border: none;
   cursor: pointer;
-  transition:
-    transform 0.15s,
-    box-shadow 0.15s;
+  transition: transform var(--t-fast) var(--ease);
 }
 .fab:active {
   transform: scale(0.93);
@@ -741,25 +840,19 @@ main {
   }
 }
 
-/* ═══════════════════════════════════════════════════
-   AGENT CONSENSUS IMPROVEMENTS — 2026-06-09
-   Applied from 5-agent audit: UI Inspector, Mobile QA,
-   Feature Auditor, UX Architect, Data Flow Agent
-═══════════════════════════════════════════════════ */
-
 /* ── Focus-visible: keyboard accessibility ── */
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 a:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 3px solid var(--ring);
   outline-offset: 2px;
 }
 
-/* ── Badge minimum font size (was 0.60–0.65rem, now 0.72rem min) ── */
+/* ── Badge minimum size: 12px text, 20px tall ── */
 .badge {
-  font-size: 0.72rem !important;
+  font-size: 0.75rem !important;
   min-height: 20px;
 }
 
@@ -778,9 +871,10 @@ button.loading {
 
 /* ── Cross-dashboard navigation bar ── */
 .dash-nav {
-  background: rgba(13, 15, 22, 0.65);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--glass-border);
+  background: var(--chrome);
+  -webkit-backdrop-filter: var(--chrome-blur);
+  backdrop-filter: var(--chrome-blur);
+  border-bottom: 1px solid var(--separator);
   padding: 0 32px;
   display: flex;
   align-items: center;
@@ -799,14 +893,16 @@ button.loading {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 10px 16px;
-  font-size: 0.78rem;
-  font-weight: 600;
+  padding: 10px 14px;
+  font-size: 0.8125rem;
+  font-weight: 500;
   color: var(--text2);
   text-decoration: none;
   border-bottom: 2px solid transparent;
   white-space: nowrap;
-  transition: all 0.15s;
+  transition:
+    color var(--t-base) var(--ease),
+    border-color var(--t-base) var(--ease);
   flex-shrink: 0;
 }
 .dash-nav-link:hover {
@@ -814,6 +910,7 @@ button.loading {
 }
 .dash-nav-link.active {
   color: var(--accent);
+  font-weight: 600;
   border-bottom-color: var(--accent);
 }
 @media (max-width: 700px) {
@@ -823,25 +920,23 @@ button.loading {
   }
   .dash-nav-link {
     padding: 6px 12px;
-    font-size: 0.72rem;
+    font-size: 0.75rem;
   }
 }
 
 /* ── Smart back-link ── */
 .smart-back {
   display: none;
-  font-size: 0.72rem;
-  color: var(--text2);
+  font-size: 0.75rem;
+  color: var(--text);
   text-decoration: none;
-  padding: 5px 10px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  transition: all 0.15s;
+  padding: 5px 12px;
+  background: var(--fill);
+  border-radius: var(--r-full);
   white-space: nowrap;
 }
 .smart-back:hover {
   color: var(--accent);
-  border-color: var(--accent);
 }
 .smart-back.visible {
   display: inline-flex;
@@ -862,72 +957,17 @@ button.loading {
   margin-bottom: 14px;
 }
 
-/* ── Form focus state enhancement ── */
-.field input:focus,
-.field textarea:focus,
-.field select:focus {
-  box-shadow: 0 0 0 3px rgba(108, 140, 255, 0.12);
-}
-
 /* ══════════════════════════════════════════════════
    BUSINESS SENSEI — insight bar responsive
 ══════════════════════════════════════════════════ */
 #sensei-insight-bar {
   padding: 9px 32px;
-  font-size: 0.76rem;
+  font-size: 0.8125rem;
 }
 @media (max-width: 700px) {
   #sensei-insight-bar {
     padding: 8px 14px;
-    font-size: 0.72rem;
-  }
-}
-
-/* ── Design elevation: shimmer on KPI values ── */
-@keyframes kpi-shimmer {
-  0% {
-    background-position: -200% center;
-  }
-  100% {
-    background-position: 200% center;
-  }
-}
-.kpi-val[data-shimmer],
-.kpi-value[data-shimmer] {
-  background: linear-gradient(90deg, var(--text) 20%, var(--accent) 50%, var(--text) 80%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: kpi-shimmer 2.4s linear 1 both;
-}
-
-/* ── Design elevation: card glow accent on hover ── */
-.card[data-accent]:hover {
-  box-shadow: 0 8px 40px color-mix(in srgb, attr(data-accent) 14%, transparent);
-}
-
-/* ── Design elevation: progress bar glow ── */
-.progress-fill {
-  position: relative;
-  overflow: hidden;
-}
-.progress-fill::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 60%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  animation: progress-sweep 2.5s ease-in-out 0.5s 1 forwards;
-}
-@keyframes progress-sweep {
-  from {
-    left: -60%;
-  }
-  to {
-    left: 120%;
+    font-size: 0.75rem;
   }
 }
 
@@ -946,15 +986,15 @@ button.loading {
     padding: 10px 10px;
   }
   .kpi-val {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
   }
   .kpi-label,
   .stat-lbl {
-    font-size: 0.62rem;
+    font-size: 0.75rem;
   }
   .main-tab {
     padding: 0 8px;
-    font-size: 0.65rem;
+    font-size: 0.75rem;
   }
   .header-right {
     gap: 4px;

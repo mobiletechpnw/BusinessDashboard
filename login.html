@@ -3,74 +3,65 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0f1117">
+<meta name="theme-color" content="#1c1c1e">
 <title>Sign In — VPC</title>
 <style>
 :root {
-  --bg: #0d0f16;
-  --surface: rgba(255,255,255,0.04);
-  --surface2: rgba(255,255,255,0.06);
-  --border: rgba(255,255,255,0.09);
-  --text: #e2e8f0;
-  --text2: #8892b0;
-  --accent: #6c8cff;
-  --accent-hover: #7d9bff;
-  --green: #34d399;
-  --red: #f87171;
+  --bg: #000000;
+  --surface: #1c1c1e;
+  --surface2: #2c2c2e;
+  --border: rgba(255,255,255,0.1);
+  --text: #f5f5f7;
+  --text2: #a1a1a6;
+  --accent: #2997ff;
+  --accent-fill: #0071e3;
+  --accent-hover: #0077ed;
+  --ring: #2997ff;
+  --green: #30d158;
+  --red: #ff6961;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{min-height:100vh;display:flex;align-items:center;justify-content:center;
-  background:var(--bg);font-family:system-ui,-apple-system,sans-serif;color:var(--text);}
-/* 2026 skin: ambient mesh + grain */
-body::before{content:'';position:fixed;inset:0;z-index:-2;pointer-events:none;
-  background:
-    radial-gradient(ellipse 60% 50% at 12% 8%, rgba(108,142,255,0.1) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 45% at 88% 12%, rgba(167,139,250,0.09) 0%, transparent 60%),
-    radial-gradient(ellipse 55% 50% at 75% 85%, rgba(45,212,191,0.06) 0%, transparent 60%);
-  animation:mesh-drift 26s ease-in-out infinite alternate;}
-@keyframes mesh-drift{from{transform:translate(0,0) scale(1);}to{transform:translate(-1.5%,1%) scale(1.04);}}
-body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:0.35;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.05'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+  background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',system-ui,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased;}
 
-.card{background:linear-gradient(160deg,rgba(255,255,255,0.05) 0%,rgba(255,255,255,0.015) 60%);
-  backdrop-filter:blur(18px) saturate(1.2);
+.card{background:var(--surface);
   border:1px solid var(--border);border-radius:20px;
   padding:44px 40px;width:400px;max-width:95vw;
   box-shadow:0 24px 80px rgba(0,0,0,0.45);}
 
 .logo{text-align:center;margin-bottom:32px;}
 .logo-icon{font-size:2.4rem;margin-bottom:10px;}
-.logo-title{font-size:1.25rem;font-weight:900;letter-spacing:-.4px;}
+.logo-title{font-size:1.25rem;font-weight:700;letter-spacing:-.4px;}
 .logo-title .v{color:var(--accent);}.logo-title .p{color:var(--green);}
 .logo-sub{font-size:.8rem;color:var(--text2);margin-top:5px;}
 
-.tabs{display:flex;background:var(--bg);border-radius:9px;padding:3px;margin-bottom:28px;}
-.tab-btn{flex:1;padding:8px;font-size:.82rem;font-weight:700;border:none;border-radius:7px;
+.tabs{display:flex;background:var(--surface2);border-radius:12px;padding:3px;margin-bottom:28px;}
+.tab-btn{flex:1;padding:8px;font-size:.82rem;font-weight:600;border:none;border-radius:999px;
   cursor:pointer;transition:all .15s;background:none;color:var(--text2);}
-.tab-btn.active{background:var(--accent);color:#fff;}
+.tab-btn.active{background:var(--accent-fill);color:#fff;}
 
 .field{margin-bottom:16px;}
-.field label{display:block;font-size:.7rem;color:var(--text2);font-weight:700;
-  text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;}
-.field input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;
+.field label{display:block;font-size:0.75rem;color:var(--text2);font-weight:600;
+  margin-bottom:7px;}
+.field input{width:100%;background:var(--surface2);border:1px solid transparent;border-radius:12px;
   color:var(--text);padding:11px 14px;font-size:.92rem;outline:none;font-family:inherit;
   transition:border-color .15s;}
 .field input:focus{border-color:var(--accent);}
 
-.btn-submit{width:100%;background:var(--accent);color:#fff;border:none;border-radius:9px;
-  padding:13px;font-size:.92rem;font-weight:700;cursor:pointer;transition:all .15s;
+.btn-submit{width:100%;background:var(--accent-fill);color:#fff;border:none;border-radius:999px;
+  padding:13px;font-size:.92rem;font-weight:600;cursor:pointer;transition:all .15s;
   margin-top:6px;}
 .btn-submit:hover{background:var(--accent-hover);}
 .btn-submit:disabled{opacity:.55;cursor:not-allowed;}
 
-.error{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);
+.error{background:rgba(255, 105, 97,.1);border:1px solid rgba(255, 105, 97,.3);
   border-radius:8px;padding:10px 14px;font-size:.8rem;color:var(--red);
   margin-bottom:16px;display:none;line-height:1.5;}
-.success{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);
+.success{background:rgba(48, 209, 88,.1);border:1px solid rgba(48, 209, 88,.3);
   border-radius:8px;padding:10px 14px;font-size:.8rem;color:var(--green);
   margin-bottom:16px;display:none;line-height:1.5;}
 
-.hint{text-align:center;font-size:.73rem;color:var(--text2);margin-top:18px;line-height:1.6;}
+.hint{text-align:center;font-size:0.75rem;color:var(--text2);margin-top:18px;line-height:1.6;}
 </style>
 </head>
 <body>
@@ -99,14 +90,14 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opa
     <input type="password" id="inp-pass" placeholder="••••••••" autocomplete="current-password">
   </div>
   <div style="text-align:right;margin:-10px 0 14px" id="forgot-wrap">
-    <button type="button" onclick="setMode('forgot')" style="background:none;border:none;color:var(--accent);font-size:.73rem;cursor:pointer;padding:4px 0">Forgot password?</button>
+    <button type="button" onclick="setMode('forgot')" style="background:none;border:none;color:var(--accent);font-size:0.75rem;cursor:pointer;padding:4px 0">Forgot password?</button>
   </div>
 
   <button class="btn-submit" id="submit-btn" onclick="handleAuth()">Sign In</button>
 
   <div class="hint" id="hint-text">Your data syncs automatically across all devices once signed in.</div>
   <div style="text-align:center;margin-top:14px;display:none" id="back-link">
-    <button type="button" onclick="setMode('signin')" style="background:none;border:none;color:var(--text2);font-size:.73rem;cursor:pointer;padding:4px;text-decoration:underline;text-underline-offset:2px">← Back to Sign In</button>
+    <button type="button" onclick="setMode('signin')" style="background:none;border:none;color:var(--text2);font-size:0.75rem;cursor:pointer;padding:4px;text-decoration:underline;text-underline-offset:2px">← Back to Sign In</button>
   </div>
 </div>
 
