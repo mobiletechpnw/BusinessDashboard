@@ -166,6 +166,7 @@ function navAccountActions({ keyboard }) {
   const acts = [{ value: 'sync', label: 'Sync now', icon: 'sync' }];
   if ('Notification' in window && Notification.permission === 'default')
     acts.push({ value: 'reminders', label: 'Turn on reminders', icon: 'bell' });
+  if (keyboard) acts.push({ value: 'appearance', label: 'Appearance', icon: 'contrast' });
   acts.push({ value: 'backoffice', label: 'Back office', icon: 'archive' });
   if (keyboard) acts.push({ value: 'shortcuts', label: 'Keyboard shortcuts', icon: 'keyboard' });
   acts.push({ value: 'activity', label: 'Activity log', icon: 'activity' });
@@ -240,6 +241,11 @@ function openMoreSheet(trigger) {
         <nav class="vpc-nav" aria-label="All pages">${navLinksHTML()}</nav>
         <div class="vpc-nav-label">Account</div>
         <div class="vpc-sheet-who">${navWhoHTML()}</div>
+        <div class="vpc-sheet-row"><span id="vpc-theme-label">Appearance</span>
+          <div class="seg" id="vpc-theme-seg" aria-labelledby="vpc-theme-label">
+            <button data-value="auto">Auto</button><button data-value="light">Light</button><button data-value="dark">Dark</button>
+          </div>
+        </div>
         ${navAccountActions({ keyboard: false })
           .map(
             (a) =>
@@ -249,6 +255,9 @@ function openMoreSheet(trigger) {
       </div>
     </div>`;
   document.body.appendChild(wrap);
+  vpcSeg(wrap.querySelector('#vpc-theme-seg'), (v) => VPCUtil.setTheme(v)).set(
+    VPCUtil.themeChoice()
+  );
   document.documentElement.classList.add('vpc-sheet-open');
   trigger?.setAttribute('aria-expanded', 'true');
   const sheet = wrap.querySelector('.vpc-sheet');
@@ -319,6 +328,17 @@ function runNavAction(action, el) {
     closeMoreSheet(false);
     if (navCurrentPage() === VAULT && typeof window.openCatModal === 'function') openCatModal();
     else location.href = VAULT + '#newcat';
+  } else if (action === 'appearance') {
+    vpcMenu(el, {
+      label: 'Appearance',
+      current: VPCUtil.themeChoice(),
+      options: [
+        { value: 'auto', label: 'Match device', color: 'transparent' },
+        { value: 'light', label: 'Light', color: 'transparent' },
+        { value: 'dark', label: 'Dark', color: 'transparent' },
+      ],
+      onSelect: (v) => VPCUtil.setTheme(v),
+    });
   } else if (action === 'backoffice') {
     closeMoreSheet(false);
     location.href = VAULT + '#backoffice';

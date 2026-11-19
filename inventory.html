@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="var(--surface)">
+<meta name="theme-color" content="#121213">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
@@ -50,7 +50,7 @@
   .filter-row { display:flex; align-items:center; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
   .filter-pill { background:none; border:1px solid var(--border); color:var(--text2); border-radius:99px; padding:6px 14px; font-size:.76rem; font-weight:600; cursor:pointer; font-family:inherit; transition:all .15s; }
   .filter-pill:hover { color:var(--text); border-color:var(--accent); }
-  .filter-pill.active { background:color-mix(in srgb, var(--accent) 14%, transparent); border-color:var(--accent); color:var(--accent); }
+  .filter-pill.active { background:var(--accent-fill); border-color:transparent; color:var(--on-accent); }
   .filter-spacer { flex:1; }
   .inv-search { background:var(--surface2,color-mix(in srgb, var(--label) 5%, transparent)); border:1px solid var(--border); border-radius:8px; color:var(--text); padding:7px 12px; font-size:.8rem; font-family:inherit; outline:none; width:200px; max-width:100%; }
   .inv-search:focus { border-color:var(--accent); }

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="var(--surface)">
+<meta name="theme-color" content="#121213">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
@@ -2753,7 +2753,7 @@ function printerCardHTML(printer) {
   const remaining = Math.max(0, printer.cost - applied);
   const pct       = Math.min(100, (applied / printer.cost * 100));
   const isPaidOff = applied >= printer.cost;
-  const accentCol = printer.id === 'p1' ? 'var(--accent)' : 'var(--accent2)';
+  const accentCol = printer.id === 'p1' ? 'var(--accent)' : 'var(--purple-pill)';
 
   const statusBadge = isPaidOff
     ? `<div style="background:var(--green-tint);border:1px solid var(--green);border-radius:8px;padding:7px 14px;text-align:center;white-space:nowrap">
@@ -2761,7 +2761,7 @@ function printerCardHTML(printer) {
        </div>`
     : `<div style="background:var(--yellow-tint);border:1px solid var(--yellow);border-radius:8px;padding:7px 14px;text-align:center;white-space:nowrap">
         <div style="font-size:0.75rem;font-weight:600;color:var(--yellow);">In Progress</div>
-        <div class="caption below">${fmt$(remaining)} left</div>
+        <div class="caption below text-1">${fmt$(remaining)} left</div>
        </div>`;
 
   // Milestone pills
@@ -2771,8 +2771,8 @@ function printerCardHTML(printer) {
     const hitEntry = credits.find((_, i) => credits.slice(0, i + 1).reduce((s, e) => s + e.amount, 0) >= target);
     const col = p === 1 ? 'var(--green)' : accentCol;
     return `<div style="text-align:center;flex:1;min-width:72px;padding:8px 4px">
-      <div style="font-size:1rem;font-weight:600;color:${reached ? col : 'var(--border)'}">${(p*100).toFixed(0)}%</div>
-      <div style="font-size:0.75rem;color:${reached ? 'var(--text2)' : 'var(--border)'};margin-top:2px">${reached && hitEntry ? fmtDate(hitEntry.date) : '—'}</div>
+      <div style="font-size:1rem;font-weight:600;color:${reached ? col : 'var(--label-2)'}">${(p*100).toFixed(0)}%</div>
+      <div style="font-size:0.75rem;color:${reached ? 'var(--text2)' : 'var(--label-2)'};margin-top:2px">${reached && hitEntry ? fmtDate(hitEntry.date) : '—'}</div>
     </div>`;
   });
   const pillsHTML = milestones.reduce((acc, p, i) =>

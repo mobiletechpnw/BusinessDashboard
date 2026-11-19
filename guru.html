@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="var(--surface)">
+<meta name="theme-color" content="#121213">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
@@ -508,7 +508,7 @@ const BELTS = [
   { id: 'yellow', name: 'Yellow Belt', sub: 'Cash Flow Control',  color: 'var(--yellow)' },
   { id: 'green',  name: 'Green Belt',  sub: 'Business Money',     color: 'var(--green)' },
   { id: 'brown',  name: 'Brown Belt',  sub: 'Protect & Grow',     color: 'var(--orange)' },
-  { id: 'black',  name: 'Black Belt',  sub: 'Wealth Mastery',     color: 'var(--accent2)' },
+  { id: 'black',  name: 'Black Belt',  sub: 'Wealth Mastery',     color: 'var(--purple-pill)' },
 ];
 
 const LESSONS = [
@@ -1318,6 +1318,10 @@ function drawNwChart(snapshots) {
   c.width = w; c.height = h;
   const ctx = c.getContext('2d');
   ctx.clearRect(0, 0, w, h);
+  // Canvas can't read CSS variables, so take the theme's colours now.
+  const css = getComputedStyle(document.documentElement);
+  const tok = (name) => css.getPropertyValue(name).trim();
+  const green = tok('--green'), sep = tok('--separator'), surface = tok('--surface');
 
   if (!snapshots || snapshots.length < 2) {
     hint.textContent = snapshots && snapshots.length === 1
@@ -1335,26 +1339,29 @@ function drawNwChart(snapshots) {
 
   // zero line
   const zeroY = h - pad - ((0 - min) / range) * (h - pad * 2);
-  ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1; ctx.setLineDash([5, 5]);
+  ctx.strokeStyle = sep; ctx.lineWidth = 1; ctx.setLineDash([5, 5]);
   ctx.beginPath(); ctx.moveTo(pad, zeroY); ctx.lineTo(w - pad, zeroY); ctx.stroke(); ctx.setLineDash([]);
 
   // area
   const grad = ctx.createLinearGradient(0, 0, 0, h);
-  grad.addColorStop(0, 'rgba(48, 209, 88,0.3)'); grad.addColorStop(1, 'rgba(48, 209, 88,0)');
+  const g = parseInt(green.replace('#', ''), 16);
+  const greenA = (a) => `rgba(${(g >> 16) & 255},${(g >> 8) & 255},${g & 255},${a})`;
+  grad.addColorStop(0, greenA(0.3)); grad.addColorStop(1, greenA(0));
   ctx.beginPath(); ctx.moveTo(pts[0][0], h - pad);
   pts.forEach(p => ctx.lineTo(p[0], p[1])); ctx.lineTo(pts[pts.length-1][0], h - pad); ctx.closePath();
   ctx.fillStyle = grad; ctx.fill();
 
   // line
   ctx.beginPath(); pts.forEach((p, i) => i === 0 ? ctx.moveTo(p[0], p[1]) : ctx.lineTo(p[0], p[1]));
-  ctx.strokeStyle = '#30d158'; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.stroke();
+  ctx.strokeStyle = green; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.stroke();
 
   // end dot
   const [lx, ly] = pts[pts.length - 1];
   ctx.beginPath(); ctx.arc(lx, ly, 5, 0, Math.PI * 2);
-  ctx.fillStyle = '#fff'; ctx.shadowBlur = 12; ctx.shadowColor = '#30d158'; ctx.fill(); ctx.shadowBlur = 0;
+  ctx.fillStyle = surface; ctx.strokeStyle = green; ctx.lineWidth = 3; ctx.fill(); ctx.stroke();
 }
 
+window.addEventListener('vpc:themechange', () => { try { renderNetWorth(); } catch (e) {} });
 function renderNetWorth() {
   const { assets, liabilities, net, data } = nwTotals();
 

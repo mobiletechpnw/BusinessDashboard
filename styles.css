@@ -125,6 +125,85 @@
   --t-sheet: 420ms;
 }
 
+/* ── Light mode ──
+   Auto follows the device; the account menu can pin Light or Dark, which
+   util.js applies as data-theme on <html> before the page paints. The
+   blocks are identical: one for the device setting, one for the choice. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    --bg: #f5f5f7;
+    --surface: #ffffff;
+    --surface2: #f2f2f7;
+    --fill: rgba(118, 118, 128, 0.12);
+    --fill-2: rgba(118, 118, 128, 0.07);
+    --thumb: #ffffff;
+    --separator: rgba(60, 60, 67, 0.14);
+    --label: #1d1d1f;
+    --label-2: #636366;
+    --label-3: #737377;
+    --accent: #0060c4;
+    --accent-fill: #0071e3;
+    --accent-fill-hover: #0077ed;
+    --accent-tint: rgba(0, 113, 227, 0.12);
+    --ring: #0071e3;
+    --green: #187634;
+    --green-tint: #e3f7e8;
+    --orange: #b93100;
+    --orange-tint: #fff0db;
+    --red: #c4001a;
+    --red-tint: #ffe4e2;
+    --yellow: #8a6200;
+    --yellow-tint: #fff6d6;
+    --blue-pill: #0066cc;
+    --blue-tint: #e5f0ff;
+    --purple-pill: #8944ab;
+    --purple-tint: #f3e8fa;
+    --accent2: #8944ab;
+    --chrome: rgba(251, 251, 253, 0.78);
+    --shadow-1: 0 1px 1px rgba(0, 0, 0, 0.02), 0 4px 16px rgba(0, 0, 0, 0.06);
+    --shadow-2: 0 2px 4px rgba(0, 0, 0, 0.04), 0 12px 32px rgba(0, 0, 0, 0.1);
+    --shadow-pop: 0 0 0 0.5px rgba(0, 0, 0, 0.08), 0 10px 30px rgba(0, 0, 0, 0.14);
+    --highlight: inset 0 0 0 0 transparent;
+    color-scheme: light;
+  }
+}
+:root[data-theme='light'] {
+  --bg: #f5f5f7;
+  --surface: #ffffff;
+  --surface2: #f2f2f7;
+  --fill: rgba(118, 118, 128, 0.12);
+  --fill-2: rgba(118, 118, 128, 0.07);
+  --thumb: #ffffff;
+  --separator: rgba(60, 60, 67, 0.14);
+  --label: #1d1d1f;
+  --label-2: #636366;
+  --label-3: #737377;
+  --accent: #0060c4;
+  --accent-fill: #0071e3;
+  --accent-fill-hover: #0077ed;
+  --accent-tint: rgba(0, 113, 227, 0.12);
+  --ring: #0071e3;
+  --green: #187634;
+  --green-tint: #e3f7e8;
+  --orange: #b93100;
+  --orange-tint: #fff0db;
+  --red: #c4001a;
+  --red-tint: #ffe4e2;
+  --yellow: #8a6200;
+  --yellow-tint: #fff6d6;
+  --blue-pill: #0066cc;
+  --blue-tint: #e5f0ff;
+  --purple-pill: #8944ab;
+  --purple-tint: #f3e8fa;
+  --accent2: #8944ab;
+  --chrome: rgba(251, 251, 253, 0.78);
+  --shadow-1: 0 1px 1px rgba(0, 0, 0, 0.02), 0 4px 16px rgba(0, 0, 0, 0.06);
+  --shadow-2: 0 2px 4px rgba(0, 0, 0, 0.04), 0 12px 32px rgba(0, 0, 0, 0.1);
+  --shadow-pop: 0 0 0 0.5px rgba(0, 0, 0, 0.08), 0 10px 30px rgba(0, 0, 0, 0.14);
+  --highlight: inset 0 0 0 0 transparent;
+  color-scheme: light;
+}
+
 /* ── Base reset ── */
 /* hidden always hides, even on elements that set their own display */
 [hidden] {
@@ -900,7 +979,7 @@ header h1 span {
 .vpc-search kbd {
   font-family: inherit;
   font-size: 0.75rem;
-  color: var(--label-3);
+  color: var(--label-2);
 }
 .vpc-nav {
   flex: 1;
@@ -1226,6 +1305,15 @@ html[data-sync='offline'] .vpc-sync-dot {
   min-height: 44px;
   font-size: 1rem;
 }
+.vpc-sheet-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 4px 10px;
+  font-size: 1rem;
+}
 .vpc-sheet-who {
   display: flex;
   align-items: center;
@@ -1521,21 +1609,6 @@ div.modal-overlay {
 /* ══════════════════════════════════════════════════
    COMPONENTS: the patterns pages used to repeat as inline styles
 ══════════════════════════════════════════════════ */
-.text-1 {
-  color: var(--text);
-}
-.text-2 {
-  color: var(--text2);
-}
-.is-red {
-  color: var(--red);
-}
-.is-green {
-  color: var(--green);
-}
-.is-yellow {
-  color: var(--yellow);
-}
 /* Secondary text: captions (12px) and subheads (13px) */
 .caption {
   font-size: 0.75rem;
@@ -1651,6 +1724,22 @@ div.modal-overlay {
 }
 .mb-20 {
   margin-bottom: 20px;
+}
+/* Colour helpers last, so they win over the components above */
+.text-1 {
+  color: var(--text);
+}
+.text-2 {
+  color: var(--text2);
+}
+.is-red {
+  color: var(--red);
+}
+.is-green {
+  color: var(--green);
+}
+.is-yellow {
+  color: var(--yellow);
 }
 .modal-overlay > .modal.modal-wide {
   width: 580px;
