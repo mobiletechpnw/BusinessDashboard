@@ -2192,32 +2192,38 @@ main {
   }
 }
 
-/* ── Floating Action Button (FAB) for add actions on mobile ── */
-.fab {
-  position: fixed;
-  bottom: calc(16px + var(--chrome-bottom));
-  right: 20px;
-  z-index: 500;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: var(--accent-fill);
-  color: var(--on-accent);
-  font-size: 1.5rem;
-  display: none;
+/* ── The title bar's one main action (New…, Add…) ──
+   A filled pill with its label; on phones a bare + like a navigation bar.
+   The button carries an aria-label, since phones hide the label. */
+header .vpc-primary {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-2);
-  border: none;
-  cursor: pointer;
-  transition: transform var(--t-fast) var(--ease);
+  gap: 6px;
+  flex: none;
 }
-.fab:active {
-  transform: scale(0.93);
+header .vpc-primary .vpc-ico {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.2;
 }
 @media (max-width: 700px) {
-  .fab {
-    display: flex;
+  header .vpc-primary,
+  header .vpc-primary:hover {
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0;
+    justify-content: center;
+    background: none;
+    color: var(--accent);
+    margin-right: -10px;
+  }
+  header .vpc-primary span {
+    display: none;
+  }
+  header .vpc-primary .vpc-ico {
+    width: 24px;
+    height: 24px;
   }
 }
 

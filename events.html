@@ -267,7 +267,7 @@ main { padding:0 0 24px; }
   <div class="header-right">
     <button class="btn-ghost" onclick="generateShareLink()" title="Generate a shareable link for vendors">Share Calendar</button>
     <button class="btn-ghost" onclick="openVendorModal()">+ Vendor</button>
-    <button class="btn-primary" onclick="openEventModal()">+ Event</button>
+    <button class="btn-primary vpc-primary" type="button" onclick="openEventModal()" aria-label="New event"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#plus"/></svg><span>New Event</span></button>
   </div>
 </header>
 
@@ -1584,6 +1584,5 @@ if (document.readyState === 'loading') {
   loadSignups();
 }
 </script>
-<button class="fab" onclick="openEventModal()" title="Add Event" aria-label="Add Event">＋</button>
 </body>
 </html>

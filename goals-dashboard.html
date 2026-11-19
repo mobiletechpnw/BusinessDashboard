@@ -16,6 +16,8 @@
   body { min-height: 100vh; }
 
   .header-stats { display: flex; gap: 20px; align-items: center; }
+  header .header-stats { margin-left: auto; }
+  header .vpc-primary { margin-left: 8px; }
   .stat { text-align: center; display: flex; align-items: baseline; gap: 6px; }
   .stat-num { font-size: 1.1rem; font-weight: 600; color: var(--accent); }
   .stat-label { font-size: 0.75rem; color: var(--text2); }
@@ -214,6 +216,9 @@
 
   @media (max-width: 700px) {
     main { padding: 12px 10px; }
+    /* Phones: the title and + on one row, the figures on a row below. */
+    header { flex-wrap: wrap; row-gap: 0; }
+    header .header-stats { order: 3; flex: 1 0 100%; margin-left: 0; padding-bottom: 10px; }
     .header-stats { gap: 8px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
     .header-stats::-webkit-scrollbar { display: none; }
     .stat-num { font-size: 1.1rem; }
@@ -242,6 +247,7 @@
     <div class="stat"><div class="stat-num" id="statDone">0</div><div class="stat-label">Complete</div></div>
     <div class="stat"><div class="stat-num" id="statPct">0%</div><div class="stat-label">Progress</div></div>
   </div>
+  <button class="btn-primary vpc-primary" type="button" onclick="openGoalModal()" aria-label="New goal"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#plus"/></svg><span>New Goal</span></button>
 </header>
 
 
@@ -262,7 +268,6 @@
         <option value="title">Sort: Title</option>
       </select>
     </div>
-    <button class="btn-primary" onclick="openGoalModal()">+ Add Goal</button>
   </div>
 
   <div class="goals-grid" id="goalsGrid"></div>
@@ -331,7 +336,6 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<button class="fab" onclick="openGoalModal()" title="Add Goal" aria-label="Add Goal">＋</button>
 
 <script>
 // ── Data ────────────────────────────────────────────────────────────

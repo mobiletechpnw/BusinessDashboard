@@ -19,8 +19,6 @@
 
   /* ── Title bar: section title, the date range (Overview) and one main action ── */
   header { gap: 12px; }
-  header .vpc-primary { display: inline-flex; align-items: center; gap: 6px; flex: none; }
-  header .vpc-primary .vpc-ico { width: 18px; height: 18px; stroke-width: 2.2; }
 
   /* ── KPI tiles (Sales › Overview): label above the number ── */
   .kpi-bar { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
@@ -273,9 +271,6 @@
     header { flex-wrap: wrap; row-gap: 0; }
     #rangeSeg { order: 3; flex: 1 0 100%; margin-bottom: 8px; }
     #rangeSeg button { flex: 1; padding: 0 4px; }
-    header .vpc-primary { width: 44px; height: 44px; min-height: 44px; padding: 0; justify-content: center; background: none; color: var(--accent); margin-right: -10px; }
-    header .vpc-primary span { display: none; }
-    header .vpc-primary .vpc-ico { width: 24px; height: 24px; }
   }
   @media (max-width: 480px) {
     .modal { position: fixed; bottom: 0; left: 0; right: 0; width: 100% !important; max-width: 100% !important; border-radius: 28px 28px 0 0; max-height: 85vh; }
