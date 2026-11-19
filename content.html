@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#1c1c1e">
+<meta name="theme-color" content="var(--surface)">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
@@ -28,8 +28,8 @@ header .brand{flex:none;}
 .h-tab:hover{color:var(--text);}
 .h-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 .header-right{display:flex;align-items:center;gap:10px;}
-.btn-primary{background:var(--accent-fill);color:#fff;border:none;border-radius:999px;padding:8px 16px;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;}
-.btn-primary:hover{background:#0077ed;}
+.btn-primary{background:var(--accent-fill);color: var(--on-accent);border:none;border-radius:999px;padding:8px 16px;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.btn-primary:hover{background:var(--accent-fill-hover);}
 .btn-ghost{background:none;border:1px solid var(--border);border-radius:999px;padding:7px 14px;font-size:0.8rem;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;}
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
 
@@ -66,7 +66,7 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
 .search-input{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--text);font-size:0.83rem;outline:none;min-width:220px;}
 .search-input:focus{border-color:var(--accent);}
 .filter-chip{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:0.75rem;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;}
-.filter-chip:hover,.filter-chip.on{background:var(--accent-fill);border-color:var(--accent);color:#fff;}
+.filter-chip:hover,.filter-chip.on{background:var(--accent-fill);border-color:var(--accent);color: var(--on-accent);}
 
 /* CONTENT CARDS */
 .content-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
@@ -82,22 +82,22 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
 .badge{display:inline-flex;align-items:center;gap:3px;font-size:0.75rem;font-weight:600;padding:3px 8px;border-radius:20px;}
 
 /* Category colors */
-.cat-show   {background:rgba(10, 132, 255,.15);color:var(--accent);}
-.cat-product{background:rgba(48, 209, 88,.15);color:var(--green);}
-.cat-card   {background:rgba(191, 90, 242,.15);color:var(--accent2);}
-.cat-custom {background:rgba(255, 214, 10,.15);color:var(--yellow);}
+.cat-show   {background:color-mix(in srgb, var(--accent) 15%, transparent);color:var(--accent);}
+.cat-product{background:color-mix(in srgb, var(--green) 15%, transparent);color:var(--green);}
+.cat-card   {background:color-mix(in srgb, var(--accent2) 15%, transparent);color:var(--accent2);}
+.cat-custom {background:color-mix(in srgb, var(--yellow) 15%, transparent);color:var(--yellow);}
 
 /* Type colors */
-.type-post  {background:rgba(255, 214, 10,.15);color:var(--yellow);}
+.type-post  {background:color-mix(in srgb, var(--yellow) 15%, transparent);color:var(--yellow);}
 .type-story {background:rgba(244,114,182,.15);color:var(--pink);}
 .type-reel  {background:rgba(45,212,191,.15);color:var(--teal);}
-.type-video {background:rgba(255, 159, 10,.15);color:var(--orange);}
+.type-video {background:color-mix(in srgb, var(--orange) 15%, transparent);color:var(--orange);}
 
 /* Status */
-.status-draft    {background:rgba(161, 161, 166,.12);color:var(--text2);}
-.status-ready    {background:rgba(255, 214, 10,.15);color:var(--yellow);}
-.status-scheduled{background:rgba(48, 209, 88,.15);color:var(--green);}
-.status-posted   {background:rgba(10, 132, 255,.15);color:var(--accent);}
+.status-draft    {background:color-mix(in srgb, var(--label-2) 12%, transparent);color:var(--text2);}
+.status-ready    {background:color-mix(in srgb, var(--yellow) 15%, transparent);color:var(--yellow);}
+.status-scheduled{background:color-mix(in srgb, var(--green) 15%, transparent);color:var(--green);}
+.status-posted   {background:color-mix(in srgb, var(--accent) 15%, transparent);color:var(--accent);}
 
 /* Platform pills */
 .platform{font-size:0.75rem;padding:2px 7px;border-radius:12px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);}
@@ -129,7 +129,7 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
 .platform-select{display:flex;gap:8px;flex-wrap:wrap;}
 .plat-btn{background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:6px 12px;font-size:0.75rem;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;}
-.plat-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(10, 132, 255,.12);}
+.plat-btn.on{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb, var(--accent) 12%, transparent);}
 .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;}
 
 /* Checklist (caption builder) */
@@ -156,11 +156,12 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
 .canva-hero{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;}
 .canva-create-card{border-radius:var(--radius);padding:24px;cursor:pointer;transition:all .2s;text-align:center;text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:10px;}
 .canva-create-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,.25);}
-.canva-create-card.post{background:linear-gradient(135deg,#7c3aed 0%,#4f46e5 100%);border:1px solid rgba(255,255,255,.1);}
-.canva-create-card.story{background:linear-gradient(135deg,#db2777 0%,#f472b6 100%);border:1px solid rgba(255,255,255,.1);}
+.canva-create-card.post{background:linear-gradient(135deg,#7c3aed 0%,#4f46e5 100%);border:1px solid rgba(255,255,255,0.1);}
+.canva-create-card.story{background:linear-gradient(135deg,#db2777 0%,#f472b6 100%);border:1px solid rgba(255,255,255,0.1);}
 .canva-create-icon{font-size:2.4rem;}
-.canva-create-label{font-size:1rem;font-weight:600;color:#fff;letter-spacing:-.2px;}
-.canva-create-sub{font-size:0.75rem;color:rgba(255,255,255,.75);}
+.canva-create-label{font-size:1rem;font-weight:600;color: var(--on-accent);letter-spacing:-.2px;}
+/* White on the fixed brand gradients, in both themes */
+.canva-create-sub{font-size:0.75rem;color:rgba(255,255,255,0.75);}
 .canva-section-title{font-size:0.75rem;font-weight:600;color:var(--text2);margin-bottom:12px;}
 .canva-quick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:28px;}
 .canva-quick-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .2s;text-decoration:none;display:flex;gap:12px;align-items:flex-start;}
@@ -172,8 +173,8 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
 .canva-link-input-wrap{display:flex;gap:8px;}
 .canva-link-input-wrap input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:9px 12px;font-size:0.83rem;outline:none;font-family:inherit;}
 .canva-link-input-wrap input:focus{border-color:var(--accent);}
-.canva-open-btn{background:var(--accent-fill);color:#fff;border:none;border-radius:999px;padding:9px 14px;font-size:0.78rem;font-weight:600;cursor:pointer;white-space:nowrap;}
-.canva-open-btn:hover{background:#0077ed;}
+.canva-open-btn{background:var(--accent-fill);color: var(--on-accent);border:none;border-radius:999px;padding:9px 14px;font-size:0.78rem;font-weight:600;cursor:pointer;white-space:nowrap;}
+.canva-open-btn:hover{background:var(--accent-fill-hover);}
 .canva-logo{display:inline-flex;align-items:center;gap:5px;font-size:0.75rem;font-weight:600;color:var(--text2);margin-bottom:20px;}
 .canva-logo svg{width:18px;height:18px;}
 
@@ -277,8 +278,8 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
   <div class="section" id="tab-queue">
     <div class="toolbar">
       <input class="search-input" id="queue-search" placeholder="Search content…" oninput="renderQueue()">
-      <div id="cat-filters" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
-      <div id="status-filters" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+      <div id="cat-filters" class="row-wrap tight"></div>
+      <div id="status-filters" class="row-wrap tight"></div>
     </div>
     <div class="content-grid" id="queue-grid"></div>
   </div>
@@ -289,7 +290,7 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
       <div class="plan-hero-main">
         <div style="font-size:1.1rem;font-weight:600;margin-bottom:6px;">The Content Engine</div>
         <div style="font-size:0.85rem;color:var(--text2);line-height:1.6;max-width:640px;">
-          A repeatable 4-week posting system built for growth. It loads <strong style="color:var(--text)">28 ready-to-shoot posts</strong>
+          A repeatable 4-week posting system built for growth. It loads <strong class="text-1">28 ready-to-shoot posts</strong>
           — captions written, dates set, formats chosen — straight onto your calendar. Reels lead each week for reach,
           stories drive engagement, and posts convert. Reload it any time to schedule the next month.
         </div>
@@ -339,14 +340,14 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
 
     <div class="canva-section-title">Link a Canva design to a content item</div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:8px;">
-      <div style="font-size:0.8rem;color:var(--text2);margin-bottom:10px;line-height:1.5;">Paste a Canva design URL into the <strong style="color:var(--text)">Canva Design URL</strong> field on any content item (via Edit) to link your design directly to that post.</div>
-      <div style="font-size:0.75rem;color:var(--text2);">You can also open content items and use the <strong style="color:var(--accent)">Open in Canva</strong> button to jump straight to an attached design.</div>
+      <div style="font-size:0.8rem;color:var(--text2);margin-bottom:10px;line-height:1.5;">Paste a Canva design URL into the <strong class="text-1">Canva Design URL</strong> field on any content item (via Edit) to link your design directly to that post.</div>
+      <div class="caption">You can also open content items and use the <strong style="color:var(--accent)">Open in Canva</strong> button to jump straight to an attached design.</div>
     </div>
   </div>
 
   <!-- ── TEMPLATES ── -->
   <div class="section" id="tab-templates">
-    <div style="margin-bottom:20px;">
+    <div class="mb-20">
       <div style="font-size:1rem;font-weight:600;margin-bottom:4px;">Content Templates</div>
       <div style="font-size:0.82rem;color:var(--text2);">Click any template to instantly create a new content item from it.</div>
     </div>
@@ -524,21 +525,21 @@ const TEMPLATES = [
 
 // ── CONTENT ENGINE: pillars, weekly rhythm, 4-week arc ──────────────
 const PILLARS = [
-  { icon: '🎬', name: 'Product & Process', goal: 'Reach', color: '#2997ff', desc: 'Reels of risers, Jet Tags & pins being made and shown off. Satisfying, shareable — this is what non-followers find on Explore.' },
-  { icon: '🎪', name: 'Show & Booth', goal: 'Convert', color: '#30d158', desc: 'Announcements, countdowns, table locators and live-from-the-booth stories. Turns the local card community into buyers.' },
-  { icon: '✨', name: 'Card Spotlights', goal: 'Engage', color: '#bf5af2', desc: 'PC showcases, grails and this-or-that polls. Personal, comment-driving content that bonds you to the collector community.' },
-  { icon: '📦', name: 'Drops & Restocks', goal: 'Sell', color: '#ffd60a', desc: 'Sealed product, new pins/tags and month-end bundles. Clear price + CTA aimed at your warm audience.' },
-  { icon: '🤝', name: 'Community & Education', goal: 'Loyalty', color: '#ff6961', desc: 'Q&A, UGC features, how-to carousels and giveaways. Builds saves, trust and a following that sticks around.' },
+  { icon: '🎬', name: 'Product & Process', goal: 'Reach', color: 'var(--accent)', desc: 'Reels of risers, Jet Tags & pins being made and shown off. Satisfying, shareable — this is what non-followers find on Explore.' },
+  { icon: '🎪', name: 'Show & Booth', goal: 'Convert', color: 'var(--green)', desc: 'Announcements, countdowns, table locators and live-from-the-booth stories. Turns the local card community into buyers.' },
+  { icon: '✨', name: 'Card Spotlights', goal: 'Engage', color: 'var(--accent2)', desc: 'PC showcases, grails and this-or-that polls. Personal, comment-driving content that bonds you to the collector community.' },
+  { icon: '📦', name: 'Drops & Restocks', goal: 'Sell', color: 'var(--yellow)', desc: 'Sealed product, new pins/tags and month-end bundles. Clear price + CTA aimed at your warm audience.' },
+  { icon: '🤝', name: 'Community & Education', goal: 'Loyalty', color: 'var(--red)', desc: 'Q&A, UGC features, how-to carousels and giveaways. Builds saves, trust and a following that sticks around.' },
 ];
 
 const WEEK_RHYTHM = [
-  { day: 'Mon', type: 'Reel',   focus: 'Product / process',    color: '#2997ff' },
-  { day: 'Tue', type: 'Story',  focus: 'Poll / this-or-that',  color: '#bf5af2' },
-  { day: 'Wed', type: 'Post',   focus: 'Spotlight / community', color: '#bf5af2' },
-  { day: 'Thu', type: 'Story',  focus: 'Behind the scenes',    color: '#ff6961' },
-  { day: 'Fri', type: 'Reel',   focus: 'Drop / restock',       color: '#ffd60a' },
-  { day: 'Sat', type: 'Story',  focus: 'Show / weekend order',  color: '#30d158' },
-  { day: 'Sun', type: 'Post',   focus: 'Educational / recap',  color: '#ff6961' },
+  { day: 'Mon', type: 'Reel',   focus: 'Product / process',    color: 'var(--accent)' },
+  { day: 'Tue', type: 'Story',  focus: 'Poll / this-or-that',  color: 'var(--accent2)' },
+  { day: 'Wed', type: 'Post',   focus: 'Spotlight / community', color: 'var(--accent2)' },
+  { day: 'Thu', type: 'Story',  focus: 'Behind the scenes',    color: 'var(--red)' },
+  { day: 'Fri', type: 'Reel',   focus: 'Drop / restock',       color: 'var(--yellow)' },
+  { day: 'Sat', type: 'Story',  focus: 'Show / weekend order',  color: 'var(--green)' },
+  { day: 'Sun', type: 'Post',   focus: 'Educational / recap',  color: 'var(--red)' },
 ];
 
 const PLAN_ARC = [
@@ -847,7 +848,7 @@ function renderQueue() {
 
   const el = document.getElementById('queue-grid');
   if (!items.length) {
-    el.innerHTML = `<div class="empty" style="grid-column:1/-1">
+    el.innerHTML = `<div class="empty span-all">
       <div class="empty-icon"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#inbox"/></svg></div>
       <div class="empty-title">No content found</div>
       <div class="empty-sub">Try changing your filters or create new content.</div>
@@ -877,8 +878,8 @@ function renderQueue() {
         </div>
         ${plats?`<div style="display:flex;gap:5px;flex-wrap:wrap">${plats}</div>`:''}
         ${c.caption?`<div class="card-caption">${esc(c.caption)}</div>`:''}
-        <div class="card-date">${c.date?`📅 <span>${fmtDate(c.date)}${c.time?' · '+c.time:''}</span>`:'<span style="color:var(--text2)">No date set</span>'}</div>
-        ${c.notes?`<div style="font-size:0.75rem;color:var(--text2)">${esc(c.notes)}</div>`:''}
+        <div class="card-date">${c.date?`📅 <span>${fmtDate(c.date)}${c.time?' · '+c.time:''}</span>`:'<span class="text-2">No date set</span>'}</div>
+        ${c.notes?`<div class="caption">${esc(c.notes)}</div>`:''}
       </div>
     </div>`;
   }).join('');

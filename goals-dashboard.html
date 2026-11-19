@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#1c1c1e">
+<meta name="theme-color" content="var(--surface)">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
@@ -41,15 +41,15 @@
     padding: 9px 16px;
     transition: all 0.15s;
   }
-  .btn-primary { background: var(--accent-fill); color: #fff; }
-  .btn-primary:hover { background: #0077ed; }
+  .btn-primary { background: var(--accent-fill); color: var(--on-accent); }
+  .btn-primary:hover { background: var(--accent-fill-hover); }
   .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
   .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
   .btn-icon { padding: 6px 10px; font-size: 1rem; }
 
   .filter-group { display: flex; gap: 6px; }
   .filter-btn { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); padding: 7px 14px; font-size: 0.78rem; }
-  .filter-btn.active { background: var(--accent-fill); color: #fff; border-color: var(--accent); }
+  .filter-btn.active { background: var(--accent-fill); color: var(--on-accent); border-color: var(--accent); }
 
   .goals-grid {
     display: grid;
@@ -83,7 +83,7 @@
     transition: all 0.15s;
   }
   .goal-check.done { background: var(--green); border-color: var(--green); }
-  .goal-check.done::after { content: '✓'; color: #000; font-size: 12px; font-weight: 600; }
+  .goal-check.done::after { content: '✓'; color: var(--on-accent); font-size: 12px; font-weight: 600; }
   .goal-title {
     font-size: 1rem; font-weight: 600; flex: 1; line-height: 1.35;
     cursor: pointer;
@@ -101,9 +101,9 @@
   .badge {
     font-size: 0.75rem; font-weight: 600; padding: 2px 8px;
     border-radius: 99px; }
-  .badge-high { background: #452323; color: var(--red); }
-  .badge-medium { background: #453e1a; color: var(--yellow); }
-  .badge-low { background: #203d28; color: var(--green); }
+  .badge-high { background: var(--red-tint); color: var(--red); }
+  .badge-medium { background: var(--yellow-tint); color: var(--yellow); }
+  .badge-low { background: var(--green-tint); color: var(--green); }
   .badge-none { background: var(--surface2); color: var(--text2); }
   .due-date { font-size: 0.75rem; color: var(--text2); }
   .due-date.overdue { color: var(--red); }
@@ -118,7 +118,7 @@
   .obj-item {
     display: flex; align-items: flex-start; gap: 10px;
     padding: 7px 0;
-    border-bottom: 1px solid #2c2c2e;
+    border-bottom: 1px solid var(--surface2);
   }
   .obj-item:last-child { border-bottom: none; }
   .obj-check {
@@ -129,7 +129,7 @@
     transition: all 0.15s;
   }
   .obj-check.done { background: var(--accent); border-color: var(--accent); }
-  .obj-check.done::after { content: '✓'; color: #fff; font-size: 12px; font-weight: 600; }
+  .obj-check.done::after { content: '✓'; color: var(--on-accent); font-size: 12px; font-weight: 600; }
   .obj-text { font-size: 0.85rem; flex: 1; line-height: 1.4; }
   .obj-text.done { text-decoration: line-through; color: var(--text2); }
   .obj-actions { display: flex; gap: 2px; opacity: 0; transition: opacity 0.12s; }
@@ -137,9 +137,9 @@
   .obj-due { font-size: 0.75rem; color: var(--text2); white-space: nowrap; }
   .obj-due.overdue { color: var(--red); }
   .obj-priority { font-size: 0.75rem; font-weight: 600; padding: 1px 6px; border-radius: 8px; flex-shrink: 0; }
-  .obj-priority-high   { background: #452323; color: var(--red); }
-  .obj-priority-medium { background: #453e1a; color: var(--yellow); }
-  .obj-priority-low    { background: #203d28; color: var(--green); }
+  .obj-priority-high   { background: var(--red-tint); color: var(--red); }
+  .obj-priority-medium { background: var(--yellow-tint); color: var(--yellow); }
+  .obj-priority-low    { background: var(--green-tint); color: var(--green); }
 
   /* Drag & drop */
   .goal-card.drag-over { border-color: var(--accent); box-shadow: 0 0 0 3px var(--ring); }
@@ -411,7 +411,7 @@ function goalHTML(g) {
       <div class="goal-meta" style="margin-left:30px">
         <span class="badge badge-${g.priority || 'none'}">${g.priority || 'no priority'}</span>
         ${g.due ? `<span class="due-date ${dueClass}">${dueStr}</span>` : ''}
-        ${objs.length ? `<span style="font-size:0.75rem;color:var(--text2)">${done}/${objs.length} done</span>` : ''}
+        ${objs.length ? `<span class="caption">${done}/${objs.length} done</span>` : ''}
       </div>
       ${objs.length ? `<div class="progress-bar-wrap" style="margin-left:30px">
         <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct}%"></div></div>

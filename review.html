@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#1c1c1e">
+<meta name="theme-color" content="var(--surface)">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
@@ -36,7 +36,7 @@
     font-family: inherit;
   }
   .narrate-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .narrate-btn.active { border-color: var(--green); color: var(--green); background: rgba(48, 209, 88,0.08); }
+  .narrate-btn.active { border-color: var(--green); color: var(--green); background: color-mix(in srgb, var(--green) 8%, transparent); }
 
   .review-grid {
     display: grid;
@@ -69,9 +69,9 @@
     margin-bottom: 8px; font-size: 0.82rem;
   }
   .alert-item:last-child { margin-bottom: 0; }
-  .alert-danger  { background: rgba(255, 105, 97,0.08); border: 1px solid rgba(255, 105, 97,0.3); }
-  .alert-warning { background: rgba(255, 214, 10,0.08);  border: 1px solid rgba(255, 214, 10,0.3); }
-  .alert-ok      { background: rgba(48, 209, 88,0.08);  border: 1px solid rgba(48, 209, 88,0.3); }
+  .alert-danger  { background: color-mix(in srgb, var(--red) 8%, transparent); border: 1px solid color-mix(in srgb, var(--red) 30%, transparent); }
+  .alert-warning { background: color-mix(in srgb, var(--yellow) 8%, transparent);  border: 1px solid color-mix(in srgb, var(--yellow) 30%, transparent); }
+  .alert-ok      { background: color-mix(in srgb, var(--green) 8%, transparent);  border: 1px solid color-mix(in srgb, var(--green) 30%, transparent); }
   .alert-icon { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; background: var(--label-3); }
   .alert-danger .alert-icon { background: var(--red); }
   .alert-warning .alert-icon { background: var(--orange); }
@@ -142,12 +142,12 @@
   .ritual-sub { font-size: 0.75rem; color: var(--text2); margin-top: 3px; line-height: 1.5; max-width: 540px; }
   .streak-badge {
     display: flex; flex-direction: column; align-items: center; flex-shrink: 0;
-    background: rgba(255, 159, 10,0.1); border: 1px solid rgba(255, 159, 10,0.3);
+    background: color-mix(in srgb, var(--orange) 10%, transparent); border: 1px solid color-mix(in srgb, var(--orange) 30%, transparent);
     border-radius: 12px; padding: 8px 16px; font-size: 1.35rem; font-weight: 700; color: var(--orange);
     line-height: 1; font-variant-numeric: tabular-nums;
   }
   .streak-badge small { font-size: 0.75rem; font-weight: 600; color: var(--text2); margin-top: 4px; }
-  .ritual-progress { height: 5px; background: rgba(255,255,255,0.07); border-radius: 3px; overflow: hidden; margin-bottom: 14px; }
+  .ritual-progress { height: 5px; background: color-mix(in srgb, var(--label) 7%, transparent); border-radius: 3px; overflow: hidden; margin-bottom: 14px; }
   .ritual-progress-fill { height: 100%; width: 0; border-radius: 3px; background: var(--accent); transition: width 0.4s ease; }
 
   .ritual-step {
@@ -155,12 +155,12 @@
     border-radius: 12px; transition: background 0.12s; cursor: pointer;
     border: 1px solid transparent;
   }
-  .ritual-step:hover { background: rgba(255,255,255,0.03); }
-  .ritual-step.done { background: rgba(48, 209, 88,0.06); border-color: rgba(48, 209, 88,0.18); }
+  .ritual-step:hover { background: color-mix(in srgb, var(--label) 3%, transparent); }
+  .ritual-step.done { background: color-mix(in srgb, var(--green) 6%, transparent); border-color: color-mix(in srgb, var(--green) 18%, transparent); }
   .step-check {
     width: 22px; height: 22px; border-radius: 8px; flex-shrink: 0;
     border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
-    font-size: 0.8rem; color: #07211a; transition: all 0.15s;
+    font-size: 0.8rem; color: var(--on-accent); transition: all 0.15s;
   }
   .ritual-step.done .step-check { background: var(--green); border-color: var(--green); }
   .step-icon { flex-shrink: 0; display: flex; color: var(--accent); }
@@ -186,7 +186,7 @@
   }
   .reflect-row input:focus { border-color: var(--ring); }
   .ritual-done-banner {
-    margin-top: 14px; background: rgba(48, 209, 88,0.1); border: 1px solid rgba(48, 209, 88,0.3);
+    margin-top: 14px; background: color-mix(in srgb, var(--green) 10%, transparent); border: 1px solid color-mix(in srgb, var(--green) 30%, transparent);
     border-radius: 12px; padding: 14px 16px; font-size: 0.86rem; color: var(--text); line-height: 1.55;
   }
   .ritual-done-banner b { color: var(--green); }
@@ -427,7 +427,7 @@ function renderGoals() {
         <div class="progress-arc-info">
           <div class="progress-arc-pct" style="color:${arcColor}">${done}/${total}</div>
           <div class="progress-arc-label">Goals Complete</div>
-          <div style="font-size:0.75rem;color:var(--text2);margin-top:6px">${doneObj}/${allObj.length} objectives done</div>
+          <div class="caption below-2">${doneObj}/${allObj.length} objectives done</div>
         </div>
       </div>`;
 
@@ -473,7 +473,7 @@ function renderExpenses() {
     el.innerHTML = `
       <div class="kpi-row">
         <div class="kpi-mini">
-          <div class="kpi-mini-val" style="color:var(--red)">${fmt(total)}</div>
+          <div class="kpi-mini-val is-red">${fmt(total)}</div>
           <div class="kpi-mini-label">Spent</div>
         </div>
         <div class="kpi-mini">
@@ -481,7 +481,7 @@ function renderExpenses() {
           <div class="kpi-mini-label">${budget>0?(total>budget?'Over Budget':'Remaining'):'No Budget'}</div>
         </div>
         <div class="kpi-mini">
-          <div class="kpi-mini-val" style="color:var(--text)">${month.length}</div>
+          <div class="kpi-mini-val text-1">${month.length}</div>
           <div class="kpi-mini-label">Entries</div>
         </div>
       </div>`;
@@ -514,7 +514,7 @@ function renderExpenses() {
         <div class="forecast-box">
           <div class="forecast-label">Month-End Projection</div>
           <div class="forecast-val" style="color:${projColor}">${fmt(proj)}</div>
-          <div style="font-size:0.75rem;color:var(--text2);margin-top:3px">Based on ${dom} days of spending</div>
+          <div class="caption below">Based on ${dom} days of spending</div>
         </div>`;
     }
 
@@ -555,7 +555,7 @@ function renderRevenue() {
       ['Sales This Month', month.count, 'var(--text)'],
     ].map(([label, val, color]) => `
       <div class="rev-stat">
-        <span style="color:var(--text2)">${label}</span>
+        <span class="text-2">${label}</span>
         <span style="font-weight:600;color:${color}">${val}</span>
       </div>`).join('');
 
@@ -582,7 +582,7 @@ function renderEvents() {
       return `<div class="event-item">
         <span class="event-date" style="${urgency}">${fmtDate(e.start||e.date)} ${diff===0?'(today)':diff===1?'(tomorrow)':''}</span>
         <span style="flex:1">${VPCUtil.esc(e.name)}</span>
-        ${e.boothCost ? `<span style="font-size:0.75rem;color:var(--text2)">${fmt(e.boothCost)}</span>` : ''}
+        ${e.boothCost ? `<span class="caption">${fmt(e.boothCost)}</span>` : ''}
       </div>`;
     }).join('');
     return upcoming;
@@ -613,7 +613,7 @@ function renderObjectivesDue() {
         const color = diff < 0 ? 'var(--red)' : diff === 0 ? 'var(--yellow)' : 'var(--accent)';
         return `<div style="background:var(--surface2);border-radius:8px;padding:12px 14px;border-left:3px solid ${color}">
           <div style="font-size:0.82rem;font-weight:600">${VPCUtil.esc(o.text)}</div>
-          <div style="font-size:0.75rem;color:var(--text2);margin-top:4px">${VPCUtil.esc(o.goalTitle)} · <span style="color:${color}">${diff<0?-diff+'d overdue':diff===0?'Due today':diff+'d left'}</span></div>
+          <div class="caption below">${VPCUtil.esc(o.goalTitle)} · <span style="color:${color}">${diff<0?-diff+'d overdue':diff===0?'Due today':diff+'d left'}</span></div>
         </div>`;
       }).join('') + '</div>';
   } catch(e) { el.innerHTML = '<div class="empty-msg">Could not load objectives.</div>'; }
@@ -787,8 +787,8 @@ function renderRitual() {
     banner.innerHTML = `<b>✓ This week's ritual is done.</b> ${streak > 1 ? `That's <b>${streak} weeks</b> in a row — this is exactly how financial discipline compounds.` : 'First week down. Come back next week to start a streak.'} Reviewed ${r.completions.length} week${r.completions.length>1?'s':''} total.`;
   } else {
     banner.style.display = 'block';
-    banner.style.background = 'rgba(10, 132, 255,0.06)';
-    banner.style.borderColor = 'rgba(10, 132, 255,0.22)';
+    banner.style.background = 'color-mix(in srgb, var(--accent) 6%, transparent)';
+    banner.style.borderColor = 'color-mix(in srgb, var(--accent) 22%, transparent)';
     banner.innerHTML = `<b style="color:var(--accent)">${doneCount}/${steps.length} steps done.</b> Finish all five to log this week${streak ? ` and keep your ${streak}-week streak alive` : ' and start your streak'}.`;
   }
 }

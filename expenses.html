@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#1c1c1e">
+<meta name="theme-color" content="var(--surface)">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
@@ -37,7 +37,7 @@
 
   /* ── Month nav + Tab bar ── */
   .toolbar {
-    background: rgba(22, 22, 23, 0.7); backdrop-filter: blur(18px) saturate(1.2);
+    background: var(--chrome); backdrop-filter: blur(18px) saturate(1.2);
     border-bottom: 1px solid var(--border);
     padding: 0 32px; display: flex; align-items: center;
     justify-content: space-between; position: sticky; top: var(--header-h); z-index: 150; gap: 16px;
@@ -50,7 +50,7 @@
   .tab { padding: 14px 18px; font-size: 0.83rem; font-weight: 600; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; user-select: none; }
   .tab:hover { color: var(--text); }
   .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-  .add-btn { background: var(--red); color: #fff; border: none; border-radius: 999px; padding: 7px 16px; font-size: 0.82rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: opacity 0.15s; }
+  .add-btn { background: var(--red); color: var(--on-accent); border: none; border-radius: 999px; padding: 7px 16px; font-size: 0.82rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: opacity 0.15s; }
   .add-btn:hover { opacity: 0.85; }
 
   /* ── Main ── */
@@ -120,13 +120,13 @@
   .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
   .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 999px; font-size: 0.83rem; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.15s; }
   .btn:hover { opacity: 0.85; }
-  .btn-primary { background: var(--accent-fill); color: #fff; }
+  .btn-primary { background: var(--accent-fill); color: var(--on-accent); }
   .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
 
   /* ── Category pill selector ── */
   .cat-pills { display: flex; flex-wrap: wrap; gap: 6px; }
   .cat-pill { padding: 5px 12px; border-radius: 99px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1.5px solid var(--border); color: var(--text2); transition: all 0.15s; background: var(--surface2); }
-  .cat-pill.selected { border-color: var(--accent); color: var(--text); background: rgba(10, 132, 255,0.1); }
+  .cat-pill.selected { border-color: var(--accent); color: var(--text); background: color-mix(in srgb, var(--accent) 10%, transparent); }
 
   footer { text-align: center; padding: 28px 24px; font-size: 0.75rem; color: var(--text2); border-top: 1px solid var(--border); }
   footer a { color: var(--accent); text-decoration: none; }
@@ -174,7 +174,7 @@
 <!-- KPI strip -->
 <div class="kpi-strip" id="kpi-strip">
   <div class="kpi"><div class="kpi-val" id="kpi-total">—</div><div class="kpi-label">This Month</div></div>
-  <div class="kpi"><div class="kpi-val" id="kpi-budget-left">—</div><div class="kpi-label">Budget Left</div><div class="kpi-sub" id="kpi-budget-sub" style="color:var(--text2)"></div></div>
+  <div class="kpi"><div class="kpi-val" id="kpi-budget-left">—</div><div class="kpi-label">Budget Left</div><div class="kpi-sub text-2" id="kpi-budget-sub"></div></div>
   <div class="kpi"><div class="kpi-val" id="kpi-top-cat">—</div><div class="kpi-label">Top Category</div></div>
   <div class="kpi"><div class="kpi-val" id="kpi-count">0</div><div class="kpi-label">Entries This Month</div></div>
 </div>
@@ -233,13 +233,13 @@
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
       <div>
         <div style="font-size:0.95rem;font-weight:600">Monthly Commitments</div>
-        <div style="font-size:0.78rem;color:var(--text2);margin-top:3px">Bills, subscriptions, and fixed costs that repeat every month.</div>
+        <div class="subhead below">Bills, subscriptions, and fixed costs that repeat every month.</div>
       </div>
       <button class="add-btn" onclick="openRecModal()">＋ Add Recurring</button>
     </div>
     <div id="rec-list"></div>
     <div id="rec-total-card" style="display:none;margin-top:20px" class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center">
+      <div class="row-between">
         <div style="font-size:0.82rem;color:var(--text2)">Total Monthly Commitments</div>
         <div id="rec-total" style="font-size:1.3rem;font-weight:600;color:var(--red)"></div>
       </div>
@@ -368,15 +368,15 @@ const BDG_KEY = VPCUtil.KEYS.expenseBudget;
 
 // ── Categories ──
 const CATS = [
-  { id: 'Housing',       icon: '🏠', color: '#2997ff' },
-  { id: 'Food',          icon: '🍔', color: '#30d158' },
-  { id: 'Transport',     icon: '🚗', color: '#ff9f0a' },
-  { id: 'Subscriptions', icon: '📱', color: '#bf5af2' },
-  { id: 'Health',        icon: '💊', color: '#ff6961' },
-  { id: 'Insurance',     icon: '🛡️', color: '#ffd60a' },
+  { id: 'Housing',       icon: '🏠', color: 'var(--accent)' },
+  { id: 'Food',          icon: '🍔', color: 'var(--green)' },
+  { id: 'Transport',     icon: '🚗', color: 'var(--orange)' },
+  { id: 'Subscriptions', icon: '📱', color: 'var(--accent2)' },
+  { id: 'Health',        icon: '💊', color: 'var(--red)' },
+  { id: 'Insurance',     icon: '🛡️', color: 'var(--yellow)' },
   { id: 'Entertainment', icon: '🎮', color: '#22d3ee' },
-  { id: 'Business',      icon: '💼', color: '#a1a1a6' },
-  { id: 'Other',         icon: '📦', color: '#8e8e93' },
+  { id: 'Business',      icon: '💼', color: 'var(--text2)' },
+  { id: 'Other',         icon: '📦', color: 'var(--label-3)' },
 ];
 const catMap = Object.fromEntries(CATS.map(c => [c.id, c]));
 
@@ -484,7 +484,7 @@ function renderBudgetBar() {
   $('budget-bar-fill').style.width = pct + '%';
   $('budget-bar-fill').style.background = pct < 75 ? 'var(--green)' : pct < 90 ? 'var(--yellow)' : 'var(--red)';
   $('budget-bar-label').innerHTML = over
-    ? `<span style="color:var(--red);font-weight:600">${fmtK(total)} / ${fmtK(budget)}</span> <span style="color:var(--red)">over budget!</span>`
+    ? `<span style="color:var(--red);font-weight:600">${fmtK(total)} / ${fmtK(budget)}</span> <span class="is-red">over budget!</span>`
     : `${fmtK(total)} of ${fmtK(budget)} (${pct}%)`;
 }
 
@@ -512,7 +512,7 @@ function renderEntries() {
     const d = new Date(date + 'T00:00:00');
     const dayLabel = d.toLocaleDateString('en-US', { weekday:'long', month:'short', day:'numeric' });
     const rows = items.map(e => {
-      const c = catMap[e.category] || { icon:'📦', color:'#8e8e93' };
+      const c = catMap[e.category] || { icon:'📦', color:'var(--label-3)' };
       return `
         <div class="expense-row">
           <div class="cat-icon" style="background:${c.color}22;color:${c.color}">${c.icon}</div>
@@ -520,7 +520,7 @@ function renderEntries() {
             <div class="exp-name">${VPCUtil.esc(e.description || e.category)}</div>
             <div class="exp-meta">${VPCUtil.esc(e.category)}${e.notes ? ' · ' + VPCUtil.esc(e.notes) : ''}</div>
           </div>
-          <div class="exp-amount" style="color:var(--red)">${fmt(e.amount)}</div>
+          <div class="exp-amount is-red">${fmt(e.amount)}</div>
           <div class="exp-actions">
             <button class="act-btn" onclick="openModal('${e.id}')" title="Edit"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#pencil"/></svg></button>
             <button class="act-btn del" onclick="deleteExp('${e.id}')" title="Delete"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#trash"/></svg></button>
@@ -532,7 +532,7 @@ function renderEntries() {
       <div class="day-group">
         <div class="day-header">
           <span>${dayLabel}</span>
-          <span style="color:var(--red)">${fmt(dayTotal)}</span>
+          <span class="is-red">${fmt(dayTotal)}</span>
         </div>
         ${rows}
       </div>`;
@@ -558,7 +558,7 @@ function renderBreakdown() {
   const maxAmt = sorted[0]?.[1] || 1;
 
   $('cat-breakdown').innerHTML = sorted.map(([catId, amt]) => {
-    const c = catMap[catId] || { icon:'📦', color:'#8e8e93' };
+    const c = catMap[catId] || { icon:'📦', color:'var(--label-3)' };
     const w = (amt / maxAmt * 100).toFixed(0);
     const pct = (amt / total * 100).toFixed(0);
     return `
@@ -610,13 +610,13 @@ function renderBreakdown() {
     const h = Math.max((dispAmt / maxDay) * 88, dispAmt > 0 ? 4 : 1);
     const isToday = d === today;
     const day = parseInt(d.slice(8));
-    const barColor = isFuture ? 'rgba(10, 132, 255,0.35)' : amt>0 ? (isToday?'var(--yellow)':'var(--red)') : 'var(--border)';
+    const barColor = isFuture ? 'color-mix(in srgb, var(--accent) 35%, transparent)' : amt>0 ? (isToday?'var(--yellow)':'var(--red)') : 'var(--border)';
     return `
       <div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:18px;gap:3px" title="${d}: ${isFuture?'Proj. ':''}${fmt(dispAmt)}${isFuture?' (forecast)':''}">
         <div style="flex:1;display:flex;align-items:flex-end;width:100%">
-          <div style="width:100%;height:${h}px;background:${barColor};border-radius:2px 2px 0 0;opacity:${dispAmt>0?0.85:0.3}${isFuture?';border:1px dashed rgba(10, 132, 255,0.5)':''}"></div>
+          <div style="width:100%;height:${h}px;background:${barColor};border-radius:2px 2px 0 0;opacity:${dispAmt>0?0.85:0.3}${isFuture?';border:1px dashed color-mix(in srgb, var(--accent) 50%, transparent)':''}"></div>
         </div>
-        <div style="font-size:0.75rem;color:${isToday?'var(--yellow)':isFuture?'rgba(10, 132, 255,0.6)':'var(--text2)'};font-weight:${isToday?'700':'400'}">${day}</div>
+        <div style="font-size:0.75rem;color:${isToday?'var(--yellow)':isFuture?'color-mix(in srgb, var(--accent) 60%, transparent)':'var(--text2)'};font-weight:${isToday?'700':'400'}">${day}</div>
       </div>`;
   }).join('');
 }
@@ -645,7 +645,7 @@ function renderRecurring() {
   const today = new Date();
 
   $('rec-list').innerHTML = recs.map(r => {
-    const c = catMap[r.category] || { icon:'📦', color:'#8e8e93' };
+    const c = catMap[r.category] || { icon:'📦', color:'var(--label-3)' };
     const dueDay = r.day || 1;
     const dueDate = new Date(today.getFullYear(), today.getMonth(), dueDay);
     const isPast = dueDate < today && dueDate.getMonth() === today.getMonth();
@@ -872,7 +872,7 @@ function toast(msg) {
   if (!el) {
     el = document.createElement('div');
     el.id = '_toast';
-    el.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#2c2c2e;border:1px solid #3a3a3c;color:#f5f5f7;padding:10px 18px;border-radius:8px;font-size:0.84rem;z-index:9999;transition:opacity 0.3s;opacity:0;pointer-events:none';
+    el.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--surface2);border:1px solid var(--separator);color:var(--text);padding:10px 18px;border-radius:8px;font-size:0.84rem;z-index:9999;transition:opacity 0.3s;opacity:0;pointer-events:none';
     document.body.appendChild(el);
   }
   el.textContent = msg;

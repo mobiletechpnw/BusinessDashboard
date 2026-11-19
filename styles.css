@@ -1518,6 +1518,144 @@ div.modal-overlay {
   }
 }
 
+/* ══════════════════════════════════════════════════
+   COMPONENTS: the patterns pages used to repeat as inline styles
+══════════════════════════════════════════════════ */
+.text-1 {
+  color: var(--text);
+}
+.text-2 {
+  color: var(--text2);
+}
+.is-red {
+  color: var(--red);
+}
+.is-green {
+  color: var(--green);
+}
+.is-yellow {
+  color: var(--yellow);
+}
+/* Secondary text: captions (12px) and subheads (13px) */
+.caption {
+  font-size: 0.75rem;
+  color: var(--text2);
+}
+.subhead {
+  font-size: 0.8125rem;
+  color: var(--text2);
+}
+.caption.below,
+.subhead.below {
+  margin-top: 3px;
+}
+.caption.below-2 {
+  margin-top: 6px;
+}
+.caption.above {
+  margin-bottom: 10px;
+}
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text2);
+}
+.section-label.above-1 {
+  margin-bottom: 4px;
+}
+.title-3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+.modal-help {
+  margin: -6px 0 14px;
+  font-size: 0.8125rem;
+  color: var(--text2);
+}
+.empty-line {
+  padding: 14px 0;
+  font-size: 0.8125rem;
+  color: var(--text2);
+}
+/* Rows */
+.row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.row-baseline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.row-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.row-wrap.tight {
+  gap: 6px;
+}
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+.nowrap {
+  white-space: nowrap;
+}
+.span-all {
+  grid-column: 1 / -1;
+}
+.clickable {
+  cursor: pointer;
+}
+/* Figures inside cards */
+.inner-tile {
+  padding: 14px;
+  border-radius: var(--r-sm);
+  background: var(--surface2);
+  text-align: center;
+}
+.inner-tile.compact {
+  padding: 10px;
+}
+.stat-big {
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.stat-mid {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.bar-track {
+  height: 6px;
+  border-radius: var(--r-full);
+  background: var(--surface2);
+}
+.bar-track.thick {
+  height: 8px;
+  overflow: hidden;
+}
+/* Spacing on the 4-point scale */
+.mb-10 {
+  margin-bottom: 10px;
+}
+.mb-14 {
+  margin-bottom: 14px;
+}
+.mb-20 {
+  margin-bottom: 20px;
+}
+.modal-overlay > .modal.modal-wide {
+  width: 580px;
+}
+
 /* ── Icons in context (icons.svg via VPCUtil.icon) ── */
 .e-icon .vpc-ico,
 .empty-icon .vpc-ico {
