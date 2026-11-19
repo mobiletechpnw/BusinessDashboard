@@ -903,7 +903,7 @@ function buildSearchIndex() {
       type: 'Order',
       icon: 'receipt',
       title: o.customer,
-      sub: `${o.product} · $${o.salePrice} · ${o.date}`,
+      sub: `${o.product}${o.color ? ' · ' + o.color : ''} · $${o.salePrice} · ${o.date}`,
       url: 'vault-pine-collective.html',
     })
   );

@@ -423,6 +423,39 @@ async function runProfile(browser, { name, viewport, mobile, seeded }) {
     await pg.close();
   }
 
+  // Orders: a colour can be set in place (the desktop table) or from the
+  // order sheet (phones), and it's saved on the order.
+  if (seeded !== 'empty') {
+    const pg = await ctx.newPage();
+    const errs = [];
+    pg.on('pageerror', (e) => errs.push(`pageerror: ${e.message}`));
+    await pg.goto(BASE + 'vault-pine-collective.html#orders', {
+      waitUntil: 'domcontentloaded',
+      timeout: 15000,
+    });
+    await pg.waitForTimeout(600);
+    const first = mobile ? '#orderList .order-row' : '#orderTable tr[data-id]';
+    const id = await pg.$eval(first, (e) => e.dataset.id).catch(() => null);
+    if (!id) errs.push('no order to edit');
+    else {
+      if (mobile) {
+        await pg.click(first);
+        await pg.waitForTimeout(500);
+        await pg.click('#osColor');
+      } else await pg.click(`#orderTable tr[data-id="${id}"] .color-chip`);
+      await pg.waitForTimeout(250);
+      await pg.click('.color-pop .swatch-btn[data-color="Blue"]');
+      await pg.waitForTimeout(300);
+      const saved = await pg.evaluate(
+        (oid) => (JSON.parse(localStorage.getItem('vp_orders_v2')) || []).find((x) => x.id === oid),
+        id
+      );
+      if (!saved || saved.color !== 'Blue') errs.push('the colour was not saved');
+    }
+    for (const e of errs) failures.push(`[${name}] order colour: ${e}`);
+    await pg.close();
+  }
+
   await ctx.close();
   return failures;
 }

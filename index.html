@@ -267,7 +267,10 @@ function renderToday() {
 
   // Deliveries from the Sales Hub's Upcoming Deliveries list
   const week = new Date(today); week.setDate(week.getDate() + 7);
-  const pipeline = read('vpc_pipeline_v1', []);
+  // Your delivery list, plus open orders with a deliver-by date.
+  const pipeline = [...read('vpc_pipeline_v1', []),
+    ...orders.filter(o => o.deliverBy && (o.fulfillStatus || 'completed') !== 'completed')
+      .map(o => ({ customer: o.customer, date: o.deliverBy }))];
   const late = pipeline.filter(p => p.date && dateOf(p.date) < today);
   const soon = pipeline.filter(p => p.date && dateOf(p.date) >= today && dateOf(p.date) <= week)
     .sort((a, b) => a.date.localeCompare(b.date));

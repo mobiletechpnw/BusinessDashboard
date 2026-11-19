@@ -102,6 +102,13 @@
   #orderTable tbody tr[data-id] { cursor: pointer; }
   #orderTable tbody tr[data-id]:hover { background: var(--fill-2); }
   .cust-sub { display: block; margin-top: 2px; font-size: 0.75rem; color: var(--text2); }
+  /* Ten columns: the product stays on one line, and cells tighten below
+     1280px; narrower than that the table scrolls inside its card. */
+  #orderTable .cust-sub { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  @media (max-width: 1279px) {
+    #orderTable th, #orderTable td { padding-left: 7px; padding-right: 7px; }
+    #orderTable .badge.status-btn { padding: 3px 7px; }
+  }
   .tfoot-row td { background: var(--surface2); font-weight: 600; }
   .order-list { display: none; flex-direction: column; background: var(--surface); border-radius: var(--r-lg); overflow: hidden; }
   .order-row { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 10px 14px; border-radius: 0; background: none; color: var(--text); font-weight: 400; text-align: left; }
@@ -116,6 +123,37 @@
   .or-flags { display: flex; gap: 4px; }
   .order-row > .vpc-ico { width: 16px; height: 16px; color: var(--label-3); }
   .order-empty { padding: 28px 16px; text-align: center; color: var(--text2); font-size: 0.875rem; }
+  /* Colour and deliver-by: a swatch per order, a date that turns orange then red */
+  .swatch { display: inline-block; flex: none; width: 14px; height: 14px; border-radius: 50%; vertical-align: -2px; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--label) 22%, transparent); }
+  .swatch.none { position: relative; overflow: hidden; background: none; box-shadow: inset 0 0 0 1.5px var(--label-3); }
+  .swatch.none::after { content: ''; position: absolute; top: -2px; bottom: -2px; left: 50%; width: 1.5px; margin-left: -0.75px; background: var(--label-3); transform: rotate(45deg); }
+  .color-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .swatch-btn { display: grid; place-items: center; width: 36px; height: 36px; min-height: 36px; padding: 0; border-radius: 50%; background: none; }
+  .swatch-btn .swatch { width: 28px; height: 28px; }
+  .swatch-btn[aria-checked="true"] { box-shadow: 0 0 0 2px var(--accent); }
+  .swatch-btn.other { background: var(--fill); color: var(--label-2); }
+  .swatch-btn.other .vpc-ico { width: 16px; height: 16px; }
+  .color-name { color: var(--label); font-weight: 600; }
+  .color-other { margin-top: 10px; }
+  .color-chip, .date-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; margin: -4px -8px; padding: 4px 8px; border-radius: var(--r-sm); background: none; color: var(--label); font-size: 0.8125rem; font-weight: 400; white-space: nowrap; }
+  .color-chip:hover, .date-chip:hover { background: var(--fill-2); }
+  .color-chip.is-empty, .date-chip.is-empty { color: var(--label-2); }
+  .date-chip.is-soon { color: var(--orange); font-weight: 600; }
+  .date-chip.is-late { color: var(--red); font-weight: 600; }
+  .date-proxy { position: fixed; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+  .color-pop { position: fixed; z-index: 1100; width: 260px; padding: 14px; border-radius: var(--r-md); background: var(--surface2); box-shadow: var(--shadow-pop); animation: vpc-menu-in var(--t-move) var(--spring); }
+  .color-pop-title { margin-bottom: 10px; font-size: 0.8125rem; font-weight: 600; color: var(--label-2); }
+  .color-pop .color-other { width: 100%; padding: 8px 10px; border: none; border-radius: var(--r-sm); background: var(--fill); color: var(--label); font: inherit; font-size: 0.875rem; }
+  .badge-due { background: var(--orange-tint); color: var(--orange); }
+  .badge-late { background: var(--red-tint); color: var(--red); }
+  .or-sub .swatch { width: 10px; height: 10px; margin-right: 4px; vertical-align: 0; }
+  .os-date { display: inline-flex; align-items: center; gap: 4px; }
+  .os-date input { padding: 6px 10px; border: none; border-radius: var(--r-sm); background: var(--fill); color: var(--label); font: inherit; font-size: 0.9375rem; }
+  .os-date-clear { display: grid; place-items: center; width: 32px; height: 32px; min-height: 32px; padding: 0; border-radius: 50%; background: none; color: var(--label-2); }
+  .os-date-clear .vpc-ico { width: 14px; height: 14px; }
+  .pipeline-item.is-order { cursor: pointer; border-radius: var(--r-sm); }
+  .pipeline-item.is-order:hover { background: var(--fill-2); }
+  .pipeline-item.is-order > .vpc-ico { width: 16px; height: 16px; color: var(--label-3); }
   .order-sheet .sheet-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
   .order-sheet h2 { margin: 0; overflow-wrap: anywhere; }
   .sheet-sub { margin-top: 3px; font-size: 0.8125rem; color: var(--text2); }
@@ -391,12 +429,14 @@
               <tr>
                 <th onclick="sortTable('date')" class="clickable">Date ↕</th>
                 <th onclick="sortTable('customer')" class="clickable">Customer ↕</th>
+                <th onclick="sortTable('color')" class="clickable">Color ↕</th>
                 <th class="num clickable" onclick="sortTable('sets')">Qty ↕</th>
                 <th class="num clickable" onclick="sortTable('salePrice')">Sale ↕</th>
                 <th class="num clickable" onclick="sortTable('profit')">Profit ↕</th>
                 <th onclick="sortTable('payStatus')" class="clickable">Payment ↕</th>
                 <th onclick="sortTable('printStatus')" class="clickable">Printed ↕</th>
                 <th onclick="sortTable('fulfillStatus')" class="clickable">Status ↕</th>
+                <th onclick="sortTable('deliverBy')" class="clickable">Deliver by ↕</th>
               </tr>
             </thead>
             <tbody id="orderTbody"></tbody>
@@ -698,6 +738,13 @@
       <button type="button" class="sheet-close" onclick="closeOrderSheet()" aria-label="Close"><svg class="vpc-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
     </div>
     <div class="glist" id="osFacts"></div>
+    <div class="glist-label">Details</div>
+    <div class="glist">
+      <div class="glist-row"><span>Color</span><button type="button" class="color-chip" id="osColor" onclick="openSheetColor(this)"></button></div>
+      <div class="glist-row"><label for="osDeliverBy">Deliver by</label>
+        <span class="os-date"><input type="date" id="osDeliverBy" onchange="sheetSetDeliverBy(this.value)"><button type="button" class="os-date-clear" id="osDeliverClear" onclick="sheetSetDeliverBy('')" aria-label="Clear the deliver-by date"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#close"/></svg></button></span>
+      </div>
+    </div>
     <div class="glist-label">Status</div>
     <div class="glist">
       <div class="glist-row"><span>Payment</span>
@@ -743,14 +790,20 @@
       </div>
       <div class="field"><label for="aoQty">Quantity</label><input type="number" id="aoQty" data-stepper value="1" min="1"></div>
     </div>
+    <div class="field">
+      <label id="aoColorLabel">Color<span class="color-name" id="aoColorName"></span></label>
+      <div class="color-grid" id="aoColorGrid" role="radiogroup" aria-labelledby="aoColorLabel"></div>
+      <input type="text" id="aoColorOther" class="color-other" placeholder="Name it: Silk Gold, Black + Red…" maxlength="40" hidden>
+    </div>
     <div class="field-row">
       <div class="field"><label for="aoSale">Sale price ($)</label><input type="number" id="aoSale" data-error="Enter the sale price" min="0" required placeholder="90.00" step="0.01"></div>
       <div class="field"><label for="aoCogs">Cost ($)</label><input type="number" id="aoCogs" min="0" placeholder="21.33" step="0.01" value="21.33"></div>
     </div>
     <div class="field-row">
+      <div class="field"><label for="aoDeliverBy">Deliver by</label><input type="date" id="aoDeliverBy"></div>
       <div class="field"><label for="aoRef">Referred by</label><input type="text" id="aoRef" placeholder="Mike / Me / Instagram"></div>
-      <div class="field"><label for="aoNotes">Notes</label><input type="text" id="aoNotes" placeholder="Delivery date, special requests…"></div>
     </div>
+    <div class="field"><label for="aoNotes">Notes</label><input type="text" id="aoNotes" placeholder="Special requests, pickup or shipping…"></div>
     <div class="field">
       <label>Payment</label>
       <select id="aoPayStatus" data-seg>
@@ -1665,20 +1718,28 @@ function renderMonthlyChart() {
 // ── Pipeline ──
 function renderPipeline() {
   const today    = todayDate();
-  const pipeline = getPipeline().sort((a, b) => a.date.localeCompare(b.date));
+  // Your own list, plus every open order with a deliver-by date (those open
+  // the order; mark it Done and it leaves the list).
+  const fromOrders = rawOrders()
+    .filter(o => o.deliverBy && (o.fulfillStatus || 'completed') !== 'completed')
+    .map(o => ({ id: o.id, order: true, date: o.deliverBy, customer: o.customer,
+      note: `${orderQty(o) > 1 ? orderQty(o) + ' × ' : ''}${o.product}${o.color ? ' · ' + o.color : ''}` }));
+  const pipeline = [...getPipeline(), ...fromOrders].sort((a, b) => a.date.localeCompare(b.date));
   const html = pipeline.map(p => {
     const d    = new Date(p.date + 'T00:00:00');
     const diff = Math.round((d - today) / 86400000);
     const cls  = diff <= 0 ? 'urgent' : diff <= 5 ? '' : 'ok';
     const label = diff === 0 ? 'Today' : diff < 0 ? `${-diff}d overdue` : `in ${diff}d`;
-    return `<div class="pipeline-item" style="position:relative">
+    const open = p.order ? ` is-order" role="button" tabindex="0" onclick="openOrderSheet('${p.id}')" onkeydown="if(event.key==='Enter')openOrderSheet('${p.id}')` : '';
+    return `<div class="pipeline-item${open}" style="position:relative">
       <div class="pipeline-dot ${cls}"></div>
       <div class="pipeline-date">${fmtDate(p.date)}</div>
       <div class="grow">
         <div class="pipeline-name">${esc(p.customer)}</div>
         <div class="pipeline-note">${esc(p.note)} — <span class="is-yellow">${label}</span></div>
       </div>
-      <button class="icon-btn" onclick="deleteDelivery('${p.id}')" title="Remove" aria-label="Remove">${VPCUtil.icon('close')}</button>
+      ${p.order ? VPCUtil.icon('chevron')
+        : `<button class="icon-btn" onclick="deleteDelivery('${p.id}')" title="Remove" aria-label="Remove">${VPCUtil.icon('close')}</button>`}
     </div>`;
   }).join('');
   document.getElementById('pipelineList').innerHTML = html || '<div style="color:var(--text2);font-size:.82rem;padding:8px 0">No upcoming deliveries.</div>';
@@ -1784,19 +1845,190 @@ const FILL_LABELS  = { completed: 'Done', in_progress: 'In progress' };
 const PRINT_LABELS = { printed: 'Printed', not_printed: 'Not printed' };
 const orderQty = o => Math.max(1, parseInt(o.sets) || 1);
 
+// ── Colour and deliver-by ──
+// One colour per order: a filament colour, or any name ("Silk Gold",
+// "Black + Red"). Swatches are the physical colours, so they don't follow
+// the theme.
+const ORDER_COLORS = [
+  { name: 'Black',  swatch: '#1d1d1f' },
+  { name: 'White',  swatch: '#ffffff' },
+  { name: 'Gray',   swatch: '#8e8e93' },
+  { name: 'Red',    swatch: '#e0352b' },
+  { name: 'Orange', swatch: '#f28c28' },
+  { name: 'Yellow', swatch: '#f5c518' },
+  { name: 'Green',  swatch: '#2e9e4f' },
+  { name: 'Blue',   swatch: '#2f6fde' },
+  { name: 'Purple', swatch: '#8e44ad' },
+  { name: 'Pink',   swatch: '#f06ea9' },
+  { name: 'Brown',  swatch: '#8b5a2b' },
+  { name: 'Silver', swatch: 'linear-gradient(135deg, #f2f2f4, #a7a9ae)', solid: '#c0c2c7' },
+  { name: 'Gold',   swatch: 'linear-gradient(135deg, #f7dc7a, #b8860b)', solid: '#d4a72c' },
+  { name: 'Clear',  swatch: 'repeating-conic-gradient(#d4d4d8 0 25%, #ffffff 0 50%) 0 0 / 8px 8px', solid: '#e5e7eb' },
+];
+// A swatch for any name: a preset, the colours a name mentions (two make a
+// two-tone swatch), or a multicolour for a name we can't read.
+function colorSwatch(name) {
+  const lower = String(name || '').toLowerCase().trim();
+  if (!lower) return '';
+  const exact = ORDER_COLORS.find(c => c.name.toLowerCase() === lower);
+  if (exact) return exact.swatch;
+  const at = c => {
+    const m = lower.match(new RegExp('\\b' + (c.name === 'Gray' ? '(gray|grey)' : c.name.toLowerCase()) + '\\b'));
+    return m ? m.index : -1;
+  };
+  const found = ORDER_COLORS.filter(c => at(c) >= 0).sort((a, b) => at(a) - at(b));
+  if (found.length === 1) return found[0].swatch;
+  if (found.length > 1) {
+    const [a, b] = found.map(c => c.solid || c.swatch);
+    return `linear-gradient(135deg, ${a} 0 50%, ${b} 50% 100%)`;
+  }
+  return 'conic-gradient(#e0352b, #f5c518, #2e9e4f, #2f6fde, #8e44ad, #e0352b)';
+}
+const swatchHTML = name => `<span class="swatch" style="background:${colorSwatch(name)}" aria-hidden="true"></span>`;
+// Colours used before, newest first: your own names come back as swatches.
+function usedColors() {
+  const seen = new Map();
+  rawOrders().slice().sort((a, b) => String(b.date).localeCompare(String(a.date))).forEach(o => {
+    const c = String(o.color || '').trim();
+    if (c && !seen.has(c.toLowerCase())) seen.set(c.toLowerCase(), c);
+  });
+  return [...seen.values()];
+}
+function colorGridHTML(current) {
+  const cur = String(current || '').trim();
+  const presets = new Set(ORDER_COLORS.map(c => c.name.toLowerCase()));
+  const own = usedColors().filter(n => !presets.has(n.toLowerCase())).slice(0, 8);
+  if (cur && !presets.has(cur.toLowerCase()) && !own.some(n => n.toLowerCase() === cur.toLowerCase())) own.unshift(cur);
+  const btn = (name, label) => {
+    const on = name.toLowerCase() === cur.toLowerCase();
+    return `<button type="button" class="swatch-btn" role="radio" aria-checked="${on}" data-color="${VPCUtil.escAttr(name)}" title="${VPCUtil.escAttr(label)}" aria-label="${VPCUtil.escAttr(label)}">` +
+      (name ? swatchHTML(name) : '<span class="swatch none"></span>') + '</button>';
+  };
+  return btn('', 'No color') + ORDER_COLORS.map(c => btn(c.name, c.name)).join('') + own.map(n => btn(n, n)).join('') +
+    `<button type="button" class="swatch-btn other" data-color="__other" title="Another color" aria-label="Another color">${VPCUtil.icon('plus')}</button>`;
+}
+
+// The colour popover: from a table cell or the order sheet.
+let _colorPop = null;
+function closeColorPop() {
+  if (!_colorPop) return;
+  _colorPop.cleanup();
+  _colorPop.el.remove();
+  _colorPop = null;
+}
+function openColorPop(anchor, current, onPick) {
+  if (_colorPop && _colorPop.anchor === anchor) return closeColorPop();
+  closeColorPop();
+  const el = document.createElement('div');
+  el.className = 'color-pop';
+  el.setAttribute('role', 'dialog');
+  el.setAttribute('aria-label', 'Color');
+  el.innerHTML = `<div class="color-pop-title">Color</div><div class="color-grid" role="radiogroup" aria-label="Color">${colorGridHTML(current)}</div>` +
+    '<input type="text" class="color-other" placeholder="Name it: Silk Gold, Black + Red…" maxlength="40" hidden>';
+  document.body.appendChild(el);
+  const r = anchor.getBoundingClientRect();
+  let top = r.bottom + 6;
+  if (top + el.offsetHeight > innerHeight - 8) top = Math.max(8, r.top - el.offsetHeight - 6);
+  el.style.left = Math.min(Math.max(8, r.left), innerWidth - el.offsetWidth - 8) + 'px';
+  el.style.top = top + 'px';
+  const typing = () => document.activeElement?.matches?.('.color-pop .color-other');
+  const pick = name => { closeColorPop(); onPick(name); };
+  el.addEventListener('click', e => {
+    const b = e.target.closest('.swatch-btn');
+    if (!b) return;
+    if (b.dataset.color === '__other') {
+      const i = el.querySelector('.color-other');
+      i.hidden = false;
+      i.focus();
+      return;
+    }
+    pick(b.dataset.color);
+  });
+  el.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.matches('.color-other') && e.target.value.trim()) pick(e.target.value.trim());
+  });
+  const outside = e => { if (!el.contains(e.target) && !anchor.contains(e.target)) closeColorPop(); };
+  const onKey = e => {
+    if (e.key !== 'Escape') return;
+    e.preventDefault();
+    e.stopPropagation();
+    closeColorPop();
+    anchor.focus();
+  };
+  const away = e => { if (typing() || (e.type === 'scroll' && el.contains(e.target))) return; closeColorPop(); };
+  document.addEventListener('pointerdown', outside, true);
+  document.addEventListener('keydown', onKey, true);
+  window.addEventListener('resize', away);
+  window.addEventListener('scroll', away, true);
+  _colorPop = { el, anchor, cleanup() {
+    document.removeEventListener('pointerdown', outside, true);
+    document.removeEventListener('keydown', onKey, true);
+    window.removeEventListener('resize', away);
+    window.removeEventListener('scroll', away, true);
+  } };
+  (el.querySelector('[aria-checked="true"]') || el.querySelector('.swatch-btn'))?.focus({ preventScroll: true });
+}
+function openOrderColor(e, id) {
+  e.stopPropagation();
+  const o = rawOrders().find(x => x.id === id);
+  if (o) openColorPop(e.currentTarget, o.color, name => setOrderField(id, 'color', name));
+}
+
+// Deliver-by: orange from three days out, red once late — until it's done.
+function deliverInfo(o) {
+  if (!o.deliverBy) return null;
+  const days = Math.round((new Date(o.deliverBy + 'T00:00:00') - todayDate()) / 86400000);
+  const done = (o.fulfillStatus || 'completed') === 'completed';
+  const when = days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : days === -1 ? 'Yesterday' : fmtShortDate(o.deliverBy);
+  const tone = done ? '' : days < 0 ? 'late' : days <= 3 ? 'soon' : '';
+  const full = new Date(o.deliverBy + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  const detail = done ? 'done' : days < 0 ? `${-days} day${days === -1 ? '' : 's'} late` : days === 0 ? 'due today' : `in ${days} day${days === 1 ? '' : 's'}`;
+  return { days, done, when, tone, full, detail };
+}
+// The table's date: the browser's own date picker, right at the cell.
+function pickDeliverBy(e, id) {
+  e.stopPropagation();
+  const o = rawOrders().find(x => x.id === id);
+  if (!o) return;
+  document.querySelectorAll('.date-proxy').forEach(x => x.remove());
+  const input = document.createElement('input');
+  input.type = 'date';
+  input.className = 'date-proxy';
+  input.value = o.deliverBy || '';
+  const r = e.currentTarget.getBoundingClientRect();
+  input.style.left = r.left + 'px';
+  input.style.top = r.bottom + 'px';
+  document.body.appendChild(input);
+  input.addEventListener('change', () => { setOrderField(id, 'deliverBy', input.value); input.remove(); });
+  try { input.showPicker(); } catch (err) { input.remove(); openOrderSheet(id); }
+}
+function setOrderField(id, field, value) {
+  const arr = rawOrders();
+  const o = arr.find(x => x.id === id);
+  if (!o) return;
+  value = String(value || '').trim();
+  if (value) o[field] = value; else delete o[field];
+  localStorage.setItem(LS_ORDERS, JSON.stringify(arr));
+  if (typeof auditLog === 'function') auditLog('EDIT_ORDER', VPCUtil.KEYS.orders, `${o.customer}: ${field === 'deliverBy' ? 'deliver by' : field} ${value || 'cleared'}`);
+  renderOrderTable();
+  renderPipeline();
+}
+
 function renderOrderTable() {
   const q = (document.getElementById('orderSearch').value || '').toLowerCase();
   let orders = getOrders();
   if (orderMonthFilter !== 'all') orders = orders.filter(o => o.date.startsWith(orderMonthFilter));
-  if (q) orders = orders.filter(o => [o.customer, o.product, o.referredBy, o.notes].join(' ').toLowerCase().includes(q));
+  if (q) orders = orders.filter(o => [o.customer, o.product, o.color, o.referredBy, o.notes].join(' ').toLowerCase().includes(q));
   // Counts on the filter reflect the month and search, before the filter itself.
   document.getElementById('cntNotPrinted').textContent = orders.filter(o => printStatusOf(o) === 'not_printed').length || '';
   document.getElementById('cntUnpaid').textContent = orders.filter(isUnpaid).length || '';
   if (orderFilter === 'notprinted') orders = orders.filter(o => printStatusOf(o) === 'not_printed');
   if (orderFilter === 'unpaid') orders = orders.filter(isUnpaid);
+  // Orders without a colour or a date go last, whichever way it's sorted.
   const sortVal = o => sortCol === 'printStatus' ? printStatusOf(o)
     : sortCol === 'profit' ? o.salePrice - o.cogs
     : sortCol === 'sets' ? orderQty(o)
+    : (sortCol === 'deliverBy' || sortCol === 'color') ? (String(o[sortCol] || '').toLowerCase() || (sortDir === 1 ? '\uffff' : ''))
     : (o[sortCol] ?? '');
   orders.sort((a, b) => {
     const av = sortVal(a), bv = sortVal(b);
@@ -1822,37 +2054,46 @@ function renderOrderTable() {
     const pay      = o.payStatus     || 'paid';
     const fill     = o.fulfillStatus || 'completed';
     const print    = printStatusOf(o);
+    const due      = deliverInfo(o);
     const statusBtn = (kind, val, text, title) =>
       `<button type="button" class="badge badge-${val} status-btn" aria-haspopup="menu" aria-expanded="false" data-menu-key="${o.id}-${kind}" title="${title}" onclick="openStatusMenu(event,'${o.id}','${kind}')">${text}</button>`;
     return `<tr data-id="${o.id}" tabindex="0" onclick="openOrderSheet('${o.id}')" onkeydown="if(event.key==='Enter'&&event.target===this)openOrderSheet('${o.id}')" oncontextmenu="orderContextMenu(event,'${o.id}')">
       <td class="nowrap">${fmtDate(o.date)}</td>
       <td><strong>${esc(o.customer)}</strong><span class="cust-sub">${esc(o.product)}</span></td>
+      <td>${o.color
+        ? `<button type="button" class="color-chip" title="Change color" onclick="openOrderColor(event,'${o.id}')">${swatchHTML(o.color)}<span>${esc(o.color)}</span></button>`
+        : `<button type="button" class="color-chip is-empty" title="Set a color" aria-label="Set a color" onclick="openOrderColor(event,'${o.id}')">—</button>`}</td>
       <td class="num">${orderQty(o)}</td>
       <td class="num">${fmt$(o.salePrice)}</td>
       <td class="num"${profit < 0 ? ' style="color:var(--red)"' : ''}>${fmt$(profit)}</td>
       <td>${statusBtn('pay', pay, PAY_LABELS[pay] || pay, 'Change payment status')}</td>
       <td class="nowrap">${statusBtn('print', print, PRINT_LABELS[print], 'Change print status')}</td>
       <td>${statusBtn('fill', fill, FILL_LABELS[fill] || fill, 'Change order status')}</td>
+      <td>${due
+        ? `<button type="button" class="date-chip${due.tone ? ' is-' + due.tone : ''}" title="Deliver by ${due.full} (${due.detail}). Change it" onclick="pickDeliverBy(event,'${o.id}')">${due.when}${due.tone === 'late' ? ' · late' : ''}</button>`
+        : `<button type="button" class="date-chip is-empty" title="Set a deliver-by date" aria-label="Set a deliver-by date" onclick="pickDeliverBy(event,'${o.id}')">—</button>`}</td>
     </tr>`;
   }).join('');
 
   // Summary footer row (always shows totals across all filtered orders)
   const footerRow = total ? `<tr class="tfoot-row">
-    <td colspan="2" class="text-2">Total — ${total} order${total === 1 ? '' : 's'}${pageCount > 1 ? ` (page ${orderPage+1}/${pageCount})` : ''}</td>
+    <td colspan="3" class="text-2">Total — ${total} order${total === 1 ? '' : 's'}${pageCount > 1 ? ` (page ${orderPage+1}/${pageCount})` : ''}</td>
     <td class="num">${totalQty}</td>
     <td class="num">${fmt$(totalRev)}</td>
     <td class="num">${fmt$(totalProf)}</td>
-    <td colspan="3"></td>
-  </tr>` : `<tr><td colspan="8" class="order-empty">No orders match.</td></tr>`;
+    <td colspan="4"></td>
+  </tr>` : `<tr><td colspan="10" class="order-empty">No orders match.</td></tr>`;
   document.getElementById('orderTbody').innerHTML = rows + footerRow;
 
   // Phones: one row per order. Colour only where something needs doing.
   document.getElementById('orderList').innerHTML = pageOrders.map(o => {
     const pay = o.payStatus || 'paid';
-    const flags = (isUnpaid(o) ? `<span class="badge badge-${pay}">${PAY_LABELS[pay]}</span>` : '')
+    const due = deliverInfo(o);
+    const flags = (due && due.tone ? `<span class="badge badge-${due.tone === 'late' ? 'late' : 'due'}">${due.tone === 'late' ? 'Late' : 'Due ' + due.when}</span>` : '')
+      + (isUnpaid(o) ? `<span class="badge badge-${pay}">${PAY_LABELS[pay]}</span>` : '')
       + (printStatusOf(o) === 'not_printed' ? '<span class="badge badge-not_printed">Not printed</span>' : '');
     return `<button type="button" class="order-row" data-id="${o.id}" onclick="openOrderSheet('${o.id}')">
-      <span class="or-main"><span class="or-title">${esc(o.customer)}</span><span class="or-sub">${esc(o.product)} · ${fmtShortDate(o.date)}</span></span>
+      <span class="or-main"><span class="or-title">${esc(o.customer)}</span><span class="or-sub">${o.color ? swatchHTML(o.color) + esc(o.color) + ' · ' : ''}${esc(o.product)} · ${fmtShortDate(o.date)}</span></span>
       <span class="or-end"><span class="or-amount">${fmt$(o.salePrice)}</span>${flags ? `<span class="or-flags">${flags}</span>` : ''}</span>
       <svg class="vpc-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
     </button>`;
@@ -1908,6 +2149,12 @@ function refreshOrderSheet() {
     row('Return on cost', o.cogs ? (profit / o.cogs * 100).toFixed(1) + '%' : '—') +
     (o.referredBy ? row('Referred by', esc(o.referredBy)) : '') +
     (o.notes ? row('Notes', esc(o.notes)) : '');
+  const chip = document.getElementById('osColor');
+  chip.innerHTML = o.color ? `${swatchHTML(o.color)}<span>${esc(o.color)}</span>` : '<span>None</span>';
+  chip.classList.toggle('is-empty', !o.color);
+  chip.setAttribute('aria-label', `Color: ${o.color || 'none'}. Change it`);
+  document.getElementById('osDeliverBy').value = o.deliverBy || '';
+  document.getElementById('osDeliverClear').hidden = !o.deliverBy;
   osPay?.set(o.payStatus || 'paid');
   osFill?.set(o.fulfillStatus || 'completed');
   document.getElementById('osPrinted').checked = printStatusOf(o) === 'printed';
@@ -1920,6 +2167,11 @@ function closeOrderSheet() {
 // Done implies Printed, and Not printed reopens the order (setOrderStatus).
 function sheetSet(kind, value) { if (sheetOrderId) setOrderStatus(sheetOrderId, kind, value); }
 function editFromSheet() { const id = sheetOrderId; closeOrderSheet(); openAddOrder(id); }
+function openSheetColor(btn) {
+  const o = rawOrders().find(x => x.id === sheetOrderId);
+  if (o) openColorPop(btn, o.color, name => setOrderField(o.id, 'color', name));
+}
+function sheetSetDeliverBy(v) { if (sheetOrderId) setOrderField(sheetOrderId, 'deliverBy', v); }
 function deleteFromSheet() { if (deleteOrder(sheetOrderId)) closeOrderSheet(); }
 
 // Right-click a row: the common jobs, without opening the order.
@@ -1966,7 +2218,7 @@ function setOrderPage(p) {
 }
 
 function sortTable(col) {
-  if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = -1; }
+  if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = col === 'deliverBy' || col === 'color' ? 1 : -1; }
   orderPage = 0; // reset to first page on sort change
   renderOrderTable();
 }
@@ -2522,6 +2774,8 @@ function openAddOrder(id) {
     document.getElementById('aoCogs').value     = o.cogs;
     document.getElementById('aoRef').value          = o.referredBy || '';
     document.getElementById('aoNotes').value        = o.notes || '';
+    setFormColor(o.color || '');
+    document.getElementById('aoDeliverBy').value    = o.deliverBy || '';
     document.getElementById('aoPayStatus').value    = o.payStatus    || 'paid';
     document.getElementById('aoFulfillStatus').value= o.fulfillStatus || 'completed';
     document.getElementById('aoPrintStatus').value  = printStatusOf(o);
@@ -2536,6 +2790,8 @@ function openAddOrder(id) {
     document.getElementById('aoCogs').value     = 21.33;
     document.getElementById('aoRef').value      = '';
     document.getElementById('aoNotes').value    = '';
+    setFormColor('');
+    document.getElementById('aoDeliverBy').value = '';
     document.getElementById('aoPayStatus').value    = 'paid';
     document.getElementById('aoFulfillStatus').value= 'in_progress';
     document.getElementById('aoPrintStatus').value  = 'not_printed';
@@ -2546,6 +2802,23 @@ function openAddOrder(id) {
   setTimeout(() => document.getElementById('aoCustomer').focus(), 50);
 }
 function closeAddOrder() { editOrderId = null; document.getElementById('addOrderModal').classList.remove('open'); }
+// The form's colour: swatches, or a name of your own under "+".
+let aoColorValue = '';
+function setFormColor(name, keepTyping = false) {
+  aoColorValue = String(name || '').trim();
+  document.getElementById('aoColorName').textContent = aoColorValue ? ' · ' + aoColorValue : '';
+  document.getElementById('aoColorGrid').innerHTML = colorGridHTML(aoColorValue);
+  const other = document.getElementById('aoColorOther');
+  if (!keepTyping) { other.hidden = true; other.value = ''; }
+}
+document.getElementById('aoColorGrid').addEventListener('click', e => {
+  const b = e.target.closest('.swatch-btn');
+  if (!b) return;
+  const other = document.getElementById('aoColorOther');
+  if (b.dataset.color === '__other') { other.hidden = false; other.focus(); return; }
+  setFormColor(b.dataset.color);
+});
+document.getElementById('aoColorOther').addEventListener('input', e => setFormColor(e.target.value, true));
 // In the form too: Done implies Printed, and Not printed reopens the order.
 document.getElementById('aoFulfillStatus').addEventListener('change', e => {
   if (e.target.value === 'completed') {
@@ -2574,6 +2847,8 @@ function saveNewOrder() {
     salePrice: sale, cogs: isNaN(cogs) ? 21.33 : cogs,
     referredBy: document.getElementById('aoRef').value.trim(),
     notes: document.getElementById('aoNotes').value.trim(),
+    color: aoColorValue || undefined,
+    deliverBy: document.getElementById('aoDeliverBy').value || undefined,
     payStatus:    document.getElementById('aoPayStatus').value,
     fulfillStatus: document.getElementById('aoFulfillStatus').value,
     printStatus:   document.getElementById('aoPrintStatus').value
@@ -2650,6 +2925,7 @@ function setOrderStatus(id, kind, value) {
   }
   localStorage.setItem(LS_ORDERS, JSON.stringify(arr));
   renderOrderTable();
+  renderPipeline(); // Done takes an order off Upcoming Deliveries
 }
 
 // ── Sales sub-tabs ──
@@ -3792,14 +4068,14 @@ function csvCell(v) {
 }
 function exportOrdersCSV() {
   const orders = getOrders();
-  const head = ['Date','Customer','Product','Sets','Sale Price','COGS','Profit','ROI %','Referred By','Notes','Printed'];
+  const head = ['Date','Customer','Product','Sets','Sale Price','COGS','Profit','ROI %','Referred By','Notes','Printed','Color','Deliver By'];
   const lines = [head.join(',')];
   orders.forEach(o => {
     const profit = o.salePrice - o.cogs;
     const roi = o.cogs ? (profit / o.cogs * 100).toFixed(1) : '';
     lines.push([o.date, o.customer, o.product, o.sets, o.salePrice.toFixed(2),
       o.cogs.toFixed(2), profit.toFixed(2), roi, o.referredBy || '', o.notes || '',
-      printStatusOf(o) === 'printed' ? 'Yes' : 'No'
+      printStatusOf(o) === 'printed' ? 'Yes' : 'No', o.color || '', o.deliverBy || ''
     ].map(csvCell).join(','));
   });
   downloadBlob(`vault-pine-orders-${TODAY}.csv`, lines.join('\r\n'), 'text/csv');
