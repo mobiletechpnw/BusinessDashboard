@@ -157,7 +157,9 @@
   .order-sheet .sheet-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
   .order-sheet h2 { margin: 0; overflow-wrap: anywhere; }
   .sheet-sub { margin-top: 3px; font-size: 0.8125rem; color: var(--text2); }
-  .order-sheet .modal-actions .btn-danger-text { margin-right: auto; background: none; color: var(--red); padding-left: 4px; padding-right: 4px; }
+  .modal-actions .btn-danger-text { margin-right: auto; background: none; color: var(--red); padding-left: 4px; padding-right: 4px; }
+  #filamentTbody tr[data-id] { cursor: pointer; }
+  #filamentTbody tr[data-id]:hover td { background: var(--fill-2); }
   .search-input { background: var(--fill); border: 1px solid transparent; border-radius: var(--r-md); color: var(--text); padding: 8px 14px; font-size: 0.875rem; outline: none; width: 240px; }
   .search-input:focus { border-color: var(--accent); }
   .search-input:focus { border-color: var(--accent); }
@@ -550,6 +552,7 @@
       </div>
       <div class="card">
         <div class="card-title">Purchase History</div>
+        <div class="caption mb-10">Click a purchase to correct it, or right-click for more.</div>
         <div class="table-wrap">
           <table>
             <thead>
@@ -589,7 +592,7 @@
 <!-- Filament Modal -->
 <div class="modal-overlay" id="addFilamentModal">
   <div class="modal">
-    <h2>Log Filament Purchase</h2>
+    <h2 id="afTitle">Log Filament Purchase</h2>
     <div class="field-row">
       <div class="field"><label>Date</label><input type="date" id="afDate" data-error="Pick a date" required></div>
       <div class="field">
@@ -608,8 +611,9 @@
     </div>
     <div class="field"><label>Notes (optional)</label><input type="text" id="afNotes" placeholder="PLA, Matte, bad batch, etc."></div>
     <div class="modal-actions">
+      <button type="button" class="btn-danger-text" id="afDeleteBtn" onclick="deleteFromFilamentSheet()" hidden>Delete</button>
       <button class="btn-ghost" onclick="closeAddFilament()">Cancel</button>
-      <button class="btn-primary" onclick="saveNewFilament()">Save</button>
+      <button class="btn-primary" id="afSaveBtn" onclick="saveNewFilament()">Save</button>
     </div>
   </div>
 </div>
@@ -3390,6 +3394,12 @@ const LS_FILAMENT_KEY = VPCUtil.KEYS.filament;
 // this safe even if two devices migrate before their first sync.
 const LS_FILAMENT_MIGRATED = 'riser_filament_seed_migrated_v1';
 function initFilament() {
+  // Purchases saved without an id get one, so every row can be edited.
+  const stored = JSON.parse(localStorage.getItem(LS_FILAMENT_KEY) || 'null');
+  if (Array.isArray(stored) && stored.some(f => !f.id)) {
+    stored.forEach(f => { if (!f.id) f.id = uid(); });
+    localStorage.setItem(LS_FILAMENT_KEY, JSON.stringify(stored));
+  }
   if (localStorage.getItem(LS_FILAMENT_MIGRATED)) return;
   const extra = JSON.parse(localStorage.getItem(LS_FILAMENT_KEY) || '[]');
   const have = new Set(extra.map(f => f.id));
@@ -3581,12 +3591,13 @@ function renderFilamentTable(items) {
     const isAdj = f.notes.toLowerCase().includes('found') || f.perRoll < 1;
     const rowStyle = isBad ? 'background:var(--red-tint)' : isAdj ? 'background:var(--blue-tint)' : '';
     const noteCol = isBad ? 'var(--red)' : isAdj ? 'var(--accent)' : 'var(--text2)';
-    return `<tr style="${rowStyle}">
+    const open = f.id ? ` data-id="${f.id}" tabindex="0" onclick="openAddFilament('${f.id}')" onkeydown="if(event.key==='Enter'&&event.target===this)openAddFilament('${f.id}')" oncontextmenu="filamentContextMenu(event,'${f.id}')"` : '';
+    return `<tr style="${rowStyle}"${open}>
       <td class="nowrap">${fmtDate(f.date)}</td>
       <td class="num">${f.qty}</td>
       <td class="num">${fmt$(f.total)}</td>
       <td class="num" style="color:${isBad?'var(--red)':'var(--text)'};font-weight:${f.perRoll<11?'700':'400'}">${fmt$(f.perRoll)}</td>
-      <td><span class="badge" style="background:var(--surface2);color:var(--text2)">${f.brand}</span></td>
+      <td><span class="badge" style="background:var(--surface2);color:var(--text2)">${esc(f.brand)}</span></td>
       <td style="font-size:.75rem;color:${noteCol}">${esc(f.notes)||'—'}</td>
     </tr>`;
   }).join('');
@@ -3601,23 +3612,77 @@ function renderFilamentTable(items) {
   </tr>`;
 }
 
-function openAddFilament() {
-  document.getElementById('afDate').value = TODAY;
+// One sheet logs a purchase and corrects one: openAddFilament(id) edits.
+let filEditId = null;
+function openAddFilament(id) {
+  const f = id ? getFilament().find(x => x.id === id) : null;
+  if (id && !f) { toast('Purchase not found.'); return; }
+  filEditId = f ? f.id : null;
+  document.getElementById('afTitle').textContent = f ? 'Edit Filament Purchase' : 'Log Filament Purchase';
+  document.getElementById('afSaveBtn').textContent = f ? 'Save Changes' : 'Save';
+  document.getElementById('afDeleteBtn').hidden = !f;
+  document.getElementById('afDate').value = f ? f.date : TODAY;
+  const brand = document.getElementById('afBrand');
+  const b = f ? f.brand : 'Elegoo';
+  if (b && ![...brand.options].some(o => o.value === b)) brand.add(new Option(b, b));
+  brand.value = b || brand.options[0].value;
+  document.getElementById('afQty').value   = f ? f.qty : 4;
+  document.getElementById('afTotal').value = f ? f.total : '';
+  document.getElementById('afNotes').value = f ? (f.notes || '') : '';
+  window.vpcSyncForms?.(document.getElementById('addFilamentModal'));
   document.getElementById('addFilamentModal').classList.add('open');
   setTimeout(() => document.getElementById('afTotal').focus(), 50);
 }
-function closeAddFilament() { document.getElementById('addFilamentModal').classList.remove('open'); }
+function closeAddFilament() { filEditId = null; document.getElementById('addFilamentModal').classList.remove('open'); }
 function saveNewFilament() {
   if (window.vpcValidate && !vpcValidate('addFilamentModal')) return;
   const total = parseFloat(document.getElementById('afTotal').value);
   const qty   = parseInt(document.getElementById('afQty').value) || 1;
   const date  = document.getElementById('afDate').value;
   if (!date || isNaN(total)) { toast('Fill in Date and Total Cost.'); return; }
-  saveFilamentEntry({ id: uid(), date, qty, total, brand: document.getElementById('afBrand').value, notes: document.getElementById('afNotes').value.trim() });
+  const entry = { date, qty, total, brand: document.getElementById('afBrand').value, notes: document.getElementById('afNotes').value.trim() };
+  if (filEditId) {
+    const arr = JSON.parse(localStorage.getItem(LS_FILAMENT_KEY) || '[]');
+    const f = arr.find(x => x.id === filEditId);
+    if (!f) { toast('Purchase not found.'); return; }
+    Object.assign(f, entry);
+    localStorage.setItem(LS_FILAMENT_KEY, JSON.stringify(arr));
+    if (typeof auditLog === 'function') auditLog('EDIT_FILAMENT', LS_FILAMENT_KEY, `${date} · ${qty} rolls · ${fmt$(total)}`);
+    toast('Filament purchase updated.');
+  } else {
+    saveFilamentEntry({ id: uid(), ...entry });
+    toast(`Filament logged: ${qty} rolls @ ${fmt$(total/qty)}/roll`);
+  }
   closeAddFilament();
   renderFilament();
-  toast(`Filament logged: ${qty} rolls @ ${fmt$(total/qty)}/roll`);
 }
+function deleteFilament(id) {
+  const f = getFilament().find(x => x.id === id);
+  if (!f || !confirm(`Delete the ${fmtDate(f.date)} purchase (${f.qty} rolls, ${fmt$(f.total)})?`)) return false;
+  localStorage.setItem(LS_FILAMENT_KEY, JSON.stringify(JSON.parse(localStorage.getItem(LS_FILAMENT_KEY) || '[]').filter(x => x.id !== id)));
+  if (typeof auditLog === 'function') auditLog('DELETE_FILAMENT', LS_FILAMENT_KEY, `${f.date} · ${f.qty} rolls · ${fmt$(f.total)}`);
+  renderFilament();
+  toast('Filament purchase deleted.');
+  return true;
+}
+function deleteFromFilamentSheet() { if (filEditId && deleteFilament(filEditId)) closeAddFilament(); }
+function filamentContextMenu(e, id) {
+  e.preventDefault();
+  vpcMenu(e.currentTarget, {
+    label: 'Filament purchase', at: e.longPress ? undefined : { x: e.clientX, y: e.clientY },
+    options: [
+      { value: 'edit', label: 'Edit', icon: vpcIcon('pencil') },
+      { value: 'delete', label: 'Delete', icon: vpcIcon('trash'), danger: true },
+    ],
+    onSelect: v => (v === 'edit' ? openAddFilament(id) : deleteFilament(id)),
+  });
+}
+document.addEventListener('DOMContentLoaded', () => {
+  vpcLongPress(document.getElementById('filamentTbody'), e => {
+    const row = e.target?.closest?.('tr[data-id]');
+    if (row) filamentContextMenu({ ...e, currentTarget: row, longPress: true }, row.dataset.id);
+  });
+});
 document.getElementById('addFilamentModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeAddFilament(); });
 
 // ══════════════════════════════════════════════════════════════
