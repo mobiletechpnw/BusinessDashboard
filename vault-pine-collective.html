@@ -61,8 +61,6 @@
   .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 
   /* ── Chart ── */
-  .chart-wrap { width: 100%; overflow-x: auto; }
-  svg.chart { display: block; }
 
   /* ── Table ── */
   .table-wrap { overflow-x: auto; }
@@ -194,9 +192,6 @@
   .pipeline-note { font-size: 0.75rem; color: var(--text2); }
 
   /* ── Projection legend ── */
-  .proj-legend { display: flex; gap: 20px; margin-bottom: 16px; flex-wrap: wrap; }
-  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; }
-  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
 
   /* ── Icon buttons ── */
   .icon-btn { background: none; border: none; color: var(--text2); padding: 4px 6px; font-size: 0.85rem; border-radius: 999px; cursor: pointer; }
@@ -396,7 +391,7 @@
       </div>
       <div class="card mb-20">
         <div class="card-title">Monthly Revenue &amp; Profit</div>
-        <div class="chart-wrap" id="monthlyChartWrap"></div>
+        <div id="monthlyChartWrap"></div>
       </div>
       <div class="grid-2 mb-20">
         <div class="card">
@@ -490,13 +485,7 @@
     <div class="panel" id="panel-projections">
       <div class="card mb-20">
         <div class="card-title">Revenue Projection — Next 6 Months</div>
-        <div class="proj-legend">
-          <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div><span>Actual</span></div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--text2);opacity:.5"></div><span>Conservative (8 sets/mo)</span></div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div><span>Moderate (12 sets/mo)</span></div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div><span>Growth (16 sets/mo)</span></div>
-        </div>
-        <div class="chart-wrap" id="projChartWrap"></div>
+        <div id="projChartWrap"></div>
       </div>
       <div class="card">
         <div class="card-title">Scenario Breakdown</div>
@@ -664,7 +653,7 @@
         </div>
         <div class="card">
           <div class="card-title">Revenue vs Expenses by Month</div>
-          <div class="chart-wrap" id="expMonthlyChart"></div>
+          <div id="expMonthlyChart"></div>
         </div>
       </div>
       <div class="card">
@@ -1453,6 +1442,7 @@ function addMonthKey(mk, n) {
 const LAST_MONTH = addMonthKey(THIS_MONTH, -1);
 function todayDate() { return new Date(TODAY + 'T00:00:00'); }
 function monthShort(mk) { return monthLabel(mk).split(' ')[0]; }
+function monthLong(mk) { const [y, m] = mk.split('-').map(Number); return new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }); }
 
 function dueDateClass(d) {
   if (!d) return '';
@@ -1717,43 +1707,33 @@ function renderKPIs() {
 }
 
 // ── Monthly Chart ──
+// One column a month: revenue in grey, the profit kept from it in blue.
 function renderMonthlyChart() {
-  const orders  = getOrders();
-  const monthly = byMonth(orders);
+  const monthly = byMonth(getOrders());
   const months  = Object.keys(monthly).sort();
+  const wrap = document.getElementById('monthlyChartWrap');
   if (!months.length) {
-    document.getElementById('monthlyChartWrap').innerHTML =
-      '<div style="color:var(--text2);font-size:.82rem;padding:18px 0">No orders yet — the chart appears with your first logged order.</div>';
+    wrap.innerHTML = '<div class="empty-line">No orders yet. The chart appears with your first order.</div>';
     return;
   }
-  const maxRev  = Math.max(...months.map(m => monthly[m].revenue));
-  const H = 220, pad = 44, barW = 32, gap = 58;
-  const stride = barW * 2 + gap;                          // full horizontal span of one month (two bars + gap)
-  const W = Math.max(pad + months.length * stride, 600);  // width MUST track the stride or the last months clip
-  let bars = '', axes = '';
-  [0, 0.25, 0.5, 0.75, 1].forEach(pct => {
-    const y = pad + (H - pad * 2) * (1 - pct);
-    const val = Math.round(maxRev * pct);
-    axes += `<line x1="${pad}" x2="${W-10}" y1="${y}" y2="${y}" stroke="var(--separator)" stroke-width="1"/>
-             <text x="${pad-6}" y="${y+4}" fill="var(--text2)" font-size="9" text-anchor="end">$${val>=1000?(val/1000).toFixed(0)+'k':val}</text>`;
+  wrap.innerHTML = VPCUtil.chart({
+    label: 'Revenue and profit by month',
+    overlay: true,
+    fmt: VPCUtil.fmtAxisMoney,
+    height: 200,
+    cols: months.map(mk => {
+      const m = monthly[mk];
+      return { x: monthLabel(mk), tip: { t: monthLong(mk), r: [
+        ['ref', 'Revenue', fmt$(m.revenue)],
+        ['main', 'Profit', fmt$(m.profit)],
+        ['', 'Orders', String(m.count)],
+      ] } };
+    }),
+    series: [
+      { k: 'ref', name: 'Revenue', values: months.map(mk => monthly[mk].revenue) },
+      { k: 'main', name: 'Profit', values: months.map(mk => monthly[mk].profit) },
+    ],
   });
-  months.forEach((mk, i) => {
-    const x = pad + i * stride;
-    const m = monthly[mk];
-    const rH = Math.max(2, (m.revenue / maxRev) * (H - pad * 2));
-    const pH = Math.max(2, (m.profit  / maxRev) * (H - pad * 2));
-    const ry = H - pad - rH, py = H - pad - pH;
-    bars += `
-      <rect x="${x}" y="${ry}" width="${barW}" height="${rH}" fill="#34d39955" rx="3"/>
-      <rect x="${x+barW+4}" y="${py}" width="${barW}" height="${pH}" fill="var(--accent)" opacity="0.8" rx="3"/>
-      <text x="${x+barW}" y="${H-pad+14}" fill="var(--text2)" font-size="9" text-anchor="middle">${monthLabel(mk)}</text>
-      <text x="${x+barW/2}" y="${ry-3}" fill="var(--green)" font-size="8.5" text-anchor="middle">$${m.revenue>=1000?(m.revenue/1000).toFixed(1)+'k':m.revenue}</text>
-      <text x="${x+barW+barW/2+4}" y="${py-3}" fill="var(--accent)" font-size="8.5" text-anchor="middle">$${m.profit>=1000?(m.profit/1000).toFixed(1)+'k':Math.round(m.profit)}</text>`;
-  });
-  const legend = `<text x="${W-160}" y="18" fill="var(--green)" font-size="10" font-weight="600">■ Revenue</text>
-                  <text x="${W-80}" y="18" fill="var(--accent)" font-size="10" font-weight="600">■ Profit</text>`;
-  document.getElementById('monthlyChartWrap').innerHTML =
-    `<svg class="chart" viewBox="0 0 ${W} ${H}" style="min-width:${W}px;height:${H}px">${axes}${bars}${legend}</svg>`;
 }
 
 // ── Pipeline ──
@@ -2345,14 +2325,14 @@ function renderProjections() {
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
   }
   const scenarios = [
-    { label:'Conservative', sets:8,  price:90, color:'#8892b066' },
-    { label:'Moderate',     sets:12, price:90, color:'var(--accent)' },
-    { label:'Growth',       sets:16, price:92, color:'var(--yellow)' },
+    { label:'Conservative', sets:8,  price:90, k:'ref2' },
+    { label:'Moderate',     sets:12, price:90, k:'ref' },
+    { label:'Growth',       sets:16, price:92, k:'ref2' },
   ];
   document.getElementById('scenarioTbody').innerHTML = scenarios.map(s => {
     const moRev = s.sets * s.price, moProf = s.sets * (s.price - 21.33);
     return `<tr>
-      <td><strong style="color:${s.color}">${s.label}</strong></td>
+      <td><strong>${s.label}</strong></td>
       <td class="num">${s.sets}</td><td class="num">${fmt$(s.price)}</td>
       <td class="num">${fmt$(moRev)}</td><td class="num">${fmt$(moProf)}</td>
       <td class="num">${fmt$(moRev*6)}</td><td class="num">${fmt$(moProf*6)}</td>
@@ -2367,35 +2347,26 @@ function renderProjections() {
     return;
   }
   const futureMonths = [1,2,3,4,5,6].map(n => addMonths(lastMonth, n));
-
   const allMonths = [...months, ...futureMonths];
-  const W = Math.max(allMonths.length * 80, 700), H = 230, pad = 50, gap = 60;
-  const allVals = [...months.map(mk => monthly[mk].revenue), ...scenarios.flatMap(s => futureMonths.map(() => s.sets * s.price))];
-  const maxVal = Math.max(...allVals) * 1.1;
-  const pxX = i => pad + i * gap;
-  const pxY = v => pad + (H - pad * 2) * (1 - v / maxVal);
-
-  let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" style="min-width:${W}px;height:${H}px">`;
-  [0, 0.25, 0.5, 0.75, 1].forEach(pct => {
-    const y = pxY(maxVal * pct), v = Math.round(maxVal * pct);
-    svg += `<line x1="${pad}" x2="${W-10}" y1="${y}" y2="${y}" stroke="var(--separator)" stroke-width="1"/>
-            <text x="${pad-6}" y="${y+4}" fill="var(--text2)" font-size="9" text-anchor="end">${v>=1000?(v/1000).toFixed(0)+'k':v}</text>`;
+  const last = months.length - 1;
+  const actual = months.map(mk => monthly[mk].revenue);
+  document.getElementById('projChartWrap').innerHTML = VPCUtil.chart({
+    kind: 'line',
+    label: 'Revenue by month, then six months projected three ways',
+    fmt: VPCUtil.fmtAxisMoney,
+    height: 220,
+    cols: allMonths.map((mk, i) => i <= last
+      ? { x: monthLabel(mk), tip: { t: monthLong(mk), r: [['main', 'Revenue', fmt$(actual[i])]] } }
+      : { x: monthLabel(mk), tip: { t: `${monthLong(mk)}, projected`, r: scenarios.map(sc => [sc.k, sc.label, fmt$(sc.sets * sc.price)]) } }),
+    series: [
+      // Each scenario starts from the latest real month
+      ...scenarios.map(sc => ({ k: sc.k, dash: true, end: sc.label,
+        values: allMonths.map((mk, i) => i < last ? null : i === last ? actual[last] : sc.sets * sc.price) })),
+      { k: 'main', area: true, values: allMonths.map((mk, i) => i <= last ? actual[i] : null) },
+    ],
+    divider: { at: months.length, label: 'Projected' },
+    keys: [['main', 'Revenue'], ['ref', 'Projected']],
   });
-  const divX = pxX(months.length - 0.5);
-  svg += `<line x1="${divX}" x2="${divX}" y1="${pad}" y2="${H-pad}" stroke="var(--separator)" stroke-width="1" stroke-dasharray="4,3"/>
-          <text x="${divX+4}" y="${pad-4}" fill="var(--text2)" font-size="9">Projected →</text>`;
-  const actPts = months.map((mk, i) => `${pxX(i)},${pxY(monthly[mk].revenue)}`).join(' ');
-  svg += `<polyline points="${actPts}" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linejoin="round"/>`;
-  months.forEach((mk, i) => { svg += `<circle cx="${pxX(i)}" cy="${pxY(monthly[mk].revenue)}" r="4" fill="var(--green)"/>`; });
-  scenarios.forEach(s => {
-    const pts = futureMonths.map((mk, i) => `${pxX(months.length+i)},${pxY(s.sets*s.price)}`).join(' ');
-    svg += `<polyline points="${pxX(months.length-1)},${pxY(monthly[lastMonth].revenue)} ${pts}" fill="none" stroke="${s.color}" stroke-width="2" stroke-dasharray="5,3" stroke-linejoin="round"/>`;
-  });
-  allMonths.forEach((mk, i) => {
-    svg += `<text x="${pxX(i)}" y="${H-pad+14}" fill="${i>=months.length?'var(--label-3)':'var(--text2)'}" font-size="9" text-anchor="middle">${monthLabel(mk)}</text>`;
-  });
-  svg += '</svg>';
-  document.getElementById('projChartWrap').innerHTML = svg;
 }
 
 // ── Insights ──
@@ -3489,43 +3460,30 @@ function renderFilament() {
 }
 
 function renderFilamentTrend(items) {
+  const el = document.getElementById('filamentTrendChart');
   if (items.length < 2) {
-    document.getElementById('filamentTrendChart').innerHTML =
-      '<div class="empty-line">The trend appears once you have two or more purchases.</div>';
+    el.innerHTML = '<div class="empty-line">The trend appears once you have two or more purchases.</div>';
     return;
   }
-  const W = 420, H = 180, pad = 44;
-  const prs = items.map(f => f.perRoll);
-  const maxPR = Math.max(...prs) * 1.1;
-  const minPR = Math.min(...prs) * 0.9;
-  function px(i) { return pad + (i / (items.length - 1)) * (W - pad - 16); }
-  function py(v) { return pad + (1 - (v - minPR) / (maxPR - minPR)) * (H - pad * 2); }
-  let grid = '', dots = '', labels = '';
-  [minPR, (minPR+maxPR)/2, maxPR].forEach(v => {
-    const y = py(v);
-    grid += `<line x1="${pad}" x2="${W}" y1="${y}" y2="${y}" stroke="var(--separator)" stroke-width="1"/>
-             <text x="${pad-4}" y="${y+4}" fill="var(--text2)" font-size="9" text-anchor="end">${fmt$(v)}</text>`;
-  });
   const avg = items.reduce((s,f) => s + f.perRoll, 0) / items.length;
-  const ay = py(avg);
-  grid += `<line x1="${pad}" x2="${W}" y1="${ay}" y2="${ay}" stroke="var(--text2)" stroke-width="1" stroke-dasharray="3,3"/>
-           <text x="${W-2}" y="${ay-3}" fill="var(--text2)" font-size="8" text-anchor="end">avg ${fmt$(avg)}</text>`;
-  const pts = items.map((f,i) => `${px(i)},${py(f.perRoll)}`).join(' ');
-  const areaBase = py(minPR);
-  const areaPath = `M${px(0)},${areaBase} ` + items.map((f,i) => `L${px(i)},${py(f.perRoll)}`).join(' ') + ` L${px(items.length-1)},${areaBase} Z`;
-  const line = `<path d="${areaPath}" fill="var(--accent2)" opacity=".08"/>
-    <polyline points="${pts}" fill="none" stroke="var(--accent2)" stroke-width="2" stroke-linejoin="round"/>`;
-  items.forEach((f,i) => {
-    const isBad = f.notes.includes('bad');
-    const color = isBad ? 'var(--red)' : 'var(--accent2)';
-    dots += `<circle cx="${px(i)}" cy="${py(f.perRoll)}" r="${isBad?5:3.5}" fill="${color}"/>`;
-    if (i === 0 || i === items.length - 1) labels += `<text x="${px(i)}" y="${py(f.perRoll)-6}" fill="${color}" font-size="8.5" text-anchor="middle">${fmt$(f.perRoll)}</text>`;
+  const bad = (f) => (f.notes || '').toLowerCase().includes('bad');
+  const marks = items.map((f, i) => bad(f) ? { i, k: 'bad' } : null).filter(Boolean);
+  el.innerHTML = VPCUtil.chart({
+    kind: 'line',
+    label: 'Cost per roll, purchase by purchase',
+    zero: false,
+    fmt: VPCUtil.fmtAxisMoney,
+    height: 160,
+    cols: items.map(f => ({ x: monthLabel(f.date.slice(0, 7)), tip: { t: VPCUtil.fmtDate(f.date), r: [
+      ['main', 'Per roll', fmt$(f.perRoll)],
+      ['', f.brand || 'Filament', `${f.qty} roll${f.qty === 1 ? '' : 's'}`],
+      ...(bad(f) ? [['bad', 'Bad batch', '']] : []),
+    ] } })),
+    series: [{ k: 'main', values: items.map(f => f.perRoll) }],
+    refs: [{ v: avg, label: `Average ${fmt$(avg)}` }],
+    marks,
+    keys: marks.length ? [['main', 'Cost per roll'], ['bad', 'Bad batch']] : [],
   });
-  const startLabel = `<text x="${px(0)}" y="${H-4}" fill="var(--text2)" font-size="8" text-anchor="middle">${fmtDate(items[0].date)}</text>`;
-  const endLabel = `<text x="${px(items.length-1)}" y="${H-4}" fill="var(--text2)" font-size="8" text-anchor="middle">${fmtDate(items[items.length-1].date)}</text>`;
-  document.getElementById('filamentTrendChart').innerHTML =
-    `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px">${grid}${line}${dots}${labels}${startLabel}${endLabel}
-     <text x="${W-2}" y="14" fill="var(--red)" font-size="8.5" text-anchor="end">● bad batch</text></svg>`;
 }
 
 function renderFilamentMonthly(items) {
@@ -3541,24 +3499,16 @@ function renderFilamentMonthly(items) {
       '<div class="empty-line">No purchases logged yet.</div>';
     return;
   }
-  const maxVal = Math.max(...months.map(m => monthMap[m].total));
-  const W = Math.max(months.length * 70, 380), H = 160, pad = 40, barW = 28;
-  let bars = '', axes = '';
-  [0, 0.5, 1].forEach(pct => {
-    const y = pad + (H - pad * 2) * (1 - pct);
-    axes += `<line x1="${pad}" x2="${W}" y1="${y}" y2="${y}" stroke="var(--separator)" stroke-width="1"/>
-             <text x="${pad-4}" y="${y+4}" fill="var(--text2)" font-size="9" text-anchor="end">$${Math.round(maxVal*pct)}</text>`;
+  document.getElementById('filamentMonthlyChart').innerHTML = VPCUtil.chart({
+    label: 'Filament spend by month',
+    fmt: VPCUtil.fmtAxisMoney,
+    height: 160,
+    cols: months.map(mk => ({ x: monthLabel(mk), tip: { t: monthLong(mk), r: [
+      ['main', 'Spent', fmt$(monthMap[mk].total)],
+      ['', 'Rolls', String(monthMap[mk].rolls)],
+    ] } })),
+    series: [{ k: 'main', values: months.map(mk => monthMap[mk].total) }],
   });
-  months.forEach((mk,i) => {
-    const x = pad + i * (barW + 42), m = monthMap[mk];
-    const h = Math.max(3, (m.total / maxVal) * (H - pad * 2)), y = H - pad - h;
-    bars += `<rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="var(--accent2)" opacity=".8" rx="3"/>
-             <text x="${x+barW/2}" y="${y-3}" fill="var(--accent2)" font-size="8.5" text-anchor="middle">$${Math.round(m.total)}</text>
-             <text x="${x+barW/2}" y="${H-pad+13}" fill="var(--text2)" font-size="8.5" text-anchor="middle">${monthLabel(mk)}</text>
-             <text x="${x+barW/2}" y="${H-pad+23}" fill="var(--label-3)" font-size="7.5" text-anchor="middle">${m.rolls}r</text>`;
-  });
-  document.getElementById('filamentMonthlyChart').innerHTML =
-    `<div class="chart-wrap"><svg class="chart" viewBox="0 0 ${W} ${H}" style="min-width:${W}px;height:${H}px">${axes}${bars}</svg></div>`;
 }
 
 function renderFilamentBrands(items) {
@@ -3819,30 +3769,23 @@ function renderExpMonthlyChart() {
   const expMonthly = {};
   exps.forEach(e => { const mk = monthKey(e.date); expMonthly[mk] = (expMonthly[mk]||0) + e.amount; });
   const allMks = [...new Set([...Object.keys(revMonthly), ...Object.keys(expMonthly)])].sort();
-  if (!allMks.length) { document.getElementById('expMonthlyChart').innerHTML = '<div style="color:var(--text2);font-size:.83rem;padding:20px">No data yet.</div>'; return; }
-  const maxVal = Math.max(...allMks.map(mk => Math.max(revMonthly[mk]?.revenue||0, expMonthly[mk]||0)), 1);
-  const W = Math.max(allMks.length * 90, 500), H = 200, pad = 44, barW = 28, gap = 62;
-  let bars = '', axes = '';
-  [0, 0.25, 0.5, 0.75, 1].forEach(pct => {
-    const y = pad + (H-pad*2)*(1-pct), v = Math.round(maxVal*pct);
-    axes += `<line x1="${pad}" x2="${W-10}" y1="${y}" y2="${y}" stroke="var(--separator)" stroke-width="1"/>
-             <text x="${pad-6}" y="${y+4}" fill="var(--text2)" font-size="9" text-anchor="end">$${v>=1000?(v/1000).toFixed(0)+'k':v}</text>`;
+  if (!allMks.length) { document.getElementById('expMonthlyChart').innerHTML = '<div class="empty-line">No revenue or expenses yet.</div>'; return; }
+  const rev = (mk) => revMonthly[mk]?.revenue || 0;
+  const exp = (mk) => expMonthly[mk] || 0;
+  document.getElementById('expMonthlyChart').innerHTML = VPCUtil.chart({
+    label: 'Revenue and expenses by month',
+    fmt: VPCUtil.fmtAxisMoney,
+    height: 200,
+    cols: allMks.map(mk => ({ x: monthLabel(mk), tip: { t: monthLong(mk), r: [
+      ['main', 'Revenue', fmt$(rev(mk))],
+      ['ref', 'Expenses', fmt$(exp(mk))],
+      ['', 'Net', fmt$(rev(mk) - exp(mk))],
+    ] } })),
+    series: [
+      { k: 'main', name: 'Revenue', values: allMks.map(rev) },
+      { k: 'ref', name: 'Expenses', values: allMks.map(exp) },
+    ],
   });
-  allMks.forEach((mk, i) => {
-    const x   = pad + i*(barW*2+gap);
-    const rev = revMonthly[mk]?.revenue||0, exp = expMonthly[mk]||0;
-    const rH  = Math.max(2, (rev/maxVal)*(H-pad*2)), eH = Math.max(2, (exp/maxVal)*(H-pad*2));
-    const ry  = H-pad-rH, ey = H-pad-eH;
-    bars += `<rect x="${x}" y="${ry}" width="${barW}" height="${rH}" fill="#34d39944" rx="3"/>
-             <rect x="${x+barW+4}" y="${ey}" width="${barW}" height="${eH}" fill="#f8717166" rx="3"/>
-             <text x="${x+barW}" y="${H-pad+14}" fill="var(--text2)" font-size="9" text-anchor="middle">${monthLabel(mk)}</text>`;
-    if (rev > 0) bars += `<text x="${x+barW/2}" y="${ry-3}" fill="var(--green)" font-size="8" text-anchor="middle">$${rev>=1000?(rev/1000).toFixed(1)+'k':Math.round(rev)}</text>`;
-    if (exp > 0) bars += `<text x="${x+barW+barW/2+4}" y="${ey-3}" fill="var(--red)" font-size="8" text-anchor="middle">$${exp>=1000?(exp/1000).toFixed(1)+'k':Math.round(exp)}</text>`;
-  });
-  const legend = `<text x="${W-180}" y="18" fill="var(--green)" font-size="10" font-weight="600">■ Revenue</text>
-                  <text x="${W-100}" y="18" fill="var(--red)" font-size="10" font-weight="600">■ Expenses</text>`;
-  document.getElementById('expMonthlyChart').innerHTML =
-    `<svg class="chart" viewBox="0 0 ${W} ${H}" style="min-width:${W}px;height:${H}px">${axes}${bars}${legend}</svg>`;
 }
 
 // ── Recent expenses list ──

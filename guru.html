@@ -206,7 +206,7 @@
   .nw-chart-head { display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; font-weight: 600; color: var(--text2); margin-bottom: 8px; }
   .btn-snapshot { background: var(--accent-tint); border: 1px solid transparent; color: var(--accent); border-radius: 999px; padding: 5px 12px; font-size: 0.75rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
   .btn-snapshot:hover { background: var(--accent-fill); color: var(--on-accent); }
-  #nw-chart { width: 100%; height: 130px; display: block; flex: 1; }
+  #nw-chart { flex: 1; }
   .nw-chart-hint { font-size: 0.75rem; color: var(--text2); text-align: center; margin-top: 6px; }
 
   .nw-income-card {
@@ -366,7 +366,7 @@
           <span>Net Worth Trend</span>
           <button class="btn-snapshot" onclick="takeSnapshot()">Save snapshot</button>
         </div>
-        <canvas id="nw-chart"></canvas>
+        <div id="nw-chart"></div>
         <div class="nw-chart-hint" id="nw-chart-hint"></div>
       </div>
     </div>
@@ -1314,57 +1314,33 @@ function saveIncome(v) {
 }
 
 function drawNwChart(snapshots) {
-  const c = document.getElementById('nw-chart');
-  if (!c) return;
+  const el = document.getElementById('nw-chart');
+  if (!el) return;
   const hint = document.getElementById('nw-chart-hint');
-  const w = c.offsetWidth * 2, h = 260;
-  c.width = w; c.height = h;
-  const ctx = c.getContext('2d');
-  ctx.clearRect(0, 0, w, h);
-  // Canvas can't read CSS variables, so take the theme's colours now.
-  const css = getComputedStyle(document.documentElement);
-  const tok = (name) => css.getPropertyValue(name).trim();
-  const green = tok('--green'), sep = tok('--separator'), surface = tok('--surface');
-
   if (!snapshots || snapshots.length < 2) {
+    el.innerHTML = '';
     hint.textContent = snapshots && snapshots.length === 1
-      ? 'One snapshot saved — save another next month to start the trend line.'
+      ? 'One snapshot saved. Save another next month to start the trend line.'
       : 'Save your first snapshot to begin tracking the trend.';
     return;
   }
-  hint.textContent = `${snapshots.length} snapshots · ${snapshots[0].date} → ${snapshots[snapshots.length-1].date}`;
-
-  const vals = snapshots.map(s => s.net);
-  const min = Math.min(...vals, 0), max = Math.max(...vals, 1);
-  const pad = 16, range = (max - min) || 1;
-  const step = (w - pad * 2) / (snapshots.length - 1);
-  const pts = vals.map((v, i) => [pad + i * step, h - pad - ((v - min) / range) * (h - pad * 2)]);
-
-  // zero line
-  const zeroY = h - pad - ((0 - min) / range) * (h - pad * 2);
-  ctx.strokeStyle = sep; ctx.lineWidth = 1; ctx.setLineDash([5, 5]);
-  ctx.beginPath(); ctx.moveTo(pad, zeroY); ctx.lineTo(w - pad, zeroY); ctx.stroke(); ctx.setLineDash([]);
-
-  // area
-  const grad = ctx.createLinearGradient(0, 0, 0, h);
-  const g = parseInt(green.replace('#', ''), 16);
-  const greenA = (a) => `rgba(${(g >> 16) & 255},${(g >> 8) & 255},${g & 255},${a})`;
-  grad.addColorStop(0, greenA(0.3)); grad.addColorStop(1, greenA(0));
-  ctx.beginPath(); ctx.moveTo(pts[0][0], h - pad);
-  pts.forEach(p => ctx.lineTo(p[0], p[1])); ctx.lineTo(pts[pts.length-1][0], h - pad); ctx.closePath();
-  ctx.fillStyle = grad; ctx.fill();
-
-  // line
-  ctx.beginPath(); pts.forEach((p, i) => i === 0 ? ctx.moveTo(p[0], p[1]) : ctx.lineTo(p[0], p[1]));
-  ctx.strokeStyle = green; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.stroke();
-
-  // end dot
-  const [lx, ly] = pts[pts.length - 1];
-  ctx.beginPath(); ctx.arc(lx, ly, 5, 0, Math.PI * 2);
-  ctx.fillStyle = surface; ctx.strokeStyle = green; ctx.lineWidth = 3; ctx.fill(); ctx.stroke();
+  hint.textContent = `${snapshots.length} snapshots · ${VPCUtil.fmtDate(snapshots[0].date)} to ${VPCUtil.fmtDate(snapshots[snapshots.length - 1].date)}`;
+  el.innerHTML = VPCUtil.chart({
+    kind: 'line',
+    label: 'Net worth over time',
+    fmt: VPCUtil.fmtAxisMoney,
+    height: 130,
+    cols: snapshots.map((s, i) => {
+      const d = i ? s.net - snapshots[i - 1].net : null;
+      return { x: VPCUtil.fmtDate(s.date).replace(/, \d{4}$/, ''), tip: { t: VPCUtil.fmtDate(s.date), r: [
+        ['main', 'Net worth', VPCUtil.fmtMoney(s.net)],
+        ...(d == null ? [] : [['', 'Change', `${d >= 0 ? '+' : '−'}${VPCUtil.fmtMoney(Math.abs(d))}`]]),
+      ] } };
+    }),
+    series: [{ k: 'main', area: true, values: snapshots.map(s => s.net) }],
+  });
 }
 
-window.addEventListener('vpc:themechange', () => { try { renderNetWorth(); } catch (e) {} });
 function renderNetWorth() {
   const { assets, liabilities, net, data } = nwTotals();
 

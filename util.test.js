@@ -356,3 +356,76 @@ test('sparkPath scales from zero, skips gaps and needs two points', () => {
   assert.strictEqual(U.sparkPath([7]), null);
   assert.strictEqual(U.sparkPath([null, 3, null]), null);
 });
+
+test('niceScale picks round gridlines from a round floor to a round ceiling', () => {
+  assert.deepStrictEqual(U.niceScale(0, 1234), { lo: 0, hi: 1500, ticks: [0, 500, 1000, 1500] });
+  assert.deepStrictEqual(U.niceScale(0, 95).ticks, [0, 25, 50, 75, 100]);
+  assert.deepStrictEqual(U.niceScale(18.5, 23.4).ticks, [18, 20, 22, 24]);
+  assert.deepStrictEqual(U.niceScale(-120, 800).ticks, [-250, 0, 250, 500, 750, 1000]);
+  assert.deepStrictEqual(U.niceScale(0, 0).ticks, [0, 0.25, 0.5, 0.75, 1]);
+});
+
+test('chart axis labels are short', () => {
+  assert.deepStrictEqual([0, 1500, 12000, -500, 2.5, 999].map(U.fmtAxisMoney), [
+    '$0',
+    '$1.5k',
+    '$12k',
+    '−$500',
+    '$2.5',
+    '$999',
+  ]);
+  assert.strictEqual(U.fmtAxisNum(4200), '4.2k');
+});
+
+const unescape = (s) =>
+  s
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&');
+
+test('chart builds a column per value, with its values in data-tip', () => {
+  const html = U.chart({
+    label: 'Revenue',
+    overlay: true,
+    fmt: U.fmtAxisMoney,
+    cols: [{ x: 'Jan', tip: { t: 'January', r: [['main', 'Profit', '$5 <net>']] } }, { x: 'Feb' }],
+    series: [
+      { k: 'ref', name: 'Revenue', values: [10, 20] },
+      { k: 'main', name: 'Profit', values: [5, -3] },
+    ],
+  });
+  const cols = [...html.matchAll(/class="vchart-col" data-i="(\d)" data-tip="([^"]*)"/g)];
+  assert.strictEqual(cols.length, 2);
+  assert.deepStrictEqual(JSON.parse(unescape(cols[0][2])), {
+    t: 'January',
+    r: [['main', 'Profit', '$5 <net>']],
+  });
+  assert.deepStrictEqual(JSON.parse(unescape(cols[1][2])), { t: 'Feb' });
+  assert.strictEqual((html.match(/class="vchart-bar /g) || []).length, 4);
+  assert.match(html, /vchart-bar main neg/); // a loss goes below the zero line
+  assert.match(html, /<i class="zero"/);
+  assert.match(html, /aria-label="Revenue\./);
+  // The legend lists the main series first
+  assert.match(
+    html,
+    /<span><i class="key main"><\/i>Profit<\/span><span><i class="key ref"><\/i>Revenue<\/span>/
+  );
+  assert.strictEqual(U.chart({ cols: [] }), '');
+});
+
+test('line charts split at gaps, mark points and label about six columns', () => {
+  const html = U.chart({
+    kind: 'line',
+    cols: Array.from({ length: 12 }, (_, i) => ({ x: 'L' + i })),
+    series: [{ values: [1, 2, null, 4, 5, 6, 7, 8, 9, 10, 11, 12] }],
+    marks: [{ i: 4, k: 'bad' }],
+    refs: [{ v: 6, label: 'Average' }],
+  });
+  assert.strictEqual((html.match(/class="vchart-line main"/g) || []).length, 2);
+  assert.match(html, /vchart-dot bad/);
+  assert.match(html, /<i class="key dash"><\/i>Average/);
+  const labels = [...html.matchAll(/<span style="left:[\d.]+%">(L\d+)<\/span>/g)].map((m) => m[1]);
+  assert.deepStrictEqual(labels, ['L0', 'L2', 'L4', 'L6', 'L8', 'L11']);
+});

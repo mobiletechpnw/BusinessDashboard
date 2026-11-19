@@ -892,6 +892,125 @@ function watchScroll() {
   }
 }
 
+// ── CHART VALUES ───────────────────────────────────
+// Charts built by VPCUtil.chart carry each column's values in data-tip. They
+// show in one box: under the pointer, on a tap, or with the arrow keys once
+// the chart has focus (screen readers hear them through aria-live).
+const vpcChartTip = (() => {
+  let box = null;
+  let on = null; // { chart, col }
+  const getBox = () => {
+    if (!box) {
+      box = document.createElement('div');
+      box.className = 'vchart-tip';
+      box.setAttribute('role', 'status');
+      box.setAttribute('aria-live', 'polite');
+      box.hidden = true;
+      document.body.appendChild(box);
+    }
+    return box;
+  };
+  const marks = (chart, i, add) =>
+    chart
+      .querySelectorAll(`.vchart-pt[data-i="${i}"]`)
+      .forEach((p) => p.classList.toggle('is-active', add));
+  function hide() {
+    if (!on) return;
+    on.col.classList.remove('is-active');
+    marks(on.chart, on.col.dataset.i, false);
+    on = null;
+    if (box) box.hidden = true;
+  }
+  function show(chart, col) {
+    if (on && on.col === col) return;
+    hide();
+    let d;
+    try {
+      d = JSON.parse(col.dataset.tip || '{}');
+    } catch (e) {
+      return;
+    }
+    on = { chart, col };
+    col.classList.add('is-active');
+    marks(chart, col.dataset.i, true);
+    const esc = VPCUtil.esc;
+    const b = getBox();
+    b.innerHTML =
+      `<b>${esc(d.t || '')}</b>` +
+      (d.r || [])
+        .map(
+          ([k, label, value]) =>
+            `<span class="vchart-tip-row"><i class="key ${k || 'none'}"></i><span>${esc(label)}</span><span class="v">${esc(value)}</span></span>`
+        )
+        .join('');
+    b.hidden = false;
+    place(col);
+  }
+  // Above the plot, centred on the column's point, inside the window
+  function place(col) {
+    const b = getBox();
+    const r = col.getBoundingClientRect();
+    const plot = col.closest('.vchart-plot').getBoundingClientRect();
+    const x = r.left + (r.width * (parseFloat(col.style.getPropertyValue('--px')) || 50)) / 100;
+    const w = b.offsetWidth;
+    const h = b.offsetHeight;
+    b.style.left = `${Math.round(Math.min(Math.max(8, x - w / 2), innerWidth - w - 8))}px`;
+    const above = plot.top - h - 6;
+    b.style.top = `${Math.round(above >= 8 ? above : Math.min(plot.top + 8, innerHeight - h - 8))}px`;
+  }
+  const colAt = (e) => (e.target.closest ? e.target.closest('.vchart-col') : null);
+  document.addEventListener('pointermove', (e) => {
+    if (e.pointerType !== 'mouse') return;
+    const col = colAt(e);
+    if (col) show(col.closest('.vchart'), col);
+    else if (on && !(e.target.closest && e.target.closest('.vchart'))) hide();
+  });
+  document.addEventListener('click', (e) => {
+    const col = colAt(e);
+    if (col) {
+      if (on && on.col === col && e.pointerType !== 'mouse') hide();
+      else show(col.closest('.vchart'), col);
+    } else if (on && !(e.target.closest && e.target.closest('.vchart-tip'))) hide();
+  });
+  // Keyboard focus starts at the latest value (a click or tap picks its own)
+  document.addEventListener('focusin', (e) => {
+    const chart = e.target.classList && e.target.classList.contains('vchart') ? e.target : null;
+    if (!chart || !chart.matches(':focus-visible') || (on && on.chart === chart)) return;
+    const cols = chart.querySelectorAll('.vchart-col');
+    if (cols.length) show(chart, cols[cols.length - 1]);
+  });
+  document.addEventListener('focusout', (e) => {
+    if (on && e.target === on.chart) hide();
+  });
+  document.addEventListener('keydown', (e) => {
+    const chart = e.target.classList && e.target.classList.contains('vchart') ? e.target : null;
+    if (!chart) return;
+    const cols = [...chart.querySelectorAll('.vchart-col')];
+    if (!cols.length) return;
+    let i = on && on.chart === chart ? cols.indexOf(on.col) : cols.length - 1;
+    if (e.key === 'ArrowLeft') i = Math.max(0, i - 1);
+    else if (e.key === 'ArrowRight') i = Math.min(cols.length - 1, i + 1);
+    else if (e.key === 'Home') i = 0;
+    else if (e.key === 'End') i = cols.length - 1;
+    else if (e.key === 'Escape') return hide();
+    else return;
+    e.preventDefault();
+    cols[i].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    show(chart, cols[i]);
+  });
+  // Scrolling the page moves the chart away from its box; scrolling the
+  // chart itself (the arrow keys can) just moves the box along.
+  window.addEventListener(
+    'scroll',
+    (e) => {
+      if (on && e.target !== document && on.chart.contains(e.target)) place(on.col);
+      else hide();
+    },
+    { passive: true, capture: true }
+  );
+  return { show, hide };
+})();
+
 // ── GLOBAL SEARCH ──────────────────────────────────
 function buildSearchIndex() {
   const results = [];
