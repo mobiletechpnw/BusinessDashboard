@@ -24,6 +24,8 @@
   --surface: #1c1c1e; /* cards, sheets, menus */
   --surface2: #2c2c2e; /* raised: inner tiles, hover rows */
   --fill: rgba(118, 118, 128, 0.24); /* inputs, quiet buttons, tracks */
+  --fill-2: rgba(118, 118, 128, 0.12); /* hover on quiet rows */
+  --thumb: #636366; /* the selected segment of a segmented control */
   --separator: rgba(255, 255, 255, 0.1); /* hairlines */
   --label: #f5f5f7;
   --label-2: #a1a1a6;
@@ -62,6 +64,12 @@
   /* Glass: floating chrome only (header, nav bars, the phone tab bar) */
   --chrome: rgba(22, 22, 23, 0.82);
   --chrome-blur: saturate(180%) blur(20px);
+
+  /* Navigation chrome (sizes) */
+  --sidebar-w: 232px;
+  --header-h: 58px; /* shared.js measures the title bar and keeps this exact */
+  --tabbar-h: 50px;
+  --chrome-bottom: env(safe-area-inset-bottom, 0px); /* bottom chrome to keep clear of */
 
   /* Type */
   --font: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
@@ -118,6 +126,10 @@
 }
 
 /* ── Base reset ── */
+/* hidden always hides, even on elements that set their own display */
+[hidden] {
+  display: none !important;
+}
 *,
 *::before,
 *::after {
@@ -258,6 +270,83 @@ strong {
 .badge-purple {
   background: var(--purple-tint);
   color: var(--purple-pill);
+}
+
+/* ── Status pill that opens a menu (see vpcMenu in shared.js) ── */
+.badge.status-btn {
+  position: relative;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  min-height: 20px;
+  padding: 3px 9px;
+}
+.badge.status-btn::after {
+  /* invisible slop: a 44px-tall tap area around a 20px pill */
+  content: '';
+  position: absolute;
+  inset: -12px -4px;
+}
+.badge.status-btn:hover {
+  filter: brightness(1.15);
+}
+
+/* ── Status menu ── */
+.vpc-menu {
+  position: fixed;
+  z-index: 1100;
+  min-width: 190px;
+  background: var(--surface2);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-pop);
+  padding: 6px;
+  transform-origin: top left;
+  animation: vpc-menu-in var(--t-move) var(--spring);
+}
+@keyframes vpc-menu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.vpc-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 36px;
+  padding: 0 12px 0 8px;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 400;
+  text-align: left;
+}
+.vpc-menu button:hover,
+.vpc-menu button:focus-visible {
+  background: var(--accent-fill);
+  color: var(--on-accent);
+  outline: none;
+}
+.vpc-menu-check {
+  width: 14px;
+  visibility: hidden;
+  font-weight: 600;
+}
+.vpc-menu button[aria-checked='true'] .vpc-menu-check {
+  visibility: visible;
+}
+.vpc-menu-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+  margin-left: auto;
 }
 
 /* ── Shared modal (sheet) ── */
@@ -443,7 +532,7 @@ button:active {
   -webkit-backdrop-filter: var(--chrome-blur);
   backdrop-filter: var(--chrome-blur);
   position: sticky;
-  top: 98px; /* 58px header + 40px dash-nav */
+  top: var(--header-h);
   z-index: 150;
 }
 .tab {
@@ -482,14 +571,951 @@ header {
   top: 0;
   z-index: 200;
 }
-.brand + #vpc-sync-wrap,
-h1 + #vpc-sync-wrap {
-  /* Pages whose header is just a title: keep the account controls and
-     search together on the right instead of floating mid-header. */
-  margin-left: auto;
+/* One title style for every page: 17px semibold, like a navigation bar. */
+header .brand,
+header h1 {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
-#vpc-search-btn {
-  margin-left: 8px;
+header .brand span,
+header h1 span {
+  color: inherit;
+}
+/* Optional one-line subtitle under a title (e.g. "47 orders · last one today") */
+.title-stack {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  flex: 1;
+}
+.title-sub {
+  font-size: 0.75rem;
+  color: var(--label-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Segmented control (shared.js: vpcSeg) ── */
+.seg {
+  display: inline-flex;
+  flex: none;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 9px;
+  background: var(--fill);
+}
+.seg button {
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--label);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.seg button:hover {
+  background: var(--fill-2);
+}
+.seg button:active {
+  transform: none;
+}
+.seg button[aria-checked='true'] {
+  background: var(--thumb);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+@media (pointer: coarse) {
+  .seg button {
+    min-height: 36px;
+  }
+}
+
+/* ── Grouped lists: label left, value right, 44px rows ── */
+.glist {
+  border-radius: var(--r-md);
+  background: var(--fill);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.glist-label {
+  margin: 0 14px 6px;
+  font-size: 0.8125rem;
+  color: var(--label-2);
+}
+.glist-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding: 7px 14px;
+  font-size: 0.9375rem;
+}
+.glist-row + .glist-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 14px;
+  right: 0;
+  border-top: 1px solid var(--separator);
+}
+.glist-val {
+  min-width: 0;
+  color: var(--label-2);
+  text-align: right;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Switch (an <input type="checkbox" class="switch">) ── */
+.switch {
+  -webkit-appearance: none;
+  appearance: none;
+  position: relative;
+  flex: none;
+  width: 51px;
+  height: 31px;
+  margin: 0;
+  border-radius: var(--r-full);
+  background: var(--fill);
+  cursor: pointer;
+  transition: background-color var(--t-base) var(--ease);
+}
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  transition: transform var(--t-move) var(--spring);
+}
+.switch:checked {
+  background: var(--green);
+}
+.switch:checked::after {
+  transform: translateX(20px);
+}
+.switch:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* ── Needs-attention rows: one job each, with a chevron ── */
+.attn-list {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.attn-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 16px;
+  border-radius: 0;
+  background: none;
+  color: var(--label);
+  text-decoration: none;
+  text-align: left;
+  font-weight: 400;
+}
+.attn-row:active {
+  transform: none;
+}
+.attn-row + .attn-row::before {
+  /* inset hairline, starting under the text like a grouped list */
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 38px;
+  right: 0;
+  border-top: 1px solid var(--separator);
+}
+.attn-row:hover {
+  background: var(--fill-2);
+}
+.attn-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--label-3);
+  flex: none;
+}
+.attn-row[data-tone='orange'] .attn-dot {
+  background: var(--orange);
+}
+.attn-row[data-tone='red'] .attn-dot {
+  background: var(--red);
+}
+.attn-row[data-tone='blue'] .attn-dot {
+  background: var(--accent);
+}
+.attn-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.attn-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+.attn-sub {
+  font-size: 0.8125rem;
+  color: var(--label-2);
+}
+.attn-end {
+  font-size: 0.8125rem;
+  color: var(--label-2);
+  white-space: nowrap;
+}
+.attn-row > .vpc-ico {
+  width: 16px;
+  height: 16px;
+  color: var(--label-3);
+}
+
+/* ══════════════════════════════════════════════════
+   APP NAVIGATION (built by shared.js)
+   ≥1024px: a sidebar · below: a tab bar and a More sheet
+══════════════════════════════════════════════════ */
+@media (max-width: 700px) {
+  :root {
+    --header-h: 48px;
+  }
+}
+@media (min-width: 1024px) {
+  body {
+    padding-left: var(--sidebar-w);
+  }
+}
+@media (max-width: 1023px) {
+  :root {
+    --chrome-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
+  }
+  body {
+    padding-bottom: var(--chrome-bottom);
+  }
+}
+
+.vpc-ico {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── Sidebar ── */
+.vpc-sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 300;
+  width: var(--sidebar-w);
+  display: none;
+  flex-direction: column;
+  padding: 12px 12px 10px;
+  background: var(--chrome);
+  -webkit-backdrop-filter: var(--chrome-blur);
+  backdrop-filter: var(--chrome-blur);
+  border-right: 1px solid var(--separator);
+}
+@media (min-width: 1024px) {
+  .vpc-sidebar {
+    display: flex;
+  }
+}
+.vpc-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+  padding: 0 8px;
+  margin-bottom: 10px;
+  color: var(--label);
+  text-decoration: none;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.vpc-brand-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-sm);
+  background: var(--surface2);
+  display: grid;
+  place-items: center;
+  font-size: 0.875rem;
+  flex: none;
+}
+.vpc-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 34px;
+  padding: 0 10px;
+  margin-bottom: 6px;
+  border-radius: var(--r-sm);
+  background: var(--fill);
+  color: var(--label-2);
+  font-size: 0.875rem;
+  font-weight: 400;
+  text-align: left;
+}
+.vpc-search:hover {
+  color: var(--label);
+}
+.vpc-search:active,
+.vpc-nav-link:active,
+.vpc-account:active {
+  transform: none;
+}
+.vpc-search span {
+  flex: 1;
+}
+.vpc-search kbd {
+  font-family: inherit;
+  font-size: 0.75rem;
+  color: var(--label-3);
+}
+.vpc-nav {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.vpc-nav::-webkit-scrollbar {
+  display: none;
+}
+.vpc-nav-label {
+  padding: 14px 10px 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--label-3);
+}
+.vpc-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 34px;
+  padding: 0 10px;
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--label);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: left;
+  flex: none;
+}
+.vpc-nav-link .vpc-ico {
+  color: var(--accent);
+}
+.vpc-nav-link:hover {
+  background: var(--fill-2);
+}
+.vpc-nav-link[aria-current='page'] {
+  background: var(--fill);
+  font-weight: 600;
+}
+.vpc-nav-link.is-danger,
+.vpc-nav-link.is-danger .vpc-ico {
+  color: var(--red);
+}
+.vpc-nav-link.is-action {
+  color: var(--label-2);
+}
+.vpc-sidebar-foot {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--separator);
+}
+.vpc-account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--label);
+  font-weight: 400;
+  text-align: left;
+}
+.vpc-account:hover,
+.vpc-account[aria-expanded='true'] {
+  background: var(--fill-2);
+}
+.vpc-account > .vpc-ico {
+  width: 16px;
+  height: 16px;
+  color: var(--label-3);
+}
+.vpc-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--surface2);
+  color: var(--label);
+  display: grid;
+  place-items: center;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  flex: none;
+}
+.vpc-account-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+.vpc-account-email {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vpc-account-sync {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--label-2);
+}
+.vpc-sync-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--label-3);
+  flex: none;
+}
+html[data-sync='syncing'] .vpc-sync-dot {
+  background: var(--accent);
+  animation: vpc-pulse 1.2s infinite;
+}
+html[data-sync='synced'] .vpc-sync-dot {
+  background: var(--green);
+}
+html[data-sync='error'] .vpc-sync-dot {
+  background: var(--red);
+}
+html[data-sync='offline'] .vpc-sync-dot {
+  background: var(--yellow);
+}
+@keyframes vpc-pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* The account menu: who is signed in, above the actions */
+.vpc-menu-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px 10px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--separator);
+}
+.vpc-menu-head .vpc-avatar {
+  background: var(--fill);
+}
+.vpc-menu .vpc-ico {
+  width: 16px;
+  height: 16px;
+}
+.vpc-menu button.is-danger {
+  color: var(--red);
+}
+.vpc-menu button.is-danger:hover,
+.vpc-menu button.is-danger:focus-visible {
+  color: var(--on-accent);
+}
+
+/* ── Tab bar (phones and tablets) ── */
+.vpc-tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 900;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: var(--chrome);
+  -webkit-backdrop-filter: var(--chrome-blur);
+  backdrop-filter: var(--chrome-blur);
+  border-top: 1px solid var(--separator);
+}
+@media (min-width: 1024px) {
+  .vpc-tabbar {
+    display: none;
+  }
+}
+.vpc-tabbar-inner {
+  display: flex;
+  max-width: 600px;
+  height: var(--tabbar-h);
+  margin: 0 auto;
+}
+.vpc-tabbar a,
+.vpc-tabbar button {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 0 2px;
+  border-radius: 0;
+  background: none;
+  color: var(--label-3);
+  text-decoration: none;
+  font-size: 0.75rem;
+  font-weight: 500;
+  -webkit-tap-highlight-color: transparent;
+}
+.vpc-tabbar .vpc-ico {
+  width: 24px;
+  height: 24px;
+}
+.vpc-tabbar span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vpc-tabbar [aria-current='page'],
+.vpc-tabbar .is-current {
+  color: var(--accent);
+}
+.vpc-tabbar button:active {
+  transform: none;
+}
+
+/* ── More sheet ── */
+.vpc-sheet-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+}
+.vpc-sheet-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity var(--t-sheet) var(--ease);
+}
+.vpc-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-width: 600px;
+  max-height: min(88vh, 760px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  box-shadow: var(--shadow-pop);
+  transform: translateY(100%);
+  transition: transform var(--t-sheet) var(--ease-sheet);
+  outline: none;
+}
+.vpc-sheet::before {
+  /* grabber */
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  width: 36px;
+  height: 5px;
+  margin-left: -18px;
+  border-radius: var(--r-full);
+  background: var(--fill);
+}
+.vpc-sheet-wrap.is-open .vpc-sheet-scrim {
+  opacity: 1;
+}
+.vpc-sheet-wrap.is-open .vpc-sheet {
+  transform: none;
+}
+.vpc-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 12px 8px 22px;
+}
+.vpc-sheet-head h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.vpc-sheet-close {
+  width: 44px;
+  height: 44px;
+  min-height: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  background: none;
+  color: var(--label-2);
+}
+.vpc-sheet-close::before {
+  content: '';
+  grid-area: 1 / 1;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--fill);
+}
+.vpc-sheet-close .vpc-ico {
+  grid-area: 1 / 1;
+  position: relative;
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.4;
+}
+.vpc-sheet-body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4px 12px calc(16px + env(safe-area-inset-bottom, 0px));
+}
+.vpc-sheet .vpc-search {
+  min-height: 44px;
+  font-size: 1rem;
+}
+.vpc-sheet .vpc-search kbd {
+  display: none;
+}
+.vpc-sheet .vpc-nav {
+  overflow: visible;
+}
+.vpc-sheet .vpc-nav-link {
+  min-height: 44px;
+  font-size: 1rem;
+}
+.vpc-sheet-who {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+}
+html.vpc-sheet-open {
+  overflow: hidden;
+}
+
+/* Touch screens: 44px rows in the sidebar too (iPad in landscape) */
+@media (pointer: coarse) {
+  .vpc-search,
+  .vpc-nav-link {
+    min-height: 44px;
+  }
+}
+
+@media print {
+  .vpc-sidebar,
+  .vpc-tabbar {
+    display: none !important;
+  }
+  body {
+    padding: 0 !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   SHEETS: every dialog (.modal-overlay > .modal)
+   Desktop: a centred dialog whose Save row stays in view.
+   Phones: a sheet that slides up, Save pinned to the bottom.
+   Selectors are a step more specific than the pages' own .modal rules,
+   so every page gets the same sheet without editing each one.
+══════════════════════════════════════════════════ */
+div.modal-overlay {
+  z-index: 1000; /* above the sidebar and the phone tab bar */
+  background: rgba(0, 0, 0, 0.5);
+}
+.modal-overlay > .modal {
+  display: flex;
+  flex-direction: column;
+  max-height: min(90vh, 900px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 28px 28px 0;
+  border: none;
+  border-radius: var(--r-xl);
+  background: var(--surface);
+  box-shadow: var(--shadow-pop);
+}
+.modal-overlay > .modal > * {
+  flex: none;
+}
+.modal-overlay > .modal:not(:has(> .modal-actions)) {
+  padding-bottom: 28px;
+}
+.modal-overlay.open > .modal {
+  animation: dialog-in var(--t-move) var(--spring);
+}
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+.modal-overlay .modal h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+/* The Save row never scrolls out of sight. */
+.modal-overlay > .modal > .modal-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin: 20px -28px 0;
+  padding: 14px 28px 20px;
+  background: var(--surface);
+  border-top: 1px solid var(--separator);
+}
+
+@media (max-width: 700px) {
+  div.modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .modal-overlay > .modal {
+    position: relative;
+    inset: auto;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 92vh;
+    max-height: 92dvh;
+    padding: 24px 20px 0;
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
+  }
+  .modal-overlay.open > .modal {
+    animation: sheet-up var(--t-sheet) var(--ease-sheet);
+  }
+  .modal-overlay > .modal::before {
+    /* grabber */
+    content: '';
+    position: absolute;
+    top: 7px;
+    left: 50%;
+    width: 36px;
+    height: 5px;
+    margin-left: -18px;
+    border-radius: var(--r-full);
+    background: var(--fill);
+  }
+  .modal-overlay > .modal:not(:has(> .modal-actions)) {
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+  .modal-overlay > .modal > .modal-actions {
+    flex-direction: row;
+    align-items: stretch;
+    margin: 16px -20px 0;
+    padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+  .modal-overlay > .modal > .modal-actions > button {
+    flex: 1;
+    width: auto;
+    min-height: 50px;
+  }
+}
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+/* ── Form controls (shared.js: vpcEnhanceForms) ── */
+.stepper {
+  display: flex;
+  align-items: center;
+  border-radius: var(--r-md);
+  background: var(--fill);
+}
+.field .stepper input {
+  flex: 1;
+  min-width: 0;
+  border-color: transparent;
+  background: transparent;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+}
+.stepper input::-webkit-inner-spin-button,
+.stepper input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.step-btn {
+  flex: none;
+  width: 44px;
+  min-height: 40px;
+  padding: 0;
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--accent);
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+.step-btn:hover {
+  background: var(--fill-2);
+}
+.money {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.money::before {
+  content: '$';
+  position: absolute;
+  left: 12px;
+  color: var(--label-2);
+  pointer-events: none;
+}
+.field .money input {
+  padding-left: 24px;
+}
+.unit {
+  display: none;
+}
+.seg-field {
+  display: flex;
+}
+.seg-field button {
+  flex: 1;
+}
+.field .switch,
+.field .switch:focus {
+  width: 51px;
+  height: 31px;
+  padding: 0;
+  border: none;
+  background: var(--fill);
+  box-shadow: none;
+}
+.field .switch:checked {
+  background: var(--green);
+}
+.field .money input {
+  border-color: transparent;
+}
+.field-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.field.field-switch label {
+  margin: 0;
+}
+.field-error {
+  margin-top: 6px;
+  font-size: 0.8125rem;
+  color: var(--red);
+}
+.field [aria-invalid='true'] {
+  border-color: var(--red);
+}
+
+/* Phones: simple fields (a label and one control, tagged .field-inset by
+   shared.js) read as inset rows, label left and value right. */
+@media (max-width: 700px) {
+  .modal .field-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .modal .field-inset,
+  .modal .field-switch {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 12px;
+    min-height: 48px;
+    margin-bottom: 8px;
+    padding: 2px 4px 2px 14px;
+    border-radius: var(--r-md);
+    background: var(--fill);
+  }
+  .modal .field-switch {
+    padding-right: 10px;
+  }
+  .modal .field-inset > label,
+  .modal .field-switch > label {
+    flex: 1 1 auto;
+    margin: 0;
+    color: var(--label);
+    font-size: 1rem;
+  }
+  .modal .field-inset > :is(input, select, .money) {
+    flex: 1 1 50%;
+    min-width: 0;
+  }
+  .modal .field-inset :is(input, select),
+  .modal .field-inset :is(input, select):focus {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+    text-align: right;
+    text-align-last: right;
+  }
+  .modal .field-inset:focus-within {
+    box-shadow: 0 0 0 2px var(--ring);
+  }
+  .modal .field-inset .money::before {
+    display: none;
+  }
+  .modal .field-inset .unit {
+    display: inline;
+    color: var(--label-2);
+  }
+  .modal .field-inset > .stepper {
+    flex: none;
+    background: transparent;
+  }
+  .modal .field-inset .stepper input {
+    flex: none;
+    width: 4ch;
+    text-align: center;
+    text-align-last: center;
+  }
+  .modal .field-inset > .field-error {
+    flex-basis: 100%;
+    margin: 0 0 8px;
+  }
 }
 
 /* ── Shared table ── */
@@ -529,7 +1555,7 @@ tr:last-child td {
 /* ── Shared toast ── */
 .toast {
   position: fixed;
-  bottom: 24px;
+  bottom: calc(24px + var(--chrome-bottom));
   right: 24px;
   background: var(--surface2);
   box-shadow: var(--shadow-pop);
@@ -627,15 +1653,6 @@ main {
     gap: 6px;
     overflow: hidden;
   }
-  /* Hide text labels on injected header buttons on small screens */
-  #vpc-sync-label,
-  #vpc-sync-wrap > div:last-child > span:first-child {
-    display: none;
-  }
-  /* Compact sign-out button */
-  #vpc-sync-wrap {
-    gap: 4px;
-  }
 }
 
 /* ── Touch targets: minimum 44×44 px ── */
@@ -659,10 +1676,29 @@ main {
   }
 }
 
+/* ── Touch screens of any size: 44px targets for small controls ── */
+@media (pointer: coarse) {
+  .icon-btn,
+  .act-btn,
+  .page-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .filter-chip,
+  .range-btn {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .vpc-menu button {
+    min-height: 44px;
+    font-size: 1rem;
+  }
+}
+
 /* ── Tab bars scroll horizontally on mobile ── */
 @media (max-width: 700px) {
   .tab-bar {
-    top: 77px; /* 48px header + 29px shrunk dash-nav (measured) */
     padding: 0 8px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -763,7 +1799,7 @@ main {
   .toast {
     left: 10px;
     right: 10px;
-    bottom: 16px;
+    bottom: calc(16px + var(--chrome-bottom));
     text-align: center;
   }
 }
@@ -781,27 +1817,10 @@ main {
   }
 }
 
-/* ── Trend alerts ── */
-@media (max-width: 600px) {
-  #trend-alerts {
-    left: 8px;
-    right: 8px;
-    max-width: none;
-    top: 60px;
-  }
-}
-
-/* ── Notification permission toast ── */
-@media (max-width: 600px) {
-  #vpc-sync-wrap div[style*='max-width:150px'] {
-    max-width: 80px !important;
-  }
-}
-
 /* ── Floating Action Button (FAB) for add actions on mobile ── */
 .fab {
   position: fixed;
-  bottom: 24px;
+  bottom: calc(16px + var(--chrome-bottom));
   right: 20px;
   z-index: 500;
   width: 56px;
@@ -829,12 +1848,6 @@ main {
 
 /* ── Safe-area insets for notched phones ── */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
-  .fab {
-    bottom: calc(20px + env(safe-area-inset-bottom));
-  }
-  .toast {
-    bottom: calc(16px + env(safe-area-inset-bottom));
-  }
   footer {
     padding-bottom: calc(16px + env(safe-area-inset-bottom));
   }
@@ -869,61 +1882,6 @@ button.loading {
   width: 500px;
 }
 
-/* ── Cross-dashboard navigation bar ── */
-.dash-nav {
-  background: var(--chrome);
-  -webkit-backdrop-filter: var(--chrome-blur);
-  backdrop-filter: var(--chrome-blur);
-  border-bottom: 1px solid var(--separator);
-  padding: 0 32px;
-  display: flex;
-  align-items: center;
-  gap: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-  position: sticky;
-  top: 58px;
-  z-index: 140;
-}
-.dash-nav::-webkit-scrollbar {
-  display: none;
-}
-.dash-nav-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 10px 14px;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--text2);
-  text-decoration: none;
-  border-bottom: 2px solid transparent;
-  white-space: nowrap;
-  transition:
-    color var(--t-base) var(--ease),
-    border-color var(--t-base) var(--ease);
-  flex-shrink: 0;
-}
-.dash-nav-link:hover {
-  color: var(--text);
-}
-.dash-nav-link.active {
-  color: var(--accent);
-  font-weight: 600;
-  border-bottom-color: var(--accent);
-}
-@media (max-width: 700px) {
-  .dash-nav {
-    padding: 0 8px;
-    top: 48px;
-  }
-  .dash-nav-link {
-    padding: 6px 12px;
-    font-size: 0.75rem;
-  }
-}
-
 /* ── Smart back-link ── */
 .smart-back {
   display: none;
@@ -955,20 +1913,6 @@ button.loading {
 .empty-state .empty-icon {
   font-size: 2.8rem;
   margin-bottom: 14px;
-}
-
-/* ══════════════════════════════════════════════════
-   BUSINESS SENSEI — insight bar responsive
-══════════════════════════════════════════════════ */
-#sensei-insight-bar {
-  padding: 9px 32px;
-  font-size: 0.8125rem;
-}
-@media (max-width: 700px) {
-  #sensei-insight-bar {
-    padding: 8px 14px;
-    font-size: 0.75rem;
-  }
 }
 
 /* ── 375px (iPhone SE) breakpoints ── */
@@ -1018,10 +1962,11 @@ body {
 
 /* iOS Safari auto-zooms the viewport whenever a focused form control has a
    font-size below 16px (and then won't zoom back). Every page's inputs are
-   0.78–0.9rem, so force 16px on touch-width screens. !important is needed to
-   beat the per-page `.field input` rules. Checkbox/radio/range excluded —
+   0.78–0.9rem, so force 16px on narrow screens and on every touch screen
+   (iPads are wider than 700px but zoom too). !important is needed to beat
+   the per-page `.field input` rules. Checkbox/radio/range excluded —
    font-size doesn't apply and we don't want to touch their box sizing. */
-@media (max-width: 700px) {
+@media (max-width: 700px), (pointer: coarse) {
   input:not([type='checkbox']):not([type='radio']):not([type='range']),
   select,
   textarea {

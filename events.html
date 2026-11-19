@@ -19,9 +19,6 @@ html, body { height:auto; }
 body { display:block; overflow-x:hidden; }
 
 /* HEADER */
-header { background:var(--surface); border-bottom:1px solid var(--border); padding:0 24px; display:flex; align-items:center; justify-content:space-between; height:54px; flex-shrink:0; z-index:100; gap:12px; }
-.brand { font-size:1rem; font-weight:600; letter-spacing:-.3px; white-space:nowrap; }
-.brand span { color:var(--accent); }
 .header-right { display:flex; align-items:center; gap:8px; }
 .btn-primary { background:var(--accent-fill); color:#fff; border:none; border-radius:999px; padding:7px 16px; font-size:.8rem; font-weight:600; cursor:pointer; transition:all .2s; white-space:nowrap; box-shadow:none; }
 .btn-primary:hover { opacity:.9; transform:translateY(-1px); box-shadow:none; }
@@ -95,8 +92,8 @@ main { padding:0 0 24px; }
 .ev-meta { font-size:0.75rem; color:var(--text2); margin-top:3px; line-height:1.5; }
 .ev-edit-btn { background:none; border:none; font-size:0.75rem; color:var(--text2); cursor:pointer; padding:2px 5px; border-radius:999px; margin-top:6px; }
 .ev-edit-btn:hover { background:var(--surface2); color:var(--text); }
-.ev-signup-btn { display:inline-block; background:none; border:1px solid var(--border); font-size:0.75rem; font-weight:600; color:var(--accent2); cursor:pointer; padding:3px 7px; border-radius:999px; margin-top:6px; margin-right:4px; }
-.ev-signup-btn:hover { border-color:var(--accent2); background:rgba(191, 90, 242,.1); }
+.ev-signup-btn { display:inline-block; background:none; border:1px solid var(--border); font-size:0.75rem; font-weight:600; color:var(--accent); cursor:pointer; padding:3px 7px; border-radius:999px; margin-top:6px; margin-right:4px; }
+.ev-signup-btn:hover { border-color:transparent; background:var(--accent-tint); }
 .su-row { border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-bottom:10px; background:rgba(255,255,255,.02); }
 .su-row-name { font-size:.92rem; font-weight:600; }
 .su-row-meta { font-size:0.75rem; color:var(--text2); margin-top:4px; line-height:1.6; }
@@ -250,7 +247,6 @@ main { padding:0 0 24px; }
 @media(max-width:700px) {
   main { padding:0 12px 12px; }
   .stat-bar { grid-template-columns:repeat(3,1fr); padding:10px 12px; gap:8px; }
-  header { padding:0 12px; }
   .ev-tab-bar { padding:0 8px; overflow-x:auto; scrollbar-width:none; }
   .ev-tab-bar::-webkit-scrollbar { display:none; }
 }
@@ -267,7 +263,7 @@ main { padding:0 0 24px; }
 <body>
 
 <header>
-  <div class="brand">Events <span>&amp; Tables</span></div>
+  <div class="brand">Events &amp; Tables</div>
   <div class="header-right">
     <button class="btn-ghost" onclick="generateShareLink()" title="Generate a shareable link for vendors">📤 Share Calendar</button>
     <button class="btn-ghost" onclick="openVendorModal()">+ Vendor</button>
@@ -275,14 +271,13 @@ main { padding:0 0 24px; }
   </div>
 </header>
 
-<nav class="dash-nav"></nav>
 
 <div class="stat-bar">
   <div class="stat-cell"><div class="stat-val" id="st-events">0</div><div class="stat-lbl">Events</div></div>
   <div class="stat-cell"><div class="stat-val" id="st-vendors">0</div><div class="stat-lbl">Vendors</div></div>
-  <div class="stat-cell"><div class="stat-val" style="color:var(--accent)" id="st-booked">0</div><div class="stat-lbl">Tables Booked</div></div>
-  <div class="stat-cell"><div class="stat-val" style="color:var(--green)" id="st-collected">$0</div><div class="stat-lbl">Collected</div></div>
-  <div class="stat-cell"><div class="stat-val" style="color:var(--yellow)" id="st-outstanding">$0</div><div class="stat-lbl">Outstanding</div></div>
+  <div class="stat-cell"><div class="stat-val" id="st-booked">0</div><div class="stat-lbl">Tables Booked</div></div>
+  <div class="stat-cell"><div class="stat-val" id="st-collected">$0</div><div class="stat-lbl">Collected</div></div>
+  <div class="stat-cell"><div class="stat-val" id="st-outstanding">$0</div><div class="stat-lbl">Outstanding</div></div>
 </div>
 
 <div class="ev-tab-bar">
@@ -415,7 +410,7 @@ main { padding:0 0 24px; }
     <div class="modal-ctx" id="cl-ctx"></div>
     <div class="field">
       <label>Table Price ($)</label>
-      <input type="number" id="cl-price" min="0" step="0.01" placeholder="0.00">
+      <input type="number" id="cl-price" data-error="Enter a price (0 or more)" required min="0" step="0.01" placeholder="0.00">
     </div>
     <div class="field">
       <label>Payment Status</label>
@@ -914,6 +909,7 @@ function flipCellPaid() {
 }
 
 function saveCellEntry() {
+  if (window.vpcValidate && !vpcValidate('cell-modal')) return;
   const raw = document.getElementById('cl-price').value;
   const price = parseFloat(raw);
   if (raw === '' || isNaN(price) || price < 0) { alert('Enter a valid price (0 or more).'); return; }
@@ -1269,11 +1265,11 @@ function renderROI() {
   const totalRoi = totalTableCost > 0 ? ((totalNet / totalTableCost) * 100).toFixed(0) + '%' : '—';
   roiKpis.innerHTML = [
     { val: events.length, label: 'Events', color: 'var(--text)' },
-    { val: fmtMoney(totalTableCost), label: 'Table & Booth Costs', color: 'var(--red)' },
-    { val: fmtMoney(totalRevenue), label: 'Total Revenue', color: 'var(--accent)' },
-    { val: fmtMoney(totalNet), label: 'Net After Costs', color: totalNet >= 0 ? 'var(--green)' : 'var(--red)' },
+    { val: fmtMoney(totalTableCost), label: 'Table & Booth Costs', color: 'var(--text)' },
+    { val: fmtMoney(totalRevenue), label: 'Total Revenue', color: 'var(--text)' },
+    { val: fmtMoney(totalNet), label: 'Net After Costs', color: totalNet >= 0 ? 'var(--text)' : 'var(--red)' },
     // A name, not a number: smaller and on one line, full name on hover.
-    { val: esc(bestName), label: 'Best Event (net)', color: 'var(--accent2)',
+    { val: esc(bestName), label: 'Best Event (net)', color: 'var(--text)',
       style: 'font-size:.95rem;line-height:1.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis', title: bestName },
   ].map(k => `
     <div class="kpi">
@@ -1588,6 +1584,6 @@ if (document.readyState === 'loading') {
   loadSignups();
 }
 </script>
-<button class="fab" onclick="openEventModal()" title="Add Event" style="bottom:calc(24px + env(safe-area-inset-bottom));right:24px;position:fixed;z-index:300;background:var(--accent-fill);color:#fff;border:none;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:none;">＋</button>
+<button class="fab" onclick="openEventModal()" title="Add Event" aria-label="Add Event">＋</button>
 </body>
 </html>

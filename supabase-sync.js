@@ -479,102 +479,23 @@ const VpcSync = {
 
   // ── UI ─────────────────────────────────────────────────────────────────────
 
-  _updateIndicator(status) {
-    const el = document.getElementById('vpc-sync-dot');
-    if (!el) return;
-    const cfg = {
-      syncing: { color: '#2997ff', label: 'Syncing…', pulse: true },
-      synced: { color: '#30d158', label: 'Synced', pulse: false },
-      error: { color: '#ff6961', label: 'Sync error', pulse: false },
-      offline: { color: '#ffd60a', label: 'Offline', pulse: false },
-      idle: { color: '#636366', label: 'Cloud sync', pulse: false },
-    };
-    const c = cfg[status] || cfg.idle;
-    el.style.background = c.color;
-    el.style.animation = c.pulse ? 'vpc-pulse 1.2s infinite' : 'none';
-    const lbl = document.getElementById('vpc-sync-label');
-    if (lbl) lbl.textContent = c.label;
+  _labels: {
+    syncing: 'Syncing…',
+    synced: 'Synced',
+    error: 'Sync error',
+    offline: 'Offline',
+    idle: 'Cloud sync',
+  },
+  label() {
+    return this._labels[this._status] || this._labels.idle;
   },
 
-  injectIndicator(session) {
-    if (document.getElementById('vpc-sync-wrap')) return;
-
-    // Inject keyframe once
-    if (!document.getElementById('vpc-sync-style')) {
-      const s = document.createElement('style');
-      s.id = 'vpc-sync-style';
-      s.textContent = `@keyframes vpc-pulse{0%,100%{opacity:1}50%{opacity:.3}}`;
-      document.head.appendChild(s);
-    }
-
-    const wrap = document.createElement('div');
-    wrap.id = 'vpc-sync-wrap';
-    wrap.style.cssText = 'display:inline-flex;align-items:center;gap:8px;flex-shrink:0;';
-
-    // Sync status chip
-    const chip = document.createElement('div');
-    chip.title = 'Sync status — click to sync now';
-    chip.style.cssText = `
-      display:inline-flex;align-items:center;gap:5px;cursor:pointer;
-      padding:4px 10px;border-radius:99px;
-      border:1px solid #3a3a3c;background:#1c1c1e;
-      transition:border-color .15s;user-select:none;
-    `;
-    chip.innerHTML = `
-      <span id="vpc-sync-dot" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#636366;flex-shrink:0;"></span>
-      <span id="vpc-sync-label" style="font-size:0.75rem;color:#a1a1a6;">Cloud sync</span>
-    `;
-    chip.addEventListener('click', () => VpcSync.sync());
-    chip.addEventListener('mouseenter', () => (chip.style.borderColor = '#2997ff'));
-    chip.addEventListener('mouseleave', () => (chip.style.borderColor = '#3a3a3c'));
-
-    // User + sign-out chip
-    const userChip = document.createElement('div');
-    userChip.style.cssText = 'display:inline-flex;align-items:center;gap:6px;flex-shrink:0;';
-    const email = session?.user?.email || '';
-    if (email) {
-      const emailSpan = document.createElement('span');
-      emailSpan.style.cssText =
-        'font-size:.7rem;color:#a1a1a6;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
-      emailSpan.textContent = email;
-
-      const signOutBtn = document.createElement('button');
-      signOutBtn.textContent = 'Sign Out';
-      signOutBtn.style.cssText = `
-        background:none;border:1px solid #3a3a3c;border-radius:5px;
-        color:#a1a1a6;padding:3px 8px;font-size:.65rem;font-weight:600;
-        cursor:pointer;transition:all .15s;font-family:inherit;
-      `;
-      signOutBtn.addEventListener('mouseenter', () => {
-        signOutBtn.style.borderColor = '#ff6961';
-        signOutBtn.style.color = '#ff6961';
-      });
-      signOutBtn.addEventListener('mouseleave', () => {
-        signOutBtn.style.borderColor = '#3a3a3c';
-        signOutBtn.style.color = '#a1a1a6';
-      });
-      signOutBtn.addEventListener('click', () => VpcAuth.signOut());
-
-      userChip.appendChild(emailSpan);
-      userChip.appendChild(signOutBtn);
-    }
-
-    wrap.appendChild(chip);
-    wrap.appendChild(userChip);
-
-    const header = document.querySelector('header');
-    if (header) {
-      // Sit just left of the search button (shared.js), whichever of the two
-      // scripts gets to the header first.
-      const search = header.querySelector('#vpc-search-btn');
-      if (search) header.insertBefore(wrap, search);
-      else header.appendChild(wrap);
-    } else {
-      wrap.style.cssText += 'position:fixed;top:12px;right:16px;z-index:9999;';
-      document.body.appendChild(wrap);
-    }
-
-    this._updateIndicator('idle');
+  // The status dot and label live in the shared navigation (shared.js): the
+  // dot is coloured by CSS from data-sync on <html>; labels are kept current.
+  _updateIndicator(status) {
+    document.documentElement.dataset.sync = this._labels[status] ? status : 'idle';
+    const text = this.label();
+    document.querySelectorAll('.vpc-sync-label').forEach((el) => (el.textContent = text));
   },
 };
 
@@ -591,8 +512,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.location.href = `login.html?redirect=${here}`;
     return;
   }
-
-  VpcSync.injectIndicator(session);
 
   // Pull latest cloud data; re-render if new data arrived (fixes blank-on-new-device bug)
   const { pulled } = await VpcSync.sync();

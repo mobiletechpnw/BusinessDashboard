@@ -13,244 +13,87 @@
 <script src="supabase-sync.js" defer></script>
 <title>Business Command Center</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-
-:root {
-  --c-sales:   #2997ff;
-  --c-goals:   #bf5af2;
-  --c-events:  #30d158;
-  --c-review:  #60A5FA;
-  --c-expense: #ff6961;
-  --c-intel:   #2DD4BF;
-  --c-prod:    #ff9f0a;
-  --c-content: #ffd60a;
-  --c-inventory: #E879F9;
-  --glass: rgba(255,255,255,0.03);
-  --glass-border: rgba(255,255,255,0.08);
-}
-
-*, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  font-family:var(--font);
-  background: var(--bg);
-  color: var(--text);
-  -webkit-font-smoothing: antialiased;
-  position: relative;
-}
-
-/* ambient mesh + noise come from styles.css (shared 2026 skin) */
-header, main, footer, .hero { position: relative; z-index: 2; }
-
-/* ── HEADER ── */
-header {
-  position: sticky; top: 0; z-index: 200;
-  background: rgba(22, 22, 23,0.7);
-  backdrop-filter: blur(20px) saturate(1.3);
-  border-bottom: 1px solid var(--glass-border);
-  padding: 0 32px;
-  display: flex; align-items: center; justify-content: space-between;
-  min-height: 58px;
-}
-.brand { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; font-weight: 600; letter-spacing: -0.3px; }
+/* Today: one figure, what needs you, and what's next. */
+.brand { display: flex; align-items: center; gap: 10px; }
+/* The sidebar carries the brand on wide screens. */
+@media (min-width: 1024px) { header .brand-mark { display: none; } }
 .brand-mark {
-  width: 30px; height: 30px; border-radius: 8px;
-  background: var(--accent-fill);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.85rem; flex-shrink: 0;
-  box-shadow: none;
+  width: 30px; height: 30px; border-radius: var(--r-sm); flex-shrink: 0;
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: center; font-size: 0.85rem;
 }
-.brand-name span { color: var(--accent); }
-.header-right { display: flex; align-items: center; gap: 16px; }
-.header-date { font-size: 0.75rem; color: var(--text2); font-weight: 500; }
 
-/* ── HERO (compact — bento carries the weight now) ── */
-.hero { padding: 44px 32px 8px; }
-.hero-inner { max-width: 1160px; margin: 0 auto; }
-.hero-eyebrow {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 0.75rem; font-weight: 600; color: var(--accent);
-  background: rgba(10, 132, 255,0.08);
-  border: 1px solid rgba(10, 132, 255,0.18);
-  border-radius: 20px; padding: 4px 12px; margin-bottom: 14px;
-}
-.hero-eyebrow::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--green); }
-.hero-title {
-  font-size: clamp(1.7rem, 3.6vw, 2.6rem); font-weight: 700;
-  letter-spacing: -1.2px; line-height: 1.1; margin: 0 0 8px;
-}
-.hero-title .grad { color: var(--text2); }
-.hero-sub { font-size: 0.92rem; color: var(--text2); margin: 0 0 28px; }
+main.today { max-width: 1200px; margin: 0 auto; padding: 28px 32px 48px; }
+.today-head { margin-bottom: 24px; }
+.today-date { font-size: 0.8125rem; font-weight: 500; color: var(--text2); }
+.today-title { font-size: 2.125rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; margin-top: 2px; }
+.today-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 28px; align-items: start; }
+.today-col { display: flex; flex-direction: column; gap: 28px; min-width: 0; }
+.today-h2 { font-size: 1.0625rem; font-weight: 600; margin-bottom: 10px; }
+.today .glist { background: var(--surface); border-radius: var(--r-lg); margin: 0; }
+a.glist-row { color: var(--text); text-decoration: none; }
+a.glist-row:hover { background: var(--fill-2); }
+.glist-row > .vpc-ico { width: 16px; height: 16px; color: var(--label-3); margin-left: -6px; }
+.glist-row .glist-val { margin-left: auto; }
+.glist-val .is-red { color: var(--red); }
 
-/* ── MAIN ── */
-main { flex: 1; max-width: 1160px; margin: 0 auto; padding: 18px 24px 36px; width: 100%; }
+/* This month's sales, and the ring toward the monthly order goal */
+.hero-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 20px;
+  padding: 24px; border-radius: var(--r-lg); background: var(--surface);
+  color: var(--text); text-decoration: none;
+}
+.hero-card:hover { background: color-mix(in srgb, var(--surface) 92%, white); }
+.hero-label { font-size: 0.9375rem; color: var(--text2); }
+.hero-value { font-size: 3rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; margin: 4px 0 8px; font-variant-numeric: tabular-nums; }
+.hero-change { font-size: 0.875rem; color: var(--text2); }
+.hero-change .up { color: var(--green); }
+.hero-change .down { color: var(--red); }
+.ring-wrap { display: flex; flex-direction: column; align-items: center; flex: none; }
+.ring { position: relative; width: 112px; height: 112px; }
+.ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke-width: 12; }
+.ring .track { stroke: var(--fill); }
+.ring .fill { stroke: var(--green); stroke-linecap: round; transition: stroke-dashoffset 900ms var(--ease); }
+.ring-pct { position: absolute; inset: 0; display: grid; place-items: center; font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.ring-caption { margin-top: 8px; font-size: 0.75rem; color: var(--text2); text-align: center; white-space: nowrap; }
 
-/* ── ALERTS ── */
-.alerts-bar { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
-.alert-pill {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 14px; border-radius: 12px;
-  font-size: 0.82rem; font-weight: 500;
-  animation: slideIn 0.35s ease both;
-}
-.alert-pill.danger  { background: rgba(255, 105, 97,0.07); border: 1px solid rgba(255, 105, 97,0.25); }
-.alert-pill.warning { background: rgba(255, 214, 10,0.06);  border: 1px solid rgba(255, 214, 10,0.22); }
-.alert-pill .alert-icon { flex-shrink: 0; }
-.alert-pill .alert-text { flex: 1; color: var(--text); }
-.alert-pill a { font-size: 0.75rem; color: var(--accent); text-decoration: none; white-space: nowrap; font-weight: 600; }
-@keyframes slideIn { from { opacity:0; transform: translateY(-6px); } to { opacity:1; transform:none; } }
+/* Up next: the next show */
+.upnext { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: var(--r-lg); background: var(--surface); color: var(--text); text-decoration: none; }
+.upnext:hover { background: color-mix(in srgb, var(--surface) 92%, white); }
+.cal { width: 52px; flex: none; padding: 6px 0; border-radius: var(--r-md); background: var(--fill); text-align: center; }
+.cal-mon { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text2); }
+.cal-day { display: block; font-size: 1.375rem; font-weight: 700; line-height: 1.15; }
+.upnext-main { flex: 1; min-width: 0; }
+.upnext-title { font-size: 0.9375rem; font-weight: 600; }
+.upnext-sub, .upnext-notes { font-size: 0.8125rem; color: var(--text2); }
+.upnext-notes { margin-top: 4px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.upnext-count { font-size: 0.8125rem; color: var(--text2); white-space: nowrap; }
+.upnext > .vpc-ico { width: 16px; height: 16px; color: var(--label-3); }
 
-/* ════════════════════════════════════════════
-   2026 BENTO GRID — asymmetric modular tiles
-════════════════════════════════════════════ */
-.bento {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  grid-auto-rows: 96px;
-  gap: 14px;
-}
-.tile {
-  position: relative;
-  border-radius: 20px;
-  padding: 22px;
-  overflow: hidden;
-  text-decoration: none;
-  color: var(--text);
-  display: flex; flex-direction: column;
-  /* dark glassmorphism */
-  background:
-    var(--surface);
-  border: 1px solid var(--glass-border);
-  transition: transform 0.22s cubic-bezier(.2,.8,.3,1.1), border-color 0.22s, box-shadow 0.25s;
-  /* scroll reveal */
-  opacity: 0; transform: translateY(14px);
-}
-.tile.revealed { opacity: 1; transform: none; }
-/* Linked tiles lift with a soft shadow only (no glow borders or orbs). */
-a.tile:hover { border-color: rgba(255,255,255,0.16); }
-.tile-orb { display: none; }
+/* A tip from Sensei, quiet */
+.tip-card { padding: 18px 20px; border-radius: var(--r-lg); background: var(--surface); }
+.tip-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.tip-cat { font-size: 0.75rem; font-weight: 600; padding: 2px 9px; border-radius: var(--r-full); background: var(--fill); color: var(--text2); }
+.tip-count { font-size: 0.75rem; color: var(--text2); margin-left: auto; font-variant-numeric: tabular-nums; }
+.tip-head { font-size: 0.9375rem; font-weight: 600; margin-bottom: 4px; }
+.tip-body { font-size: 0.8125rem; color: var(--text2); line-height: 1.55; }
+.tip-actions { display: flex; gap: 8px; margin-top: 14px; }
+.sensei-btn { display: inline-flex; align-items: center; justify-content: center; background: var(--fill); color: var(--text); border: none; padding: 6px 14px; border-radius: var(--r-full); font-size: 0.8125rem; font-weight: 600; text-decoration: none; min-height: 32px; }
+.sensei-btn:hover { background: var(--surface2); }
+.sensei-btn.primary { background: var(--accent-fill); color: var(--on-accent); margin-left: auto; }
+.sensei-btn.primary:hover { background: var(--accent-fill-hover); }
+@media (pointer: coarse) { .sensei-btn { min-height: 44px; } }
 
-/* tile spans */
-.span-6x4  { grid-column: span 6;  grid-row: span 4; }
-.span-6x3  { grid-column: span 6;  grid-row: span 3; }
-.span-3x3  { grid-column: span 3;  grid-row: span 3; }
-.span-3x2  { grid-column: span 3;  grid-row: span 2; }
-.span-4x2  { grid-column: span 4;  grid-row: span 2; }
-.span-6x2  { grid-column: span 6;  grid-row: span 2; }
-.span-3x1  { grid-column: span 3;  grid-row: span 1; }
-.span-12x2 { grid-column: span 12; grid-row: span 2; }
-
-/* Sensei tile — same surface as every other tile */
-.sensei-tile { position: relative; }
-
-/* tile internals */
-.tile-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: auto; }
-.tile-icon {
-  width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
-  background: color-mix(in srgb, var(--tile-accent, var(--accent)) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--tile-accent, var(--accent)) 18%, transparent);
+@media (max-width: 900px) {
+  .today-grid { grid-template-columns: minmax(0, 1fr); }
 }
-.tile-badge {
-  font-size: 0.75rem; font-weight: 600; padding: 3px 9px; border-radius: 20px; white-space: nowrap;
-  color: var(--tile-accent, var(--accent));
-  background: color-mix(in srgb, var(--tile-accent, var(--accent)) 10%, transparent);
-  border: 1px solid color-mix(in srgb, var(--tile-accent, var(--accent)) 22%, transparent);
-}
-.tile-title { font-size: 1rem; font-weight: 600; letter-spacing: -0.3px; margin: 14px 0 5px; }
-.tile-desc  { font-size: 0.78rem; color: var(--text2); line-height: 1.55; }
-.tile-foot {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--glass-border);
-}
-.tile-arrow {
-  font-size: 0.75rem; font-weight: 600; color: var(--tile-accent, var(--accent));
-  display: inline-flex; align-items: center; gap: 5px;
-}
-.tile-arrow svg { width: 12px; height: 12px; transition: transform 0.2s; }
-a.tile:hover .tile-arrow svg { transform: translateX(3px); }
-.tile-stat { font-size: 0.75rem; color: var(--text2); }
-.tile-stat strong { color: var(--text); }
-
-/* KPI tiles (small, number-led — dopamine glow) */
-.kpi-tile { justify-content: center; padding: 18px 22px; }
-.kpi-label { font-size: 0.75rem; font-weight: 600; color: var(--text2); margin-bottom: 6px; }
-.kpi-value {
-  font-size: 1.7rem; font-weight: 700; letter-spacing: -1px; line-height: 1;
-  color: var(--tile-accent, var(--text));
-  text-shadow: 0 0 24px color-mix(in srgb, var(--tile-accent, var(--accent)) 35%, transparent);
-  font-variant-numeric: tabular-nums;
-}
-.kpi-sub { font-size: 0.75rem; color: var(--text2); margin-top: 6px; }
-.kpi-up { color: var(--green); } .kpi-down { color: var(--red); }
-
-/* widget tiles (data lists inside bento) */
-.widget-tile { padding: 20px 22px; }
-.widget-head { display: flex; align-items: center; gap: 9px; margin-bottom: 12px; }
-.widget-title { font-size: 0.75rem; font-weight: 600; color: var(--text2); }
-.widget-body { font-size: 0.8rem; color: var(--text2); overflow-y: auto; flex: 1; }
-
-/* sparkline canvas in featured tile */
-.spark-wrap { margin-top: 12px; }
-#spark { width: 100%; height: 52px; display: block; }
-
-/* sync banner */
-.sync-banner-wrap { margin-bottom: 18px; display: none; }
-.sync-banner-wrap.show { display: block; }
-.sync-banner {
-  background: rgba(10, 132, 255,0.05); border: 1px solid rgba(10, 132, 255,0.2);
-  border-radius: 20px; padding: 14px 18px;
-  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-}
-.sync-banner-text { flex: 1; min-width: 220px; }
-.sync-banner-text strong { font-size: 0.85rem; display: block; margin-bottom: 2px; }
-.sync-banner-text span { font-size: 0.75rem; color: var(--text2); }
-.btn-primary {
-  background: var(--accent-fill); color: #fff; border: none; border-radius: 999px;
-  padding: 9px 18px; font-size: 0.82rem; font-weight: 600; cursor: pointer;
-  font-family: inherit; box-shadow: none;
-  transition: all 0.18s;
-}
-.btn-primary:hover { box-shadow: none; transform: translateY(-1px); }
-.btn-ghost { background: none; border: 1px solid var(--glass-border); border-radius: 999px; color: var(--text2); padding: 8px 12px; cursor: pointer; font-family: inherit; font-size: 0.82rem; }
-
-footer {
-  text-align: center; padding: 24px; font-size: 0.75rem; color: var(--text2);
-  border-top: 1px solid var(--glass-border);
-}
-footer a { color: var(--accent); text-decoration: none; }
-
-/* ── RESPONSIVE ── */
-@media (max-width: 980px) {
-  .span-6x3, .span-3x3, .span-3x2, .span-4x2, .span-6x2, .span-3x1 { grid-column: span 6; }
-  .span-6x3 { grid-row: span 3; }
-  .span-3x2, .span-3x1 { grid-row: span 2; }
-  .span-12x2 { grid-column: span 12; }
-}
-@media (max-width: 640px) {
-  header { padding: 0 14px; }
-  .hero { padding: 30px 16px 4px; }
-  main { padding: 12px 12px 28px; }
-  .bento { grid-auto-rows: 84px; gap: 10px; }
-  .span-6x4, .span-6x3, .span-3x3, .span-3x2, .span-4x2, .span-6x2 { grid-column: span 12; }
-  .span-6x4 { grid-row: span 3; }
-  /* KPI tiles are a label and a number — one row is enough on a phone. */
-  .span-3x1 { grid-column: span 6; grid-row: span 1; }
-  .header-date { display: none; }
-  .span-12x2 { grid-column: span 12; grid-row: span 3; }
-  .kpi-value { font-size: 1.4rem; }
-  .tile { border-radius: 20px; padding: 18px; }
-  /* Let tiles grow with their content instead of a fixed row height that
-     clips text on small screens. */
-  .bento { grid-auto-rows: minmax(84px, auto); }
-  .tile { height: auto; }
-}
-@media (max-width: 420px) {
-  /* The last two-up tiles go full width on the narrowest phones. */
-  .span-3x1 { grid-column: span 12; }
+@media (max-width: 700px) {
+  main.today { padding: 18px 16px 32px; }
+  .today-title { font-size: 1.875rem; }
+  .hero-card { padding: 20px; gap: 14px; }
+  .hero-value { font-size: 2.5rem; }
+  .ring { width: 92px; height: 92px; }
 }
 </style>
 </head>
@@ -259,623 +102,317 @@ footer a { color: var(--accent); text-decoration: none; }
 <header>
   <div class="brand">
     <div class="brand-mark">🌲</div>
-    <div class="brand-name"><span>VPC</span> Command Center</div>
-  </div>
-  <div class="header-right">
-    <div class="header-date" id="hdate"></div>
+    <div class="brand-name">VPC Command Center</div>
   </div>
 </header>
 
-<nav class="dash-nav"></nav>
-
-<section class="hero">
-  <div class="hero-inner">
-    <div class="hero-eyebrow">Live · Vault &amp; Pine Collective</div>
-    <h1 class="hero-title" id="hero-greeting">Your Business, <span class="grad">Command Ready.</span></h1>
-    <p class="hero-sub" id="hero-sub">Everything that matters today, in one glance.</p>
-  </div>
-</section>
-
-<main>
-  <div class="alerts-bar" id="alerts-bar"></div>
-
-  <div class="sync-banner-wrap" id="sync-banner">
-    <div class="sync-banner">
-      <div style="font-size:1.2rem">☁️</div>
-      <div class="sync-banner-text">
-        <strong>Back up your data to the cloud</strong>
-        <span>Your data lives in this browser. Push it to Supabase so it's safe and synced.</span>
-      </div>
-      <button class="btn-primary" onclick="pushAllAndDismiss()" id="sync-btn">☁️ Push to Cloud</button>
-      <button class="btn-ghost" onclick="dismissSyncBanner()">✕</button>
-    </div>
+<main class="today">
+  <div class="today-head">
+    <div class="today-date" id="tDate"></div>
+    <h1 class="today-title" id="tGreeting">Hello</h1>
   </div>
 
-  <!-- ════ BENTO GRID ════ -->
-  <div class="bento">
-
-    <!-- FEATURED: Sales hub w/ sparkline · 6x4 — as tall as the KPIs + snapshot beside it -->
-    <a class="tile span-6x4" href="vault-pine-collective.html" style="--tile-accent:var(--c-sales);">
-      <div class="tile-orb"></div>
-      <div class="tile-head">
-        <div class="tile-icon">🌲</div>
-        <div class="tile-badge">Primary Hub</div>
-      </div>
-      <div class="tile-title">Vault &amp; Pine Collective</div>
-      <div class="tile-desc">Riser sales, filament tracking, printer payoff, jet tags, pins, and business expenses — the whole operation.</div>
-      <div class="spark-wrap"><canvas id="spark"></canvas></div>
-      <div class="tile-foot">
-        <span class="tile-arrow">Open Dashboard <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
-        <span class="tile-stat" id="vpc-stat">—</span>
-      </div>
-    </a>
-
-    <!-- KPI tiles · 3x1 each, stacked 2x2 beside featured -->
-    <div class="tile span-3x1 kpi-tile" style="--tile-accent:var(--green);">
-      <div class="kpi-label">All-Time Revenue</div>
-      <div class="kpi-value" id="kpi-rev" data-prefix="$">0</div>
-      <div class="kpi-sub" id="kpi-rev-sub"></div>
-    </div>
-    <div class="tile span-3x1 kpi-tile" style="--tile-accent:var(--accent);">
-      <div class="kpi-label">This Month</div>
-      <div class="kpi-value" id="kpi-month" data-prefix="$">0</div>
-      <div class="kpi-sub" id="kpi-month-sub"></div>
-    </div>
-    <div class="tile span-3x1 kpi-tile" style="--tile-accent:var(--accent2);">
-      <div class="kpi-label">Gross Profit</div>
-      <div class="kpi-value" id="kpi-profit" data-prefix="$">0</div>
-      <div class="kpi-sub" id="kpi-profit-sub"></div>
-    </div>
-    <div class="tile span-3x1 kpi-tile" style="--tile-accent:var(--c-goals);">
-      <div class="kpi-label">Active Goals</div>
-      <div class="kpi-value" id="kpi-goals">0</div>
-      <div class="kpi-sub" id="kpi-goals-sub"></div>
-    </div>
-    <!-- Revenue snapshot widget · 6x1 fills below KPIs -->
-    <div class="tile span-6x2 widget-tile">
-      <div class="widget-head">
-        <div class="tile-icon" style="width:30px;height:30px;font-size:0.85rem;--tile-accent:var(--green);">💰</div>
-        <div class="widget-title">Revenue Snapshot</div>
-      </div>
-      <div class="widget-body" id="revenue-snapshot">Loading…</div>
-    </div>
-
-    <!-- Goals · 3x2 -->
-    <a class="tile span-3x2" href="goals-dashboard.html" style="--tile-accent:var(--c-goals);">
-      <div class="tile-orb"></div>
-      <div class="tile-head">
-        <div class="tile-icon">🎯</div>
-        <div class="tile-badge" id="goals-badge">Goals</div>
-      </div>
-      <div class="tile-title">Goals &amp; Objectives</div>
-      <div class="tile-desc">Targets, progress, and focus for the quarter.</div>
-      <div class="tile-foot">
-        <span class="tile-arrow">View <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
-        <span class="tile-stat" id="goals-stat">—</span>
-      </div>
-    </a>
-
-    <!-- Events · 3x2 -->
-    <a class="tile span-3x2" href="events.html" style="--tile-accent:var(--c-events);">
-      <div class="tile-orb"></div>
-      <div class="tile-head">
-        <div class="tile-icon">🗓️</div>
-        <div class="tile-badge">Events</div>
-      </div>
-      <div class="tile-title">Events &amp; Tables</div>
-      <div class="tile-desc">Vendor tables, payments, and totals per event.</div>
-      <div class="tile-foot">
-        <span class="tile-arrow">Manage <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
-        <span class="tile-stat" id="events-stat">—</span>
-      </div>
-    </a>
-
-    <!-- Deliveries widget · 6x2 -->
-    <div class="tile span-6x2 widget-tile">
-      <div class="widget-head">
-        <div class="tile-icon" style="width:30px;height:30px;font-size:0.85rem;--tile-accent:var(--c-sales);">📦</div>
-        <div class="widget-title">Upcoming Deliveries</div>
-      </div>
-      <div class="widget-body" id="delivery-list">Loading…</div>
-    </div>
-
-    <!-- App tiles · 3x2, four to a row -->
-    <a class="tile span-3x2" href="review.html" style="--tile-accent:var(--c-review);">
-      <div class="tile-orb"></div>
-      <div class="tile-head">
-        <div class="tile-icon">📋</div>
-        <div class="tile-badge">Daily</div>
-      </div>
-      <div class="tile-title">Daily Review</div>
-      <div class="tile-desc">Morning briefing — alerts, budget, and revenue at a glance.</div>
-      <div class="tile-foot">
-        <span class="tile-arrow">Open Briefing <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
-      </div>
-    </a>
-
-    <a class="tile span-3x2" href="inventory.html" style="--tile-accent:var(--c-inventory);">
-      <div class="tile-orb"></div>
-      <div class="tile-head">
-        <div class="tile-icon">🃏</div>
-        <div class="tile-badge">Inventory</div>
-      </div>
-      <div class="tile-title">Card Inventory</div>
-      <div class="tile-desc">Singles, slabs, and sealed — what your stock is worth.</div>
-      <div class="tile-foot">
-        <span class="tile-arrow">Open Inventory <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
-        <span class="tile-stat" id="inventory-stat">—</span>
-      </div>
-    </a>
-
-    <!-- Expenses · 3x2 -->
-    <a class="tile span-3x2" href="expenses.html" style="--tile-accent:var(--c-expense);">
-      <div class="tile-orb"></div>
-      <div class="tile-head">
-        <div class="tile-icon">💸</div>
-        <div class="tile-badge" id="expense-badge">Expenses</div>
-      </div>
-      <div class="tile-title">Personal Expenses</div>
-      <div class="tile-desc">Spending by category, budget, recurring bills.</div>
-      <div class="tile-foot">
-        <span class="tile-arrow">Track <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
-        <span class="tile-stat" id="expense-stat">—</span>
-      </div>
-    </a>
-
-    <!-- Analytics · 3x2 -->
-    <a class="tile span-3x2" href="analytics.html" style="--tile-accent:var(--c-intel);">
-      <div class="tile-orb"></div>
-      <div class="tile-head">
-        <div class="tile-icon">📈</div>
-        <div class="tile-badge">Analytics</div>
-      </div>
-      <div class="tile-title">Business Intelligence</div>
-      <div class="tile-desc">Margins, show comparisons, monthly trends.</div>
-      <div class="tile-foot">
-        <span class="tile-arrow">View Analytics <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
-      </div>
-    </a>
-
-    <!-- Production · 3x2 -->
-    <a class="tile span-3x2" href="production.html" style="--tile-accent:var(--c-prod);">
-      <div class="tile-orb"></div>
-      <div class="tile-head">
-        <div class="tile-icon">🖨️</div>
-        <div class="tile-badge">Production</div>
-      </div>
-      <div class="tile-title">Production Hub</div>
-      <div class="tile-desc">Print queue, progress, and stock levels with low-stock alerts.</div>
-      <div class="tile-foot">
-        <span class="tile-arrow">Open Production <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
-      </div>
-    </a>
-
-    <!-- Content · 3x2 -->
-    <a class="tile span-3x2" href="content.html" style="--tile-accent:var(--c-content);">
-      <div class="tile-orb"></div>
-      <div class="tile-head">
-        <div class="tile-icon">📱</div>
-        <div class="tile-badge">Content</div>
-      </div>
-      <div class="tile-title">Content Planner</div>
-      <div class="tile-desc">Announcements, drops, and spotlights — calendar and queue.</div>
-      <div class="tile-foot">
-        <span class="tile-arrow">Open Planner <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
-      </div>
-    </a>
-
-    <!-- Instagram Growth · 3x2 -->
-    <a class="tile span-3x2" href="growth.html" style="--tile-accent:#ec4899;">
-      <div class="tile-orb"></div>
-      <div class="tile-head">
-        <div class="tile-icon">🚀</div>
-        <div class="tile-badge">Growth</div>
-      </div>
-      <div class="tile-title">Instagram Growth</div>
-      <div class="tile-desc">Track followers over time, growth pace, and progress to goal.</div>
-      <div class="tile-foot">
-        <span class="tile-arrow">Track Followers <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
-        <span class="tile-stat" id="growth-stat">—</span>
-      </div>
-    </a>
-
-    <!-- Financial Guru · 3x2 -->
-    <a class="tile span-3x2" href="guru.html" style="--tile-accent:#bf5af2;">
-      <div class="tile-orb"></div>
-      <div class="tile-head">
-        <div class="tile-icon">🥋</div>
-        <div class="tile-badge" id="guru-badge">Academy</div>
-      </div>
-      <div class="tile-title">Financial Guru</div>
-      <div class="tile-desc">25-lesson money academy, health score, milestones, and calculators.</div>
-      <div class="tile-foot">
-        <span class="tile-arrow">Enter the Dojo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></span>
-        <span class="tile-stat" id="guru-stat">—</span>
-      </div>
-    </a>
-
-    <!-- Business Sensei · 12x2 — full-width rotating tip -->
-    <div class="tile span-12x2 sensei-tile" style="--tile-accent:#bf5af2;">
-      <div class="tile-orb" style="background:radial-gradient(circle,#bf5af2 0%,transparent 70%);"></div>
-      <div style="display:flex;align-items:flex-start;gap:18px;height:100%;">
-        <div style="flex-shrink:0;text-align:center;">
-          <div style="font-size:2rem;margin-bottom:4px;">🧠</div>
-          <div style="font-size:0.75rem;font-weight:600;color:#bf5af2;white-space:nowrap;">Sensei</div>
+  <div class="today-grid">
+    <div class="today-col">
+      <a class="hero-card" href="vault-pine-collective.html#sales" aria-describedby="tRingCaption">
+        <div>
+          <div class="hero-label" id="tMonthLabel">This month so far</div>
+          <div class="hero-value" id="tMonthValue">$0</div>
+          <div class="hero-change" id="tChange"></div>
         </div>
-        <div style="flex:1;min-width:0;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-            <div id="sensei-home-cat" style="font-size:0.75rem;font-weight:600;padding:2px 9px;border-radius:20px;background:rgba(191, 90, 242,0.1);border:1px solid rgba(191, 90, 242,0.25);color:#bf5af2;">Business Tip</div>
-            <div id="sensei-home-count" style="font-size:0.75rem;color:#a1a1a6;"></div>
+        <div class="ring-wrap">
+          <div class="ring" role="img" id="tRing" aria-label="Monthly goal">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="track" cx="60" cy="60" r="52"/>
+              <circle class="fill" id="tRingFill" cx="60" cy="60" r="52" stroke-dasharray="326.73" stroke-dashoffset="326.73"/>
+            </svg>
+            <div class="ring-pct" id="tRingPct" aria-hidden="true">0%</div>
           </div>
-          <div id="sensei-home-head" style="font-size:0.95rem;font-weight:600;color:#f5f5f7;letter-spacing:-0.2px;margin-bottom:5px;"></div>
-          <div id="sensei-home-body" style="font-size:0.78rem;color:#a1a1a6;line-height:1.6;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;"></div>
+          <div class="ring-caption" id="tRingCaption"></div>
         </div>
-        <div style="flex-shrink:0;display:flex;flex-direction:column;gap:6px;justify-content:center;">
-          <button onclick="senseiHomePrev()" style="background:rgba(191, 90, 242,0.08);border:1px solid rgba(191, 90, 242,0.2);color:#bf5af2;padding:6px 12px;border-radius:8px;font-size:0.75rem;cursor:pointer;font-family:inherit;min-height:unset;transition:all .15s;" onmouseover="this.style.background='rgba(191, 90, 242,0.18)'" onmouseout="this.style.background='rgba(191, 90, 242,0.08)'">← Prev</button>
-          <button onclick="senseiHomeNext()" style="background:rgba(191, 90, 242,0.08);border:1px solid rgba(191, 90, 242,0.2);color:#bf5af2;padding:6px 12px;border-radius:8px;font-size:0.75rem;cursor:pointer;font-family:inherit;min-height:unset;transition:all .15s;" onmouseover="this.style.background='rgba(191, 90, 242,0.18)'" onmouseout="this.style.background='rgba(191, 90, 242,0.08)'">Next →</button>
-          <a href="guru.html" style="text-align:center;background:#bf5af2;color:#14101f;padding:6px 12px;border-radius:8px;font-size:0.75rem;font-weight:600;text-decoration:none;box-shadow:none;transition:all .15s;" onmouseover="this.style.boxShadow='0 4px 18px rgba(191, 90, 242,0.5)'" onmouseout="this.style.boxShadow='0 2px 12px rgba(191, 90, 242,0.3)'">🥋 Academy</a>
-        </div>
-      </div>
+      </a>
+
+      <section aria-labelledby="tAttnTitle">
+        <h2 class="today-h2" id="tAttnTitle">Needs attention</h2>
+        <div class="attn-list" id="tAttention"></div>
+      </section>
     </div>
 
+    <div class="today-col">
+      <section aria-labelledby="tNextTitle">
+        <h2 class="today-h2" id="tNextTitle">Up next</h2>
+        <div id="tUpNext"></div>
+      </section>
+
+      <section aria-labelledby="tGlanceTitle">
+        <h2 class="today-h2" id="tGlanceTitle">At a glance</h2>
+        <div class="glist" id="tGlance"></div>
+      </section>
+
+      <section class="tip-card" aria-labelledby="sensei-home-head">
+        <div class="tip-top">
+          <span class="tip-cat" id="sensei-home-cat">Tip</span>
+          <span class="tip-count" id="sensei-home-count"></span>
+        </div>
+        <div class="tip-head" id="sensei-home-head"></div>
+        <div class="tip-body" id="sensei-home-body"></div>
+        <div class="tip-actions">
+          <button class="sensei-btn" type="button" onclick="senseiHomePrev()" aria-label="Previous tip">Previous</button>
+          <button class="sensei-btn" type="button" onclick="senseiHomeNext()" aria-label="Next tip">Next</button>
+          <a class="sensei-btn primary" href="guru.html">Academy</a>
+        </div>
+      </section>
+    </div>
   </div>
 </main>
 
-<footer>
-  <strong style="color:var(--text)">Business Command Center</strong> &nbsp;·&nbsp; Vault &amp; Pine Collective &nbsp;·&nbsp;
-  <a href="vault-pine-collective.html">Dashboard</a> &nbsp;·&nbsp;
-  <a href="analytics.html">Analytics</a> &nbsp;·&nbsp;
-  <a href="review.html">Daily Review</a>
-</footer>
-
 <script>
 'use strict';
-const fmt = n => '$' + Math.abs(n).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+// ══════════════════════════════════════════════════
+//  TODAY — how am I doing, what needs me, what's next
+// ══════════════════════════════════════════════════
+const fmt = n => '$' + Math.round(Math.abs(n)).toLocaleString('en-US');
+const esc = s => VPCUtil.esc(s == null ? '' : String(s));
+const read = (key, fallback) => {
+  try { const v = JSON.parse(localStorage.getItem(key)); return v == null ? fallback : v; }
+  catch (e) { return fallback; }
+};
+const CHEVRON = '<svg class="vpc-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>';
+const pad = n => String(n).padStart(2, '0');
+const ymdOf = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const dateOf = s => new Date(String(s).slice(0, 10) + 'T00:00:00');
+const plural = (n, one, many = one + 's') => `${n} ${n === 1 ? one : many}`;
+// Orders logged before the Printed column existed: finished ones count as printed.
+const printStatusOf = o => (o.printStatus === 'printed' || o.printStatus === 'not_printed')
+  ? o.printStatus : ((o.fulfillStatus || 'completed') === 'completed' ? 'printed' : 'not_printed');
 
-const _now = new Date();
-document.getElementById('hdate').textContent =
-  _now.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+function renderToday() {
+  const now = new Date();
+  const today = new Date(now); today.setHours(0, 0, 0, 0);
+  const todayYmd = ymdOf(today);
+  const thisMonth = todayYmd.slice(0, 7);
+  const monthName = now.toLocaleDateString('en-US', { month: 'long' });
 
-// Time-based greeting + business health line in hero
-(function setGreeting() {
-  const hr = _now.getHours();
-  const greet = hr < 12 ? 'Good Morning' : hr < 17 ? 'Good Afternoon' : 'Good Evening';
-  // Try to build a health summary
-  let healthLine = 'Everything that matters today, in one glance.';
-  try {
-    const orders = JSON.parse(localStorage.getItem(VPCUtil.KEYS.orders) || '[]');
-    const thisMonth = VPCUtil.todayStr().slice(0,7); // local month — UTC rolls over early in the evening
-    const mRev = orders.filter(o=>(o.date||'').startsWith(thisMonth)).reduce((s,o)=>s+(o.salePrice||0),0);
-    const goals = JSON.parse(localStorage.getItem(VPCUtil.KEYS.goals) || '{"goals":[]}').goals || [];
-    const active = goals.filter(x=>!x.done).length;
-    const today2 = new Date(); today2.setHours(0,0,0,0);
-    const overdue = goals.filter(x=>!x.done && x.due && new Date(x.due+'T00:00:00') < today2).length;
-    const parts = [];
-    if (mRev > 0) parts.push(`$${mRev.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',')} in sales this month`);
-    if (active > 0) parts.push(`${active} active goal${active>1?'s':''}`);
-    if (overdue > 0) parts.push(`⚠ ${overdue} overdue`);
-    if (parts.length) healthLine = parts.join(' · ');
-  } catch(e) {}
-  document.getElementById('hero-greeting').innerHTML = `${greet} — <span class="grad">Let's build something.</span>`;
-  document.getElementById('hero-sub').textContent = healthLine;
-})();
+  // ── Greeting ──
+  document.getElementById('tDate').textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  const hr = now.getHours();
+  document.getElementById('tGreeting').textContent = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
 
-// ── Cloud sync banner ──
-function dismissSyncBanner() {
-  document.getElementById('sync-banner').classList.remove('show');
-  localStorage.setItem('vpc_sync_banner_dismissed', '1');
-}
-async function pushAllAndDismiss() {
-  const btn = document.getElementById('sync-btn');
-  btn.textContent = '⏳ Pushing…'; btn.disabled = true;
-  await window.VpcSync?.pushAll();
-  btn.textContent = '✓ Done!';
-  setTimeout(dismissSyncBanner, 1200);
-}
-document.addEventListener('DOMContentLoaded', () => {
-  if (!localStorage.getItem('vpc_sync_banner_dismissed')
-      && localStorage.getItem(VPCUtil.KEYS.orders)
-      && !localStorage.getItem('vpc_last_sync_at')) {
-    document.getElementById('sync-banner').classList.add('show');
+  // ── This month so far, against the same days last month ──
+  const month = VPCUtil.salesInPeriod(thisMonth);
+  const lm = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lmDays = new Date(lm.getFullYear(), lm.getMonth() + 1, 0).getDate();
+  const lmTo = `${ymdOf(lm).slice(0, 8)}${pad(Math.min(now.getDate(), lmDays))}`;
+  const prior = VPCUtil.salesBetween(ymdOf(lm), lmTo);
+  const lmName = lm.toLocaleDateString('en-US', { month: 'short' });
+  document.getElementById('tMonthLabel').textContent = `${monthName} so far`;
+  countUp(document.getElementById('tMonthValue'), month.revenue);
+  const change = document.getElementById('tChange');
+  const span = `${lmName} 1–${Math.min(now.getDate(), lmDays)}`;
+  if (prior.revenue > 0) {
+    const pct = Math.round((month.revenue - prior.revenue) / prior.revenue * 100);
+    change.innerHTML = pct === 0 ? `Level with ${span}`
+      : `<span class="${pct > 0 ? 'up' : 'down'}">${pct > 0 ? '▲' : '▼'} ${Math.abs(pct)}%</span> vs ${span}`;
+  } else {
+    change.textContent = month.revenue > 0 ? `Nothing by this point in ${lm.toLocaleDateString('en-US', { month: 'long' })}` : 'No sales yet this month';
   }
-});
 
-// ── 2026 micro-interaction: count-up animation for KPI numbers ──
-function countUp(el, target, prefix = '', duration = 900) {
-  const start = performance.now();
-  const from = 0;
-  function frame(now) {
-    const t = Math.min(1, (now - start) / duration);
-    const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
-    const val = Math.round(from + (target - from) * eased);
-    el.textContent = prefix + Math.abs(val).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    if (t < 1) requestAnimationFrame(frame);
+  // Ring: order revenue toward the monthly goal set on the Sales Hub.
+  const orders = VPCUtil.orderList();
+  const goal = parseFloat(localStorage.getItem('riser_monthly_goal_v1')) || 1000;
+  const orderRev = orders.filter(o => String(o.date).startsWith(thisMonth)).reduce((s, o) => s + (o.salePrice || 0), 0);
+  const pct = Math.max(0, Math.min(100, Math.round(orderRev / goal * 100)));
+  const C = 2 * Math.PI * 52;
+  requestAnimationFrame(() => { document.getElementById('tRingFill').style.strokeDashoffset = String(C * (1 - pct / 100)); });
+  document.getElementById('tRingPct').textContent = `${pct}%`;
+  document.getElementById('tRingCaption').textContent = `${fmt(orderRev)} of ${fmt(goal)} goal`;
+  document.getElementById('tRing').setAttribute('aria-label', `${pct}% of the ${fmt(goal)} monthly order goal`);
+
+  // ── Needs attention: ranked, one job per row, each opens the right view ──
+  const rows = [];
+  const add = (tone, title, sub, href, end = '') => rows.push({ tone, title, sub, href, end });
+
+  const toPrint = orders.filter(o => printStatusOf(o) === 'not_printed');
+  if (toPrint.length) {
+    const saved = read(VPCUtil.KEYS.orderProducts, []);
+    let hours = 0, timed = 0;
+    toPrint.forEach(o => {
+      const p = saved.find(x => x.name === o.product);
+      if (p && p.printHours) { hours += p.printHours * Math.max(1, parseInt(o.sets) || 1); timed++; }
+    });
+    add('orange', plural(toPrint.length, 'order') + ' to print',
+      timed ? `About ${Math.round(hours * 10) / 10} hours of printing` : 'Open the print queue',
+      'vault-pine-collective.html#print-queue');
   }
-  requestAnimationFrame(frame);
-}
+  const unpaid = orders.filter(o => o.payStatus === 'unpaid');
+  const partial = orders.filter(o => o.payStatus === 'partial');
+  if (unpaid.length || partial.length) {
+    const owed = unpaid.reduce((s, o) => s + (o.salePrice || 0), 0);
+    add('orange', `${plural(unpaid.length + partial.length, 'order')} waiting on payment`,
+      [unpaid.length ? `${fmt(owed)} unpaid` : '', partial.length ? `${partial.length} partly paid` : ''].filter(Boolean).join(' · '),
+      'vault-pine-collective.html#unpaid');
+  }
 
-// ── 2026 micro-interaction: staggered scroll-reveal ──
-const observer = new IntersectionObserver(entries => {
-  entries.forEach((e, i) => {
-    if (e.isIntersecting) {
-      setTimeout(() => e.target.classList.add('revealed'), (e.target.dataset.idx % 6) * 60);
-      observer.unobserve(e.target);
-    }
-  });
-}, { threshold: 0.1 });
-document.querySelectorAll('.tile').forEach((t, i) => { t.dataset.idx = i; observer.observe(t); });
+  // Deliveries from the Sales Hub's Upcoming Deliveries list
+  const week = new Date(today); week.setDate(week.getDate() + 7);
+  const pipeline = read('vpc_pipeline_v1', []);
+  const late = pipeline.filter(p => p.date && dateOf(p.date) < today);
+  const soon = pipeline.filter(p => p.date && dateOf(p.date) >= today && dateOf(p.date) <= week)
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const names = list => list.slice(0, 2).map(p => p.customer).join(', ') + (list.length > 2 ? ` and ${list.length - 2} more` : '');
+  if (late.length) add('red', `${plural(late.length, 'delivery', 'deliveries')} overdue`, names(late), 'vault-pine-collective.html#sales');
+  if (soon.length === 1) {
+    const d = dateOf(soon[0].date);
+    add('orange', `${soon[0].customer} delivery`, `Due ${d.getTime() === today.getTime() ? 'today' : d.toLocaleDateString('en-US', { weekday: 'long' })}`, 'vault-pine-collective.html#sales');
+  } else if (soon.length) {
+    add('orange', `${soon.length} deliveries this week`, names(soon), 'vault-pine-collective.html#sales');
+  }
 
-// ── Data load ──
-(function loadData() {
-  let orders = [], jtSales = [], pinSales = [], catTotals = [];
+  // Low stock: Jet Tags, Pins and your own categories
+  const lowFrom = (salesKey, invKey, limit) => {
+    const inv = read(invKey, null);
+    if (!inv) return 0;
+    const sold = {};
+    read(salesKey, []).forEach(s => (s.chars || []).forEach(c => { sold[c] = (sold[c] || 0) + (s.charQty?.[c] ?? (s.qty || 1)); }));
+    return inv.filter(c => { const left = c.purchased - (sold[c.id] || 0); return left >= 0 && left <= limit; }).length;
+  };
+  const jtLow = lowFrom(VPCUtil.KEYS.jetTags, VPCUtil.KEYS.jetTagInventory, 2);
+  if (jtLow) add('orange', 'Jet Tags running low', `${plural(jtLow, 'character')} with 2 or fewer left`, 'vault-pine-collective.html#jettags');
+  const pinLow = lowFrom(VPCUtil.KEYS.pins, VPCUtil.KEYS.pinInventory, 3);
+  if (pinLow) add('orange', 'Pins running low', `${plural(pinLow, 'character')} with 3 or fewer left`, 'vault-pine-collective.html#pins');
   try {
-    orders   = JSON.parse(localStorage.getItem(VPCUtil.KEYS.orders) || '[]');
-    jtSales  = JSON.parse(localStorage.getItem(VPCUtil.KEYS.jetTags) || '[]');
-    pinSales = JSON.parse(localStorage.getItem(VPCUtil.KEYS.pins) || '[]');
-    catTotals = VPCUtil.customCatTotals();
-  } catch(e) {}
-  const now = new Date(), thisMonth = VPCUtil.todayStr().slice(0,7);
-
-  const riserRev = orders.reduce((s,o)=>s+(o.salePrice||0),0);
-  const catRev   = catTotals.reduce((s,t)=>s+(t.revenue||0),0);
-  const totalRev = riserRev + jtSales.reduce((s,x)=>s+(x.revenue||0),0) + pinSales.reduce((s,x)=>s+(x.revenue||0),0) + catRev;
-  const riserProfit = orders.reduce((s,o)=>s+(o.salePrice||0)-(o.cogs||0),0);
-  const jtProfit    = jtSales.reduce((s,x)=>s+(x.revenue||0),0) - jtSales.reduce((s,x)=>s+(x.qty||0),0) * 0.747; // approx cost per tag
-  const pinProfit   = pinSales.reduce((s,x)=>s+(x.revenue||0),0) - pinSales.reduce((s,x)=>s+(x.qty||0),0) * 0.95;
-  const catProfit   = catTotals.reduce((s,t)=>s+(t.profit||0),0);
-  const profit      = riserProfit + jtProfit + pinProfit + catProfit;
-  // This Month counts the same product lines as All-Time (risers, Jet Tags,
-  // Pins, custom categories) — see VPCUtil.salesInPeriod.
-  const month    = VPCUtil.salesInPeriod(thisMonth);
-  const allTime  = VPCUtil.salesInPeriod('');
-  const monthRev = month.revenue;
-
-  countUp(document.getElementById('kpi-rev'),    totalRev, '$');
-  countUp(document.getElementById('kpi-month'),  monthRev, '$');
-  countUp(document.getElementById('kpi-profit'), profit,   '$');
-  document.getElementById('kpi-rev-sub').textContent   = `${allTime.count} sale${allTime.count!==1?'s':''} · all products`;
-  document.getElementById('kpi-month-sub').textContent = `${month.count} sale${month.count!==1?'s':''} this month`;
-  const allRevForMargin = totalRev;
-  const grossMarginPct = allRevForMargin > 0 ? (profit / allRevForMargin * 100).toFixed(1) : '0.0';
-  document.getElementById('kpi-profit-sub').innerHTML  = allRevForMargin <= 0
-    ? 'no sales yet'
-    : profit > 0
-      ? `<span class="kpi-up">${grossMarginPct}% margin</span>`
-      : profit === 0
-        ? 'break-even — 0% margin'
-        : `<span class="kpi-down">below cost — check pricing</span>`;
-  document.getElementById('vpc-stat').innerHTML = `<strong>${orders.length}</strong> orders`;
-
-  // Sparkline — last 8 weeks of revenue (2026: data-forward tiles)
-  try {
-    const weeks = Array.from({length:8}, (_,i) => {
-      const end = new Date(now); end.setDate(end.getDate() - i*7);
-      const start = new Date(end); start.setDate(start.getDate() - 7);
-      return orders.filter(o => { const d = new Date(o.date); return d > start && d <= end; })
-        .reduce((s,o)=>s+(o.salePrice||0),0);
-    }).reverse();
-    const c = document.getElementById('spark');
-    c.width = c.offsetWidth * 2; c.height = 104; // 2x for retina
-    const ctx = c.getContext('2d');
-    const max = Math.max(...weeks, 1), w = c.width, h = c.height, step = w/(weeks.length-1);
-    const pts = weeks.map((v,i)=>[i*step, h-8-(v/max)*(h-20)]);
-    // area fill
-    const grad = ctx.createLinearGradient(0,0,0,h);
-    grad.addColorStop(0,'rgba(10, 132, 255,0.28)'); grad.addColorStop(1,'rgba(10, 132, 255,0)');
-    ctx.beginPath(); ctx.moveTo(pts[0][0], h);
-    pts.forEach(p=>ctx.lineTo(p[0],p[1])); ctx.lineTo(w,h); ctx.closePath();
-    ctx.fillStyle = grad; ctx.fill();
-    // line
-    ctx.beginPath(); pts.forEach((p,i)=>i===0?ctx.moveTo(p[0],p[1]):ctx.lineTo(p[0],p[1]));
-    ctx.strokeStyle = '#2997ff'; ctx.lineWidth = 2.5; ctx.lineJoin='round'; ctx.stroke();
-    // end dot glow
-    const [lx,ly] = pts[pts.length-1];
-    ctx.beginPath(); ctx.arc(lx-3,ly,4,0,Math.PI*2);
-    ctx.fillStyle='#fff'; ctx.shadowBlur=12; ctx.shadowColor='#2997ff'; ctx.fill(); ctx.shadowBlur=0;
-  } catch(e) {}
+    VPCUtil.customCatTotals().forEach(t => {
+      if (t.low.length) add('orange', `${t.cat.name} running low`, `${plural(t.low.length, 'item')} with 3 or fewer left`, `vault-pine-collective.html#cat-${t.cat.id}`);
+    });
+  } catch (e) {}
 
   // Goals
-  try {
-    const g = JSON.parse(localStorage.getItem(VPCUtil.KEYS.goals) || '{"goals":[]}');
-    const today = new Date(); today.setHours(0,0,0,0);
-    const active  = (g.goals||[]).filter(x=>!x.done);
-    const done    = (g.goals||[]).filter(x=>x.done);
-    const overdue = active.filter(x=>x.due && new Date(x.due+'T00:00:00') < today);
-    countUp(document.getElementById('kpi-goals'), active.length, '', 700);
-    document.getElementById('kpi-goals-sub').innerHTML = overdue.length
-      ? `<span class="kpi-down">⚠ ${overdue.length} overdue</span>`
-      : done.length ? `<span class="kpi-up">${done.length} completed</span>` : 'none completed yet';
-    document.getElementById('goals-stat').innerHTML = `<strong>${done.length}</strong> done`;
-    if (overdue.length) {
-      const b = document.getElementById('goals-badge');
-      b.textContent = `⚠ ${overdue.length} overdue`;
-      b.style.color = 'var(--yellow)'; b.style.borderColor = 'rgba(255, 214, 10,0.3)'; b.style.background = 'rgba(255, 214, 10,0.08)';
-    }
-  } catch(e) {}
+  const goals = (read(VPCUtil.KEYS.goals, { goals: [] }).goals || []);
+  const odGoals = goals.filter(x => !x.done && x.due && dateOf(x.due) < today);
+  const soonGoals = goals.filter(x => !x.done && x.due && dateOf(x.due) >= today && dateOf(x.due) <= week);
+  if (odGoals.length) add('red', `${plural(odGoals.length, 'goal')} overdue`, odGoals[0].title || odGoals[0].name || 'Update the date or close it', 'goals-dashboard.html');
+  if (soonGoals.length) add('orange', `${plural(soonGoals.length, 'goal')} due this week`, soonGoals[0].title || soonGoals[0].name || '', 'goals-dashboard.html');
 
-  // Financial Guru — lesson progress
-  try {
-    const guru = JSON.parse(localStorage.getItem(VPCUtil.KEYS.guru) || '{"completed":{}}');
-    const doneLessons = Object.keys(guru.completed || {}).length;
-    document.getElementById('guru-stat').innerHTML = `<strong>${doneLessons}/25</strong> lessons`;
-    if (doneLessons === 0) document.getElementById('guru-badge').textContent = 'New';
-  } catch(e) {}
-
-  // Instagram Growth — current followers
-  try {
-    const g = JSON.parse(localStorage.getItem(VPCUtil.KEYS.growth) || '{"snapshots":[]}');
-    const snaps = (g.snapshots || []).slice().sort((a,b) => a.date.localeCompare(b.date));
-    const el = document.getElementById('growth-stat');
-    if (el) el.innerHTML = snaps.length ? `<strong>${(snaps[snaps.length-1].followers||0).toLocaleString()}</strong> followers` : `<strong>—</strong> followers`;
-  } catch(e) {}
-
-  // Card inventory — market value of what's on hand
-  try {
-    const items = JSON.parse(localStorage.getItem(VPCUtil.KEYS.cardInventory) || '[]');
-    // Same rule as inventory.html: a lot entry's value is already the whole lot's total.
-    const value = items.reduce((s, i) => s + (i.lot ? +i.value || 0 : Math.max(1, Math.round(+i.qty) || 1) * (+i.value || 0)), 0);
-    document.getElementById('inventory-stat').innerHTML = items.length
-      ? `<strong>${fmt(value)}</strong> value`
-      : `<strong>0</strong> items`;
-  } catch(e) {}
-
-  // Events
-  try {
-    const events = JSON.parse(localStorage.getItem(VPCUtil.KEYS.events)||'[]');
-    const today = new Date(); today.setHours(0,0,0,0);
-    const up = events.filter(e => new Date((e.start||e.date||'')+'T00:00:00') >= today);
-    document.getElementById('events-stat').innerHTML = `<strong>${up.length}</strong> upcoming`;
-  } catch(e) {}
-
-  // Expenses
-  try {
-    const prefix = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-    const exps   = JSON.parse(localStorage.getItem(VPCUtil.KEYS.expenses)||'[]');
-    const spent  = exps.filter(e=>(e.date||'').startsWith(prefix)).reduce((s,e)=>s+(e.amount||0),0);
-    const budget = JSON.parse(localStorage.getItem(VPCUtil.KEYS.expenseBudget)||'{"total":0}').total;
-    document.getElementById('expense-stat').innerHTML = `<strong>${fmt(spent)}</strong> this month`;
-    if (budget > 0 && spent > budget) {
-      const b = document.getElementById('expense-badge');
-      b.textContent = '⚠ Over Budget';
-      b.style.color = 'var(--red)'; b.style.borderColor = 'rgba(255, 105, 97,0.3)'; b.style.background = 'rgba(255, 105, 97,0.08)';
-    }
-  } catch(e) {}
-
-  // Revenue snapshot widget
-  const rsEl = document.getElementById('revenue-snapshot');
-  const jtRev  = jtSales.reduce((s,x)=>s+(x.revenue||0),0);
-  const pinRev = pinSales.reduce((s,x)=>s+(x.revenue||0),0);
-  const riserRev2 = orders.reduce((s,o)=>s+(o.salePrice||0),0);
-  if (!orders.length && !jtSales.length && !pinSales.length) {
-    rsEl.innerHTML = `<span>No data — <a href="vault-pine-collective.html" style="color:var(--accent)">open dashboard</a> to get started.</span>`;
-  } else {
-    const stats = [
-      ['Risers', fmt(riserRev2), 'var(--green)'],
-      ['Jet Tags', fmt(jtRev), 'var(--yellow)'],
-      ['Pins', fmt(pinRev), '#2dd4bf'],
-      ['Total', fmt(totalRev), 'var(--accent)'],
-    ];
-    rsEl.innerHTML = `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">` +
-      stats.map(([l,v,c]) => `<div style="background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);border-radius:12px;padding:10px 12px;">
-        <div style="font-size:1rem;font-weight:700;color:${c};letter-spacing:-0.3px">${v}</div>
-        <div style="font-size:0.75rem;color:var(--text2);margin-top:3px;">${l}</div>
-      </div>`).join('') + '</div>';
+  // Personal spending: budget, and pace against last month
+  const exps = read(VPCUtil.KEYS.expenses, []);
+  const spent = exps.filter(e => String(e.date || '').startsWith(thisMonth)).reduce((s, e) => s + (e.amount || 0), 0);
+  const budget = (read(VPCUtil.KEYS.expenseBudget, { total: 0 }).total) || 0;
+  if (budget > 0 && spent > budget) add('red', 'Over budget this month', `${fmt(spent)} of ${fmt(budget)}`, 'expenses.html');
+  else if (budget > 0 && spent > budget * 0.8) add('orange', `Budget ${Math.round(spent / budget * 100)}% used`, `${fmt(budget - spent)} left this month`, 'expenses.html');
+  const lmSpent = exps.filter(e => String(e.date || '').startsWith(ymdOf(lm).slice(0, 7))).reduce((s, e) => s + (e.amount || 0), 0);
+  const daysIn = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  if (lmSpent > 0 && spent > 0 && spent / now.getDate() * daysIn > lmSpent * 1.2) {
+    add('orange', 'Spending is running high', `On pace for ${Math.round((spent / now.getDate() * daysIn / lmSpent - 1) * 100)}% more than last month`, 'expenses.html');
   }
 
-  // Deliveries widget
-  const today = new Date(); today.setHours(0,0,0,0);
-  const upcoming = orders.filter(o => {
-    if (!o.notes) return false;
-    const m = o.notes.match(/(?:deliver|delivery|pickup|pick up)[^\d]*(\d{1,2}\/\d{1,2})/i);
-    if (!m) return false;
-    const [mo, dy] = m[1].split('/').map(Number);
-    return new Date(today.getFullYear(), mo-1, dy) >= today;
-  }).sort((a,b) => {
-    const parse = n => { const m = n.notes.match(/(\d{1,2})\/(\d{1,2})/); return m ? new Date(today.getFullYear(),m[1]-1,m[2]) : new Date('9999'); };
-    return parse(a) - parse(b);
-  }).slice(0, 4);
-  const dEl = document.getElementById('delivery-list');
-  if (!upcoming.length) { dEl.innerHTML = '<span>No upcoming deliveries found.</span>'; }
-  else dEl.innerHTML = upcoming.map(o => {
-    const m = o.notes.match(/(\d{1,2}\/\d{1,2})/);
-    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--glass-border);">
-      <div><div style="color:var(--text);font-weight:600;font-size:0.8rem">${VPCUtil.esc(o.customer)}</div>
-      <div style="font-size:0.75rem;color:var(--text2)">${VPCUtil.esc(o.product)}</div></div>
-      <div style="font-size:0.75rem;font-weight:600;color:var(--yellow);background:rgba(255, 214, 10,0.08);padding:3px 8px;border-radius:8px;white-space:nowrap;">📅 ${m?m[1]:''}</div>
-    </div>`;
-  }).join('');
-})();
+  const order = { red: 0, orange: 1, blue: 2 };
+  rows.sort((a, b) => order[a.tone] - order[b.tone]);
+  let html = rows.map(r =>
+    `<a class="attn-row" data-tone="${r.tone}" href="${r.href}"><span class="attn-dot"></span>` +
+    `<span class="attn-text"><span class="attn-title">${esc(r.title)}</span>${r.sub ? `<span class="attn-sub">${esc(r.sub)}</span>` : ''}</span>${CHEVRON}</a>`
+  ).join('');
+  // Not backed up yet: one tap pushes everything to the cloud.
+  if (!localStorage.getItem('vpc_sync_banner_dismissed') && localStorage.getItem(VPCUtil.KEYS.orders) && !localStorage.getItem('vpc_last_sync_at')) {
+    html += `<button type="button" class="attn-row" data-tone="blue" onclick="backUpNow(this)"><span class="attn-dot"></span>` +
+      `<span class="attn-text"><span class="attn-title">Back up to the cloud</span><span class="attn-sub">Your data lives in this browser until it's pushed</span></span>${CHEVRON}</button>`;
+  }
+  document.getElementById('tAttention').innerHTML = html ||
+    `<div class="attn-row"><span class="attn-dot"></span><span class="attn-text"><span class="attn-title">You're all caught up</span><span class="attn-sub">Nothing needs you right now</span></span></div>`;
 
-// ── Business Sensei home tile ──
+  // ── Up next: the next show ──
+  const events = read(VPCUtil.KEYS.events, []).map(VPCUtil.normalizeEvent)
+    .filter(e => e.start && dateOf(e.end || e.start) >= today)
+    .sort((a, b) => String(a.start).localeCompare(String(b.start)));
+  const next = events[0];
+  const upEl = document.getElementById('tUpNext');
+  if (next) {
+    const d = dateOf(next.start);
+    const days = Math.round((d - today) / 864e5);
+    const when = days <= 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days} days`;
+    upEl.innerHTML = `<a class="upnext" href="events.html">
+      <span class="cal" aria-hidden="true"><span class="cal-mon">${d.toLocaleDateString('en-US', { month: 'short' })}</span><span class="cal-day">${d.getDate()}</span></span>
+      <span class="upnext-main">
+        <span class="upnext-title">${esc(next.name || 'Show')}</span>
+        <span class="upnext-sub" style="display:block">${d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}${next.location ? ' · ' + esc(next.location) : ''}${next.approved === false ? ' · awaiting approval' : ''}</span>
+        ${next.notes ? `<span class="upnext-notes">${esc(next.notes)}</span>` : ''}
+      </span>
+      <span class="upnext-count">${when}</span>${CHEVRON}
+    </a>`;
+  } else {
+    upEl.innerHTML = `<a class="upnext" href="events.html"><span class="upnext-main"><span class="upnext-title">No shows booked</span>` +
+      `<span class="upnext-sub" style="display:block">Add your next event to see it here</span></span>${CHEVRON}</a>`;
+  }
+
+  // ── At a glance: one row per area, each a link ──
+  const jt = read(VPCUtil.KEYS.jetTags, []), pins = read(VPCUtil.KEYS.pins, []);
+  let catTotals = [];
+  try { catTotals = VPCUtil.customCatTotals(); } catch (e) {}
+  const allTime = VPCUtil.salesInPeriod('');
+  const profit = orders.reduce((s, o) => s + (o.salePrice || 0) - (o.cogs || 0), 0)
+    + jt.reduce((s, x) => s + (x.revenue || 0), 0) - jt.reduce((s, x) => s + (x.qty || 0), 0) * 0.747
+    + pins.reduce((s, x) => s + (x.revenue || 0), 0) - pins.reduce((s, x) => s + (x.qty || 0), 0) * 0.95
+    + catTotals.reduce((s, t) => s + (t.profit || 0), 0);
+  const margin = allTime.revenue > 0 ? Math.round(profit / allTime.revenue * 100) : 0;
+  const active = goals.filter(x => !x.done);
+  const items = read(VPCUtil.KEYS.cardInventory, []);
+  const invValue = items.reduce((s, i) => s + (i.lot ? +i.value || 0 : Math.max(1, Math.round(+i.qty) || 1) * (+i.value || 0)), 0);
+  const snaps = (read(VPCUtil.KEYS.growth, { snapshots: [] }).snapshots || []).slice().sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  const lessons = Object.keys(read(VPCUtil.KEYS.guru, { completed: {} }).completed || {}).length;
+  const glance = [
+    ['vault-pine-collective.html#sales', 'All-time sales', fmt(allTime.revenue)],
+    ['vault-pine-collective.html#sales', 'Gross profit', allTime.revenue > 0 ? `${fmt(profit)} · ${margin}%` : '—'],
+    ['goals-dashboard.html', 'Goals', odGoals.length ? `<span class="is-red">${odGoals.length} overdue</span> · ${active.length} active` : `${active.length} active`],
+    ['inventory.html', 'Card inventory', items.length ? fmt(invValue) : 'No items'],
+    ['expenses.html', 'Personal spending', `${fmt(spent)} this month`],
+    ['growth.html', 'Instagram', snaps.length ? `${(snaps[snaps.length - 1].followers || 0).toLocaleString('en-US')} followers` : '—'],
+    ['guru.html', 'Academy', `${lessons} of 25 lessons`],
+  ];
+  document.getElementById('tGlance').innerHTML = glance.map(([href, label, val]) =>
+    `<a class="glist-row" href="${href}"><span>${label}</span><span class="glist-val">${val}</span>${CHEVRON}</a>`).join('');
+}
+
+async function backUpNow(row) {
+  row.querySelector('.attn-sub').textContent = 'Backing up…';
+  await window.VpcSync?.pushAll();
+  localStorage.setItem('vpc_sync_banner_dismissed', '1');
+  row.remove();
+}
+
+// Numbers count up to their value; reduced motion shows them at once.
+function countUp(el, target, duration = 700) {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { el.textContent = fmt(target); return; }
+  const start = performance.now();
+  (function frame(t) {
+    const k = Math.min(1, (t - start) / duration);
+    el.textContent = fmt(target * (1 - Math.pow(1 - k, 3)));
+    if (k < 1) requestAnimationFrame(frame);
+  })(start);
+}
+
+// ── Sensei: a tip a day, with Previous / Next ──
 (function initSenseiHome() {
-  // Wait for shared.js to load SENSEI_TIPS
   function tryInit() {
     if (!window.SENSEI_TIPS) { setTimeout(tryInit, 100); return; }
-    const pool = [
-      ...window.SENSEI_TIPS.general,
-      ...window.SENSEI_TIPS.sales,
-      ...window.SENSEI_TIPS.goals,
-      ...window.SENSEI_TIPS.expenses,
-    ];
-    let idx = Math.floor(Math.random() * pool.length);
-
+    const pool = [...window.SENSEI_TIPS.general, ...window.SENSEI_TIPS.sales, ...window.SENSEI_TIPS.goals, ...window.SENSEI_TIPS.expenses];
+    // The same tip all day, a new one tomorrow.
+    let idx = Math.floor(Date.now() / 864e5) % pool.length;
     function render() {
       const t = pool[idx];
-      document.getElementById('sensei-home-cat').textContent   = t.cat;
-      document.getElementById('sensei-home-head').textContent  = t.head;
-      document.getElementById('sensei-home-body').textContent  = t.body;
-      document.getElementById('sensei-home-count').textContent = `${idx + 1} / ${pool.length}`;
+      document.getElementById('sensei-home-cat').textContent = t.cat;
+      document.getElementById('sensei-home-head').textContent = t.head;
+      document.getElementById('sensei-home-body').textContent = t.body;
+      document.getElementById('sensei-home-count').textContent = `${idx + 1} of ${pool.length}`;
     }
-
     window.senseiHomeNext = () => { idx = (idx + 1) % pool.length; render(); };
     window.senseiHomePrev = () => { idx = (idx - 1 + pool.length) % pool.length; render(); };
     render();
-    // Auto-advance every 60s
-    setInterval(window.senseiHomeNext, 60000);
   }
   tryInit();
 })();
 
-// ── Alerts ──
-(function renderAlerts() {
-  const bar = document.getElementById('alerts-bar');
-  const alerts = [];
-  const today = new Date(); today.setHours(0,0,0,0);
-  const week  = new Date(today); week.setDate(week.getDate()+7);
-  const now = new Date(), prefix = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-  try {
-    const g = JSON.parse(localStorage.getItem(VPCUtil.KEYS.goals)||'{"goals":[]}');
-    const od = (g.goals||[]).filter(x=>!x.done && x.due && new Date(x.due+'T00:00:00') < today);
-    if (od.length) alerts.push({ type:'danger', icon:'⚠️', text:`${od.length} goal${od.length>1?'s':''} overdue`, url:'goals-dashboard.html', label:'View' });
-    const soon = (g.goals||[]).filter(x=>!x.done && x.due && new Date(x.due+'T00:00:00') <= week && new Date(x.due+'T00:00:00') >= today);
-    if (soon.length) alerts.push({ type:'warning', icon:'⏰', text:`${soon.length} goal${soon.length>1?'s':''} due within 7 days`, url:'goals-dashboard.html', label:'Manage' });
-  } catch(e) {}
-  try {
-    const budget = JSON.parse(localStorage.getItem(VPCUtil.KEYS.expenseBudget)||'{"total":0}');
-    const exps   = JSON.parse(localStorage.getItem(VPCUtil.KEYS.expenses)||'[]');
-    const spent  = exps.filter(e=>(e.date||'').startsWith(prefix)).reduce((s,e)=>s+(e.amount||0),0);
-    if (budget.total > 0) {
-      const pct = spent/budget.total*100;
-      if (spent > budget.total) alerts.push({ type:'danger', icon:'💸', text:`Budget exceeded — ${fmt(spent)} of ${fmt(budget.total)}`, url:'expenses.html', label:'View' });
-      else if (pct > 80) alerts.push({ type:'warning', icon:'💸', text:`Budget ${Math.round(pct)}% used`, url:'expenses.html', label:'View' });
-    }
-  } catch(e) {}
-  // Jet Tags low stock
-  try {
-    const jt = JSON.parse(localStorage.getItem(VPCUtil.KEYS.jetTags)||'[]');
-    const jtInv = JSON.parse(localStorage.getItem(VPCUtil.KEYS.jetTagInventory)||'null');
-    if (jtInv) {
-      const soldMap = {};
-      jt.forEach(s => (s.chars||[]).forEach(c => { soldMap[c] = (soldMap[c]||0) + (s.charQty?.[c] ?? (s.qty||1)); }));
-      const low = jtInv.filter(c => (c.purchased - (soldMap[c.id]||0)) <= 2 && (c.purchased - (soldMap[c.id]||0)) >= 0);
-      if (low.length) alerts.push({ type:'warning', icon:'🏷', text:`${low.length} Jet Tag character${low.length>1?'s':''} low on stock (≤2 remaining)`, url:'vault-pine-collective.html', label:'View' });
-    }
-  } catch(e) {}
-  // Pins low stock
-  try {
-    const pins = JSON.parse(localStorage.getItem(VPCUtil.KEYS.pins)||'[]');
-    const pinInv = JSON.parse(localStorage.getItem(VPCUtil.KEYS.pinInventory)||'null');
-    if (pinInv) {
-      const soldMap = {};
-      pins.forEach(s => (s.chars||[]).forEach(c => { soldMap[c] = (soldMap[c]||0) + (s.charQty?.[c] ?? (s.qty||1)); }));
-      const low = pinInv.filter(c => (c.purchased - (soldMap[c.id]||0)) <= 3 && (c.purchased - (soldMap[c.id]||0)) >= 0);
-      if (low.length) alerts.push({ type:'warning', icon:'📌', text:`${low.length} Pin character${low.length>1?'s':''} low on stock (≤3 remaining)`, url:'vault-pine-collective.html', label:'View' });
-    }
-  } catch(e) {}
-  // Custom category low stock
-  try {
-    VPCUtil.customCatTotals().forEach(t => {
-      if (!t.low.length) return;
-      alerts.push({ type:'warning', icon:(t.cat.emoji||'').trim()||'🛍', text:`${t.low.length} ${t.cat.name} item${t.low.length>1?'s':''} low on stock (≤3 remaining)`, url:'vault-pine-collective.html', label:'View' });
-    });
-  } catch(e) {}
-  if (!alerts.length) return;
-  bar.innerHTML = alerts.map((a,i)=>`
-    <div class="alert-pill ${a.type}" style="animation-delay:${i*0.06}s">
-      <span class="alert-icon">${a.icon}</span><span class="alert-text">${a.text}</span>
-      <a href="${a.url}">${a.label} →</a>
-    </div>`).join('');
-})();
+renderToday();
+// Called by VpcSync after it pulls newer data from the cloud.
+window.renderAll = renderToday;
 </script>
 
 </body>

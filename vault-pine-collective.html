@@ -16,39 +16,24 @@
   body { min-height: 100vh; }
 
   /* Header and cross-page nav come from styles.css, same as every page. */
-  .brand { font-size: 1rem; font-weight: 600; letter-spacing: -.3px; white-space: nowrap; }
-  .brand span { color: var(--accent); }
 
-  /* ── Section row (Sales / Business Expenses / trackers) ──
-     Sits under the cross-page nav and scrolls with the page; written like
-     the shared tab bar so it reads as part of the same site. */
-  .main-nav {
-    display: flex; gap: 0; padding: 0 32px;
-    border-bottom: 1px solid var(--glass-border);
-    background: rgba(22, 22, 23, 0.7);
-    overflow-x: auto; scrollbar-width: none;
-  }
-  .main-nav::-webkit-scrollbar { display: none; }
-  .main-tab {
-    padding: 14px 20px; font-size: 0.84rem; font-weight: 600; color: var(--text2);
-    cursor: pointer; border-bottom: 2px solid transparent;
-    transition: all 0.15s; user-select: none; white-space: nowrap;
-  }
-  .main-tab:hover { color: var(--text); }
-  .main-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  /* ── Title bar: section title, the date range (Overview) and one main action ── */
+  header { gap: 12px; }
+  header .vpc-primary { display: inline-flex; align-items: center; gap: 6px; flex: none; }
+  header .vpc-primary .vpc-ico { width: 18px; height: 18px; stroke-width: 2.2; }
 
-  /* ── KPI bar (Sales) ── */
-  .kpi-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
-  .kpi { background: var(--surface); padding: 16px 22px; }
-  .kpi-val { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.5px; }
-  .kpi-label { font-size: 0.75rem; color: var(--text2); margin-top: 3px; }
+  /* ── KPI tiles (Sales › Overview): label above the number ── */
+  .kpi-bar { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .kpi { display: flex; flex-direction: column; background: var(--surface); border-radius: var(--r-lg); padding: 16px 18px; min-width: 0; }
+  .kpi-val { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kpi-label { order: -1; font-size: 0.75rem; color: var(--text2); margin-bottom: 4px; }
   .kpi-sub { font-size: 0.75rem; margin-top: 4px; }
 
   /* ── Sales sub-tab bar ── */
   .tab-bar {
     display: flex; gap: 0; border-bottom: 1px solid var(--border);
     padding: 0 32px; background: var(--surface);
-    position: sticky; top: 98px; z-index: 150;
+    position: sticky; top: var(--header-h); z-index: 150;
   }
   .tab { padding: 13px 18px; font-size: 0.83rem; font-weight: 600; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; user-select: none; }
   .tab:hover { color: var(--text); }
@@ -101,20 +86,46 @@
   .badge-none { background: var(--surface2); color: var(--text2); }
 
   /* ── Payment / Fulfillment status badges ── */
-  .badge-paid       { background: #203d28; color: var(--green); cursor: pointer; }
-  .badge-partial    { background: #453e1a; color: var(--yellow); cursor: pointer; }
-  .badge-unpaid     { background: #452323; color: var(--red); cursor: pointer; }
-  .badge-completed  { background: #203d28; color: var(--green); cursor: pointer; }
-  .badge-in_progress{ background: #192f46; color: var(--accent); cursor: pointer; }
-  .badge-printed    { background: #203d28; color: var(--green); cursor: pointer; }
-  .badge-not_printed{ background: #453e1a; color: var(--yellow); cursor: pointer; }
-  .badge-paid:hover, .badge-partial:hover, .badge-unpaid:hover,
-  .badge-completed:hover, .badge-in_progress:hover,
-  .badge-printed:hover, .badge-not_printed:hover { filter: brightness(1.25); }
+  .badge-paid       { background: var(--green-tint); color: var(--green); }
+  .badge-partial,
+  .badge-unpaid,
+  .badge-not_printed{ background: var(--orange-tint); color: var(--orange); }
+  .badge-in_progress{ background: var(--blue-tint); color: var(--blue-pill); }
+  .badge-completed,
+  .badge-printed    { background: var(--fill); color: var(--text2); }
 
   /* ── Search / filter ── */
   .toolbar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
-  .search-input { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 8px 14px; font-size: 0.82rem; outline: none; width: 240px; }
+
+  /* ── Orders: filters, an 8-column table, list rows on phones, a details sheet ── */
+  .orders-toolbar .search-input { flex: 1; min-width: 200px; }
+  .month-select { background: var(--fill); border: none; border-radius: var(--r-md); color: var(--text); padding: 8px 12px; font: inherit; font-size: 0.875rem; }
+  .seg-count { color: var(--text2); font-weight: 500; margin-left: 3px; font-variant-numeric: tabular-nums; }
+  #orderTable tbody tr[data-id] { cursor: pointer; }
+  #orderTable tbody tr[data-id]:hover { background: var(--fill-2); }
+  .cust-sub { display: block; margin-top: 2px; font-size: 0.75rem; color: var(--text2); }
+  .tfoot-row td { background: var(--surface2); font-weight: 600; }
+  .order-list { display: none; flex-direction: column; background: var(--surface); border-radius: var(--r-lg); overflow: hidden; }
+  .order-row { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 10px 14px; border-radius: 0; background: none; color: var(--text); font-weight: 400; text-align: left; }
+  .order-row:active { transform: none; background: var(--fill-2); }
+  .order-row + .order-row::before { content: ''; position: absolute; top: 0; left: 14px; right: 0; border-top: 1px solid var(--separator); }
+  .or-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .or-title, .or-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .or-title { font-size: 0.9375rem; font-weight: 600; }
+  .or-sub { font-size: 0.8125rem; color: var(--text2); }
+  .or-end { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .or-amount { font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
+  .or-flags { display: flex; gap: 4px; }
+  .order-row > .vpc-ico { width: 16px; height: 16px; color: var(--label-3); }
+  .order-empty { padding: 28px 16px; text-align: center; color: var(--text2); font-size: 0.875rem; }
+  .order-sheet .sheet-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+  .order-sheet h2 { margin: 0; overflow-wrap: anywhere; }
+  .sheet-sub { margin-top: 3px; font-size: 0.8125rem; color: var(--text2); }
+  .sheet-close { flex: none; width: 30px; height: 30px; min-height: 0; padding: 0; display: grid; place-items: center; border-radius: 50%; background: var(--fill); color: var(--text2); }
+  .sheet-close .vpc-ico { width: 14px; height: 14px; stroke-width: 2.4; }
+  .order-sheet .modal-actions .btn-danger-text { margin-right: auto; background: none; color: var(--red); padding-left: 4px; padding-right: 4px; }
+  .search-input { background: var(--fill); border: 1px solid transparent; border-radius: var(--r-md); color: var(--text); padding: 8px 14px; font-size: 0.875rem; outline: none; width: 240px; }
+  .search-input:focus { border-color: var(--accent); }
   .search-input:focus { border-color: var(--accent); }
   .filter-chip { background: var(--surface2); border: 1px solid var(--border); color: var(--text2); padding: 6px 13px; border-radius: 99px; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
   .filter-chip.active { background: var(--accent-fill); color: #fff; border-color: var(--accent); }
@@ -155,7 +166,7 @@
   .estat { background: var(--surface); padding: 14px 22px; }
   .estat-num { font-size: 1.4rem; font-weight: 600; }
   .estat-label { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
-  .exp-tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 32px; background: var(--surface); position: sticky; top: 98px; z-index: 150; }
+  .exp-tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 32px; background: var(--surface); position: sticky; top: var(--header-h); z-index: 150; }
   .exp-tab { padding: 13px 18px; font-size: 0.83rem; font-weight: 600; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; user-select: none; }
   .exp-tab:hover { color: var(--text); }
   .exp-tab.active { color: var(--red); border-bottom-color: var(--red); }
@@ -169,16 +180,16 @@
   .jtat-num { font-size: 1.4rem; font-weight: 600; }
   .jtat-label { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
   .jt-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; transition: border-color 0.15s; }
-  .jt-card:hover { border-color: #8b5cf6; }
+  .jt-card:hover { border-color: rgba(255,255,255,0.16); }
   .jt-name { font-size: 0.82rem; font-weight: 600; }
   .jt-bar-bg { background: var(--surface); border-radius: 99px; height: 4px; overflow: hidden; }
-  .jt-bar-fill { height: 100%; border-radius: 99px; background: #8b5cf6; transition: width 0.4s; }
+  .jt-bar-fill { height: 100%; border-radius: 99px; background: var(--accent); transition: width 0.4s; }
   .jt-bar-fill.sold-out { background: var(--red); }
   .jt-bar-fill.low { background: var(--yellow); }
   .jt-nums { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text2); }
   .jt-char-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 999px; color: var(--text2); padding: 7px 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; }
-  .jt-char-btn.selected { background: #2e1f4a; border-color: #8b5cf6; color: #c4b5fd; }
-  .jt-char-btn:hover { border-color: #8b5cf6; color: var(--text); }
+  .jt-char-btn.selected { background: var(--accent-tint); border-color: var(--accent); color: var(--accent); }
+  .jt-char-btn:hover { border-color: var(--accent); color: var(--text); }
 
   /* ── Pins section ── */
   .pin-stat-bar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
@@ -186,16 +197,16 @@
   .pintat-num { font-size: 1.4rem; font-weight: 600; }
   .pintat-label { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
   .pin-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; transition: border-color 0.15s; }
-  .pin-card:hover { border-color: #2dd4bf; }
+  .pin-card:hover { border-color: rgba(255,255,255,0.16); }
   .pin-name { font-size: 0.82rem; font-weight: 600; }
   .pin-bar-bg { background: var(--surface); border-radius: 99px; height: 4px; overflow: hidden; }
-  .pin-bar-fill { height: 100%; border-radius: 99px; background: #2dd4bf; transition: width 0.4s; }
+  .pin-bar-fill { height: 100%; border-radius: 99px; background: var(--accent); transition: width 0.4s; }
   .pin-bar-fill.sold-out { background: var(--red); }
   .pin-bar-fill.low { background: var(--yellow); }
   .pin-nums { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text2); }
   .pin-char-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 999px; color: var(--text2); padding: 7px 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; }
-  .pin-char-btn.selected { background: #0d2e2c; border-color: #2dd4bf; color: #99f6e4; }
-  .pin-char-btn:hover { border-color: #2dd4bf; color: var(--text); }
+  .pin-char-btn.selected { background: var(--accent-tint); border-color: var(--accent); color: var(--accent); }
+  .pin-char-btn:hover { border-color: var(--accent); color: var(--text); }
 
   /* ── Empty state ── */
   .empty { grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--text2); }
@@ -230,27 +241,20 @@
   .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
 
   /* ── Toast ── */
-  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--accent); color: var(--text); padding: 11px 18px; border-radius: 8px; font-size: 0.83rem; z-index: 600; transform: translateY(80px); opacity: 0; transition: all 0.25s; }
+  .toast { position: fixed; bottom: calc(24px + var(--chrome-bottom)); right: 24px; background: var(--surface); border: 1px solid var(--accent); color: var(--text); padding: 11px 18px; border-radius: 8px; font-size: 0.83rem; z-index: 600; transform: translateY(80px); opacity: 0; transition: all 0.25s; }
   .toast.show { transform: translateY(0); opacity: 1; }
 
-  /* ── Date range filter bar ── */
-  .range-bar { display: flex; align-items: center; gap: 6px; padding: 10px 24px; border-bottom: 1px solid var(--border); background: var(--surface); flex-wrap: wrap; }
-  .range-btn { background: transparent; border: 1px solid var(--border); color: var(--text2); font-size: 0.75rem; font-weight: 600; padding: 5px 12px; border-radius: 999px; cursor: pointer; transition: all 0.15s; }
-  .range-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .range-btn.active { background: var(--accent-fill); color: #fff; border-color: var(--accent); }
-  .range-label { font-size: 0.75rem; color: var(--text2); margin-right: 4px; }
-
   @media (max-width: 700px) {
-    .main-nav { padding: 0 8px; }
-    .main-tab { padding: 12px 14px; font-size: 0.78rem; }
-    /* Sticky offset under the shared mobile header + nav (see styles.css) */
-    .tab-bar { top: 77px; padding: 0 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-wrap: nowrap; }
+    .tab-bar { padding: 0 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-wrap: nowrap; }
     .tab-bar::-webkit-scrollbar { display: none; }
     .tab { white-space: nowrap; padding: 12px 14px; font-size: 0.78rem; }
-    .exp-tab-bar { top: 77px; padding: 0 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-wrap: nowrap; }
+    .exp-tab-bar { padding: 0 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-wrap: nowrap; }
     .exp-tab-bar::-webkit-scrollbar { display: none; }
     .exp-tab { white-space: nowrap; }
-    .kpi-bar { grid-template-columns: repeat(2, 1fr); }
+    .kpi-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .kpi:last-child { grid-column: span 2; }
+    .kpi { padding: 12px 14px; }
+    .kpi-val { font-size: 1.25rem; }
     .jt-stat-bar, .pin-stat-bar, .exp-stat-bar { grid-template-columns: repeat(2, 1fr); }
     .grid-2, .grid-3 { grid-template-columns: 1fr; }
     #filamentKpis { grid-template-columns: repeat(2, 1fr) !important; }
@@ -259,9 +263,21 @@
     table { font-size: 0.75rem; }
     .card { padding: 14px; }
     .toolbar { flex-direction: column; gap: 8px; }
+    .orders-toolbar { align-items: stretch; }
+    .orders-toolbar .seg button { flex: 1; }
+    #orderTableCard { display: none; }
+    .order-list { display: flex; }
     .search-input { width: 100%; }
     .btn-primary, .btn-ghost { padding: 8px 14px; font-size: 0.78rem; min-height: 44px; }
     #backup-banner { width: 92%; flex-wrap: wrap; }
+    /* Phones: the range gets its own row under the title; the main action
+       is a + button, like a navigation bar. */
+    header { flex-wrap: wrap; row-gap: 0; }
+    #rangeSeg { order: 3; flex: 1 0 100%; margin-bottom: 8px; }
+    #rangeSeg button { flex: 1; padding: 0 4px; }
+    header .vpc-primary { width: 44px; height: 44px; min-height: 44px; padding: 0; justify-content: center; background: none; color: var(--accent); margin-right: -10px; }
+    header .vpc-primary span { display: none; }
+    header .vpc-primary .vpc-ico { width: 24px; height: 24px; }
   }
   @media (max-width: 480px) {
     .modal { position: fixed; bottom: 0; left: 0; right: 0; width: 100% !important; max-width: 100% !important; border-radius: 28px 28px 0 0; max-height: 85vh; }
@@ -275,61 +291,24 @@
 <body>
 
 <header>
-  <div class="brand">Sales <span>Hub</span></div>
+  <div class="title-stack">
+    <div class="brand" id="vpcTitle">Sales</div>
+    <div class="title-sub" id="vpcSub"></div>
+  </div>
+  <div class="seg" id="rangeSeg" aria-label="Date range">
+    <button data-value="all" aria-checked="true">All</button>
+    <button data-value="ytd">YTD</button>
+    <button data-value="6m">6M</button>
+    <button data-value="3m">3M</button>
+    <button data-value="30d">30D</button>
+    <button data-value="7d">7D</button>
+  </div>
+  <button class="btn-primary vpc-primary" id="vpcPrimary" type="button" onclick="vpcPrimaryAction()"><svg class="vpc-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span id="vpcPrimaryLabel">New Order</span></button>
 </header>
 
-<nav class="dash-nav"></nav>
-
-<!-- Section row: switches between the Sales Hub's own sections -->
-<div class="main-nav">
-  <div class="main-tab active" data-section="sales">Sales</div>
-  <div class="main-tab" data-section="expenses" title="Business costs — separate from the Personal Expenses page">Business Expenses</div>
-  <div class="main-tab" data-section="jettags">🏷 Jet Tags</div>
-  <div class="main-tab" data-section="pins">📌 Pins</div>
-  <div class="main-tab" data-section="backoffice">⚙ Back Office</div>
-  <div class="main-tab" data-action="newcat" title="Create a new product category" style="color:var(--text2)">＋ New Category</div>
-</div>
 
 <!-- ══════════════════════════════════════════ SALES SECTION ══ -->
 <div class="section active" id="section-sales">
-
-  <div class="range-bar" id="sales-range-bar">
-    <span class="range-label">Range:</span>
-    <button class="range-btn active" data-range="all">All Time</button>
-    <button class="range-btn" data-range="ytd">YTD</button>
-    <button class="range-btn" data-range="6m">6 Months</button>
-    <button class="range-btn" data-range="3m">3 Months</button>
-    <button class="range-btn" data-range="30d">30 Days</button>
-    <button class="range-btn" data-range="7d">7 Days</button>
-  </div>
-
-  <div class="kpi-bar">
-    <div class="kpi">
-      <div class="kpi-val green" id="kpiRevenue">—</div>
-      <div class="kpi-label">Total Revenue</div>
-      <div class="kpi-sub" id="kpiRevSub" style="color:var(--text2)"></div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-val" style="color:var(--accent)" id="kpiProfit">—</div>
-      <div class="kpi-label">Gross Profit</div>
-      <div class="kpi-sub" id="kpiProfitSub" style="color:var(--text2)"></div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-val" style="color:var(--yellow)" id="kpiRoi">—</div>
-      <div class="kpi-label">Gross Margin</div>
-      <div class="kpi-sub" id="kpiRoiSub" style="color:var(--text2)"></div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-val" id="kpiOrders">—</div>
-      <div class="kpi-label">Orders</div>
-      <div class="kpi-sub" id="kpiOrdersSub" style="color:var(--text2)"></div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-val" id="kpiCustomers">—</div>
-      <div class="kpi-label">Avg Order Value</div>
-      <div class="kpi-sub" id="kpiCustSub" style="color:var(--text2)"></div>
-    </div>
-  </div>
 
   <div class="tab-bar">
     <div class="tab active" data-tab="overview">Overview</div>
@@ -343,9 +322,39 @@
   <main>
     <!-- Overview -->
     <div class="panel active" id="panel-overview">
-      <div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px">
-        <div class="filter-chip" id="toPrintLink" style="display:none;margin-right:auto" title="Show the orders that still need printing" onclick="showPrintQueue()"></div>
-        <button class="btn-primary" onclick="openAddOrder()">+ Log New Order</button>
+      <div class="kpi-bar">
+        <div class="kpi">
+          <div class="kpi-val" id="kpiRevenue">—</div>
+          <div class="kpi-label">Total Revenue</div>
+          <div class="kpi-sub" id="kpiRevSub" style="color:var(--text2)"></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val" id="kpiProfit">—</div>
+          <div class="kpi-label">Gross Profit</div>
+          <div class="kpi-sub" id="kpiProfitSub" style="color:var(--text2)"></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val" id="kpiRoi">—</div>
+          <div class="kpi-label">Gross Margin</div>
+          <div class="kpi-sub" id="kpiRoiSub" style="color:var(--text2)"></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val" id="kpiOrders">—</div>
+          <div class="kpi-label">Orders</div>
+          <div class="kpi-sub" id="kpiOrdersSub" style="color:var(--text2)"></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val" id="kpiCustomers">—</div>
+          <div class="kpi-label">Avg Order Value</div>
+          <div class="kpi-sub" id="kpiCustSub" style="color:var(--text2)"></div>
+        </div>
+      </div>
+      <div class="attn-list" id="toPrintList" hidden style="margin-bottom:20px">
+        <button type="button" class="attn-row" data-tone="orange" onclick="showPrintQueue()">
+          <span class="attn-dot"></span>
+          <span class="attn-text"><span class="attn-title" id="toPrintTitle"></span><span class="attn-sub" id="toPrintSub"></span></span>
+          <svg class="vpc-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </button>
       </div>
       <div class="card" style="margin-bottom:20px">
         <div class="card-title">Monthly Revenue &amp; Profit</div>
@@ -372,29 +381,29 @@
 
     <!-- Orders -->
     <div class="panel" id="panel-orders">
-      <div class="toolbar">
-        <input class="search-input" id="orderSearch" placeholder="Search customer, product, referral…" oninput="orderPage=0; renderOrderTable()">
-        <div id="orderMonthFilters" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
-        <div id="orderPrintFilter"></div>
+      <div class="toolbar orders-toolbar">
+        <div class="seg" id="orderFilterSeg" aria-label="Show orders">
+          <button data-value="all" aria-checked="true">All</button>
+          <button data-value="notprinted">Not printed<span class="seg-count" id="cntNotPrinted"></span></button>
+          <button data-value="unpaid">Unpaid<span class="seg-count" id="cntUnpaid"></span></button>
+        </div>
+        <input class="search-input" id="orderSearch" type="search" placeholder="Search orders" aria-label="Search orders" oninput="orderPage=0; renderOrderTable()">
+        <select class="month-select" id="orderMonth" aria-label="Month" onchange="setMonthFilter(this.value)"></select>
       </div>
-      <div class="card">
+      <div class="order-list" id="orderList"></div>
+      <div class="card" id="orderTableCard">
         <div class="table-wrap">
           <table id="orderTable">
             <thead>
               <tr>
-                <th onclick="sortTable('date')">Date ↕</th>
-                <th onclick="sortTable('customer')">Customer ↕</th>
-                <th onclick="sortTable('product')">Product</th>
-                <th class="num" onclick="sortTable('salePrice')">Sale ↕</th>
-                <th class="num" onclick="sortTable('cogs')">COGS ↕</th>
-                <th class="num" onclick="sortTable('profit')">Profit ↕</th>
-                <th class="num" onclick="sortTable('roi')">ROI ↕</th>
-                <th>Referred By</th>
-                <th>Notes</th>
+                <th onclick="sortTable('date')" style="cursor:pointer">Date ↕</th>
+                <th onclick="sortTable('customer')" style="cursor:pointer">Customer ↕</th>
+                <th class="num" onclick="sortTable('sets')" style="cursor:pointer">Qty ↕</th>
+                <th class="num" onclick="sortTable('salePrice')" style="cursor:pointer">Sale ↕</th>
+                <th class="num" onclick="sortTable('profit')" style="cursor:pointer">Profit ↕</th>
                 <th onclick="sortTable('payStatus')" style="cursor:pointer">Payment ↕</th>
                 <th onclick="sortTable('printStatus')" style="cursor:pointer">Printed ↕</th>
                 <th onclick="sortTable('fulfillStatus')" style="cursor:pointer">Status ↕</th>
-                <th style="text-align:right">Actions</th>
               </tr>
             </thead>
             <tbody id="orderTbody"></tbody>
@@ -485,10 +494,6 @@
 
     <!-- Filament -->
     <div class="panel" id="panel-filament">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
-        <div></div>
-        <button class="btn-primary" onclick="openAddFilament()">+ Log Purchase</button>
-      </div>
       <div id="filamentKpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;border:1px solid var(--border)"></div>
       <div class="grid-2" style="margin-bottom:20px">
         <div class="card">
@@ -537,8 +542,8 @@
   <div class="modal" style="width:420px">
     <h2 id="pcModalTitle">Apply Credit</h2>
     <div class="field-row">
-      <div class="field"><label>Date</label><input type="date" id="pcDate"></div>
-      <div class="field"><label>Amount ($)</label><input type="number" id="pcAmount" placeholder="0.00" step="0.01" min="0.01"></div>
+      <div class="field"><label>Date</label><input type="date" id="pcDate" data-error="Pick a date" required></div>
+      <div class="field"><label>Amount ($)</label><input type="number" id="pcAmount" data-error="Enter the amount" required placeholder="0.00" step="0.01" min="0.01"></div>
     </div>
     <div class="field"><label>Notes (optional)</label><input type="text" id="pcNotes" placeholder="e.g. May profit allocation, lump sum…"></div>
     <div class="modal-actions">
@@ -553,7 +558,7 @@
   <div class="modal">
     <h2>Log Filament Purchase</h2>
     <div class="field-row">
-      <div class="field"><label>Date</label><input type="date" id="afDate"></div>
+      <div class="field"><label>Date</label><input type="date" id="afDate" data-error="Pick a date" required></div>
       <div class="field">
         <label>Brand</label>
         <select id="afBrand">
@@ -566,7 +571,7 @@
     </div>
     <div class="field-row">
       <div class="field"><label>Qty (rolls)</label><input type="number" id="afQty" value="4" min="1"></div>
-      <div class="field"><label>Total Cost ($)</label><input type="number" id="afTotal" placeholder="45.00" step="0.01"></div>
+      <div class="field"><label>Total Cost ($)</label><input type="number" id="afTotal" data-error="Enter the total cost" min="0" required placeholder="45.00" step="0.01"></div>
     </div>
     <div class="field"><label>Notes (optional)</label><input type="text" id="afNotes" placeholder="PLA, Matte, bad batch, etc."></div>
     <div class="modal-actions">
@@ -585,11 +590,11 @@
       <div class="estat-label">This Month Spend</div>
     </div>
     <div class="estat">
-      <div class="estat-num" style="color:var(--accent)" id="eskpiFixed">$0.00</div>
+      <div class="estat-num" id="eskpiFixed">$0.00</div>
       <div class="estat-label">Fixed Costs</div>
     </div>
     <div class="estat">
-      <div class="estat-num" style="color:var(--yellow)" id="eskpiVar">$0.00</div>
+      <div class="estat-num" id="eskpiVar">$0.00</div>
       <div class="estat-label">Variable Costs</div>
     </div>
     <div class="estat">
@@ -610,9 +615,6 @@
 
     <!-- Overview -->
     <div class="exp-panel active" id="exppanel-overview">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:20px">
-        <button class="btn-primary" style="background:var(--red)" onclick="openExpModal()">+ Add Expense</button>
-      </div>
       <div class="grid-2" style="margin-bottom:20px">
         <div class="card">
           <div class="card-title">Spending by Category</div>
@@ -624,10 +626,7 @@
         </div>
       </div>
       <div class="card">
-        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
-          <span>Recent Expenses</span>
-          <button class="btn-primary" style="background:var(--red);padding:6px 13px;font-size:.78rem" onclick="openExpModal()">+ Add</button>
-        </div>
+        <div class="card-title">Recent Expenses</div>
         <div id="expRecentList"></div>
       </div>
     </div>
@@ -637,7 +636,6 @@
       <div class="toolbar">
         <input class="search-input" id="expSearch" placeholder="Search description, category…" oninput="renderExpTable()">
         <div id="expMonthFilters" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
-        <button class="btn-primary" style="background:var(--red);margin-left:auto" onclick="openExpModal()">+ Add Expense</button>
       </div>
       <div class="card">
         <div class="table-wrap">
@@ -660,9 +658,6 @@
 
     <!-- By Category -->
     <div class="exp-panel" id="exppanel-categories">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:20px">
-        <button class="btn-primary" style="background:var(--red)" onclick="openExpModal()">+ Add Expense</button>
-      </div>
       <div class="exp-cat-grid" id="expCatGrid"></div>
     </div>
 
@@ -702,16 +697,43 @@
   </div>
 </div>
 
+<!-- Order details: opens from a row (a sheet on phones). Statuses apply at once. -->
+<div class="modal-overlay" id="orderSheet">
+  <div class="modal order-sheet" role="dialog" aria-modal="true" aria-labelledby="osTitle">
+    <div class="sheet-head">
+      <div style="min-width:0"><h2 id="osTitle">Order</h2><div class="sheet-sub" id="osSub"></div></div>
+      <button type="button" class="sheet-close" onclick="closeOrderSheet()" aria-label="Close"><svg class="vpc-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <div class="glist" id="osFacts"></div>
+    <div class="glist-label">Status</div>
+    <div class="glist">
+      <div class="glist-row"><span>Payment</span>
+        <div class="seg" id="osPay" aria-label="Payment"><button data-value="paid">Paid</button><button data-value="partial">Partial</button><button data-value="unpaid">Unpaid</button></div>
+      </div>
+      <div class="glist-row"><label for="osPrinted">Printed</label>
+        <input type="checkbox" class="switch" id="osPrinted" onchange="sheetSet('print', this.checked ? 'printed' : 'not_printed')">
+      </div>
+      <div class="glist-row"><span>Order</span>
+        <div class="seg" id="osFill" aria-label="Order status"><button data-value="in_progress">In progress</button><button data-value="completed">Done</button></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-danger-text" onclick="deleteFromSheet()">Delete</button>
+      <button type="button" class="btn-primary" onclick="editFromSheet()">Edit Order</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="addOrderModal">
   <div class="modal">
-    <h2 id="aoTitle">Log New Order</h2>
+    <h2 id="aoTitle">New Order</h2>
     <div class="field-row">
-      <div class="field"><label>Date</label><input type="date" id="aoDate"></div>
-      <div class="field"><label>Customer Name</label><input type="text" id="aoCustomer" placeholder="e.g. Mike - CardStore"></div>
+      <div class="field"><label for="aoCustomer">Customer</label><input type="text" id="aoCustomer" data-error="Enter the customer's name" required placeholder="e.g. Mike - CardStore" autocomplete="off"></div>
+      <div class="field"><label for="aoDate">Date</label><input type="date" id="aoDate" data-error="Pick the order date" required></div>
     </div>
     <div class="field-row">
       <div class="field">
-        <label>Product / Description</label>
+        <label for="aoProduct">Product</label>
         <select id="aoProduct">
           <option>18 Large Risers + 9 End Cap Pairs</option>
           <option>Large Risers Only</option>
@@ -726,45 +748,43 @@
           <button type="button" class="btn-ghost" id="aoEditProduct" style="font-size:0.75rem;padding:5px 10px;margin-top:6px;display:none" onclick="openOrderProductModal(document.getElementById('aoProduct').value)">Edit Product</button>
         </div>
       </div>
-      <div class="field"><label>Qty / Sets</label><input type="number" id="aoQty" value="1" min="1"></div>
+      <div class="field"><label for="aoQty">Quantity</label><input type="number" id="aoQty" data-stepper value="1" min="1"></div>
     </div>
     <div class="field-row">
-      <div class="field"><label>Sale Price ($)</label><input type="number" id="aoSale" placeholder="90.00" step="0.01"></div>
-      <div class="field"><label>COGS ($)</label><input type="number" id="aoCogs" placeholder="21.33" step="0.01" value="21.33"></div>
+      <div class="field"><label for="aoSale">Sale price ($)</label><input type="number" id="aoSale" data-error="Enter the sale price" min="0" required placeholder="90.00" step="0.01"></div>
+      <div class="field"><label for="aoCogs">Cost ($)</label><input type="number" id="aoCogs" min="0" placeholder="21.33" step="0.01" value="21.33"></div>
     </div>
     <div class="field-row">
-      <div class="field"><label>Referred By</label><input type="text" id="aoRef" placeholder="Mike / Me / Instagram"></div>
-      <div class="field"><label>Notes</label><input type="text" id="aoNotes" placeholder="Delivery date, special requests…"></div>
+      <div class="field"><label for="aoRef">Referred by</label><input type="text" id="aoRef" placeholder="Mike / Me / Instagram"></div>
+      <div class="field"><label for="aoNotes">Notes</label><input type="text" id="aoNotes" placeholder="Delivery date, special requests…"></div>
+    </div>
+    <div class="field">
+      <label>Payment</label>
+      <select id="aoPayStatus" data-seg>
+        <option value="paid">Paid</option>
+        <option value="partial">Partial</option>
+        <option value="unpaid">Unpaid</option>
+      </select>
     </div>
     <div class="field-row">
       <div class="field">
-        <label>Payment Status</label>
-        <select id="aoPayStatus">
-          <option value="paid">✅ Paid</option>
-          <option value="partial">🟡 Partial</option>
-          <option value="unpaid">🔴 Unpaid</option>
+        <label>Order</label>
+        <select id="aoFulfillStatus" data-seg>
+          <option value="in_progress">In progress</option>
+          <option value="completed">Done</option>
         </select>
       </div>
       <div class="field">
-        <label>Fulfillment Status</label>
-        <select id="aoFulfillStatus">
-          <option value="completed">✅ Completed</option>
-          <option value="in_progress">🔵 In Progress</option>
-        </select>
-      </div>
-    </div>
-    <div class="field-row">
-      <div class="field">
-        <label>Print Status</label>
-        <select id="aoPrintStatus">
-          <option value="not_printed">⏳ Not Printed</option>
-          <option value="printed">🖨️ Printed</option>
+        <label>Printed</label>
+        <select id="aoPrintStatus" data-switch="printed">
+          <option value="not_printed">Not printed</option>
+          <option value="printed">Printed</option>
         </select>
       </div>
     </div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeAddOrder()">Cancel</button>
-      <button class="btn-primary" id="aoSaveBtn" onclick="saveNewOrder()">Save Order</button>
+      <button class="btn-primary" id="aoSaveBtn" onclick="saveNewOrder()">Add Order</button>
     </div>
   </div>
 </div>
@@ -774,9 +794,9 @@
   <div class="modal" style="width:480px">
     <h2 id="opTitle">New Product</h2>
     <div style="font-size:0.76rem;color:var(--text2);margin:-6px 0 14px">Saved products appear in the order form's product list and fill in Sale Price and COGS for you (per unit × quantity).</div>
-    <div class="field"><label>Product Name</label><input type="text" id="opName" maxlength="60" placeholder="e.g. KickStands"></div>
+    <div class="field"><label>Product Name</label><input type="text" id="opName" data-error="Give the product a name" required maxlength="60" placeholder="e.g. KickStands"></div>
     <div class="field-row">
-      <div class="field"><label>Cost per Unit ($)</label><input type="number" id="opCost" step="0.01" min="0" placeholder="e.g. 1.25"></div>
+      <div class="field"><label>Cost per Unit ($)</label><input type="number" id="opCost" data-error="Enter your cost per unit" required step="0.01" min="0" placeholder="e.g. 1.25"></div>
       <div class="field"><label>Sale Price per Unit ($)</label><input type="number" id="opPrice" step="0.01" min="0" placeholder="e.g. 5.00 (optional)"></div>
     </div>
     <div class="field-row">
@@ -799,7 +819,7 @@
   <div class="modal" style="width:480px">
     <h2 id="expModalTitle">Add Expense</h2>
     <div class="field-row">
-      <div class="field"><label>Date</label><input type="date" id="expDate"></div>
+      <div class="field"><label>Date</label><input type="date" id="expDate" data-error="Pick a date" required></div>
       <div class="field">
         <label>Type</label>
         <select id="expType">
@@ -822,11 +842,11 @@
         <option>Other</option>
       </select>
     </div>
-    <div class="field"><label>Description</label><input type="text" id="expDesc" placeholder="e.g. Overture PLA White 1kg — 2 rolls"></div>
-    <div class="field"><label>Amount ($)</label><input type="number" id="expAmount" placeholder="0.00" step="0.01" min="0"></div>
+    <div class="field"><label>Description</label><input type="text" id="expDesc" data-error="Describe the expense" required placeholder="e.g. Overture PLA White 1kg — 2 rolls"></div>
+    <div class="field"><label>Amount ($)</label><input type="number" id="expAmount" data-error="Enter the amount" required placeholder="0.00" step="0.01" min="0"></div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeExpModal()">Cancel</button>
-      <button class="btn-primary" style="background:var(--red)" onclick="saveExpense()">Save Expense</button>
+      <button class="btn-primary" onclick="saveExpense()">Save Expense</button>
     </div>
   </div>
 </div>
@@ -836,11 +856,11 @@
 
   <div class="jt-stat-bar" id="jtStatBar">
     <div class="jtat"><div class="jtat-num green" id="jtRevenue">$0.00</div><div class="jtat-label">Revenue</div></div>
-    <div class="jtat"><div class="jtat-num" style="color:var(--accent)" id="jtProfit">$0.00</div><div class="jtat-label">Gross Profit</div></div>
-    <div class="jtat"><div class="jtat-num" style="color:var(--yellow)" id="jtMargin">—</div><div class="jtat-label">Gross Margin</div></div>
+    <div class="jtat"><div class="jtat-num" id="jtProfit">$0.00</div><div class="jtat-label">Gross Profit</div></div>
+    <div class="jtat"><div class="jtat-num" id="jtMargin">—</div><div class="jtat-label">Gross Margin</div></div>
     <div class="jtat"><div class="jtat-num" style="color:var(--text2)" id="jtCogs">$0.00</div><div class="jtat-label">COGS</div></div>
     <div class="jtat"><div class="jtat-num" style="color:var(--text2)" id="jtInvCost">$0.00</div><div class="jtat-label" id="jtInvCostLabel">Inventory Cost</div></div>
-    <div class="jtat"><div class="jtat-num" style="color:var(--accent2)" id="jtSold">0</div><div class="jtat-label">Tags Sold</div></div>
+    <div class="jtat"><div class="jtat-num" id="jtSold">0</div><div class="jtat-label">Tags Sold</div></div>
     <div class="jtat"><div class="jtat-num" id="jtRemaining">0</div><div class="jtat-label">In Stock</div></div>
   </div>
 
@@ -853,7 +873,6 @@
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn-ghost" onclick="openJtCharModal()">+ New Character</button>
         <button class="btn-ghost" onclick="openJtRestockModal()">+ Restock</button>
-        <button class="btn-primary" style="background:#8b5cf6" onclick="openJtSaleModal()">+ Log Sale</button>
       </div>
     </div>
 
@@ -939,8 +958,8 @@
   <div class="modal" style="width:520px">
     <h2 id="jtSaleModalTitle">Log Jet Tag Sale</h2>
     <div class="field-row">
-      <div class="field"><label>Date</label><input type="date" id="jtDate"></div>
-      <div class="field"><label>Total Qty Sold</label><input type="number" id="jtQty" value="1" min="1" oninput="jtUpdateRevPreview()"></div>
+      <div class="field"><label>Date</label><input type="date" id="jtDate" data-error="Pick a date" required></div>
+      <div class="field"><label>Total Qty Sold</label><input type="number" id="jtQty" data-error="Enter how many" data-stepper required value="1" min="1" oninput="jtUpdateRevPreview()"></div>
     </div>
     <div class="field">
       <label>Character(s) Sold — select one or more</label>
@@ -948,13 +967,13 @@
     </div>
     <div class="field">
       <label>Sale Price per Tag ($)</label>
-      <input type="number" id="jtPrice" value="5.00" step="0.01" min="0" oninput="jtUpdateRevPreview()">
+      <input type="number" id="jtPrice" data-error="Enter the price" required value="5.00" step="0.01" min="0" oninput="jtUpdateRevPreview()">
     </div>
     <div id="jtRevPreview" style="background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:4px;font-size:0.82rem;color:var(--text2);display:none"></div>
     <div class="field"><label>Notes (optional)</label><input type="text" id="jtNotes" placeholder="e.g. Card show, Whatnot, eBay"></div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeJtModal()">Cancel</button>
-      <button class="btn-primary" style="background:#8b5cf6" onclick="saveJtSale()">Save Sale</button>
+      <button class="btn-primary" onclick="saveJtSale()">Save Sale</button>
     </div>
   </div>
 </div>
@@ -981,7 +1000,7 @@
     <div class="field"><label>Notes (optional)</label><input type="text" id="jtRestockNotes" placeholder="e.g. July vendor order"></div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeJtRestockModal()">Cancel</button>
-      <button class="btn-primary" style="background:#8b5cf6" onclick="saveJtOrder()">Save Order</button>
+      <button class="btn-primary" onclick="saveJtOrder()">Save Order</button>
     </div>
   </div>
 </div>
@@ -990,10 +1009,10 @@
 <div class="modal-overlay" id="jtCharModal">
   <div class="modal" style="width:520px">
     <h2>Add New Character</h2>
-    <div class="field"><label>Character Name</label><input type="text" id="jtCharName" maxlength="60" placeholder="e.g. Snorlax"></div>
+    <div class="field"><label>Character Name</label><input type="text" id="jtCharName" data-error="Enter a character name" required maxlength="60" placeholder="e.g. Snorlax"></div>
     <div class="field-row">
-      <div class="field"><label>Date Purchased</label><input type="date" id="jtCharDate"></div>
-      <div class="field"><label>Qty Purchased</label><input type="number" id="jtCharQty" value="10" min="1"></div>
+      <div class="field"><label>Date Purchased</label><input type="date" id="jtCharDate" data-error="Pick a date" required></div>
+      <div class="field"><label>Qty Purchased</label><input type="number" id="jtCharQty" data-error="Enter how many" data-stepper required value="10" min="1"></div>
     </div>
     <div class="field">
       <label>Total Cost of This Order ($) — what you paid</label>
@@ -1002,7 +1021,7 @@
     <div class="field"><label>Notes (optional)</label><input type="text" id="jtCharNotes" placeholder="e.g. First batch of this character"></div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeJtCharModal()">Cancel</button>
-      <button class="btn-primary" style="background:#8b5cf6" onclick="saveJtCharacter()">Add Character</button>
+      <button class="btn-primary" onclick="saveJtCharacter()">Add Character</button>
     </div>
   </div>
 </div>
@@ -1012,11 +1031,11 @@
 
   <div class="pin-stat-bar">
     <div class="pintat"><div class="pintat-num green" id="pinRevenue">$0.00</div><div class="pintat-label">Revenue</div></div>
-    <div class="pintat"><div class="pintat-num" style="color:#2dd4bf" id="pinProfit">$0.00</div><div class="pintat-label">Gross Profit</div></div>
-    <div class="pintat"><div class="pintat-num" style="color:var(--yellow)" id="pinMargin">—</div><div class="pintat-label">Gross Margin</div></div>
+    <div class="pintat"><div class="pintat-num" id="pinProfit">$0.00</div><div class="pintat-label">Gross Profit</div></div>
+    <div class="pintat"><div class="pintat-num" id="pinMargin">—</div><div class="pintat-label">Gross Margin</div></div>
     <div class="pintat"><div class="pintat-num" style="color:var(--text2)" id="pinCogs">$0.00</div><div class="pintat-label">COGS</div></div>
     <div class="pintat"><div class="pintat-num" style="color:var(--text2)" id="pinInvCost">$0.00</div><div class="pintat-label" id="pinInvCostLabel">Inventory Cost</div></div>
-    <div class="pintat"><div class="pintat-num" style="color:var(--accent2)" id="pinSold">0</div><div class="pintat-label">Pins Sold</div></div>
+    <div class="pintat"><div class="pintat-num" id="pinSold">0</div><div class="pintat-label">Pins Sold</div></div>
     <div class="pintat"><div class="pintat-num" id="pinRemaining">0</div><div class="pintat-label">In Stock</div></div>
   </div>
 
@@ -1029,7 +1048,6 @@
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn-ghost" onclick="openPinCharModal()">+ New Character</button>
         <button class="btn-ghost" onclick="openPinRestockModal()">+ Restock</button>
-        <button class="btn-primary" style="background:#0d9488" onclick="openPinSaleModal()">+ Log Sale</button>
       </div>
     </div>
 
@@ -1111,8 +1129,8 @@
   <div class="modal" style="width:520px">
     <h2>Log Pin Sale</h2>
     <div class="field-row">
-      <div class="field"><label>Date</label><input type="date" id="pinDate"></div>
-      <div class="field"><label>Total Qty Sold</label><input type="number" id="pinQty" value="1" min="1" oninput="pinUpdateRevPreview()"></div>
+      <div class="field"><label>Date</label><input type="date" id="pinDate" data-error="Pick a date" required></div>
+      <div class="field"><label>Total Qty Sold</label><input type="number" id="pinQty" data-error="Enter how many" data-stepper required value="1" min="1" oninput="pinUpdateRevPreview()"></div>
     </div>
     <div class="field">
       <label>Character(s) Sold — select one or more</label>
@@ -1120,13 +1138,13 @@
     </div>
     <div class="field">
       <label>Sale Price per Pin ($)</label>
-      <input type="number" id="pinPrice" value="5.00" step="0.01" min="0" oninput="pinUpdateRevPreview()">
+      <input type="number" id="pinPrice" data-error="Enter the price" required value="5.00" step="0.01" min="0" oninput="pinUpdateRevPreview()">
     </div>
     <div id="pinRevPreview" style="background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:4px;font-size:0.82rem;color:var(--text2);display:none"></div>
     <div class="field"><label>Notes (optional)</label><input type="text" id="pinNotes" placeholder="e.g. Card show, Whatnot, eBay"></div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closePinModal()">Cancel</button>
-      <button class="btn-primary" style="background:#0d9488" onclick="savePinSale()">Save Sale</button>
+      <button class="btn-primary" onclick="savePinSale()">Save Sale</button>
     </div>
   </div>
 </div>
@@ -1153,7 +1171,7 @@
     <div class="field"><label>Notes (optional)</label><input type="text" id="pinRestockNotes" placeholder="e.g. July vendor order"></div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closePinRestockModal()">Cancel</button>
-      <button class="btn-primary" style="background:#0d9488" onclick="savePinOrder()">Save Order</button>
+      <button class="btn-primary" onclick="savePinOrder()">Save Order</button>
     </div>
   </div>
 </div>
@@ -1162,10 +1180,10 @@
 <div class="modal-overlay" id="pinCharModal">
   <div class="modal" style="width:520px">
     <h2>Add New Character</h2>
-    <div class="field"><label>Character Name</label><input type="text" id="pinCharName" maxlength="60" placeholder="e.g. Gengar"></div>
+    <div class="field"><label>Character Name</label><input type="text" id="pinCharName" data-error="Enter a character name" required maxlength="60" placeholder="e.g. Gengar"></div>
     <div class="field-row">
-      <div class="field"><label>Date Purchased</label><input type="date" id="pinCharDate"></div>
-      <div class="field"><label>Qty Purchased</label><input type="number" id="pinCharQty" value="20" min="1"></div>
+      <div class="field"><label>Date Purchased</label><input type="date" id="pinCharDate" data-error="Pick a date" required></div>
+      <div class="field"><label>Qty Purchased</label><input type="number" id="pinCharQty" data-error="Enter how many" data-stepper required value="20" min="1"></div>
     </div>
     <div class="field">
       <label>Total Cost of This Order ($) — what you paid</label>
@@ -1174,7 +1192,7 @@
     <div class="field"><label>Notes (optional)</label><input type="text" id="pinCharNotes" placeholder="e.g. First batch of this character"></div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closePinCharModal()">Cancel</button>
-      <button class="btn-primary" style="background:#0d9488" onclick="savePinCharacter()">Add Character</button>
+      <button class="btn-primary" onclick="savePinCharacter()">Add Character</button>
     </div>
   </div>
 </div>
@@ -1187,7 +1205,7 @@
     <h2 id="cmTitle">New Category</h2>
     <div style="font-size:0.76rem;color:var(--text2);margin:-6px 0 14px">A category gets its own tracker tab — inventory by item, stock orders with real costs, a sales log, and low-stock alerts — just like Jet Tags and Pins.</div>
     <div class="field-row">
-      <div class="field"><label>Category Name</label><input type="text" id="cmName" maxlength="40" placeholder="e.g. Stickers"></div>
+      <div class="field"><label>Category Name</label><input type="text" id="cmName" data-error="Give the category a name" required maxlength="40" placeholder="e.g. Stickers"></div>
       <div class="field"><label>Unit Name (singular)</label><input type="text" id="cmUnit" maxlength="20" placeholder="e.g. sticker"></div>
     </div>
     <div class="field-row">
@@ -1209,10 +1227,10 @@
 <div class="modal-overlay" id="catItemModal">
   <div class="modal" style="width:520px">
     <h2 id="ciTitle">Add New Item</h2>
-    <div class="field"><label>Item Name</label><input type="text" id="ciName" maxlength="60" placeholder="e.g. Charizard"></div>
+    <div class="field"><label>Item Name</label><input type="text" id="ciName" data-error="Enter an item name" required maxlength="60" placeholder="e.g. Charizard"></div>
     <div class="field-row">
-      <div class="field"><label>Date Purchased</label><input type="date" id="ciDate"></div>
-      <div class="field"><label>Qty Purchased</label><input type="number" id="ciQty" value="10" min="1"></div>
+      <div class="field"><label>Date Purchased</label><input type="date" id="ciDate" data-error="Pick a date" required></div>
+      <div class="field"><label>Qty Purchased</label><input type="number" id="ciQty" data-error="Enter how many" data-stepper required value="10" min="1"></div>
     </div>
     <div class="field">
       <label>Total Cost of This Order ($) — what you paid</label>
@@ -1258,8 +1276,8 @@
   <div class="modal" style="width:520px">
     <h2 id="csTitle">Log Sale</h2>
     <div class="field-row">
-      <div class="field"><label>Date</label><input type="date" id="csDate"></div>
-      <div class="field"><label>Total Qty Sold</label><input type="number" id="csQty" value="1" min="1" oninput="catUpdateRevPreview()"></div>
+      <div class="field"><label>Date</label><input type="date" id="csDate" data-error="Pick a date" required></div>
+      <div class="field"><label>Total Qty Sold</label><input type="number" id="csQty" data-error="Enter how many" data-stepper required value="1" min="1" oninput="catUpdateRevPreview()"></div>
     </div>
     <div class="field">
       <label>Item(s) Sold — select one or more</label>
@@ -1267,7 +1285,7 @@
     </div>
     <div class="field">
       <label id="csPriceLabel">Sale Price per Unit ($)</label>
-      <input type="number" id="csPrice" step="0.01" min="0" oninput="catUpdateRevPreview()">
+      <input type="number" id="csPrice" data-error="Enter the price" required step="0.01" min="0" oninput="catUpdateRevPreview()">
     </div>
     <div id="csRevPreview" style="background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:4px;font-size:0.82rem;color:var(--text2);display:none"></div>
     <div class="field"><label>Notes (optional)</label><input type="text" id="csNotes" placeholder="e.g. Card show, Whatnot, eBay"></div>
@@ -1280,7 +1298,6 @@
 
 <!-- ══════════════════════════════════════════ FAB ══ -->
 <!-- Context-aware FAB: shows the right "add" modal for the active section/tab -->
-<button class="fab" id="vpc-fab" onclick="vpcFabAction()" title="Quick add" aria-label="Add">＋</button>
 
 <!-- ══════════════════════════════════════════ BACK OFFICE ══ -->
 <div class="section" id="section-backoffice">
@@ -1324,18 +1341,37 @@
 
 <script>
 // ── Context-aware FAB ──
-function vpcFabAction() {
-  const activeSection = document.querySelector('.section.active');
-  const sectionId = activeSection ? activeSection.id : 'section-sales';
-  if (sectionId === 'section-expenses') { openExpModal(); return; }
-  if (sectionId === 'section-jettags') { openJtSaleModal(); return; }
-  if (sectionId === 'section-pins') { openPinSaleModal(); return; }
-  if (sectionId.startsWith('section-cat-')) { openCatSaleModal(sectionId.slice('section-cat-'.length)); return; }
-  // Sales section — check which sub-tab is active
-  const activeTab = document.querySelector('#section-sales .tab.active');
-  const tabId = activeTab ? activeTab.dataset.tab : 'overview';
-  if (tabId === 'filament') { openAddFilament(); return; }
-  openAddOrder();
+// ── Title bar: the one main action follows the section and the Sales tab ──
+function activeSectionId() {
+  return (document.querySelector('.section.active')?.id || 'section-sales').slice('section-'.length);
+}
+function salesTab() {
+  return document.querySelector('#section-sales .tab.active')?.dataset.tab || 'overview';
+}
+function primaryActionFor(section) {
+  if (section === 'expenses') return { label: 'Add Expense', run: () => openExpModal() };
+  if (section === 'jettags') return { label: 'Log Sale', run: () => openJtSaleModal() };
+  if (section === 'pins') return { label: 'Log Sale', run: () => openPinSaleModal() };
+  if (section.startsWith('cat-')) return { label: 'Log Sale', run: () => openCatSaleModal(section.slice(4)) };
+  if (section === 'sales') {
+    return salesTab() === 'filament'
+      ? { label: 'Log Purchase', run: () => openAddFilament() }
+      : { label: 'New Order', run: () => openAddOrder() };
+  }
+  return null; // Back Office has no main action
+}
+function vpcPrimaryAction() { primaryActionFor(activeSectionId())?.run(); }
+function updateTitleBar() {
+  const section = activeSectionId();
+  const act = primaryActionFor(section);
+  const btn = document.getElementById('vpcPrimary');
+  btn.hidden = !act;
+  if (act) {
+    document.getElementById('vpcPrimaryLabel').textContent = act.label;
+    btn.setAttribute('aria-label', act.label);
+  }
+  // The date range only changes the Overview (its KPIs and units sold).
+  document.getElementById('rangeSeg').hidden = !(section === 'sales' && salesTab() === 'overview');
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1395,21 +1431,48 @@ function toast(msg) {
 //  MAIN NAV
 // ══════════════════════════════════════════════════════════════
 // Delegated so tabs created at runtime (custom categories) work too.
-function activateMainTab(t) {
-  document.querySelectorAll('.main-tab').forEach(x => x.classList.remove('active'));
-  document.querySelectorAll('.section').forEach(x => x.classList.remove('active'));
-  t.classList.add('active');
-  const section = document.getElementById('section-' + t.dataset.section);
-  if (section) section.classList.add('active');
-  const fab = document.getElementById('vpc-fab');
-  if (fab) fab.style.display = t.dataset.section === 'backoffice' ? 'none' : '';
+// ── Sections are chosen from the app navigation, by #hash ──
+const SECTION_TITLES = { sales: 'Sales', expenses: 'Business Expenses', jettags: 'Jet Tags', pins: 'Pins', backoffice: 'Back Office' };
+function showSection(id) {
+  if (!document.getElementById('section-' + id)) id = 'sales';
+  const prev = activeSectionId();
+  document.querySelectorAll('.section').forEach(x => x.classList.toggle('active', x.id === 'section-' + id));
+  const cat = id.startsWith('cat-') ? catById(id.slice(4)) : null;
+  const title = cat ? cat.name : SECTION_TITLES[id];
+  document.getElementById('vpcTitle').textContent = title;
+  document.getElementById('vpcSub').hidden = id !== 'sales';
+  document.title = `${title} — Vault & Pine Collective`;
+  updateTitleBar();
+  if (prev !== id) window.scrollTo(0, 0);
 }
-document.querySelector('.main-nav').addEventListener('click', (e) => {
-  const t = e.target.closest('.main-tab');
-  if (!t) return;
-  if (t.dataset.action === 'newcat') { openCatModal(); return; }
-  if (t.dataset.section) activateMainTab(t);
-});
+// Switch section through the #hash, so Back and the nav stay in step.
+function goSection(id) {
+  if (location.hash.slice(1) === id) showSection(id);
+  else location.hash = id;
+}
+function selectSalesTab(tab) {
+  document.querySelector(`#section-sales .tab[data-tab="${tab}"]`)?.click();
+}
+function routeFromHash() {
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (h === 'newcat') {
+    history.replaceState(null, '', location.pathname + location.search);
+    showSection('sales');
+    openCatModal();
+  } else if (h === 'print-queue') {
+    showSection('sales');
+    showPrintQueue();
+  } else if (h === 'unpaid') {
+    showSection('sales');
+    showUnpaidOrders();
+  } else if (h === 'orders') {
+    showSection('sales');
+    selectSalesTab('orders');
+  } else {
+    showSection(h || 'sales');
+  }
+}
+window.addEventListener('hashchange', routeFromHash);
 
 // ══════════════════════════════════════════════════════════════
 //  DATE RANGE FILTER
@@ -1434,67 +1497,18 @@ function getFilteredOrders() {
   return all.filter(o => o.date && new Date(o.date + 'T00:00:00') >= start);
 }
 
-document.querySelectorAll('.range-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    ACTIVE_RANGE = btn.dataset.range;
-    renderSalesAll();
-  });
+const RANGE_LABELS = { all: 'All time', ytd: 'Year to date', '6m': 'Last 6 months', '3m': 'Last 3 months', '30d': 'Last 30 days', '7d': 'Last 7 days' };
+// The range is a segmented control in the title bar (vpcSeg is in shared.js).
+document.addEventListener('DOMContentLoaded', () => {
+  vpcSeg(document.getElementById('rangeSeg'), (v) => { ACTIVE_RANGE = v; renderSalesAll(); });
 });
 
 // ══════════════════════════════════════════════════════════════
 //  SALES — DATA
 // ══════════════════════════════════════════════════════════════
-const HISTORICAL = [
-  { id:'h1',  date:'2025-12-27', customer:'Jay',                       product:'Large Risers (10)',            sets:0, salePrice:40,   cogs:10.50,  referredBy:'1st Buyer',          notes:'' },
-  { id:'h2',  date:'2025-12-28', customer:'Kevin',                     product:'Large Risers (12)',            sets:0, salePrice:48,   cogs:12.60,  referredBy:'Jay',                notes:'' },
-  { id:'h3',  date:'2026-01-03', customer:'Kaiden',                    product:'Large + Small + End Caps',    sets:0, salePrice:80,   cogs:27.34,  referredBy:'Me',                 notes:'' },
-  { id:'h4',  date:'2026-01-25', customer:'Mike',                      product:'Large + Med + Small + Caps',  sets:0, salePrice:60,   cogs:18.32,  referredBy:'Me',                 notes:'' },
-  { id:'h5',  date:'2026-01-31', customer:'Jay',                       product:'Large + Small + End Caps',    sets:0, salePrice:40,   cogs:12.24,  referredBy:'Me',                 notes:'Repeat buyer' },
-  { id:'h6',  date:'2026-02-08', customer:'Ali',                       product:'Large Risers + Caps',         sets:1, salePrice:36,   cogs:10.26,  referredBy:'Me',                 notes:'' },
-  { id:'h7',  date:'2026-02-09', customer:'Ali',                       product:'Large Risers + Caps (27)',    sets:1, salePrice:108,  cogs:30.78,  referredBy:'Me',                 notes:'Repeat' },
-  { id:'h8',  date:'2026-02-08', customer:'Mike',                      product:'Large + Med + Caps',          sets:1, salePrice:50,   cogs:13.65,  referredBy:'Me',                 notes:'' },
-  { id:'h9',  date:'2026-02-09', customer:'VIC - TCGVIC (Zion)',       product:'18 Med Risers + 8 Caps',      sets:1, salePrice:100,  cogs:21.36,  referredBy:'Me',                 notes:'White color' },
-  { id:'h10', date:'2026-02-08', customer:'Mons + Mana',               product:'21 Large + 7 Small',          sets:1, salePrice:100,  cogs:27.30,  referredBy:'Me',                 notes:'' },
-  { id:'h11', date:'2026-02-15', customer:'Max',                       product:'3 sets: Large + Caps',        sets:3, salePrice:225,  cogs:67.50,  referredBy:'Me',                 notes:'3 sets @ $75 each' },
-  { id:'h12', date:'2026-02-21', customer:'Richard',                   product:'18 Large + 6 Caps',           sets:1, salePrice:80,   cogs:22.50,  referredBy:'Me',                 notes:'' },
-  { id:'h13', date:'2026-03-07', customer:'Damian',                    product:'18 Large + 6 Caps',           sets:1, salePrice:85,   cogs:22.50,  referredBy:'Me',                 notes:'' },
-  { id:'h14', date:'2026-03-14', customer:'Sam',                       product:'18 Large + 9 Caps',           sets:1, salePrice:100,  cogs:23.31,  referredBy:'Me',                 notes:'' },
-  { id:'h15', date:'2026-03-14', customer:'Izeah - Baichu',            product:'18 Large + 9 Caps',           sets:1, salePrice:85,   cogs:23.31,  referredBy:'Mike',               notes:'' },
-  { id:'h16', date:'2026-03-14', customer:'Jonathan (jlin730)',        product:'18 Large + 9 Caps',           sets:1, salePrice:80,   cogs:23.31,  referredBy:'Richard & Jay',      notes:'Instagram: @jlin730' },
-  { id:'h17', date:'2026-03-21', customer:'Baichu',                    product:'18 Large + 9 Caps',           sets:1, salePrice:85,   cogs:23.31,  referredBy:'Mike',               notes:'' },
-  { id:'h18', date:'2026-03-21', customer:'Baichu',                    product:'18 Large + 9 Caps (2nd)',     sets:1, salePrice:85,   cogs:23.31,  referredBy:'Mike',               notes:'Repeat same day' },
-  { id:'h19', date:'2026-03-21', customer:"Nahk - Let's Rips",         product:'18 Large + 9 Caps + Rental',  sets:1, salePrice:113,  cogs:23.31,  referredBy:'Me',                 notes:'$85 set + $40 rental – $12 shipping' },
-  { id:'h20', date:'2026-03-28', customer:'Diego',                     product:'18 Large + 9 Caps',           sets:1, salePrice:85,   cogs:21.33,  referredBy:'Damian',             notes:'' },
-  { id:'h21', date:'2026-03-28', customer:'TCG Dodge',                 product:'18 Large + 9 Caps',           sets:1, salePrice:85,   cogs:21.33,  referredBy:'',                   notes:'' },
-  { id:'h22', date:'2026-03-29', customer:'Sanjil',                    product:'18 Large + 9 Caps',           sets:1, salePrice:85,   cogs:18.90,  referredBy:'',                   notes:'' },
-  { id:'h23', date:'2026-04-05', customer:'Tyler - tyscardcorner1',    product:'18 Large + 9 Caps',           sets:1, salePrice:85,   cogs:21.33,  referredBy:'Mike',               notes:'' },
-  { id:'h24', date:'2026-04-05', customer:'Tyler - tyscardcorner1',    product:'18 Large + 9 Caps (2nd)',     sets:1, salePrice:85,   cogs:21.33,  referredBy:'Mike',               notes:'Repeat same day' },
-  { id:'h25', date:'2026-04-05', customer:'tcgnes',                    product:'18 Large + 9 Caps',           sets:1, salePrice:80,   cogs:21.33,  referredBy:'',                   notes:'' },
-  { id:'h26', date:'2026-04-06', customer:'Benze - Big Belly TCG',     product:'18 Large + 9 Caps',           sets:1, salePrice:86,   cogs:21.33,  referredBy:'',                   notes:'Shipped 4 lbs 3 oz' },
-  { id:'h27', date:'2026-04-12', customer:'Chris - Pokemon Go',        product:'18 Large + 9 Caps',           sets:1, salePrice:100,  cogs:21.33,  referredBy:'Mike',               notes:'Tournament player' },
-  { id:'h28', date:'2026-04-12', customer:'Sanjil',                    product:'18 Large + 9 Caps (2nd)',     sets:1, salePrice:85,   cogs:21.33,  referredBy:'',                   notes:'Repeat' },
-  { id:'h29', date:'2026-04-18', customer:'Damian',                    product:'18 Large + 9 Caps (2nd)',     sets:1, salePrice:85,   cogs:21.33,  referredBy:'',                   notes:'Repeat' },
-  { id:'h30', date:'2026-04-18', customer:'Ruben - Holy Collectz',     product:'18 Large + 9 Caps',           sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'' },
-  { id:'h31', date:'2026-04-19', customer:'Richard',                   product:'18 Large + 9 Caps',           sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Repeat' },
-  { id:'h32', date:'2026-04-19', customer:'Richard',                   product:'18 Large + 9 Caps (2nd)',     sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'' },
-  { id:'h33', date:'2026-04-28', customer:'Jdrops',                    product:'18 Large + 9 Caps',           sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Ships to FL' },
-  { id:'h34', date:'2026-04-28', customer:'Jdrops',                    product:'18 Large + 9 Caps (2nd)',     sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Ships to FL' },
-  { id:'h35', date:'2026-04-30', customer:'Jeff Nelson',               product:'18 Large + 9 Caps',           sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Prepaid $180 for 2 sets' },
-  { id:'h36', date:'2026-04-30', customer:'Jeff Nelson',               product:'18 Large + 9 Caps (2nd)',     sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Prepaid' },
-  { id:'h37', date:'2026-05-10', customer:'binbreon.tcg',              product:'18 Large + 9 Caps',           sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Delivery 5/16' },
-  { id:'h38', date:'2026-05-11', customer:'Big Belly (Benze)',         product:'18 Large + 9 Caps',           sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Delivery 5/17; repeat' },
-  { id:'h39', date:'2026-05-28', customer:'Luke - iyekul_collectibles',product:'18 Large + 9 Caps',           sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Delivery 5/30' },
-  { id:'h40', date:'2026-05-29', customer:'Raymond - Sleepy PokeShop', product:'18 Large + 9 Caps',           sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Deliver 6/6 — Emerald+Cardfest' },
-  { id:'h41', date:'2026-05-29', customer:'Raymond - Sleepy PokeShop', product:'18 Large + 9 Caps (2nd)',     sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Deliver 6/6' },
-  { id:'h42', date:'2026-05-29', customer:'boxheadtc - Joe Mendez',    product:'18 Large + 9 Caps',           sets:1, salePrice:100,  cogs:21.33,  referredBy:'',                   notes:'Pickup 6/6' },
-  { id:'h43', date:'2026-05-31', customer:'Argcardz',                  product:'18 Large + 9 Caps',           sets:1, salePrice:100,  cogs:21.33,  referredBy:'',                   notes:'Pick up 5/31' },
-  { id:'h44', date:'2026-05-31', customer:'pipstle.tcg',               product:'18 Large + 9 Caps',           sets:1, salePrice:100,  cogs:21.33,  referredBy:'',                   notes:'Pick up 5/31' },
-  { id:'h45', date:'2026-06-02', customer:'Yash - Silver Clash TCG',   product:'18 Large + 9 Caps',           sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Deliver 6/20' },
-  { id:'h46', date:'2026-06-02', customer:'Yash - Silver Clash TCG',   product:'18 Large + 9 Caps (2nd)',     sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Deliver 6/20' },
-  { id:'h47', date:'2026-06-02', customer:'Yash - Silver Clash TCG',   product:'18 Large + 9 Caps (3rd)',     sets:1, salePrice:90,   cogs:21.33,  referredBy:'',                   notes:'Deliver 6/20' },
-];
+// The 47 orders logged before this app existed live in util.js (shared with
+// Home, which shows them before the Sales Hub has ever been opened).
+const HISTORICAL = VPCUtil.HISTORICAL_ORDERS;
 
 const LS_PIPELINE = 'vpc_pipeline_v1';
 const PIPELINE_SEED = [
@@ -1506,6 +1520,8 @@ function getPipeline() {
   const raw = localStorage.getItem(LS_PIPELINE);
   if (raw) return JSON.parse(raw);
   localStorage.setItem(LS_PIPELINE, JSON.stringify(PIPELINE_SEED));
+  // Older than any cloud copy, so the first sync brings your real list.
+  localStorage.setItem(LS_PIPELINE + '__ts', '1');
   return PIPELINE_SEED.map(p => ({ ...p }));
 }
 function savePipeline(arr) { localStorage.setItem(LS_PIPELINE, JSON.stringify(arr)); }
@@ -1516,7 +1532,7 @@ function deleteDelivery(id) {
 
 const LS_ORDERS    = VPCUtil.KEYS.orders;      // unified, fully-editable order store
 const LS_ORDERS_V1 = 'riser_orders_v1';   // legacy custom-orders store (pre-migration)
-let sortCol = 'date', sortDir = -1, orderMonthFilter = 'all', orderNotPrintedOnly = false;
+let sortCol = 'date', sortDir = -1, orderMonthFilter = 'all', orderFilter = 'all';
 const ORDER_PAGE_SIZE = 50;
 let orderPage = 0;
 
@@ -1528,11 +1544,7 @@ function initOrders() {
   // truth. Deliberately NO auto-merge of HISTORICAL into an existing store —
   // the old merge resurrected deleted orders on every page load. Restoring
   // the baseline is now only done explicitly via the "Reset 47" data tool.
-  if (!localStorage.getItem(LS_ORDERS)) {
-    const legacy = JSON.parse(localStorage.getItem(LS_ORDERS_V1) || '[]');
-    const seeded = [...HISTORICAL.map(o => ({ ...o })), ...legacy];
-    localStorage.setItem(LS_ORDERS, JSON.stringify(seeded));
-  }
+  VPCUtil.seedOrders(localStorage, LS_ORDERS_V1);
 }
 function rawOrders() { return JSON.parse(localStorage.getItem(LS_ORDERS) || '[]'); }
 function getOrders() { return rawOrders().sort((a, b) => a.date.localeCompare(b.date)); }
@@ -1712,8 +1724,8 @@ function renderThisMonthSnap() {
   const projected = dayOfMo > 0 ? rev / dayOfMo * daysInMo : 0;
   document.getElementById('thisMonthSnap').innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-      <div><div style="font-size:1.5rem;font-weight:600;color:var(--green)">${fmt$(rev)}</div><div style="font-size:0.75rem;color:var(--text2);margin-top:2px">Revenue (${moName})</div></div>
-      <div><div style="font-size:1.5rem;font-weight:600;color:var(--accent)">${fmt$(prof)}</div><div style="font-size:0.75rem;color:var(--text2);margin-top:2px">Profit (${moName})</div></div>
+      <div><div style="font-size:1.5rem;font-weight:600;color:var(--text)">${fmt$(rev)}</div><div style="font-size:0.75rem;color:var(--text2);margin-top:2px">Revenue (${moName})</div></div>
+      <div><div style="font-size:1.5rem;font-weight:600;color:var(--text)">${fmt$(prof)}</div><div style="font-size:0.75rem;color:var(--text2);margin-top:2px">Profit (${moName})</div></div>
     </div>
     <div style="font-size:.83rem;color:var(--text2);margin-bottom:6px"><strong style="color:var(--text)">${mo.length} orders</strong> in ${moName} so far (day ${dayOfMo} of ${daysInMo})</div>
     <div style="font-size:.83rem;color:${changeColor}">${changeSign}${pctChange}% vs ${lastName} (${fmt$(lrev)})</div>
@@ -1724,10 +1736,9 @@ function renderThisMonthSnap() {
 function renderOrderMonthFilters() {
   const orders = getOrders();
   const months = [...new Set(orders.map(o => monthKey(o.date)))].sort();
-  document.getElementById('orderMonthFilters').innerHTML = ['all', ...months].map(mk => {
-    const label = mk === 'all' ? 'All' : monthLabel(mk);
-    return `<div class="filter-chip ${orderMonthFilter===mk?'active':''}" onclick="setMonthFilter('${mk}')">${label}</div>`;
-  }).join('');
+  document.getElementById('orderMonth').innerHTML = ['all', ...months.reverse()].map(mk =>
+    `<option value="${mk}"${orderMonthFilter === mk ? ' selected' : ''}>${mk === 'all' ? 'All months' : monthLabel(mk)}</option>`
+  ).join('');
 }
 function setMonthFilter(mk) { orderMonthFilter = mk; orderPage = 0; renderOrderMonthFilters(); renderOrderTable(); }
 
@@ -1747,30 +1758,51 @@ function printQueueSummary() {
 function fmtHours(h) { return (Math.round(h * 10) / 10).toLocaleString('en-US') + ' h'; }
 function renderPrintQueue() {
   const q = printQueueSummary();
-  const hrs = q.timed ? ` · ≈ ${fmtHours(q.hours)}${q.timed < q.count ? ` for ${q.timed} of ${q.count}` : ''}` : '';
-  document.getElementById('orderPrintFilter').innerHTML =
-    `<div class="filter-chip ${orderNotPrintedOnly ? 'active' : ''}" title="Show only orders not yet printed" onclick="toggleNotPrintedFilter()">⏳ Not Printed (${q.count})</div>`;
-  const link = document.getElementById('toPrintLink');
-  link.style.display = q.count ? '' : 'none';
-  link.textContent = `⏳ ${q.count} order${q.count === 1 ? '' : 's'} to print${hrs}`;
+  document.getElementById('toPrintList').hidden = !q.count;
+  document.getElementById('toPrintTitle').textContent = `${q.count} order${q.count === 1 ? '' : 's'} to print`;
+  document.getElementById('toPrintSub').textContent = q.timed
+    ? `About ${fmtHours(q.hours)} of printing${q.timed < q.count ? ` for ${q.timed} of them` : ''}`
+    : 'Open the print queue';
 }
-function toggleNotPrintedFilter() { orderNotPrintedOnly = !orderNotPrintedOnly; orderPage = 0; renderOrderTable(); }
-function showPrintQueue() {
-  orderNotPrintedOnly = true; orderPage = 0;
-  document.querySelector('#section-sales .tab[data-tab="orders"]').click();
+// The orders filter: All · Not printed · Unpaid (a segmented control).
+let orderFilterSeg = null;
+const isUnpaid = o => (o.payStatus || 'paid') !== 'paid';
+function setOrderFilter(v) {
+  orderFilter = v; orderPage = 0;
+  orderFilterSeg?.set(v);
   renderOrderTable();
 }
+function showPrintQueue() { setOrderFilter('notprinted'); selectSalesTab('orders'); }
+function showUnpaidOrders() { setOrderFilter('unpaid'); selectSalesTab('orders'); }
+
+function fmtShortDate(d) {
+  const dt = new Date(d + 'T00:00:00');
+  const opts = { month: 'short', day: 'numeric' };
+  if (dt.getFullYear() !== NOW.getFullYear()) opts.year = 'numeric';
+  return dt.toLocaleDateString('en-US', opts);
+}
+const PAY_LABELS   = { paid: 'Paid', partial: 'Partial', unpaid: 'Unpaid' };
+const FILL_LABELS  = { completed: 'Done', in_progress: 'In progress' };
+const PRINT_LABELS = { printed: 'Printed', not_printed: 'Not printed' };
+const orderQty = o => Math.max(1, parseInt(o.sets) || 1);
 
 function renderOrderTable() {
   const q = (document.getElementById('orderSearch').value || '').toLowerCase();
   let orders = getOrders();
   if (orderMonthFilter !== 'all') orders = orders.filter(o => o.date.startsWith(orderMonthFilter));
-  if (orderNotPrintedOnly) orders = orders.filter(o => printStatusOf(o) === 'not_printed');
   if (q) orders = orders.filter(o => [o.customer, o.product, o.referredBy, o.notes].join(' ').toLowerCase().includes(q));
+  // Counts on the filter reflect the month and search, before the filter itself.
+  document.getElementById('cntNotPrinted').textContent = orders.filter(o => printStatusOf(o) === 'not_printed').length || '';
+  document.getElementById('cntUnpaid').textContent = orders.filter(isUnpaid).length || '';
+  if (orderFilter === 'notprinted') orders = orders.filter(o => printStatusOf(o) === 'not_printed');
+  if (orderFilter === 'unpaid') orders = orders.filter(isUnpaid);
+  const sortVal = o => sortCol === 'printStatus' ? printStatusOf(o)
+    : sortCol === 'profit' ? o.salePrice - o.cogs
+    : sortCol === 'sets' ? orderQty(o)
+    : (o[sortCol] ?? '');
   orders.sort((a, b) => {
-    let av = sortCol === 'printStatus' ? printStatusOf(a) : a[sortCol];
-    let bv = sortCol === 'printStatus' ? printStatusOf(b) : b[sortCol];
-    if (typeof av === 'string') return av.localeCompare(bv) * sortDir;
+    const av = sortVal(a), bv = sortVal(b);
+    if (typeof av === 'string' || typeof bv === 'string') return String(av).localeCompare(String(bv)) * sortDir;
     return (av - bv) * sortDir;
   });
 
@@ -1785,61 +1817,58 @@ function renderOrderTable() {
   // Totals span all filtered orders (not just the current page)
   const totalRev  = orders.reduce((s,o) => s + o.salePrice, 0);
   const totalProf = orders.reduce((s,o) => s + o.salePrice - o.cogs, 0);
-  const totalCogs = orders.reduce((s,o) => s + o.cogs, 0);
-
-  const PAY_LABELS  = { paid: '✅ Paid', partial: '🟡 Partial', unpaid: '🔴 Unpaid' };
-  const FILL_LABELS = { completed: '✅ Done', in_progress: '🔵 In Progress' };
-  const PRINT_LABELS = { printed: '🖨️ Printed', not_printed: '⏳ Not Printed' };
+  const totalQty  = orders.reduce((s,o) => s + orderQty(o), 0);
 
   const rows = pageOrders.map(o => {
     const profit   = o.salePrice - o.cogs;
-    const roi      = (profit / o.cogs * 100).toFixed(1);
-    const roiColor = roi >= 80 ? 'var(--green)' : roi >= 70 ? 'var(--yellow)' : 'var(--text)';
     const pay      = o.payStatus     || 'paid';
     const fill     = o.fulfillStatus || 'completed';
-    const payBadge  = `<span class="badge badge-${pay}"  title="Click to cycle" onclick="togglePayStatus('${o.id}')">${PAY_LABELS[pay]||pay}</span>`;
-    const fillBadge = `<span class="badge badge-${fill}" title="Click to toggle" onclick="toggleFulfillStatus('${o.id}')">${FILL_LABELS[fill]||fill}</span>`;
-    const print     = printStatusOf(o);
-    const printBadge = `<span class="badge badge-${print}" title="Click to toggle" onclick="togglePrintStatus('${o.id}')">${PRINT_LABELS[print]}</span>`;
-    const actions   =
-      `<button class="icon-btn" title="Edit order" onclick="openAddOrder('${o.id}')">✏️</button>
-       <button class="icon-btn" title="Delete order" onclick="deleteOrder('${o.id}')">✕</button>`;
-    return `<tr>
+    const print    = printStatusOf(o);
+    const statusBtn = (kind, val, text, title) =>
+      `<button type="button" class="badge badge-${val} status-btn" aria-haspopup="menu" aria-expanded="false" data-menu-key="${o.id}-${kind}" title="${title}" onclick="openStatusMenu(event,'${o.id}','${kind}')">${text}</button>`;
+    return `<tr data-id="${o.id}" tabindex="0" onclick="openOrderSheet('${o.id}')" onkeydown="if(event.key==='Enter'&&event.target===this)openOrderSheet('${o.id}')" oncontextmenu="orderContextMenu(event,'${o.id}')">
       <td style="white-space:nowrap">${fmtDate(o.date)}</td>
-      <td><strong>${esc(o.customer)}</strong></td>
-      <td style="color:var(--text2);font-size:.78rem">${esc(o.product)}</td>
-      <td class="num green">${fmt$(o.salePrice)}</td>
-      <td class="num" style="color:var(--text2)">${fmt$(o.cogs)}</td>
-      <td class="num" style="color:var(--accent)">${fmt$(profit)}</td>
-      <td class="num" style="color:${roiColor}">${roi}%</td>
-      <td style="font-size:.78rem;color:var(--text2)">${esc(o.referredBy||'—')}</td>
-      <td style="font-size:.75rem;color:var(--text2);max-width:160px">${esc(o.notes||'')}</td>
-      <td>${payBadge}</td>
-      <td style="white-space:nowrap">${printBadge}</td>
-      <td>${fillBadge}</td>
-      <td style="text-align:right;white-space:nowrap">${actions}</td>
+      <td><strong>${esc(o.customer)}</strong><span class="cust-sub">${esc(o.product)}</span></td>
+      <td class="num">${orderQty(o)}</td>
+      <td class="num">${fmt$(o.salePrice)}</td>
+      <td class="num"${profit < 0 ? ' style="color:var(--red)"' : ''}>${fmt$(profit)}</td>
+      <td>${statusBtn('pay', pay, PAY_LABELS[pay] || pay, 'Change payment status')}</td>
+      <td style="white-space:nowrap">${statusBtn('print', print, PRINT_LABELS[print], 'Change print status')}</td>
+      <td>${statusBtn('fill', fill, FILL_LABELS[fill] || fill, 'Change order status')}</td>
     </tr>`;
   }).join('');
 
   // Summary footer row (always shows totals across all filtered orders)
-  const footerRow = `<tr style="background:var(--surface2);font-weight:600">
-    <td colspan="3" style="color:var(--text2)">Total — ${total} orders${pageCount > 1 ? ` (page ${orderPage+1}/${pageCount})` : ''}</td>
-    <td class="num green">${fmt$(totalRev)}</td>
-    <td class="num" style="color:var(--text2)">${fmt$(totalCogs)}</td>
-    <td class="num" style="color:var(--accent)">${fmt$(totalProf)}</td>
-    <td class="num" style="color:var(--yellow)">${totalCogs ? (totalProf/totalCogs*100).toFixed(1) : '0.0'}%</td>
-    <td colspan="6"></td>
-  </tr>`;
-
+  const footerRow = total ? `<tr class="tfoot-row">
+    <td colspan="2" style="color:var(--text2)">Total — ${total} order${total === 1 ? '' : 's'}${pageCount > 1 ? ` (page ${orderPage+1}/${pageCount})` : ''}</td>
+    <td class="num">${totalQty}</td>
+    <td class="num">${fmt$(totalRev)}</td>
+    <td class="num">${fmt$(totalProf)}</td>
+    <td colspan="3"></td>
+  </tr>` : `<tr><td colspan="8" class="order-empty">No orders match.</td></tr>`;
   document.getElementById('orderTbody').innerHTML = rows + footerRow;
-  renderPrintQueue();
 
-  // Render pagination controls below the table card
+  // Phones: one row per order. Colour only where something needs doing.
+  document.getElementById('orderList').innerHTML = pageOrders.map(o => {
+    const pay = o.payStatus || 'paid';
+    const flags = (isUnpaid(o) ? `<span class="badge badge-${pay}">${PAY_LABELS[pay]}</span>` : '')
+      + (printStatusOf(o) === 'not_printed' ? '<span class="badge badge-not_printed">Not printed</span>' : '');
+    return `<button type="button" class="order-row" onclick="openOrderSheet('${o.id}')">
+      <span class="or-main"><span class="or-title">${esc(o.customer)}</span><span class="or-sub">${esc(o.product)} · ${fmtShortDate(o.date)}</span></span>
+      <span class="or-end"><span class="or-amount">${fmt$(o.salePrice)}</span>${flags ? `<span class="or-flags">${flags}</span>` : ''}</span>
+      <svg class="vpc-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </button>`;
+  }).join('') || '<div class="order-empty">No orders match.</div>';
+
+  renderPrintQueue();
+  if (sheetOrderId) refreshOrderSheet();
+
+  // Render pagination controls below the orders
   let pgEl = document.getElementById('orderPagination');
   if (!pgEl) {
     pgEl = document.createElement('div');
     pgEl.id = 'orderPagination';
-    document.getElementById('panel-orders').querySelector('.card').after(pgEl);
+    document.getElementById('orderTableCard').after(pgEl);
   }
   if (pageCount <= 1) {
     pgEl.innerHTML = '';
@@ -1857,6 +1886,72 @@ function renderOrderTable() {
     </div>`;
   }
 }
+
+// ── Order details sheet ──
+let sheetOrderId = null, osPay = null, osFill = null;
+function openOrderSheet(id) {
+  sheetOrderId = id;
+  if (!refreshOrderSheet()) return;
+  document.getElementById('orderSheet').classList.add('open');
+  setTimeout(() => document.querySelector('#orderSheet .sheet-close')?.focus(), 50);
+}
+function refreshOrderSheet() {
+  const o = rawOrders().find(x => x.id === sheetOrderId);
+  if (!o) { closeOrderSheet(); return false; }
+  const profit = o.salePrice - o.cogs;
+  const row = (k, v) => `<div class="glist-row"><span>${k}</span><span class="glist-val">${v}</span></div>`;
+  document.getElementById('osTitle').textContent = o.customer;
+  document.getElementById('osSub').textContent =
+    `${new Date(o.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })} · ${o.product}`;
+  document.getElementById('osFacts').innerHTML =
+    row('Quantity', orderQty(o)) + row('Sale price', fmt$(o.salePrice)) + row('Cost', fmt$(o.cogs)) +
+    row('Profit', fmt$(profit)) +
+    row('Margin', o.salePrice ? (profit / o.salePrice * 100).toFixed(1) + '%' : '—') +
+    row('Return on cost', o.cogs ? (profit / o.cogs * 100).toFixed(1) + '%' : '—') +
+    (o.referredBy ? row('Referred by', esc(o.referredBy)) : '') +
+    (o.notes ? row('Notes', esc(o.notes)) : '');
+  osPay?.set(o.payStatus || 'paid');
+  osFill?.set(o.fulfillStatus || 'completed');
+  document.getElementById('osPrinted').checked = printStatusOf(o) === 'printed';
+  return true;
+}
+function closeOrderSheet() {
+  sheetOrderId = null;
+  document.getElementById('orderSheet').classList.remove('open');
+}
+// Done implies Printed, and Not printed reopens the order (setOrderStatus).
+function sheetSet(kind, value) { if (sheetOrderId) setOrderStatus(sheetOrderId, kind, value); }
+function editFromSheet() { const id = sheetOrderId; closeOrderSheet(); openAddOrder(id); }
+function deleteFromSheet() { if (deleteOrder(sheetOrderId)) closeOrderSheet(); }
+
+// Right-click a row: the common jobs, without opening the order.
+function orderContextMenu(e, id) {
+  e.preventDefault();
+  const o = rawOrders().find(x => x.id === id);
+  if (!o) return;
+  const opts = [{ value: 'open', label: 'Open', icon: vpcIcon('chevron') }, { value: 'edit', label: 'Edit order', icon: vpcIcon('pencil') }];
+  if (isUnpaid(o)) opts.push({ value: 'paid', label: 'Mark paid', icon: vpcIcon('check') });
+  if (printStatusOf(o) === 'not_printed') opts.push({ value: 'printed', label: 'Mark printed', icon: vpcIcon('check') });
+  opts.push({ value: 'delete', label: 'Delete', icon: vpcIcon('trash'), danger: true });
+  vpcMenu(e.currentTarget, {
+    label: 'Order', options: opts, at: { x: e.clientX, y: e.clientY },
+    onSelect: v => {
+      if (v === 'open') openOrderSheet(id);
+      else if (v === 'edit') openAddOrder(id);
+      else if (v === 'paid') setOrderStatus(id, 'pay', 'paid');
+      else if (v === 'printed') setOrderStatus(id, 'print', 'printed');
+      else if (v === 'delete') deleteOrder(id);
+    },
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  orderFilterSeg = vpcSeg(document.getElementById('orderFilterSeg'), v => setOrderFilter(v));
+  orderFilterSeg.set(orderFilter);
+  osPay = vpcSeg(document.getElementById('osPay'), v => sheetSet('pay', v));
+  osFill = vpcSeg(document.getElementById('osFill'), v => sheetSet('fill', v));
+});
+document.getElementById('orderSheet').addEventListener('click', e => { if (e.target === e.currentTarget) closeOrderSheet(); });
 
 function setOrderPage(p) {
   orderPage = p;
@@ -1930,8 +2025,8 @@ function renderCustomers() {
     return `<tr>
       <td><strong>${esc(name)}</strong></td>
       <td class="num">${d.orders}</td>
-      <td class="num green">${fmt$(d.revenue)}</td>
-      <td class="num" style="color:var(--accent)">${fmt$(d.profit)}</td>
+      <td class="num">${fmt$(d.revenue)}</td>
+      <td class="num">${fmt$(d.profit)}</td>
       <td class="num" style="color:var(--text2)">${fmt$(d.revenue/d.orders)}</td>
       <td style="font-size:.78rem;color:var(--text2)">${esc(d.referredBy||'—')}</td>
       <td style="font-size:.78rem;color:var(--text2)">${fmtDate(d.lastDate)}</td>
@@ -1961,9 +2056,9 @@ function renderProjections() {
     return `<tr>
       <td><strong style="color:${s.color}">${s.label}</strong></td>
       <td class="num">${s.sets}</td><td class="num">${fmt$(s.price)}</td>
-      <td class="num green">${fmt$(moRev)}</td><td class="num" style="color:var(--accent)">${fmt$(moProf)}</td>
-      <td class="num green">${fmt$(moRev*6)}</td><td class="num" style="color:var(--accent)">${fmt$(moProf*6)}</td>
-      <td class="num green">${fmt$(moRev*12)}</td>
+      <td class="num">${fmt$(moRev)}</td><td class="num">${fmt$(moProf)}</td>
+      <td class="num">${fmt$(moRev*6)}</td><td class="num">${fmt$(moProf*6)}</td>
+      <td class="num">${fmt$(moRev*12)}</td>
     </tr>`;
   }).join('');
 
@@ -2301,6 +2396,7 @@ function openOrderProductModal(name) {
 function closeOrderProductModal() { document.getElementById('orderProductModal').classList.remove('open'); }
 
 function saveOrderProduct() {
+  if (window.vpcValidate && !vpcValidate('orderProductModal')) return;
   const name  = document.getElementById('opName').value.trim();
   const cost  = parseFloat(document.getElementById('opCost').value);
   const price = parseFloat(document.getElementById('opPrice').value);
@@ -2383,17 +2479,17 @@ function renderUnitsSold() {
     t.revenue += o.salePrice || 0;
   });
   const order = ['risers', ...saved.map(p => 'p:' + p.id), 'rentals', 'other', 'custom'];
-  const colors = { risers: 'var(--green)', custom: 'var(--yellow)', other: 'var(--text2)', rentals: 'var(--accent2)' };
+  const colors = { custom: 'var(--orange)', other: 'var(--text2)' };
   const tiles = order.filter(k => lines[k]).map(k => {
     const t = lines[k];
-    const col = colors[k] || 'var(--accent)';
+    const col = colors[k] || 'var(--text)';
     return `<div style="background:var(--surface2);border-radius:8px;padding:14px;text-align:center">
         <div style="font-size:2rem;font-weight:600;color:${col};line-height:1">${t.units}</div>
         <div style="font-size:0.75rem;color:var(--text2);margin-top:4px">${esc(t.label)} ${t.unit}</div>
         <div style="font-size:0.75rem;color:var(--text2);margin-top:6px">${t.orders} order${t.orders === 1 ? '' : 's'} · ${fmt$(t.revenue)}</div>
       </div>`;
   }).join('');
-  const rangeLabel = document.querySelector('.range-btn.active')?.textContent.trim() || 'All Time';
+  const rangeLabel = RANGE_LABELS[ACTIVE_RANGE] || 'All time';
   const customNote = lines.custom
     ? `<div style="font-size:0.75rem;color:var(--text2);margin-top:14px">Custom orders aren't counted under a product. To move them, open each one on the Orders tab, choose its product, and check the Sale Price and COGS before saving — choosing a saved product refills them.</div>`
     : '';
@@ -2438,15 +2534,29 @@ function openAddOrder(id) {
     document.getElementById('aoPayStatus').value    = 'paid';
     document.getElementById('aoFulfillStatus').value= 'in_progress';
     document.getElementById('aoPrintStatus').value  = 'not_printed';
-    titleEl.textContent = 'Log New Order';
-    saveEl.textContent  = 'Save Order';
+    titleEl.textContent = 'New Order';
+    saveEl.textContent  = 'Add Order';
   }
   document.getElementById('addOrderModal').classList.add('open');
   setTimeout(() => document.getElementById('aoCustomer').focus(), 50);
 }
 function closeAddOrder() { editOrderId = null; document.getElementById('addOrderModal').classList.remove('open'); }
+// In the form too: Done implies Printed, and Not printed reopens the order.
+document.getElementById('aoFulfillStatus').addEventListener('change', e => {
+  if (e.target.value === 'completed') {
+    document.getElementById('aoPrintStatus').value = 'printed';
+    window.vpcSyncForms?.(document.getElementById('addOrderModal'));
+  }
+});
+document.getElementById('aoPrintStatus').addEventListener('change', e => {
+  if (e.target.value === 'not_printed' && document.getElementById('aoFulfillStatus').value === 'completed') {
+    document.getElementById('aoFulfillStatus').value = 'in_progress';
+    window.vpcSyncForms?.(document.getElementById('addOrderModal'));
+  }
+});
 
 function saveNewOrder() {
+  if (window.vpcValidate && !vpcValidate('addOrderModal')) return;
   const sale = parseFloat(document.getElementById('aoSale').value);
   const cogs = parseFloat(document.getElementById('aoCogs').value);
   const cust = document.getElementById('aoCustomer').value.trim();
@@ -2479,44 +2589,60 @@ function saveNewOrder() {
 }
 
 function deleteOrder(id) {
-  if (!confirm('Delete this order? This cannot be undone.')) return;
+  if (!confirm('Delete this order? This cannot be undone.')) return false;
   localStorage.setItem(LS_ORDERS, JSON.stringify(rawOrders().filter(x => x.id !== id)));
   if (typeof auditLog === 'function') auditLog('DELETE_ORDER', VPCUtil.KEYS.orders, `Order deleted`);
   renderSalesAll();
   toast('Order deleted.');
+  return true;
 }
 
-function togglePayStatus(id) {
-  const arr = rawOrders();
-  const o = arr.find(x => x.id === id);
-  if (!o) return;
-  const cycle = { paid: 'partial', partial: 'unpaid', unpaid: 'paid' };
-  o.payStatus = cycle[o.payStatus || 'paid'] || 'paid';
-  localStorage.setItem(LS_ORDERS, JSON.stringify(arr));
-  renderOrderTable();
-}
 // Orders logged before the Printed column existed have no printStatus:
 // treat finished orders as printed and open ones as not yet printed.
 function printStatusOf(o) {
   if (o.printStatus === 'printed' || o.printStatus === 'not_printed') return o.printStatus;
   return (o.fulfillStatus || 'completed') === 'completed' ? 'printed' : 'not_printed';
 }
-function togglePrintStatus(id) {
-  const arr = rawOrders();
-  const o = arr.find(x => x.id === id);
-  if (!o) return;
-  o.printStatus = printStatusOf(o) === 'printed' ? 'not_printed' : 'printed';
-  // Not printed means it can't be done yet.
-  if (o.printStatus === 'not_printed' && (o.fulfillStatus || 'completed') === 'completed') o.fulfillStatus = 'in_progress';
-  localStorage.setItem(LS_ORDERS, JSON.stringify(arr));
-  renderOrderTable();
+// Status pills open a menu with every option (vpcMenu in shared.js), so a
+// status never changes on a stray tap.
+const STATUS_MENUS = {
+  pay: { label: 'Payment status', options: [
+    { value: 'paid', label: 'Paid', color: 'var(--green)' },
+    { value: 'partial', label: 'Partial', color: 'var(--orange)' },
+    { value: 'unpaid', label: 'Unpaid', color: 'var(--orange)' },
+  ] },
+  print: { label: 'Print status', options: [
+    { value: 'not_printed', label: 'Not printed', color: 'var(--orange)' },
+    { value: 'printed', label: 'Printed', color: 'var(--text2)' },
+  ] },
+  fill: { label: 'Fulfilment status', options: [
+    { value: 'in_progress', label: 'In progress', color: 'var(--blue-pill)' },
+    { value: 'completed', label: 'Done', color: 'var(--text2)' },
+  ] },
+};
+function openStatusMenu(e, id, kind) {
+  e.stopPropagation();
+  const o = rawOrders().find(x => x.id === id);
+  if (!o || !STATUS_MENUS[kind]) return;
+  const current = kind === 'pay' ? (o.payStatus || 'paid')
+    : kind === 'print' ? printStatusOf(o)
+    : (o.fulfillStatus || 'completed');
+  vpcMenu(e.currentTarget, { ...STATUS_MENUS[kind], current, onSelect: v => setOrderStatus(id, kind, v) });
 }
-function toggleFulfillStatus(id) {
+function setOrderStatus(id, kind, value) {
   const arr = rawOrders();
   const o = arr.find(x => x.id === id);
   if (!o) return;
-  o.fulfillStatus = (o.fulfillStatus === 'completed') ? 'in_progress' : 'completed';
-  if (o.fulfillStatus === 'completed') o.printStatus = 'printed';   // Done implies Printed
+  if (kind === 'pay') o.payStatus = value;
+  if (kind === 'print') {
+    o.printStatus = value;
+    // Not printed means it can't be done yet.
+    if (value === 'not_printed' && (o.fulfillStatus || 'completed') === 'completed') o.fulfillStatus = 'in_progress';
+  }
+  if (kind === 'fill') {
+    o.fulfillStatus = value;
+    if (value === 'completed') o.printStatus = 'printed';   // Done implies Printed
+  }
   localStorage.setItem(LS_ORDERS, JSON.stringify(arr));
   renderOrderTable();
 }
@@ -2531,10 +2657,26 @@ document.querySelectorAll('.tab').forEach(t => {
     // Recompute live insights each time the tab is opened so they always
     // reflect the latest order data (and refresh the "updated" timestamp).
     if (t.dataset.tab === 'insights') renderInsights();
+    updateTitleBar();
   });
 });
 
+function relDay(d) {
+  const days = Math.round((todayDate() - new Date(d + 'T00:00:00')) / 864e5);
+  if (days <= 0) return 'today';
+  if (days === 1) return 'yesterday';
+  if (days < 7) return `${days} days ago`;
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+function renderTitleSub() {
+  const all = getOrders();
+  const last = all.length ? all[all.length - 1].date : '';
+  document.getElementById('vpcSub').textContent = all.length
+    ? `${all.length} order${all.length === 1 ? '' : 's'} · last one ${relDay(last)}`
+    : 'No orders yet';
+}
 function renderSalesAll() {
+  renderTitleSub();
   renderKPIs();
   renderMonthlyChart();
   renderPipeline();
@@ -2594,6 +2736,7 @@ function closePrinterCreditModal() {
   _pcPrinterId = null;
 }
 function savePrinterCreditEntry() {
+  if (window.vpcValidate && !vpcValidate('printerCreditModal')) return;
   const amount = parseFloat(document.getElementById('pcAmount').value);
   const date   = document.getElementById('pcDate').value;
   const notes  = document.getElementById('pcNotes').value.trim();
@@ -2794,15 +2937,15 @@ function renderMonthlyGoal() {
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
           <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center">
-            <div style="font-size:1.1rem;font-weight:600;color:var(--green)">${fmt$(Math.max(0, goal - curRev))}</div>
+            <div style="font-size:1.1rem;font-weight:600;color:var(--text)">${fmt$(Math.max(0, goal - curRev))}</div>
             <div style="font-size:0.75rem;color:var(--text2);margin-top:2px;">Still Needed</div>
           </div>
           <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center">
-            <div style="font-size:1.1rem;font-weight:600;color:var(--accent)">${Math.ceil(Math.max(0, goal - curRev) / 90)}</div>
+            <div style="font-size:1.1rem;font-weight:600;color:var(--text)">${Math.ceil(Math.max(0, goal - curRev) / 90)}</div>
             <div style="font-size:0.75rem;color:var(--text2);margin-top:2px;">More Orders</div>
           </div>
           <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center">
-            <div style="font-size:1.1rem;font-weight:600;color:var(--accent2)">${streak}</div>
+            <div style="font-size:1.1rem;font-weight:600;color:var(--text)">${streak}</div>
             <div style="font-size:0.75rem;color:var(--text2);margin-top:2px;">Month Streak</div>
           </div>
         </div>
@@ -2877,19 +3020,19 @@ function renderInstalledBase() {
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:22px">
       <div style="background:var(--surface2);border-radius:8px;padding:14px;text-align:center">
-        <div style="font-size:2rem;font-weight:600;color:var(--green);line-height:1">${totalSets}</div>
+        <div style="font-size:2rem;font-weight:600;color:var(--text);line-height:1">${totalSets}</div>
         <div style="font-size:0.75rem;color:var(--text2);margin-top:4px">Sets in Field</div>
       </div>
       <div style="background:var(--surface2);border-radius:8px;padding:14px;text-align:center">
-        <div style="font-size:2rem;font-weight:600;color:var(--accent);line-height:1">${totalVendors}</div>
+        <div style="font-size:2rem;font-weight:600;color:var(--text);line-height:1">${totalVendors}</div>
         <div style="font-size:0.75rem;color:var(--text2);margin-top:4px">Vendors Using It</div>
       </div>
       <div style="background:var(--surface2);border-radius:8px;padding:14px;text-align:center">
-        <div style="font-size:2rem;font-weight:600;color:var(--accent2);line-height:1">${multiSet.length}</div>
+        <div style="font-size:2rem;font-weight:600;color:var(--text);line-height:1">${multiSet.length}</div>
         <div style="font-size:0.75rem;color:var(--text2);margin-top:4px">Multi-Set Vendors</div>
       </div>
       <div style="background:var(--surface2);border-radius:8px;padding:14px;text-align:center">
-        <div style="font-size:2rem;font-weight:600;color:var(--yellow);line-height:1">${singleSet.length}</div>
+        <div style="font-size:2rem;font-weight:600;color:var(--text);line-height:1">${singleSet.length}</div>
         <div style="font-size:0.75rem;color:var(--text2);margin-top:4px">Expansion Candidates</div>
       </div>
     </div>
@@ -2916,12 +3059,12 @@ function renderInstalledBase() {
       </div>
       <div style="background:var(--surface2);border-radius:8px;padding:12px">
         <div style="font-size:0.75rem;font-weight:600;color:var(--text2);margin-bottom:4px">Full Expansion Value</div>
-        <div style="font-size:1.2rem;font-weight:600;color:var(--yellow)">${fmt$(expansionRev)}</div>
+        <div style="font-size:1.2rem;font-weight:600;color:var(--text)">${fmt$(expansionRev)}</div>
         <div style="font-size:0.75rem;color:var(--text2);margin-top:2px">if every 1-set vendor buys a 2nd</div>
       </div>
       <div style="background:var(--surface2);border-radius:8px;padding:12px">
         <div style="font-size:0.75rem;font-weight:600;color:var(--text2);margin-bottom:4px">Replacement Potential</div>
-        <div style="font-size:1.2rem;font-weight:600;color:var(--accent2)">~${Math.round(totalSets * 0.02)}/mo</div>
+        <div style="font-size:1.2rem;font-weight:600;color:var(--text)">~${Math.round(totalSets * 0.02)}/mo</div>
         <div style="font-size:0.75rem;color:var(--text2);margin-top:2px">orders if ~2% of sets break monthly</div>
       </div>
     </div>`;
@@ -3006,7 +3149,7 @@ function renderFilament() {
     { val: fmt$(latestPR),         label: 'Latest Price / Roll',      sub: `was ${fmt$(firstPR)} at start (${savingPct > 0 ? '-'+savingPct+'%' : '+'+Math.abs(savingPct)+'%'})` },
     { val: (totalSpend / Math.max(totalRev,1) * 100).toFixed(1) + '%', label: 'Filament as % of Revenue', sub: `${fmt$(totalSpend)} of ${fmt$(totalRev)}` },
   ].map(k => `<div style="background:var(--surface);padding:16px 20px">
-    <div style="font-size:1.4rem;font-weight:600;color:var(--accent2)">${k.val}</div>
+    <div style="font-size:1.4rem;font-weight:600;color:var(--text)">${k.val}</div>
     <div style="font-size:0.75rem;color:var(--text2);margin-top:3px">${k.label}</div>
     <div style="font-size:0.75rem;color:var(--text2);margin-top:3px">${k.sub}</div>
   </div>`).join('');
@@ -3160,7 +3303,7 @@ function renderFilamentTable(items) {
     return `<tr style="${rowStyle}">
       <td style="white-space:nowrap">${fmtDate(f.date)}</td>
       <td class="num">${f.qty}</td>
-      <td class="num" style="color:var(--accent2)">${fmt$(f.total)}</td>
+      <td class="num">${fmt$(f.total)}</td>
       <td class="num" style="color:${isBad?'var(--red)':'var(--text)'};font-weight:${f.perRoll<11?'700':'400'}">${fmt$(f.perRoll)}</td>
       <td><span class="badge" style="background:var(--surface2);color:var(--text2)">${f.brand}</span></td>
       <td style="font-size:.75rem;color:${noteCol}">${esc(f.notes)||'—'}</td>
@@ -3171,7 +3314,7 @@ function renderFilamentTable(items) {
   document.getElementById('filamentTbody').innerHTML = rows + `<tr style="background:var(--surface2);font-weight:600">
     <td style="color:var(--text2)">Total — ${items.length} purchases</td>
     <td class="num">${totalRolls} rolls</td>
-    <td class="num" style="color:var(--accent2)">${fmt$(totalSpend)}</td>
+    <td class="num">${fmt$(totalSpend)}</td>
     <td class="num" style="color:var(--text2)">${totalRolls ? fmt$(totalSpend/totalRolls) + ' avg' : '—'}</td>
     <td colspan="2"></td>
   </tr>`;
@@ -3184,6 +3327,7 @@ function openAddFilament() {
 }
 function closeAddFilament() { document.getElementById('addFilamentModal').classList.remove('open'); }
 function saveNewFilament() {
+  if (window.vpcValidate && !vpcValidate('addFilamentModal')) return;
   const total = parseFloat(document.getElementById('afTotal').value);
   const qty   = parseInt(document.getElementById('afQty').value) || 1;
   const date  = document.getElementById('afDate').value;
@@ -3364,7 +3508,7 @@ function renderExpTable() {
       <td><div style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0"></span><strong>${esc(e.description)}</strong></div></td>
       <td><span style="font-size:.75rem;color:${color};font-weight:600">${esc(e.category)}</span></td>
       <td><span class="badge ${e.type==='fixed'?'badge-blue':'badge-yellow'}">${e.type}</span></td>
-      <td class="num" style="color:var(--red)">${fmt$(e.amount)}</td>
+      <td class="num">${fmt$(e.amount)}</td>
       <td style="text-align:right;white-space:nowrap">
         <button class="icon-btn" onclick="openExpModal('${e.id}')">✏️</button>
         <button class="icon-btn" onclick="deleteExpense('${e.id}')">✕</button>
@@ -3374,7 +3518,7 @@ function renderExpTable() {
   document.getElementById('expTbody').innerHTML = rows + (exps.length
     ? `<tr style="background:var(--surface2);font-weight:600">
         <td colspan="4" style="color:var(--text2)">Total — ${exps.length} expense${exps.length!==1?'s':''}</td>
-        <td class="num" style="color:var(--red)">${fmt$(total)}</td><td></td>
+        <td class="num">${fmt$(total)}</td><td></td>
       </tr>`
     : '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:40px">No expenses yet. Click "+ Add Expense" to start.</td></tr>');
 }
@@ -3398,13 +3542,13 @@ function renderExpByCategory() {
   document.getElementById('expCatGrid').innerHTML = sorted.map(([cat, d]) => {
     if (d.total === 0) return '';
     const pct = grandTotal > 0 ? (d.total/grandTotal*100).toFixed(1) : 0;
-    return `<div class="card" style="border-left:3px solid ${d.color}">
+    return `<div class="card">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
         <span style="width:10px;height:10px;border-radius:50%;background:${d.color};flex-shrink:0"></span>
         <span style="font-size:.85rem;font-weight:600;flex:1">${esc(cat)}</span>
         <span class="badge ${d.type==='fixed'?'badge-blue':'badge-yellow'}">${d.type}</span>
       </div>
-      <div style="font-size:1.4rem;font-weight:600;color:${d.color}">${fmt$(d.total)}</div>
+      <div style="font-size:1.4rem;font-weight:600;color:var(--text)">${fmt$(d.total)}</div>
       <div style="font-size:0.75rem;color:var(--text2);margin-top:4px">${d.count} entry${d.count!==1?'s':''} · ${pct}% of total</div>
       <div style="background:var(--surface2);border-radius:99px;height:4px;margin-top:10px">
         <div style="width:${pct}%;background:${d.color};border-radius:99px;height:4px;opacity:.85"></div>
@@ -3427,12 +3571,12 @@ function renderExpVsRevenue() {
     const exp   = expMonthly[mk] || 0;
     const net   = gross - exp;
     const margin = rev > 0 ? (net/rev*100).toFixed(1) : '—';
-    const netColor = net >= 0 ? 'var(--green)' : 'var(--red)';
+    const netColor = net >= 0 ? 'var(--text)' : 'var(--red)';
     return `<tr>
       <td style="font-weight:600">${monthLabel(mk)}</td>
-      <td class="num green">${fmt$(rev)}</td>
-      <td class="num" style="color:var(--accent)">${fmt$(gross)}</td>
-      <td class="num" style="color:var(--red)">${exp > 0 ? fmt$(exp) : '—'}</td>
+      <td class="num">${fmt$(rev)}</td>
+      <td class="num">${fmt$(gross)}</td>
+      <td class="num">${exp > 0 ? fmt$(exp) : '—'}</td>
       <td class="num" style="color:${netColor}">${fmt$(net)}</td>
       <td class="num" style="color:${netColor}">${margin !== '—' ? margin + '%' : '—'}</td>
     </tr>`;
@@ -3450,9 +3594,9 @@ function renderExpVsRevenue() {
     <tbody>${rows}
     <tr style="background:var(--surface2);font-weight:600">
       <td>All Time</td>
-      <td class="num green">${fmt$(totRev)}</td>
-      <td class="num" style="color:var(--accent)">${fmt$(totGross)}</td>
-      <td class="num" style="color:var(--red)">${fmt$(totExp)}</td>
+      <td class="num">${fmt$(totRev)}</td>
+      <td class="num">${fmt$(totGross)}</td>
+      <td class="num">${fmt$(totExp)}</td>
       <td class="num" style="color:${totNet>=0?'var(--green)':'var(--red)'}">${fmt$(totNet)}</td>
       <td class="num" style="color:${totNet>=0?'var(--green)':'var(--red)'}">${totRev>0?(totNet/totRev*100).toFixed(1)+'%':'—'}</td>
     </tr></tbody>
@@ -3483,6 +3627,7 @@ function openExpModal(id) {
 function closeExpModal() { document.getElementById('expModal').classList.remove('open'); }
 
 function saveExpense() {
+  if (window.vpcValidate && !vpcValidate('expModal')) return;
   const amount = parseFloat(document.getElementById('expAmount').value);
   const desc   = document.getElementById('expDesc').value.trim();
   const date   = document.getElementById('expDate').value;
@@ -3762,7 +3907,7 @@ function renderJtStatBar() {
   const t = jtTotals();
   document.getElementById('jtRevenue').textContent   = fmt$(t.revenue);
   document.getElementById('jtProfit').textContent    = fmt$(t.profit);
-  document.getElementById('jtProfit').style.color    = t.profit >= 0 ? 'var(--accent)' : 'var(--red)';
+  document.getElementById('jtProfit').style.color    = t.profit >= 0 ? '' : 'var(--red)';
   const marginEl = document.getElementById('jtMargin');
   marginEl.textContent  = t.revenue > 0 ? t.margin.toFixed(1) + '%' : '—';
   marginEl.style.color  = t.margin >= 60 ? 'var(--green)' : t.margin >= 40 ? 'var(--yellow)' : 'var(--red)';
@@ -3791,7 +3936,7 @@ function renderJtInventoryGrid() {
     const barCls    = left === 0 ? 'sold-out' : left <= 2 ? 'low' : '';
     const numCol    = left === 0 ? 'color:var(--red)' : left <= 2 ? 'color:var(--yellow)' : 'color:var(--green)';
     const breakdown = restocked > 0
-      ? `<div style="font-size:0.75rem;color:#bf5af2">↺ ${base} original + ${restocked} reordered</div>`
+      ? `<div style="font-size:0.75rem;color:var(--text2)">↺ ${base} original + ${restocked} reordered</div>`
       : '';
     return `<div class="jt-card">
       <div class="jt-name">${esc(c.name)}</div>
@@ -3824,7 +3969,7 @@ function renderJtSalesLog() {
       <td>${fmtDate(s.date)}</td>
       <td>${esc(chars || '—')}</td>
       <td class="num">${s.qty}</td>
-      <td class="num green">${fmt$(s.revenue)}</td>
+      <td class="num">${fmt$(s.revenue)}</td>
       <td class="num" style="color:var(--text2)">${fmt$(cogs)}</td>
       <td class="num" style="color:${profit>=0?'var(--accent)':'var(--red)'}">${fmt$(profit)}</td>
       <td style="color:var(--text2);font-size:0.78rem">${esc(s.notes||'')}</td>
@@ -3851,7 +3996,7 @@ function renderJtTopSellers() {
     const pct = (c.sold / max * 100).toFixed(0);
     const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉'
       : `<span style="display:inline-block;width:18px;text-align:center;font-size:0.75rem;color:var(--text2);font-weight:600">${i+1}</span>`;
-    const barColor = i === 0 ? '#f59e0b' : i === 1 ? '#a1a1a6' : i === 2 ? '#cd7f32' : '#8b5cf6';
+    const barColor = i === 0 ? '#f59e0b' : i === 1 ? '#a1a1a6' : i === 2 ? '#cd7f32' : 'var(--accent)';
     return `<div style="margin-bottom:11px">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
         <span style="font-size:.83rem;font-weight:600;display:flex;align-items:center;gap:5px">${medal} ${esc(c.name)}</span>
@@ -3928,7 +4073,7 @@ function renderJtOrderHistory() {
   tbody.innerHTML = rows.map(r => {
     const type = r.kind === 'original' ? badge('var(--surface2)', 'var(--text2)', '📦 Original')
       : r.kind === 'new' ? badge('rgba(48, 209, 88,0.12)', 'var(--green)', '🆕 New character')
-      : badge('rgba(139,92,246,0.14)', '#bf5af2', '↺ Reorder');
+      : badge('var(--orange-tint)', 'var(--orange)', '↺ Reorder');
     const costTxt = r.cost != null ? fmt$(r.cost) : '—';
     const unitTxt = (r.cost != null && r.qty > 0) ? fmt$(r.cost / r.qty) : '—';
     const del = r.kind === 'restock'
@@ -4026,6 +4171,7 @@ function jtUpdateRevPreview() {
 }
 
 function saveJtSale() {
+  if (window.vpcValidate && !vpcValidate('jtSaleModal')) return;
   const date  = document.getElementById('jtDate').value;
   const qty   = parseInt(document.getElementById('jtQty').value);
   const price = parseFloat(document.getElementById('jtPrice').value);
@@ -4181,6 +4327,7 @@ function openJtCharModal() {
 function closeJtCharModal() { document.getElementById('jtCharModal').classList.remove('open'); }
 
 function saveJtCharacter() {
+  if (window.vpcValidate && !vpcValidate('jtCharModal')) return;
   const name    = document.getElementById('jtCharName').value.trim();
   const date    = document.getElementById('jtCharDate').value;
   const qty     = parseInt(document.getElementById('jtCharQty').value);
@@ -4309,7 +4456,7 @@ function renderPinStatBar() {
   const t = pinTotals();
   document.getElementById('pinRevenue').textContent   = fmt$(t.revenue);
   document.getElementById('pinProfit').textContent    = fmt$(t.profit);
-  document.getElementById('pinProfit').style.color    = t.profit >= 0 ? '#2dd4bf' : 'var(--red)';
+  document.getElementById('pinProfit').style.color    = t.profit >= 0 ? '' : 'var(--red)';
   const marginEl = document.getElementById('pinMargin');
   marginEl.textContent  = t.revenue > 0 ? t.margin.toFixed(1) + '%' : '—';
   marginEl.style.color  = t.margin >= 60 ? 'var(--green)' : t.margin >= 40 ? 'var(--yellow)' : 'var(--red)';
@@ -4338,7 +4485,7 @@ function renderPinInventoryGrid() {
     const barCls    = left === 0 ? 'sold-out' : left <= 3 ? 'low' : '';
     const numCol    = left === 0 ? 'color:var(--red)' : left <= 3 ? 'color:var(--yellow)' : 'color:var(--green)';
     const breakdown = restocked > 0
-      ? `<div style="font-size:0.75rem;color:#2dd4bf">↺ ${base} original + ${restocked} reordered</div>`
+      ? `<div style="font-size:0.75rem;color:var(--text2)">↺ ${base} original + ${restocked} reordered</div>`
       : '';
     return `<div class="pin-card">
       <div class="pin-name">${esc(c.name)}</div>
@@ -4371,9 +4518,9 @@ function renderPinSalesLog() {
       <td>${fmtDate(s.date)}</td>
       <td>${esc(chars || '—')}</td>
       <td class="num">${s.qty}</td>
-      <td class="num green">${fmt$(s.revenue)}</td>
+      <td class="num">${fmt$(s.revenue)}</td>
       <td class="num" style="color:var(--text2)">${fmt$(cogs)}</td>
-      <td class="num" style="color:${profit>=0?'#2dd4bf':'var(--red)'}">${fmt$(profit)}</td>
+      <td class="num" style="color:${profit>=0?'var(--text)':'var(--red)'}">${fmt$(profit)}</td>
       <td style="color:var(--text2);font-size:0.78rem">${esc(s.notes||'')}</td>
       <td><button class="icon-btn" onclick="deletePinSale('${s.id}')" title="Delete">✕</button></td>
     </tr>`;
@@ -4398,7 +4545,7 @@ function renderPinTopSellers() {
     const pct = (c.sold / max * 100).toFixed(0);
     const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉'
       : `<span style="display:inline-block;width:18px;text-align:center;font-size:0.75rem;color:var(--text2);font-weight:600">${i+1}</span>`;
-    const barColor = i === 0 ? '#f59e0b' : i === 1 ? '#a1a1a6' : i === 2 ? '#cd7f32' : '#2dd4bf';
+    const barColor = i === 0 ? '#f59e0b' : i === 1 ? '#a1a1a6' : i === 2 ? '#cd7f32' : 'var(--accent)';
     return `<div style="margin-bottom:11px">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
         <span style="font-size:.83rem;font-weight:600;display:flex;align-items:center;gap:5px">${medal} ${esc(c.name)}</span>
@@ -4475,7 +4622,7 @@ function renderPinOrderHistory() {
   tbody.innerHTML = rows.map(r => {
     const type = r.kind === 'original' ? badge('var(--surface2)', 'var(--text2)', '📦 Original')
       : r.kind === 'new' ? badge('rgba(48, 209, 88,0.12)', 'var(--green)', '🆕 New character')
-      : badge('rgba(45,212,191,0.14)', '#2dd4bf', '↺ Reorder');
+      : badge('var(--orange-tint)', 'var(--orange)', '↺ Reorder');
     const costTxt = r.cost != null ? fmt$(r.cost) : '—';
     const unitTxt = (r.cost != null && r.qty > 0) ? fmt$(r.cost / r.qty) : '—';
     const del = r.kind === 'restock'
@@ -4567,11 +4714,12 @@ function pinUpdateRevPreview() {
     preview.style.display = 'block';
     preview.innerHTML = `<strong style="color:var(--text)">Preview:</strong>
       ${qty} pin${qty>1?'s':''} × ${fmt$(price)} = <strong style="color:var(--green)">${fmt$(revenue)}</strong>
-      &nbsp;·&nbsp; COGS ${fmt$(cogs)} &nbsp;·&nbsp; Profit <strong style="color:#2dd4bf">${fmt$(profit)}</strong>`;
+      &nbsp;·&nbsp; COGS ${fmt$(cogs)} &nbsp;·&nbsp; Profit <strong>${fmt$(profit)}</strong>`;
   } else { preview.style.display = 'none'; }
 }
 
 function savePinSale() {
+  if (window.vpcValidate && !vpcValidate('pinSaleModal')) return;
   const date  = document.getElementById('pinDate').value;
   const qty   = parseInt(document.getElementById('pinQty').value);
   const price = parseFloat(document.getElementById('pinPrice').value);
@@ -4727,6 +4875,7 @@ function openPinCharModal() {
 function closePinCharModal() { document.getElementById('pinCharModal').classList.remove('open'); }
 
 function savePinCharacter() {
+  if (window.vpcValidate && !vpcValidate('pinCharModal')) return;
   const name    = document.getElementById('pinCharName').value.trim();
   const date    = document.getElementById('pinCharDate').value;
   const qty     = parseInt(document.getElementById('pinCharQty').value);
@@ -4809,11 +4958,11 @@ function catSectionHtml(cat) {
   return `<div class="section" id="section-cat-${cat.id}" data-cat="${cat.id}">
   <div class="pin-stat-bar">
     <div class="pintat"><div class="pintat-num green" data-hook="revenue">$0.00</div><div class="pintat-label">Revenue</div></div>
-    <div class="pintat"><div class="pintat-num" style="color:${color}" data-hook="profit">$0.00</div><div class="pintat-label">Gross Profit</div></div>
-    <div class="pintat"><div class="pintat-num" style="color:var(--yellow)" data-hook="margin">—</div><div class="pintat-label">Gross Margin</div></div>
+    <div class="pintat"><div class="pintat-num" data-hook="profit">$0.00</div><div class="pintat-label">Gross Profit</div></div>
+    <div class="pintat"><div class="pintat-num" data-hook="margin">—</div><div class="pintat-label">Gross Margin</div></div>
     <div class="pintat"><div class="pintat-num" style="color:var(--text2)" data-hook="cogs">$0.00</div><div class="pintat-label">COGS</div></div>
     <div class="pintat"><div class="pintat-num" style="color:var(--text2)" data-hook="invcost">$0.00</div><div class="pintat-label" data-hook="invcostlabel">Inventory Cost</div></div>
-    <div class="pintat"><div class="pintat-num" style="color:var(--accent2)" data-hook="sold">0</div><div class="pintat-label">${esc(catCap(catPlural(cat, 2)))} Sold</div></div>
+    <div class="pintat"><div class="pintat-num" data-hook="sold">0</div><div class="pintat-label">${esc(catCap(catPlural(cat, 2)))} Sold</div></div>
     <div class="pintat"><div class="pintat-num" data-hook="remaining">0</div><div class="pintat-label">In Stock</div></div>
   </div>
   <main>
@@ -4826,7 +4975,6 @@ function catSectionHtml(cat) {
         <button class="btn-ghost" onclick="openCatModal('${cat.id}')" title="Rename, restyle, or delete this category">✎ Edit</button>
         <button class="btn-ghost" onclick="openCatItemModal('${cat.id}')">+ New Item</button>
         <button class="btn-ghost" onclick="openCatOrderModal('${cat.id}')">+ Restock</button>
-        <button class="btn-primary" style="background:${color}" onclick="openCatSaleModal('${cat.id}')">+ Log Sale</button>
       </div>
     </div>
     <div class="grid-2" style="margin-bottom:20px">
@@ -4873,24 +5021,19 @@ function catSectionHtml(cat) {
 </div>`;
 }
 
-// (Re)build every category tab + section. Tabs sit between Pins and Back Office.
+// (Re)build every category section. Their links live in the app navigation.
 function buildCatUI(activateCatId) {
-  const prevActive = document.querySelector('.section.active')?.id || '';
-  document.querySelectorAll('.main-tab[data-cat], .section[data-cat]').forEach(el => el.remove());
-  const evTab     = document.querySelector('.main-tab[data-section="backoffice"]');
+  const prevActive = activeSectionId();
+  document.querySelectorAll('.section[data-cat]').forEach(el => el.remove());
   const evSection = document.getElementById('section-backoffice');
   getCats().forEach(cat => {
-    evTab.insertAdjacentHTML('beforebegin',
-      `<div class="main-tab" data-section="cat-${cat.id}" data-cat="${cat.id}">${esc(catEmoji(cat))} ${esc(cat.name)}</div>`);
     evSection.insertAdjacentHTML('beforebegin', catSectionHtml(cat));
     renderCatSection(cat.id);
   });
-  const wantSection = activateCatId ? `section-cat-${activateCatId}` : prevActive;
-  if (activateCatId || !document.querySelector('.section.active')) {
-    const tab = document.querySelector(`.main-tab[data-section="${wantSection.replace(/^section-/, '')}"]`)
-      || document.querySelector('.main-tab[data-section="sales"]');
-    activateMainTab(tab);
-  }
+  window.vpcRefreshNav?.();
+  if (activateCatId) goSection('cat-' + activateCatId);
+  else if (document.getElementById('section-' + prevActive)) showSection(prevActive);
+  else goSection('sales');
 }
 
 function renderCatSection(catId) {
@@ -4902,7 +5045,7 @@ function renderCatSection(catId) {
   const color = catAccent(cat), unit = catUnit(cat);
   q('revenue').textContent = fmt$(t.revenue);
   q('profit').textContent  = fmt$(t.profit);
-  q('profit').style.color  = t.profit >= 0 ? color : 'var(--red)';
+  q('profit').style.color  = t.profit >= 0 ? '' : 'var(--red)';
   const margin = t.revenue > 0 ? (t.profit / t.revenue * 100) : 0;
   q('margin').textContent = t.revenue > 0 ? margin.toFixed(1) + '%' : '—';
   q('margin').style.color = margin >= 60 ? 'var(--green)' : margin >= 40 ? 'var(--yellow)' : 'var(--red)';
@@ -4935,7 +5078,7 @@ function renderCatInvGrid(cat, t, el) {
     const barCls = s.left === 0 ? 'sold-out' : s.left <= 3 ? 'low' : '';
     const numCol = s.left === 0 ? 'color:var(--red)' : s.left <= 3 ? 'color:var(--yellow)' : 'color:var(--green)';
     const breakdown = restocked > 0
-      ? `<div style="font-size:0.75rem;color:${catAccent(cat)}">↺ ${base} original + ${restocked} reordered</div>`
+      ? `<div style="font-size:0.75rem;color:var(--text2)">↺ ${base} original + ${restocked} reordered</div>`
       : '';
     return `<div class="pin-card">
       <div class="pin-name">${esc(s.name)}</div>
@@ -4973,7 +5116,7 @@ function renderCatOrderHistory(cat, tbody) {
   tbody.innerHTML = rows.map(r => {
     const type = r.kind === 'new'
       ? badge('rgba(48, 209, 88,0.12)', 'var(--green)', '🆕 New item')
-      : badge(hexRgba(color, 0.14), color, '↺ Reorder');
+      : badge('var(--orange-tint)', 'var(--orange)', '↺ Reorder');
     const costTxt = r.cost != null ? fmt$(r.cost) : '—';
     const unitTxt = (r.cost != null && r.qty > 0) ? fmt$(r.cost / r.qty) : '—';
     const del = r.kind === 'restock'
@@ -5009,9 +5152,9 @@ function renderCatSalesLog(cat, t, tbody) {
       <td>${fmtDate(s.date)}</td>
       <td>${esc(items || '—')}</td>
       <td class="num">${s.qty}</td>
-      <td class="num green">${fmt$(s.revenue)}</td>
+      <td class="num">${fmt$(s.revenue)}</td>
       <td class="num" style="color:var(--text2)">${fmt$(cogs)}</td>
-      <td class="num" style="color:${profit >= 0 ? color : 'var(--red)'}">${fmt$(profit)}</td>
+      <td class="num" style="color:${profit >= 0 ? 'var(--text)' : 'var(--red)'}">${fmt$(profit)}</td>
       <td style="color:var(--text2);font-size:0.78rem">${esc(s.notes || '')}</td>
       <td><button class="icon-btn" onclick="deleteCatSale('${cat.id}','${s.id}')" title="Delete">✕</button></td>
     </tr>`;
@@ -5100,6 +5243,7 @@ function openCatModal(catId) {
 function closeCatModal() { document.getElementById('catModal').classList.remove('open'); }
 
 function saveCategory() {
+  if (window.vpcValidate && !vpcValidate('catModal')) return;
   const name  = document.getElementById('cmName').value.trim();
   const unit  = document.getElementById('cmUnit').value.trim().toLowerCase();
   const emoji = document.getElementById('cmEmoji').value.trim();
@@ -5152,13 +5296,13 @@ function openCatItemModal(catId) {
   document.getElementById('ciQty').value   = 10;
   document.getElementById('ciCost').value  = '';
   document.getElementById('ciNotes').value = '';
-  document.getElementById('ciSave').style.background = catAccent(cat);
   document.getElementById('catItemModal').classList.add('open');
 }
 
 function closeCatItemModal() { document.getElementById('catItemModal').classList.remove('open'); }
 
 function saveCatItem() {
+  if (window.vpcValidate && !vpcValidate('catItemModal')) return;
   const cat = catById(CAT_ACTIVE); if (!cat) return;
   const name    = document.getElementById('ciName').value.trim();
   const date    = document.getElementById('ciDate').value;
@@ -5191,7 +5335,6 @@ function openCatOrderModal(catId) {
   document.getElementById('coCost').value  = '';
   document.getElementById('coNotes').value = '';
   document.getElementById('coNewItems').innerHTML = '';
-  document.getElementById('coSave').style.background = catAccent(cat);
   document.getElementById('coQtyGrid').innerHTML = t.stock.length ? t.stock.map(s => {
     const leftCol = s.left === 0 ? 'var(--red)' : s.left <= 3 ? 'var(--yellow)' : 'var(--text2)';
     return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px">
@@ -5309,7 +5452,6 @@ function openCatSaleModal(catId) {
   document.getElementById('csPrice').value = cat.sellPrice != null ? (+cat.sellPrice).toFixed(2) : '';
   document.getElementById('csNotes').value = '';
   document.getElementById('csPriceLabel').textContent = `Sale Price per ${catCap(catUnit(cat))} ($)`;
-  document.getElementById('csSave').style.background = catAccent(cat);
   document.getElementById('csItemSelect').innerHTML = t.stock.length ? t.stock.map(s => {
     const disabled = s.left <= 0 ? 'style="opacity:0.4;pointer-events:none"' : '';
     return `<div class="pin-char-btn" data-itemid="${s.id}" onclick="catToggleItem(this)" ${disabled}>
@@ -5335,11 +5477,12 @@ function catUpdateRevPreview() {
     preview.style.display = 'block';
     preview.innerHTML = `<strong style="color:var(--text)">Preview:</strong>
       ${qty} ${esc(catPlural(cat, qty))} × ${fmt$(price)} = <strong style="color:var(--green)">${fmt$(revenue)}</strong>
-      &nbsp;·&nbsp; COGS ${fmt$(cogs)} &nbsp;·&nbsp; Profit <strong style="color:${catAccent(cat)}">${fmt$(profit)}</strong>`;
+      &nbsp;·&nbsp; COGS ${fmt$(cogs)} &nbsp;·&nbsp; Profit <strong>${fmt$(profit)}</strong>`;
   } else { preview.style.display = 'none'; }
 }
 
 function saveCatSale() {
+  if (window.vpcValidate && !vpcValidate('catSaleModal')) return;
   const cat = catById(CAT_ACTIVE); if (!cat) return;
   const date  = document.getElementById('csDate').value;
   const qty   = parseInt(document.getElementById('csQty').value);
@@ -5405,10 +5548,12 @@ initOrders();
 initFilament();
 renderSalesAll();
 renderExpensesAll();
+routeFromHash();
 
 
 // Full re-render hook — called by VpcSync after pulling fresh cloud data
 window.renderAll = function() {
+  try { buildCatUI();        } catch(e) {}
   try { renderSalesAll();    } catch(e) {}
   try { renderExpensesAll(); } catch(e) {}
   try { renderJtAll();       } catch(e) {}
