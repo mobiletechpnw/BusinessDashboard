@@ -6,8 +6,8 @@
  * colour only for state, eight type styles, a 4-pt spacing grid, five radii.
  * Full system (light + dark, components, rules): the "Design System" artifact.
  *
- * The dashboard ships its dark theme. Light mode follows the device once the
- * remaining inline colours are tokenised (roadmap #10–#11).
+ * Dark is the base below; light follows the device, or the Appearance
+ * setting in the account menu (see "Light mode").
  *
  * Legacy token names (--text, --text2, --border, --glass-border, --accent2,
  * --radius) are kept as aliases so every page keeps working.
@@ -69,6 +69,7 @@
   --sidebar-w: 232px;
   --header-h: 58px; /* shared.js measures the title bar and keeps this exact */
   --tabbar-h: 50px;
+  --hairline: 1px; /* 0.5px on high-density screens, below */
   --chrome-bottom: env(safe-area-inset-bottom, 0px); /* bottom chrome to keep clear of */
 
   /* Type */
@@ -123,6 +124,91 @@
   --t-base: 200ms;
   --t-move: 320ms;
   --t-sheet: 420ms;
+}
+
+@media (min-resolution: 2dppx) {
+  :root {
+    --hairline: 0.5px;
+  }
+}
+
+/* ── Light mode ──
+   Auto follows the device; the account menu can pin Light or Dark, which
+   util.js applies as data-theme on <html> before the page paints. The
+   blocks are identical: one for the device setting, one for the choice. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    --bg: #f5f5f7;
+    --surface: #ffffff;
+    --surface2: #f2f2f7;
+    --fill: rgba(118, 118, 128, 0.12);
+    --fill-2: rgba(118, 118, 128, 0.07);
+    --thumb: #ffffff;
+    --separator: rgba(60, 60, 67, 0.14);
+    --label: #1d1d1f;
+    --label-2: #636366;
+    --label-3: #737377;
+    --accent: #0060c4;
+    --accent-fill: #0071e3;
+    --accent-fill-hover: #0077ed;
+    --accent-tint: rgba(0, 113, 227, 0.12);
+    --ring: #0071e3;
+    --green: #187634;
+    --green-tint: #e3f7e8;
+    --orange: #b93100;
+    --orange-tint: #fff0db;
+    --red: #c4001a;
+    --red-tint: #ffe4e2;
+    --yellow: #8a6200;
+    --yellow-tint: #fff6d6;
+    --blue-pill: #0066cc;
+    --blue-tint: #e5f0ff;
+    --purple-pill: #8944ab;
+    --purple-tint: #f3e8fa;
+    --accent2: #8944ab;
+    --chrome: rgba(251, 251, 253, 0.78);
+    --shadow-1: 0 1px 1px rgba(0, 0, 0, 0.02), 0 4px 16px rgba(0, 0, 0, 0.06);
+    --shadow-2: 0 2px 4px rgba(0, 0, 0, 0.04), 0 12px 32px rgba(0, 0, 0, 0.1);
+    --shadow-pop: 0 0 0 0.5px rgba(0, 0, 0, 0.08), 0 10px 30px rgba(0, 0, 0, 0.14);
+    --highlight: inset 0 0 0 0 transparent;
+    color-scheme: light;
+  }
+}
+:root[data-theme='light'] {
+  --bg: #f5f5f7;
+  --surface: #ffffff;
+  --surface2: #f2f2f7;
+  --fill: rgba(118, 118, 128, 0.12);
+  --fill-2: rgba(118, 118, 128, 0.07);
+  --thumb: #ffffff;
+  --separator: rgba(60, 60, 67, 0.14);
+  --label: #1d1d1f;
+  --label-2: #636366;
+  --label-3: #737377;
+  --accent: #0060c4;
+  --accent-fill: #0071e3;
+  --accent-fill-hover: #0077ed;
+  --accent-tint: rgba(0, 113, 227, 0.12);
+  --ring: #0071e3;
+  --green: #187634;
+  --green-tint: #e3f7e8;
+  --orange: #b93100;
+  --orange-tint: #fff0db;
+  --red: #c4001a;
+  --red-tint: #ffe4e2;
+  --yellow: #8a6200;
+  --yellow-tint: #fff6d6;
+  --blue-pill: #0066cc;
+  --blue-tint: #e5f0ff;
+  --purple-pill: #8944ab;
+  --purple-tint: #f3e8fa;
+  --accent2: #8944ab;
+  --chrome: rgba(251, 251, 253, 0.78);
+  --shadow-1: 0 1px 1px rgba(0, 0, 0, 0.02), 0 4px 16px rgba(0, 0, 0, 0.06);
+  --shadow-2: 0 2px 4px rgba(0, 0, 0, 0.04), 0 12px 32px rgba(0, 0, 0, 0.1);
+  --shadow-pop: 0 0 0 0.5px rgba(0, 0, 0, 0.08), 0 10px 30px rgba(0, 0, 0, 0.14);
+  --highlight: inset 0 0 0 0 transparent;
+  color-scheme: light;
 }
 
 /* ── Base reset ── */
@@ -340,6 +426,26 @@ strong {
 }
 .vpc-menu button[aria-checked='true'] .vpc-menu-check {
   visibility: visible;
+}
+.vpc-menu-check .vpc-ico {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.5;
+}
+/* A search result's icon, in a quiet square like the navigation's */
+.search-ico {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-sm);
+  background: var(--fill);
+  color: var(--accent);
+}
+.search-ico .vpc-ico {
+  width: 17px;
+  height: 17px;
 }
 .vpc-menu-dot {
   width: 8px;
@@ -561,7 +667,10 @@ header {
   background: var(--chrome);
   -webkit-backdrop-filter: var(--chrome-blur);
   backdrop-filter: var(--chrome-blur);
-  border-bottom: 1px solid var(--separator);
+  border-bottom: var(--hairline) solid transparent;
+  transition:
+    background-color var(--t-base) var(--ease),
+    border-color var(--t-base) var(--ease);
   padding: 0 32px;
   display: flex;
   align-items: center;
@@ -570,6 +679,25 @@ header {
   position: sticky;
   top: 0;
   z-index: 200;
+}
+/* The bar gains its hairline once content passes under it (shared.js). */
+html.scrolled header {
+  border-bottom-color: var(--separator);
+}
+/* A page with a large title starts with a clear bar, as on iOS; the glass
+   comes in with the hairline. */
+html.has-large-title:not(.scrolled) header {
+  background-color: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+/* A page with a large title shows its small title only after scrolling. */
+html.has-large-title header .brand {
+  opacity: 0;
+  transition: opacity var(--t-base) var(--ease);
+}
+html.has-large-title.title-in header .brand {
+  opacity: 1;
 }
 /* One title style for every page: 17px semibold, like a navigation bar. */
 header .brand,
@@ -666,7 +794,7 @@ header h1 span {
   top: 0;
   left: 14px;
   right: 0;
-  border-top: 1px solid var(--separator);
+  border-top: var(--hairline) solid var(--separator);
 }
 .glist-val {
   min-width: 0;
@@ -746,7 +874,7 @@ header h1 span {
   top: 0;
   left: 38px;
   right: 0;
-  border-top: 1px solid var(--separator);
+  border-top: var(--hairline) solid var(--separator);
 }
 .attn-row:hover {
   background: var(--fill-2);
@@ -815,6 +943,12 @@ header h1 span {
     padding-bottom: var(--chrome-bottom);
   }
 }
+/* A page that runs full screen, without the app navigation (Show Mode) */
+body[data-nav='none'] {
+  --chrome-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: 0;
+  padding-bottom: 0;
+}
 
 .vpc-ico {
   width: 20px;
@@ -841,7 +975,7 @@ header h1 span {
   background: var(--chrome);
   -webkit-backdrop-filter: var(--chrome-blur);
   backdrop-filter: var(--chrome-blur);
-  border-right: 1px solid var(--separator);
+  border-right: var(--hairline) solid var(--separator);
 }
 @media (min-width: 1024px) {
   .vpc-sidebar {
@@ -900,7 +1034,7 @@ header h1 span {
 .vpc-search kbd {
   font-family: inherit;
   font-size: 0.75rem;
-  color: var(--label-3);
+  color: var(--label-2);
 }
 .vpc-nav {
   flex: 1;
@@ -1073,7 +1207,7 @@ html[data-sync='offline'] .vpc-sync-dot {
   background: var(--chrome);
   -webkit-backdrop-filter: var(--chrome-blur);
   backdrop-filter: var(--chrome-blur);
-  border-top: 1px solid var(--separator);
+  border-top: var(--hairline) solid var(--separator);
 }
 @media (min-width: 1024px) {
   .vpc-tabbar {
@@ -1226,6 +1360,15 @@ html[data-sync='offline'] .vpc-sync-dot {
   min-height: 44px;
   font-size: 1rem;
 }
+.vpc-sheet-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 4px 10px;
+  font-size: 1rem;
+}
 .vpc-sheet-who {
   display: flex;
   align-items: center;
@@ -1296,6 +1439,24 @@ div.modal-overlay {
   font-size: 1.25rem;
   font-weight: 600;
   letter-spacing: -0.012em;
+}
+/* A sheet's round close button */
+.sheet-close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  min-height: 0;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--fill);
+  color: var(--label-2);
+}
+.sheet-close .vpc-ico {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.4;
 }
 /* The Save row never scrolls out of sight. */
 .modal-overlay > .modal > .modal-actions {
@@ -1515,6 +1676,319 @@ div.modal-overlay {
   .modal .field-inset > .field-error {
     flex-basis: 100%;
     margin: 0 0 8px;
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   COMPONENTS: the patterns pages used to repeat as inline styles
+══════════════════════════════════════════════════ */
+/* Secondary text: captions (12px) and subheads (13px) */
+.caption {
+  font-size: 0.75rem;
+  color: var(--text2);
+}
+.subhead {
+  font-size: 0.8125rem;
+  color: var(--text2);
+}
+.caption.below,
+.subhead.below {
+  margin-top: 3px;
+}
+.caption.below-2 {
+  margin-top: 6px;
+}
+.caption.above {
+  margin-bottom: 10px;
+}
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text2);
+}
+.section-label.above-1 {
+  margin-bottom: 4px;
+}
+.title-3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+.modal-help {
+  margin: -6px 0 14px;
+  font-size: 0.8125rem;
+  color: var(--text2);
+}
+.empty-line {
+  padding: 14px 0;
+  font-size: 0.8125rem;
+  color: var(--text2);
+}
+/* Rows */
+.row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.row-baseline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.row-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.row-wrap.tight {
+  gap: 6px;
+}
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+.nowrap {
+  white-space: nowrap;
+}
+.span-all {
+  grid-column: 1 / -1;
+}
+.clickable {
+  cursor: pointer;
+}
+/* Figures inside cards */
+.inner-tile {
+  padding: 14px;
+  border-radius: var(--r-sm);
+  background: var(--surface2);
+  text-align: center;
+}
+.inner-tile.compact {
+  padding: 10px;
+}
+.stat-big {
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.stat-mid {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.bar-track {
+  height: 6px;
+  border-radius: var(--r-full);
+  background: var(--surface2);
+}
+.bar-track.thick {
+  height: 8px;
+  overflow: hidden;
+}
+/* Spacing on the 4-point scale */
+.mb-10 {
+  margin-bottom: 10px;
+}
+.mb-14 {
+  margin-bottom: 14px;
+}
+.mb-20 {
+  margin-bottom: 20px;
+}
+.mb-24 {
+  margin-bottom: 24px;
+}
+.mb-28 {
+  margin-bottom: 28px;
+}
+.mt-8 {
+  margin-top: 8px;
+}
+.mt-14 {
+  margin-top: 14px;
+}
+.semibold {
+  font-weight: 600;
+}
+.empty-block {
+  text-align: center;
+  padding: 40px;
+  color: var(--text2);
+}
+/* The Sales Hub's trackers (Jet Tags, Pins, your own categories) */
+.tracker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.tracker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  margin-top: 4px;
+}
+.pick-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 6px;
+}
+.qty-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin-top: 6px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+.qty-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface2);
+}
+.qty-name {
+  min-width: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+input.qty-input,
+input.inline-input {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.85rem;
+  outline: none;
+}
+input.qty-input {
+  width: 64px;
+  text-align: center;
+}
+input.qty-input.on-fill,
+input.inline-input {
+  background: var(--surface2);
+}
+input.inline-input {
+  flex: 1;
+  padding: 7px 10px;
+  font-size: 0.82rem;
+}
+button.btn-small {
+  margin-top: 6px;
+  padding: 5px 10px;
+  font-size: 0.75rem;
+}
+/* Colour helpers last, so they win over the components above */
+.text-1 {
+  color: var(--text);
+}
+.text-2 {
+  color: var(--text2);
+}
+.is-red {
+  color: var(--red);
+}
+.is-green {
+  color: var(--green);
+}
+.is-yellow {
+  color: var(--yellow);
+}
+.is-orange {
+  color: var(--orange);
+}
+.is-accent {
+  color: var(--accent);
+}
+.modal-overlay > .modal.modal-wide {
+  width: 580px;
+}
+
+/* ── Icons in context (icons.svg via VPCUtil.icon) ── */
+.e-icon .vpc-ico,
+.empty-icon .vpc-ico,
+.empty .icon .vpc-ico {
+  width: 44px;
+  height: 44px;
+  stroke-width: 1.5;
+  color: var(--label-3);
+}
+/* Icon sizes: sm for lists and chips; inline sits in a line of text; em
+   fills a slot that was sized for an emoji glyph. */
+.vpc-ico.sm {
+  width: 16px;
+  height: 16px;
+}
+.vpc-ico.inline {
+  width: 1.15em;
+  height: 1.15em;
+  margin-right: 0.3em;
+  vertical-align: -0.2em;
+}
+.vpc-ico.em {
+  width: 1em;
+  height: 1em;
+}
+.icon-btn .vpc-ico,
+.act-btn .vpc-ico {
+  width: 16px;
+  height: 16px;
+}
+/* Rank in a top-sellers list */
+.rank {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--fill);
+  color: var(--label-2);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+/* A low-stock row: a state dot, the item, how many are left */
+.stock-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: var(--fill-2);
+}
+.stock-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+}
+
+/* Squircle corners where supported; elsewhere ordinary rounded corners */
+@supports (corner-shape: squircle) {
+  .card,
+  .kpi,
+  .attn-list,
+  .glist,
+  .modal-overlay > .modal,
+  .vpc-menu,
+  .vpc-sheet,
+  .stepper,
+  .seg {
+    corner-shape: squircle;
   }
 }
 
@@ -1817,32 +2291,38 @@ main {
   }
 }
 
-/* ── Floating Action Button (FAB) for add actions on mobile ── */
-.fab {
-  position: fixed;
-  bottom: calc(16px + var(--chrome-bottom));
-  right: 20px;
-  z-index: 500;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: var(--accent-fill);
-  color: var(--on-accent);
-  font-size: 1.5rem;
-  display: none;
+/* ── The title bar's one main action (New…, Add…) ──
+   A filled pill with its label; on phones a bare + like a navigation bar.
+   The button carries an aria-label, since phones hide the label. */
+header .vpc-primary {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-2);
-  border: none;
-  cursor: pointer;
-  transition: transform var(--t-fast) var(--ease);
+  gap: 6px;
+  flex: none;
 }
-.fab:active {
-  transform: scale(0.93);
+header .vpc-primary .vpc-ico {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.2;
 }
 @media (max-width: 700px) {
-  .fab {
-    display: flex;
+  header .vpc-primary,
+  header .vpc-primary:hover {
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0;
+    justify-content: center;
+    background: none;
+    color: var(--accent);
+    margin-right: -10px;
+  }
+  header .vpc-primary span {
+    display: none;
+  }
+  header .vpc-primary .vpc-ico {
+    width: 24px;
+    height: 24px;
   }
 }
 

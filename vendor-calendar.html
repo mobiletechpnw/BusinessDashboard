@@ -10,19 +10,38 @@
 <style>
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
 
+/* Tokens: dark below; light follows the device, or the Appearance setting
+   (util.js sets data-theme before the page paints). Same values as styles.css. */
 :root {
-  --bg:#000000;
-  --surface:#1c1c1e;
-  --border:rgba(255,255,255,.1);
-  --accent:#2997ff;
-  --accent-fill:#0071e3;
-  --accent2:#bf5af2;
-  --green:#30d158;
-  --yellow:#ffd60a;
-  --text:#f5f5f7;
-  --text2:#a1a1a6;
-  --radius:12px;
+  color-scheme: dark;
+  --bg: #000000; --surface: #1c1c1e; --surface2: #2c2c2e; --fill: rgba(118, 118, 128, 0.24);
+  --border: rgba(255, 255, 255, 0.1); --text: #f5f5f7; --text2: #a1a1a6;
+  --accent: #2997ff; --accent-fill: #0071e3; --accent-hover: #0077ed; --ring: #2997ff; --on-accent: #ffffff;
+  --accent2: #bf5af2; --green: #30d158; --yellow: #ffd60a; --red: #ff6961;
+  --shadow: 0 24px 80px rgba(0, 0, 0, 0.45); --overlay: rgba(0, 0, 0, 0.6);
+  --radius: 12px;
 }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    color-scheme: light;
+    --bg: #f5f5f7; --surface: #ffffff; --surface2: #f2f2f7; --fill: rgba(118, 118, 128, 0.12);
+    --border: rgba(60, 60, 67, 0.14); --text: #1d1d1f; --text2: #636366;
+    --accent: #0060c4; --accent-fill: #0071e3; --accent-hover: #0077ed; --ring: #0071e3;
+    --accent2: #8944ab; --green: #187634; --yellow: #8a6200; --red: #c4001a;
+    --shadow: 0 24px 60px rgba(0, 0, 0, 0.08); --overlay: rgba(0, 0, 0, 0.35);
+  }
+}
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f5f5f7; --surface: #ffffff; --surface2: #f2f2f7; --fill: rgba(118, 118, 128, 0.12);
+  --border: rgba(60, 60, 67, 0.14); --text: #1d1d1f; --text2: #636366;
+  --accent: #0060c4; --accent-fill: #0071e3; --accent-hover: #0077ed; --ring: #0071e3;
+  --accent2: #8944ab; --green: #187634; --yellow: #8a6200; --red: #c4001a;
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.08); --overlay: rgba(0, 0, 0, 0.35);
+}
+/* Line icons from icons.svg */
+.vpc-ico { width: 1.15em; height: 1.15em; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; vertical-align: -0.2em; }
+.vpc-ico.inline { margin-right: 0.3em; }
 
 html, body {
   font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',system-ui,sans-serif;
@@ -39,7 +58,7 @@ body {
 /* ── HEADER ── */
 .page-header { text-align:center; padding:40px 20px 28px; }
 .logo { display:inline-flex; align-items:center; gap:10px; margin-bottom:16px; }
-.logo-icon { width:42px; height:42px; background:var(--accent-fill); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; }
+.logo-icon { width:42px; height:42px; background:var(--accent-fill); color:var(--on-accent); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; }
 .logo-name { font-size:1.1rem; font-weight:600; letter-spacing:-.3px; }
 .logo-name span { color: inherit; }
 .page-title { font-size:1.8rem; font-weight:600; letter-spacing:-.5px; margin-bottom:6px; }
@@ -47,20 +66,20 @@ body {
 .header-actions { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
 
 /* ── BUTTONS ── */
-.btn-primary { background:var(--accent-fill); color:#fff; border:none; border-radius:999px; padding:9px 20px; font-size:.82rem; font-weight:600; cursor:pointer; transition:all .2s; box-shadow:none; white-space:nowrap; }
+.btn-primary { background:var(--accent-fill); color:var(--on-accent); border:none; border-radius:999px; padding:9px 20px; font-size:.82rem; font-weight:600; cursor:pointer; transition:all .2s; box-shadow:none; white-space:nowrap; }
 .btn-primary:hover { opacity:.9; transform:translateY(-1px); }
-.btn-ghost { background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:999px; padding:8px 18px; font-size:.82rem; font-weight:600; color:var(--text2); cursor:pointer; transition:all .15s; white-space:nowrap; }
+.btn-ghost { background:color-mix(in srgb, var(--text) 4%, transparent); border:1px solid var(--border); border-radius:999px; padding:8px 18px; font-size:.82rem; font-weight:600; color:var(--text2); cursor:pointer; transition:all .15s; white-space:nowrap; }
 .btn-ghost:hover { border-color:var(--accent); color:var(--accent); }
 
 /* ── FILTER BAR ── */
 .filter-bar { display:flex; align-items:center; justify-content:center; gap:8px; padding:0 20px 20px; flex-wrap:wrap; }
 .filter-chip { padding:5px 14px; border-radius:99px; font-size:.75rem; font-weight:600; border:1px solid var(--border); background:var(--surface); color:var(--text2); cursor:pointer; transition:all .15s; user-select:none; }
-.filter-chip.active { border-color:var(--accent); color:var(--accent); background:rgba(10, 132, 255,.1); }
+.filter-chip.active { border-color:var(--accent); color:var(--accent); background:color-mix(in srgb, var(--accent) 10%, transparent); }
 
 /* ── VIEW TOGGLE ── */
-.view-toggle { display:flex; gap:3px; background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:8px; padding:3px; }
+.view-toggle { display:flex; gap:3px; background:color-mix(in srgb, var(--text) 4%, transparent); border:1px solid var(--border); border-radius:8px; padding:3px; }
 .view-btn { padding:5px 13px; border-radius:999px; border:none; background:none; color:var(--text2); font-size:.76rem; font-weight:600; cursor:pointer; transition:all .15s; }
-.view-btn.active { background:var(--accent-fill); color:#fff; }
+.view-btn.active { background:var(--accent-fill); color:var(--on-accent); }
 
 /* ── MONTH NAV ── */
 .month-nav { display:flex; align-items:center; justify-content:center; gap:14px; padding:0 20px 16px; }
@@ -74,15 +93,15 @@ body {
 .cal-weekday { text-align:center; font-size:0.75rem; font-weight:600; color:var(--text2); padding:5px 0; }
 .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
 
-.cal-day { min-height:86px; border-radius:8px; padding:7px; border:1px solid var(--border); background:rgba(255,255,255,.02); transition:border-color .15s; overflow:hidden; }
+.cal-day { min-height:86px; border-radius:8px; padding:7px; border:1px solid var(--border); background:color-mix(in srgb, var(--text) 2%, transparent); transition:border-color .15s; overflow:hidden; }
 .cal-day.other-month { opacity:.3; }
-.cal-day.today { border-color:rgba(10, 132, 255,.4); background:rgba(10, 132, 255,.04); }
-.cal-day.has-event { border-color:rgba(191, 90, 242,.25); background:rgba(191, 90, 242,.03); }
+.cal-day.today { border-color:color-mix(in srgb, var(--accent) 40%, transparent); background:color-mix(in srgb, var(--accent) 4%, transparent); }
+.cal-day.has-event { border-color:color-mix(in srgb, var(--accent2) 25%, transparent); background:color-mix(in srgb, var(--accent2) 3%, transparent); }
 .cal-day-num { font-size:.75rem; font-weight:600; color:var(--text2); margin-bottom:3px; line-height:1; }
-.cal-day.today .cal-day-num { background:var(--accent-fill); color:#fff; width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.75rem; }
+.cal-day.today .cal-day-num { background:var(--accent-fill); color:var(--on-accent); width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.75rem; }
 
-.cal-event { background:rgba(10, 132, 255,.18); border:1px solid rgba(10, 132, 255,.3); border-radius:8px; padding:3px 6px; margin-top:2px; cursor:pointer; transition:all .15s; }
-.cal-event:hover { background:rgba(10, 132, 255,.32); border-color:var(--accent); }
+.cal-event { background:color-mix(in srgb, var(--accent) 18%, transparent); border:1px solid color-mix(in srgb, var(--accent) 30%, transparent); border-radius:8px; padding:3px 6px; margin-top:2px; cursor:pointer; transition:all .15s; }
+.cal-event:hover { background:color-mix(in srgb, var(--accent) 32%, transparent); border-color:var(--accent); }
 .cal-event-name { font-size:0.75rem; font-weight:600; line-height:1.3; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .cal-event-loc { font-size:0.75rem; color:var(--text2); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .cal-event.approved { border-left:2px solid var(--green); }
@@ -93,7 +112,7 @@ body {
 .list-month-group { margin-bottom:28px; }
 .list-month-heading { font-size:0.75rem; font-weight:600; color:var(--text2); margin-bottom:10px; padding-bottom:7px; border-bottom:1px solid var(--border); }
 .list-event { display:flex; align-items:flex-start; gap:14px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; margin-bottom:8px; transition:border-color .2s, transform .15s; cursor:pointer; }
-.list-event:hover { border-color:rgba(10, 132, 255,.4); transform:translateX(3px); }
+.list-event:hover { border-color:color-mix(in srgb, var(--accent) 40%, transparent); transform:translateX(3px); }
 .list-event.approved { border-left:3px solid var(--green); }
 .list-event.pending  { border-left:3px solid var(--yellow); }
 .list-date-col { text-align:center; flex-shrink:0; width:44px; }
@@ -104,13 +123,13 @@ body {
 .list-name { font-size:.9rem; font-weight:600; line-height:1.3; }
 .list-meta { font-size:0.75rem; color:var(--text2); margin-top:4px; display:flex; flex-wrap:wrap; gap:8px; }
 .status-badge { font-size:0.75rem; font-weight:600; padding:3px 9px; border-radius:99px; flex-shrink:0; align-self:flex-start; white-space:nowrap; }
-.badge-approved { background:rgba(48, 209, 88,.15); color:var(--green); border:1px solid rgba(48, 209, 88,.3); }
-.badge-pending  { background:rgba(255, 214, 10,.15);  color:var(--yellow); border:1px solid rgba(255, 214, 10,.3); }
+.badge-approved { background:color-mix(in srgb, var(--green) 15%, transparent); color:var(--green); border:1px solid color-mix(in srgb, var(--green) 30%, transparent); }
+.badge-pending  { background:color-mix(in srgb, var(--yellow) 15%, transparent);  color:var(--yellow); border:1px solid color-mix(in srgb, var(--yellow) 30%, transparent); }
 
 /* ── EVENT DETAIL MODAL ── */
-.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:500; align-items:center; justify-content:center; padding:16px; }
+.modal-overlay { display:none; position:fixed; inset:0; background:var(--overlay); z-index:500; align-items:center; justify-content:center; padding:16px; }
 .modal-overlay.open { display:flex; }
-.modal { background:#1c1c1e; border:1px solid var(--border); border-radius:28px; padding:28px; width:460px; max-width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 24px 80px rgba(0,0,0,.6); }
+.modal { background:var(--surface); border:1px solid var(--border); border-radius:28px; padding:28px; width:460px; max-width:100%; max-height:90vh; overflow-y:auto; box-shadow:var(--shadow); }
 .modal-tag { font-size:0.75rem; font-weight:600; color:var(--text2); margin-bottom:10px; }
 .modal-name { font-size:1.3rem; font-weight:600; letter-spacing:-.4px; line-height:1.3; margin-bottom:6px; }
 .modal-sub { font-size:.78rem; color:var(--text2); margin-bottom:16px; display:flex; flex-wrap:wrap; gap:12px; }
@@ -118,18 +137,19 @@ body {
 
 /* vendor table list inside modal */
 .vendor-section-title { font-size:0.75rem; font-weight:600; color:var(--text2); margin-bottom:10px; }
-.vendor-row { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-radius:8px; background:rgba(255,255,255,.03); border:1px solid var(--border); margin-bottom:6px; gap:10px; }
+.vendor-row { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-radius:8px; background:color-mix(in srgb, var(--text) 3%, transparent); border:1px solid var(--border); margin-bottom:6px; gap:10px; }
 .vendor-row-name { font-size:.85rem; font-weight:600; }
 .vendor-row-status { font-size:0.75rem; font-weight:600; padding:3px 10px; border-radius:99px; white-space:nowrap; }
-.vs-paid   { background:rgba(48, 209, 88,.15); color:var(--green); border:1px solid rgba(48, 209, 88,.3); }
-.vs-unpaid { background:rgba(255, 214, 10,.15);  color:var(--yellow); border:1px solid rgba(255, 214, 10,.3); }
+.vs-paid   { background:color-mix(in srgb, var(--green) 15%, transparent); color:var(--green); border:1px solid color-mix(in srgb, var(--green) 30%, transparent); }
+.vs-unpaid { background:color-mix(in srgb, var(--yellow) 15%, transparent);  color:var(--yellow); border:1px solid color-mix(in srgb, var(--yellow) 30%, transparent); }
 .no-vendors { font-size:.8rem; color:var(--text2); text-align:center; padding:16px 0; }
 
 .modal-close { display:block; width:100%; margin-top:20px; }
 
 /* ── EMPTY STATE ── */
 .empty { text-align:center; padding:60px 20px; color:var(--text2); }
-.empty-icon { font-size:2.8rem; margin-bottom:12px; }
+.empty-icon { font-size:2.8rem; margin-bottom:12px; color:var(--text2); }
+.empty-icon .vpc-ico { stroke-width:1.5; }
 .empty-title { font-size:1rem; font-weight:600; color:var(--text); margin-bottom:6px; }
 .empty-sub { font-size:.82rem; line-height:1.65; max-width:320px; margin:0 auto; }
 
@@ -148,6 +168,18 @@ footer { text-align:center; padding:20px; border-top:1px solid var(--border); fo
   .cal-event-name { font-size:0.75rem; }
   .header-actions { flex-direction:column; align-items:center; }
 }
+
+/* Paper is white: print in the light colours whatever the screen shows. */
+@media print {
+  :root, :root[data-theme='dark'] {
+    color-scheme: light;
+    --bg: #f5f5f7; --surface: #ffffff; --surface2: #f2f2f7; --fill: rgba(118, 118, 128, 0.12);
+    --border: rgba(60, 60, 67, 0.14); --text: #1d1d1f; --text2: #636366;
+    --accent: #0060c4; --accent-fill: #0071e3; --accent-hover: #0077ed; --ring: #0071e3;
+    --accent2: #8944ab; --green: #187634; --yellow: #8a6200; --red: #c4001a;
+    --shadow: 0 24px 60px rgba(0, 0, 0, 0.08); --overlay: rgba(0, 0, 0, 0.35);
+  }
+}
 </style>
 <script src="util.js"></script>
 </head>
@@ -155,30 +187,30 @@ footer { text-align:center; padding:20px; border-top:1px solid var(--border); fo
 
 <div class="page-header">
   <div class="logo">
-    <div class="logo-icon">🎪</div>
+    <div class="logo-icon"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#events"/></svg></div>
     <div class="logo-name">Vault <span>&amp;</span> Pine Collective</div>
   </div>
   <h1 class="page-title">Event Calendar</h1>
   <p class="page-sub">Upcoming shows and events. Click any event to see table booking status.</p>
   <div class="header-actions">
     <div class="view-toggle">
-      <button class="view-btn active" id="btn-cal" onclick="setView('calendar')">📅 Calendar</button>
-      <button class="view-btn" id="btn-list" onclick="setView('list')">☰ List</button>
+      <button class="view-btn active" id="btn-cal" onclick="setView('calendar')">Calendar</button>
+      <button class="view-btn" id="btn-list" onclick="setView('list')">List</button>
     </div>
-    <button class="btn-primary" onclick="exportICS()">⬇ Export .ics</button>
-    <button class="btn-ghost" onclick="window.print()">🖨 Print</button>
+    <button class="btn-primary" onclick="exportICS()">Export .ics</button>
+    <button class="btn-ghost" onclick="window.print()">Print</button>
   </div>
 </div>
 
 <div id="share-banner" style="display:none;text-align:center;padding:8px 20px 4px;font-size:.75rem;color:var(--text2);">
-  📤 Shared by <strong style="color:var(--text)">Vault &amp; Pine Collective</strong> &nbsp;·&nbsp; Read-only event calendar
+  Shared by <strong style="color:var(--text)">Vault &amp; Pine Collective</strong> &nbsp;·&nbsp; Read-only event calendar
 </div>
 
 <div class="filter-bar">
   <div class="filter-chip active" data-filter="upcoming" onclick="setFilter('upcoming')">Upcoming</div>
   <div class="filter-chip"        data-filter="all"      onclick="setFilter('all')">All Events</div>
-  <div class="filter-chip"        data-filter="approved" onclick="setFilter('approved')">✓ Confirmed</div>
-  <div class="filter-chip"        data-filter="pending"  onclick="setFilter('pending')">○ Pending</div>
+  <div class="filter-chip"        data-filter="approved" onclick="setFilter('approved')">Confirmed</div>
+  <div class="filter-chip"        data-filter="pending"  onclick="setFilter('pending')">Pending</div>
 </div>
 
 <!-- CALENDAR VIEW -->
@@ -207,12 +239,12 @@ footer { text-align:center; padding:20px; border-top:1px solid var(--border); fo
 <!-- EVENT DETAIL MODAL -->
 <div class="modal-overlay" id="detail-modal">
   <div class="modal">
-    <div class="modal-tag">🎪 Event Details</div>
+    <div class="modal-tag">Event Details</div>
     <div class="modal-name" id="detail-name"></div>
     <div class="modal-sub" id="detail-sub"></div>
     <div id="detail-status-row"></div>
     <hr class="modal-divider">
-    <div class="vendor-section-title">🪑 Table Bookings</div>
+    <div class="vendor-section-title">Table Bookings</div>
     <div id="detail-vendors"></div>
     <button class="btn-ghost modal-close" onclick="closeDetail()">Close</button>
   </div>
@@ -356,7 +388,7 @@ function renderCalendar() {
     evs.slice(0,2).forEach(e => {
       inner += `<div class="cal-event ${e.approved?'approved':'pending'}" onclick="showDetail('${e.id}')">
         <div class="cal-event-name">${esc(e.name)}</div>
-        ${e.location ? `<div class="cal-event-loc">📍 ${esc(e.location)}</div>` : ''}
+        ${e.location ? `<div class="cal-event-loc">${esc(e.location)}</div>` : ''}
       </div>`;
     });
     if (evs.length > 2) inner += `<div style="font-size:0.75rem;color:var(--text2);margin-top:2px">+${evs.length-2} more</div>`;
@@ -377,7 +409,7 @@ function renderList() {
   const wrap   = document.getElementById('list-wrap');
 
   if (!events.length) {
-    wrap.innerHTML = `<div class="empty"><div class="empty-icon">🗓️</div><div class="empty-title">No events found</div><div class="empty-sub">Try a different filter above.</div></div>`;
+    wrap.innerHTML = `<div class="empty"><div class="empty-icon">${VPCUtil.icon('calendar')}</div><div class="empty-title">No events found</div><div class="empty-sub">Try a different filter above.</div></div>`;
     return;
   }
 
@@ -399,11 +431,11 @@ function renderList() {
         <div class="list-info">
           <div class="list-name">${esc(e.name)}</div>
           <div class="list-meta">
-            ${e.date ? `<span>📅 ${fmtDate(e.date)}</span>` : ''}
-            ${e.location ? `<span>📍 ${esc(e.location)}</span>` : ''}
+            ${e.date ? `<span>${VPCUtil.icon('calendar', 'inline')}${fmtDate(e.date)}</span>` : ''}
+            ${e.location ? `<span>${VPCUtil.icon('map-pin', 'inline')}${esc(e.location)}</span>` : ''}
           </div>
         </div>
-        <span class="status-badge ${e.approved?'badge-approved':'badge-pending'}">${e.approved?'✓ Confirmed':'○ Pending'}</span>
+        <span class="status-badge ${e.approved?'badge-approved':'badge-pending'}">${e.approved?'Confirmed':'Pending'}</span>
       </div>`;
     });
     h += `</div>`;
@@ -423,14 +455,14 @@ function showDetail(id) {
 
   // Sub line: date + location
   let sub = '';
-  if (e.date)     sub += `<span>📅 ${fmtDate(e.date)}</span>`;
-  if (e.location) sub += `<span>📍 ${esc(e.location)}</span>`;
+  if (e.date)     sub += `<span>${VPCUtil.icon('calendar', 'inline')}${fmtDate(e.date)}</span>`;
+  if (e.location) sub += `<span>${VPCUtil.icon('map-pin', 'inline')}${esc(e.location)}</span>`;
   document.getElementById('detail-sub').innerHTML = sub;
 
   // Status badge
   document.getElementById('detail-status-row').innerHTML =
     `<span class="status-badge ${e.approved?'badge-approved':'badge-pending'}" style="font-size:0.75rem;padding:5px 14px">
-      ${e.approved ? '✓ Confirmed' : '○ Pending Confirmation'}
+      ${e.approved ? 'Confirmed' : 'Pending Confirmation'}
     </span>`;
 
   // Vendor table bookings — names + paid/unpaid, NO prices
@@ -443,7 +475,7 @@ function showDetail(id) {
       if (!v) return;
       vh += `<div class="vendor-row">
         <div class="vendor-row-name">${esc(v.name)}</div>
-        <span class="vendor-row-status ${t.paid ? 'vs-paid' : 'vs-unpaid'}">${t.paid ? '✓ Paid' : '● Unpaid'}</span>
+        <span class="vendor-row-status ${t.paid ? 'vs-paid' : 'vs-unpaid'}">${t.paid ? 'Paid' : 'Unpaid'}</span>
       </div>`;
     });
     if (!vh) vh = `<div class="no-vendors">No matched vendor records.</div>`;

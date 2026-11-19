@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#1c1c1e">
+<meta name="theme-color" content="#121213">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
@@ -23,9 +23,11 @@
     flex-wrap: wrap; gap: 12px; margin-bottom: 28px;
   }
   .review-title { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.5px; }
-  .review-title span { color: var(--accent); }
+  .review-title span { color: inherit; }
   .review-date { font-size: 0.8rem; color: var(--text2); }
 
+  #narrate-icon { display: flex; }
+  #narrate-icon .vpc-ico { width: 16px; height: 16px; }
   .narrate-btn {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 999px; padding: 8px 16px; color: var(--text2);
@@ -34,7 +36,7 @@
     font-family: inherit;
   }
   .narrate-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .narrate-btn.active { border-color: var(--green); color: var(--green); background: rgba(48, 209, 88,0.08); }
+  .narrate-btn.active { border-color: var(--green); color: var(--green); background: color-mix(in srgb, var(--green) 8%, transparent); }
 
   .review-grid {
     display: grid;
@@ -67,10 +69,13 @@
     margin-bottom: 8px; font-size: 0.82rem;
   }
   .alert-item:last-child { margin-bottom: 0; }
-  .alert-danger  { background: rgba(255, 105, 97,0.08); border: 1px solid rgba(255, 105, 97,0.3); }
-  .alert-warning { background: rgba(255, 214, 10,0.08);  border: 1px solid rgba(255, 214, 10,0.3); }
-  .alert-ok      { background: rgba(48, 209, 88,0.08);  border: 1px solid rgba(48, 209, 88,0.3); }
-  .alert-icon { font-size: 1rem; flex-shrink: 0; }
+  .alert-danger  { background: color-mix(in srgb, var(--red) 8%, transparent); border: 1px solid color-mix(in srgb, var(--red) 30%, transparent); }
+  .alert-warning { background: color-mix(in srgb, var(--yellow) 8%, transparent);  border: 1px solid color-mix(in srgb, var(--yellow) 30%, transparent); }
+  .alert-ok      { background: color-mix(in srgb, var(--green) 8%, transparent);  border: 1px solid color-mix(in srgb, var(--green) 30%, transparent); }
+  .alert-icon { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; background: var(--label-3); }
+  .alert-danger .alert-icon { background: var(--red); }
+  .alert-warning .alert-icon { background: var(--orange); }
+  .alert-ok .alert-icon { background: var(--green); }
   .alert-text { flex: 1; }
   .alert-action { font-size: 0.75rem; color: var(--accent); text-decoration: none; white-space: nowrap; }
 
@@ -137,12 +142,12 @@
   .ritual-sub { font-size: 0.75rem; color: var(--text2); margin-top: 3px; line-height: 1.5; max-width: 540px; }
   .streak-badge {
     display: flex; flex-direction: column; align-items: center; flex-shrink: 0;
-    background: rgba(255, 159, 10,0.1); border: 1px solid rgba(255, 159, 10,0.3);
+    background: color-mix(in srgb, var(--orange) 10%, transparent); border: 1px solid color-mix(in srgb, var(--orange) 30%, transparent);
     border-radius: 12px; padding: 8px 16px; font-size: 1.35rem; font-weight: 700; color: var(--orange);
     line-height: 1; font-variant-numeric: tabular-nums;
   }
   .streak-badge small { font-size: 0.75rem; font-weight: 600; color: var(--text2); margin-top: 4px; }
-  .ritual-progress { height: 5px; background: rgba(255,255,255,0.07); border-radius: 3px; overflow: hidden; margin-bottom: 14px; }
+  .ritual-progress { height: 5px; background: color-mix(in srgb, var(--label) 7%, transparent); border-radius: 3px; overflow: hidden; margin-bottom: 14px; }
   .ritual-progress-fill { height: 100%; width: 0; border-radius: 3px; background: var(--accent); transition: width 0.4s ease; }
 
   .ritual-step {
@@ -150,15 +155,17 @@
     border-radius: 12px; transition: background 0.12s; cursor: pointer;
     border: 1px solid transparent;
   }
-  .ritual-step:hover { background: rgba(255,255,255,0.03); }
-  .ritual-step.done { background: rgba(48, 209, 88,0.06); border-color: rgba(48, 209, 88,0.18); }
+  .ritual-step:hover { background: color-mix(in srgb, var(--label) 3%, transparent); }
+  .ritual-step.done { background: color-mix(in srgb, var(--green) 6%, transparent); border-color: color-mix(in srgb, var(--green) 18%, transparent); }
   .step-check {
     width: 22px; height: 22px; border-radius: 8px; flex-shrink: 0;
     border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
-    font-size: 0.8rem; color: #07211a; transition: all 0.15s;
+    font-size: 0.8rem; color: var(--on-accent); transition: all 0.15s;
   }
   .ritual-step.done .step-check { background: var(--green); border-color: var(--green); }
-  .step-icon { font-size: 1.1rem; flex-shrink: 0; }
+  .step-check .vpc-ico { width: 14px; height: 14px; stroke-width: 2.5; }
+  .step-icon { flex-shrink: 0; display: flex; color: var(--accent); }
+  .step-icon .vpc-ico { width: 20px; height: 20px; }
   .step-body { flex: 1; min-width: 0; }
   .step-label { font-size: 0.86rem; font-weight: 600; }
   .ritual-step.done .step-label { text-decoration: line-through; color: var(--text2); }
@@ -180,7 +187,7 @@
   }
   .reflect-row input:focus { border-color: var(--ring); }
   .ritual-done-banner {
-    margin-top: 14px; background: rgba(48, 209, 88,0.1); border: 1px solid rgba(48, 209, 88,0.3);
+    margin-top: 14px; background: color-mix(in srgb, var(--green) 10%, transparent); border: 1px solid color-mix(in srgb, var(--green) 30%, transparent);
     border-radius: 12px; padding: 14px 16px; font-size: 0.86rem; color: var(--text); line-height: 1.55;
   }
   .ritual-done-banner b { color: var(--green); }
@@ -223,7 +230,7 @@
       <div class="review-date" id="review-date"></div>
     </div>
     <button class="narrate-btn" id="narrate-btn" onclick="toggleNarrate()">
-      <span id="narrate-icon">🔊</span>
+      <span id="narrate-icon"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#volume"/></svg></span>
       <span id="narrate-label">Narrate Summary</span>
     </button>
   </div>
@@ -234,15 +241,15 @@
     <div class="panel section-full ritual-card" id="ritual-card">
       <div class="ritual-head">
         <div>
-          <div class="ritual-title">🥋 Weekly Money Ritual</div>
+          <div class="ritual-title">Weekly Money Ritual</div>
           <div class="ritual-sub">The 15-minute habit that ties every tool together. Do it once a week — same day, every week.</div>
         </div>
-        <div class="streak-badge" id="streak-badge" title="Consecutive weeks completed">🔥 <span id="streak-num">0</span><small>wk streak</small></div>
+        <div class="streak-badge" id="streak-badge" title="Consecutive weeks completed"><span id="streak-num">0</span><small>wk streak</small></div>
       </div>
       <div class="ritual-progress"><div class="ritual-progress-fill" id="ritual-progress-fill"></div></div>
       <div id="ritual-steps"></div>
       <div class="ritual-reflect" id="ritual-reflect">
-        <div class="reflect-label">✍️ Lock it in — one line each (optional)</div>
+        <div class="reflect-label">Lock it in — one line each (optional)</div>
         <div class="reflect-row">
           <input type="text" id="reflect-win" placeholder="One win this week…" onchange="saveReflection()">
           <input type="text" id="reflect-fix" placeholder="One thing to fix next week…" onchange="saveReflection()">
@@ -348,9 +355,9 @@ function renderAlerts() {
   try {
     const g = JSON.parse(localStorage.getItem(VPCUtil.KEYS.goals) || '{"goals":[]}');
     const od = (g.goals||[]).filter(x => !x.done && x.due && new Date(x.due+'T00:00:00') < today);
-    if (od.length) alerts.push({ type:'danger', icon:'⚠', text:`${od.length} goal${od.length>1?'s':''} overdue — immediate attention needed`, url:'goals-dashboard.html', label:'View Goals' });
+    if (od.length) alerts.push({ type:'danger', text:`${od.length} goal${od.length>1?'s':''} overdue — immediate attention needed`, url:'goals-dashboard.html', label:'View Goals' });
     const soon = (g.goals||[]).filter(x => !x.done && x.due && new Date(x.due+'T00:00:00') <= week && new Date(x.due+'T00:00:00') >= today);
-    if (soon.length) alerts.push({ type:'warning', icon:'⏰', text:`${soon.length} goal${soon.length>1?'s':''} due within the next 7 days`, url:'goals-dashboard.html', label:'View Goals' });
+    if (soon.length) alerts.push({ type:'warning', text:`${soon.length} goal${soon.length>1?'s':''} due within the next 7 days`, url:'goals-dashboard.html', label:'View Goals' });
   } catch(e) {}
 
   // Budget check
@@ -362,8 +369,8 @@ function renderAlerts() {
       const pct = total / budget.total * 100;
       const dom = now.getDate(), dim = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
       const proj = (total / dom) * dim;
-      if (total > budget.total) alerts.push({ type:'danger', icon:'💸', text:`Budget exceeded — spent ${fmt(total)} vs ${fmt(budget.total)} limit`, url:'expenses.html', label:'View Expenses' });
-      else if (pct > 80) alerts.push({ type:'warning', icon:'💸', text:`Budget at ${Math.round(pct)}% — projected ${fmt(proj)} by month end`, url:'expenses.html', label:'View Expenses' });
+      if (total > budget.total) alerts.push({ type:'danger', text:`Budget exceeded — spent ${fmt(total)} vs ${fmt(budget.total)} limit`, url:'expenses.html', label:'View Expenses' });
+      else if (pct > 80) alerts.push({ type:'warning', text:`Budget at ${Math.round(pct)}% — projected ${fmt(proj)} by month end`, url:'expenses.html', label:'View Expenses' });
     }
   } catch(e) {}
 
@@ -374,15 +381,15 @@ function renderAlerts() {
     const dueThisWeek = recs.filter(r => r.day >= todayDay && r.day <= todayDay + 7);
     if (dueThisWeek.length) {
       const total = dueThisWeek.reduce((s,r)=>s+(r.amount||0),0);
-      alerts.push({ type:'warning', icon:'🔄', text:`${dueThisWeek.length} recurring bill${dueThisWeek.length>1?'s':''} due this week (${fmt(total)})`, url:'expenses.html', label:'View Recurring' });
+      alerts.push({ type:'warning', text:`${dueThisWeek.length} recurring bill${dueThisWeek.length>1?'s':''} due this week (${fmt(total)})`, url:'expenses.html', label:'View Recurring' });
     }
   } catch(e) {}
 
-  if (!alerts.length) alerts.push({ type:'ok', icon:'✅', text:'All clear — no urgent items today. Keep up the great work!', url:null });
+  if (!alerts.length) alerts.push({ type:'ok', text:'All clear — no urgent items today. Keep up the great work!', url:null });
 
   el.innerHTML = alerts.map(a => `
     <div class="alert-item alert-${a.type}">
-      <span class="alert-icon">${a.icon}</span>
+      <span class="alert-icon"></span>
       <span class="alert-text">${a.text}</span>
       ${a.url ? `<a class="alert-action" href="${a.url}">${a.label} →</a>` : ''}
     </div>`).join('');
@@ -395,7 +402,7 @@ function renderGoals() {
   try {
     const g = JSON.parse(localStorage.getItem(VPCUtil.KEYS.goals) || '{"goals":[]}');
     const goals = g.goals || [];
-    if (!goals.length) { el.innerHTML = '<div class="empty-msg">No goals yet. <a href="goals-dashboard.html" style="color:var(--accent)">Add one →</a></div>'; return []; }
+    if (!goals.length) { el.innerHTML = '<div class="empty-msg">No goals yet. <a href="goals-dashboard.html" class="is-accent">Add one →</a></div>'; return []; }
 
     const today = new Date(); today.setHours(0,0,0,0);
     const total = goals.length;
@@ -421,7 +428,7 @@ function renderGoals() {
         <div class="progress-arc-info">
           <div class="progress-arc-pct" style="color:${arcColor}">${done}/${total}</div>
           <div class="progress-arc-label">Goals Complete</div>
-          <div style="font-size:0.75rem;color:var(--text2);margin-top:6px">${doneObj}/${allObj.length} objectives done</div>
+          <div class="caption below-2">${doneObj}/${allObj.length} objectives done</div>
         </div>
       </div>`;
 
@@ -467,7 +474,7 @@ function renderExpenses() {
     el.innerHTML = `
       <div class="kpi-row">
         <div class="kpi-mini">
-          <div class="kpi-mini-val" style="color:var(--red)">${fmt(total)}</div>
+          <div class="kpi-mini-val is-red">${fmt(total)}</div>
           <div class="kpi-mini-label">Spent</div>
         </div>
         <div class="kpi-mini">
@@ -475,7 +482,7 @@ function renderExpenses() {
           <div class="kpi-mini-label">${budget>0?(total>budget?'Over Budget':'Remaining'):'No Budget'}</div>
         </div>
         <div class="kpi-mini">
-          <div class="kpi-mini-val" style="color:var(--text)">${month.length}</div>
+          <div class="kpi-mini-val text-1">${month.length}</div>
           <div class="kpi-mini-label">Entries</div>
         </div>
       </div>`;
@@ -508,7 +515,7 @@ function renderExpenses() {
         <div class="forecast-box">
           <div class="forecast-label">Month-End Projection</div>
           <div class="forecast-val" style="color:${projColor}">${fmt(proj)}</div>
-          <div style="font-size:0.75rem;color:var(--text2);margin-top:3px">Based on ${dom} days of spending</div>
+          <div class="caption below">Based on ${dom} days of spending</div>
         </div>`;
     }
 
@@ -549,7 +556,7 @@ function renderRevenue() {
       ['Sales This Month', month.count, 'var(--text)'],
     ].map(([label, val, color]) => `
       <div class="rev-stat">
-        <span style="color:var(--text2)">${label}</span>
+        <span class="text-2">${label}</span>
         <span style="font-weight:600;color:${color}">${val}</span>
       </div>`).join('');
 
@@ -576,7 +583,7 @@ function renderEvents() {
       return `<div class="event-item">
         <span class="event-date" style="${urgency}">${fmtDate(e.start||e.date)} ${diff===0?'(today)':diff===1?'(tomorrow)':''}</span>
         <span style="flex:1">${VPCUtil.esc(e.name)}</span>
-        ${e.boothCost ? `<span style="font-size:0.75rem;color:var(--text2)">${fmt(e.boothCost)}</span>` : ''}
+        ${e.boothCost ? `<span class="caption">${fmt(e.boothCost)}</span>` : ''}
       </div>`;
     }).join('');
     return upcoming;
@@ -599,7 +606,7 @@ function renderObjectivesDue() {
     });
     due.sort((a,b) => (a.due||'').localeCompare(b.due||''));
 
-    if (!due.length) { el.innerHTML = '<div class="empty-msg">No objectives due this week. 🎉</div>'; return; }
+    if (!due.length) { el.innerHTML = '<div class="empty-msg">No objectives due this week.</div>'; return; }
 
     el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px">` +
       due.map(o => {
@@ -607,7 +614,7 @@ function renderObjectivesDue() {
         const color = diff < 0 ? 'var(--red)' : diff === 0 ? 'var(--yellow)' : 'var(--accent)';
         return `<div style="background:var(--surface2);border-radius:8px;padding:12px 14px;border-left:3px solid ${color}">
           <div style="font-size:0.82rem;font-weight:600">${VPCUtil.esc(o.text)}</div>
-          <div style="font-size:0.75rem;color:var(--text2);margin-top:4px">${VPCUtil.esc(o.goalTitle)} · <span style="color:${color}">${diff<0?-diff+'d overdue':diff===0?'Due today':diff+'d left'}</span></div>
+          <div class="caption below">${VPCUtil.esc(o.goalTitle)} · <span style="color:${color}">${diff<0?-diff+'d overdue':diff===0?'Due today':diff+'d left'}</span></div>
         </div>`;
       }).join('') + '</div>';
   } catch(e) { el.innerHTML = '<div class="empty-msg">Could not load objectives.</div>'; }
@@ -685,11 +692,11 @@ function ritualSteps() {
   } catch(e) {}
 
   return [
-    { id:'log',      icon:'🧾', label:'Log any missed expenses',     sub:logSub,    link:'expenses.html',         linkLabel:'Open Expenses' },
-    { id:'budget',   icon:'💸', label:'Check your budget status',    sub:budgetSub, link:'expenses.html',         linkLabel:'Review' },
-    { id:'margin',   icon:'📈', label:'Glance at your profit margin',sub:marginSub, link:'analytics.html',        linkLabel:'Analytics' },
-    { id:'goals',    icon:'🎯', label:'Review goals & deadlines',    sub:goalsSub,  link:'goals-dashboard.html',  linkLabel:'Goals' },
-    { id:'snapshot', icon:'💰', label:'Save a net-worth snapshot',   sub:nwSub,     action:'snapshot',            linkLabel:'Save now' },
+    { id:'log',      icon:'receipt', label:'Log any missed expenses',     sub:logSub,    link:'expenses.html',         linkLabel:'Open Expenses' },
+    { id:'budget',   icon:'expenses', label:'Check your budget status',    sub:budgetSub, link:'expenses.html',         linkLabel:'Review' },
+    { id:'margin',   icon:'analytics', label:'Glance at your profit margin',sub:marginSub, link:'analytics.html',        linkLabel:'Analytics' },
+    { id:'goals',    icon:'goals', label:'Review goals & deadlines',    sub:goalsSub,  link:'goals-dashboard.html',  linkLabel:'Goals' },
+    { id:'snapshot', icon:'star', label:'Save a net-worth snapshot',   sub:nwSub,     action:'snapshot',            linkLabel:'Save now' },
   ];
 }
 
@@ -715,7 +722,7 @@ function ritualSaveSnapshot() {
   localStorage.setItem(VPCUtil.KEYS.networth, JSON.stringify(d));
   const r = loadRitual(); r.weekState.checked['snapshot'] = true; saveRitual(r);
   if (window.auditLog) auditLog('snapshot', VPCUtil.KEYS.networth, `Net worth ${fmt(a-l)} (ritual)`);
-  showToast('📸 Snapshot saved — net worth ' + fmt(a - l));
+  showToast('Snapshot saved — net worth ' + fmt(a - l));
   renderRitual();
 }
 
@@ -742,8 +749,8 @@ function renderRitual() {
 
   $('ritual-steps').innerHTML = steps.map(s => `
     <div class="ritual-step ${checked[s.id] ? 'done' : ''}" onclick="toggleRitualStep('${s.id}')">
-      <div class="step-check">${checked[s.id] ? '✓' : ''}</div>
-      <div class="step-icon">${s.icon}</div>
+      <div class="step-check">${checked[s.id] ? VPCUtil.icon('check') : ''}</div>
+      <div class="step-icon">${VPCUtil.icon(s.icon)}</div>
       <div class="step-body">
         <div class="step-label">${s.label}</div>
         <div class="step-sub">${s.sub}</div>
@@ -769,7 +776,7 @@ function renderRitual() {
     if (r.reflections.length > 26) r.reflections = r.reflections.slice(-26);
     saveRitual(r);
     if (window.auditLog) auditLog('ritual', RITUAL_KEY, 'Completed weekly money ritual ' + wk);
-    showToast('🥋 Weekly ritual complete — streak ' + computeStreak(r.completions) + '!');
+    showToast('Weekly ritual complete — streak ' + computeStreak(r.completions));
   }
 
   const streak = computeStreak(r.completions);
@@ -778,12 +785,12 @@ function renderRitual() {
   const banner = $('ritual-done-banner');
   if (r.completions.includes(wk)) {
     banner.style.display = 'block';
-    banner.innerHTML = `<b>✓ This week's ritual is done.</b> ${streak > 1 ? `That's <b>${streak} weeks</b> in a row — this is exactly how financial discipline compounds.` : 'First week down. Come back next week to start a streak.'} Reviewed ${r.completions.length} week${r.completions.length>1?'s':''} total.`;
+    banner.innerHTML = `<b>This week's ritual is done.</b> ${streak > 1 ? `That's <b>${streak} weeks</b> in a row — this is exactly how financial discipline compounds.` : 'First week down. Come back next week to start a streak.'} Reviewed ${r.completions.length} week${r.completions.length>1?'s':''} total.`;
   } else {
     banner.style.display = 'block';
-    banner.style.background = 'rgba(10, 132, 255,0.06)';
-    banner.style.borderColor = 'rgba(10, 132, 255,0.22)';
-    banner.innerHTML = `<b style="color:var(--accent)">${doneCount}/${steps.length} steps done.</b> Finish all five to log this week${streak ? ` and keep your ${streak}-week streak alive 🔥` : ' and start your streak 🔥'}.`;
+    banner.style.background = 'color-mix(in srgb, var(--accent) 6%, transparent)';
+    banner.style.borderColor = 'color-mix(in srgb, var(--accent) 22%, transparent)';
+    banner.innerHTML = `<b style="color:var(--accent)">${doneCount}/${steps.length} steps done.</b> Finish all five to log this week${streak ? ` and keep your ${streak}-week streak alive` : ' and start your streak'}.`;
   }
 }
 
@@ -794,14 +801,14 @@ function toggleNarrate() {
     window.speechSynthesis?.cancel();
     isNarrating = false;
     $('narrate-btn').classList.remove('active');
-    $('narrate-icon').textContent = '🔊';
+    $('narrate-icon').innerHTML = VPCUtil.icon('volume');
     $('narrate-label').textContent = 'Narrate Summary';
     return;
   }
   if (!window.speechSynthesis) { alert('Text-to-speech not supported in this browser.'); return; }
   isNarrating = true;
   $('narrate-btn').classList.add('active');
-  $('narrate-icon').textContent = '⏹';
+  $('narrate-icon').innerHTML = VPCUtil.icon('stop');
   $('narrate-label').textContent = 'Stop';
 
   // Build narration text
@@ -836,7 +843,7 @@ function toggleNarrate() {
 
   const utt = new SpeechSynthesisUtterance(text);
   utt.rate = 0.9; utt.pitch = 1.0; utt.volume = 1.0;
-  utt.onend = () => { isNarrating = false; $('narrate-btn').classList.remove('active'); $('narrate-icon').textContent='🔊'; $('narrate-label').textContent='Narrate Summary'; };
+  utt.onend = () => { isNarrating = false; $('narrate-btn').classList.remove('active'); $('narrate-icon').innerHTML=VPCUtil.icon('volume'); $('narrate-label').textContent='Narrate Summary'; };
   utt.onerror = () => { isNarrating = false; $('narrate-btn').classList.remove('active'); };
   window.speechSynthesis.speak(utt);
 }

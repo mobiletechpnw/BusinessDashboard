@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#1c1c1e">
+<meta name="theme-color" content="#121213">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
@@ -16,6 +16,8 @@
   body { min-height: 100vh; }
 
   .header-stats { display: flex; gap: 20px; align-items: center; }
+  header .header-stats { margin-left: auto; }
+  header .vpc-primary { margin-left: 8px; }
   .stat { text-align: center; display: flex; align-items: baseline; gap: 6px; }
   .stat-num { font-size: 1.1rem; font-weight: 600; color: var(--accent); }
   .stat-label { font-size: 0.75rem; color: var(--text2); }
@@ -48,8 +50,8 @@
     padding: 9px 16px;
     transition: all 0.15s;
   }
-  .btn-primary { background: var(--accent-fill); color: #fff; }
-  .btn-primary:hover { background: #0077ed; }
+  .btn-primary { background: var(--accent-fill); color: var(--on-accent); }
+  .btn-primary:hover { background: var(--accent-fill-hover); }
   .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
   .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
   .btn-icon { padding: 6px 10px; font-size: 1rem; }
@@ -92,7 +94,7 @@
   .chart { display: block; }
   .range-group { display: flex; gap: 6px; }
   .range-btn { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); padding: 6px 12px; font-size: 0.75rem; }
-  .range-btn.active { background: var(--accent-fill); color: #fff; border-color: var(--accent); }
+  .range-btn.active { background: var(--accent-fill); color: var(--on-accent); border-color: var(--accent); }
 
   /* Goal editor */
   .goal-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
@@ -110,7 +112,7 @@
   .snap-table th {
     text-align: left; font-size: 0.75rem; color: var(--text2); font-weight: 600; padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap;
   }
-  .snap-table td { padding: 9px 10px; border-bottom: 1px solid #2c2c2e; white-space: nowrap; }
+  .snap-table td { padding: 9px 10px; border-bottom: 1px solid var(--surface2); white-space: nowrap; }
   .snap-table tr:last-child td { border-bottom: none; }
   .snap-table tr:hover td { background: var(--surface2); }
   .snap-num { font-variant-numeric: tabular-nums; }
@@ -122,8 +124,8 @@
 
   /* Automation panel */
   .auto-status { display: inline-flex; align-items: center; gap: 7px; font-size: 0.8rem; font-weight: 600; padding: 4px 12px; border-radius: 99px; }
-  .auto-status.manual { background: #453e1a; color: var(--yellow); }
-  .auto-status.connected { background: #203d28; color: var(--green); }
+  .auto-status.manual { background: var(--yellow-tint); color: var(--yellow); }
+  .auto-status.connected { background: var(--green-tint); color: var(--green); }
   .auto-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
   .auto-steps { font-size: 0.84rem; color: var(--text2); line-height: 1.7; margin-top: 6px; }
   .auto-steps ol { margin: 8px 0 0 18px; }
@@ -174,6 +176,9 @@
 
   @media (max-width: 700px) {
     main { padding: 12px 10px; }
+    /* Phones: the title and + on one row, the figures on a row below. */
+    header { flex-wrap: wrap; row-gap: 0; }
+    header .header-stats { order: 3; flex: 1 0 100%; margin-left: 0; padding-bottom: 10px; }
     .header-stats { gap: 8px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
     .header-stats::-webkit-scrollbar { display: none; }
     .stat-label { font-size: 0.75rem; }
@@ -195,6 +200,7 @@
     <div class="stat"><div class="stat-num" id="statWeek">—</div><div class="stat-label">7-Day</div></div>
     <div class="stat"><div class="stat-num" id="statGoalPct">0%</div><div class="stat-label">To Goal</div></div>
   </div>
+  <button class="btn-primary vpc-primary" type="button" onclick="openSnapModal()" aria-label="Log snapshot"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#plus"/></svg><span>Log Snapshot</span></button>
 </header>
 
 
@@ -204,7 +210,6 @@
       <input class="handle-input" id="handleInput" placeholder="@yourhandle" onchange="saveHandle()" />
       <span class="panel-sub" id="lastLogged"></span>
     </div>
-    <button class="btn-primary" onclick="openSnapModal()">+ Log Snapshot</button>
   </div>
 
   <!-- Metric cards -->
@@ -213,7 +218,7 @@
   <!-- Goal -->
   <div class="gpanel">
     <div class="panel-head">
-      <div class="panel-title">🎯 Follower Goal</div>
+      <div class="panel-title">Follower Goal</div>
       <div class="panel-sub" id="goalEta"></div>
     </div>
     <div class="goal-row">
@@ -226,7 +231,7 @@
   <!-- Chart -->
   <div class="gpanel">
     <div class="panel-head">
-      <div class="panel-title">📈 Follower Growth</div>
+      <div class="panel-title">Follower Growth</div>
       <div class="range-group" id="rangeGroup">
         <button class="range-btn" data-range="30">30d</button>
         <button class="range-btn" data-range="90">90d</button>
@@ -239,7 +244,7 @@
   <!-- Snapshots -->
   <div class="gpanel">
     <div class="panel-head">
-      <div class="panel-title">🗓️ Snapshots</div>
+      <div class="panel-title">Snapshots</div>
       <div class="panel-sub">Log your numbers weekly for the cleanest trend.</div>
     </div>
     <div class="table-scroll">
@@ -265,7 +270,7 @@
   <!-- Automation -->
   <div class="gpanel">
     <div class="panel-head">
-      <div class="panel-title">🔌 Auto-Sync</div>
+      <div class="panel-title">Auto-Sync</div>
       <span class="auto-status manual" id="autoStatus"><span class="auto-dot"></span>Manual tracking</span>
     </div>
     <p class="panel-sub" id="autoSummary">
@@ -274,7 +279,7 @@
     </p>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
       <button class="btn-ghost" onclick="openEndpointModal()">Configure endpoint</button>
-      <button class="btn-ghost" id="fetchNowBtn" onclick="fetchNow()" style="display:none">↻ Fetch now</button>
+      <button class="btn-ghost" id="fetchNowBtn" onclick="fetchNow()" style="display:none">Fetch now</button>
     </div>
     <details class="auto-details" style="margin-top:16px">
       <summary>How the automated sync works &amp; how to turn it on</summary>
@@ -350,7 +355,6 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<button class="fab" onclick="openSnapModal()" title="Log Snapshot" aria-label="Log Snapshot">＋</button>
 
 <script>
 // ── Data ────────────────────────────────────────────────────────────
@@ -467,7 +471,7 @@ function renderGoal(m) {
   bar.style.width = pct.toFixed(1) + '%';
   const remaining = data.goal - m.current;
   if (remaining <= 0) {
-    txt.textContent = `🎉 Goal reached — ${m.current.toLocaleString()} / ${data.goal.toLocaleString()}`;
+    txt.textContent = `Goal reached — ${m.current.toLocaleString()} / ${data.goal.toLocaleString()}`;
     eta.textContent = '';
     return;
   }
@@ -495,7 +499,7 @@ function drawChart() {
     }
   }
   if (s.length < 2) {
-    wrap.innerHTML = `<div class="empty"><div class="icon">📉</div><h3>Not enough data yet</h3><p>Log at least two snapshots to see your growth curve.</p></div>`;
+    wrap.innerHTML = `<div class="empty"><div class="icon">${VPCUtil.icon('growth')}</div><h3>Not enough data yet</h3><p>Log at least two snapshots to see your growth curve.</p></div>`;
     return;
   }
 
@@ -516,29 +520,29 @@ function drawChart() {
   // gridlines
   [0, 0.25, 0.5, 0.75, 1].forEach(p => {
     const v = minV + range2 * p, y = pxY(v);
-    svg += `<line x1="${pad}" x2="${W - padR}" y1="${y}" y2="${y}" stroke="#3a3a3c" stroke-width="1"/>
-            <text x="${pad - 6}" y="${y + 4}" fill="#a1a1a6" font-size="9" text-anchor="end">${fmtK(Math.round(v))}</text>`;
+    svg += `<line x1="${pad}" x2="${W - padR}" y1="${y}" y2="${y}" stroke="var(--separator)" stroke-width="1"/>
+            <text x="${pad - 6}" y="${y + 4}" fill="var(--text2)" font-size="9" text-anchor="end">${fmtK(Math.round(v))}</text>`;
   });
   // goal line
   if (data.goal && data.goal >= minV && data.goal <= maxV) {
     const gy = pxY(data.goal);
-    svg += `<line x1="${pad}" x2="${W - padR}" y1="${gy}" y2="${gy}" stroke="#bf5af2" stroke-width="1.5" stroke-dasharray="5,3"/>
-            <text x="${W - padR}" y="${gy - 5}" fill="#bf5af2" font-size="9" text-anchor="end">Goal ${fmtK(data.goal)}</text>`;
+    svg += `<line x1="${pad}" x2="${W - padR}" y1="${gy}" y2="${gy}" stroke="var(--accent2)" stroke-width="1.5" stroke-dasharray="5,3"/>
+            <text x="${W - padR}" y="${gy - 5}" fill="var(--accent2)" font-size="9" text-anchor="end">Goal ${fmtK(data.goal)}</text>`;
   }
   // area + line
   const pts = s.map((x, i) => `${pxX(i)},${pxY(x.followers)}`).join(' ');
   const areaPts = `${pad},${pxY(minV)} ${pts} ${pxX(s.length - 1)},${pxY(minV)}`;
   svg += `<polygon points="${areaPts}" fill="url(#grGrad)" opacity="0.25"/>`;
-  svg += `<defs><linearGradient id="grGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2997ff"/><stop offset="1" stop-color="#2997ff" stop-opacity="0"/></linearGradient></defs>`;
-  svg += `<polyline points="${pts}" fill="none" stroke="#2997ff" stroke-width="2.5" stroke-linejoin="round"/>`;
+  svg += `<defs><linearGradient id="grGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--accent)"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>`;
+  svg += `<polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>`;
   s.forEach((x, i) => {
-    svg += `<circle cx="${pxX(i)}" cy="${pxY(x.followers)}" r="3.5" fill="#2997ff"><title>${fmtDate(x.date)}: ${x.followers.toLocaleString()}</title></circle>`;
+    svg += `<circle cx="${pxX(i)}" cy="${pxY(x.followers)}" r="3.5" fill="var(--accent)"><title>${fmtDate(x.date)}: ${x.followers.toLocaleString()}</title></circle>`;
   });
   // x labels — thin out if crowded
   const step = Math.ceil(s.length / 8);
   s.forEach((x, i) => {
     if (i % step !== 0 && i !== s.length - 1) return;
-    svg += `<text x="${pxX(i)}" y="${H - padB + 18}" fill="#a1a1a6" font-size="9" text-anchor="middle">${shortDate(x.date)}</text>`;
+    svg += `<text x="${pxX(i)}" y="${H - padB + 18}" fill="var(--text2)" font-size="9" text-anchor="middle">${shortDate(x.date)}</text>`;
   });
   svg += '</svg>';
   wrap.innerHTML = svg;
@@ -551,7 +555,7 @@ function renderTable() {
   const empty = document.getElementById('snapEmpty');
   if (!s.length) {
     body.innerHTML = '';
-    empty.innerHTML = `<div class="empty"><div class="icon">📸</div><h3>No snapshots yet</h3><p>Tap “Log Snapshot” and drop in your current follower count to start the trend.</p></div>`;
+    empty.innerHTML = `<div class="empty"><div class="icon">${VPCUtil.icon('content')}</div><h3>No snapshots yet</h3><p>Tap “Log Snapshot” and drop in your current follower count to start the trend.</p></div>`;
     return;
   }
   empty.innerHTML = '';
@@ -566,8 +570,8 @@ function renderTable() {
       <td class="snap-num">${x.reach != null ? x.reach.toLocaleString() : '—'}</td>
       <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis" title="${esc(x.note || '')}">${esc(x.note || '')}</td>
       <td><div class="snap-actions">
-        <button class="icon-btn" title="Edit" onclick="openSnapModal('${x.id}')">✏️</button>
-        <button class="icon-btn" title="Delete" onclick="deleteSnap('${x.id}')">🗑</button>
+        <button class="icon-btn" title="Edit" onclick="openSnapModal('${x.id}')"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#pencil"/></svg></button>
+        <button class="icon-btn" title="Delete" onclick="deleteSnap('${x.id}')"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#trash"/></svg></button>
       </div></td>
     </tr>`;
   }).join('');
@@ -593,7 +597,7 @@ function renderAuto() {
 async function fetchNow() {
   if (!data.endpoint) return;
   const btn = document.getElementById('fetchNowBtn');
-  btn.disabled = true; btn.textContent = '↻ Fetching…';
+  btn.disabled = true; btn.textContent = 'Fetching…';
   try {
     const res = await fetch(data.endpoint, { headers: { 'Accept': 'application/json' } });
     if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -613,7 +617,7 @@ async function fetchNow() {
   } catch (e) {
     toast('Fetch failed: ' + e.message);
   } finally {
-    btn.disabled = false; btn.textContent = '↻ Fetch now';
+    btn.disabled = false; btn.textContent = 'Fetch now';
   }
 }
 function numOrNull(v) { const n = Number(v); return Number.isFinite(n) ? n : null; }

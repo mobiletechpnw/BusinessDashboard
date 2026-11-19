@@ -34,6 +34,7 @@ const NAV = [
     items: [
       { href: 'production.html', icon: 'production', label: 'Production', tab: 'production' },
       { href: 'events.html', icon: 'events', label: 'Events', tab: 'events' },
+      { href: 'show.html', icon: 'bolt', label: 'Show Mode' },
     ],
   },
   {
@@ -63,54 +64,8 @@ const NAV_TABS = [
   { key: 'events', href: 'events.html', icon: 'events', label: 'Events' },
 ];
 
-// Line icons on a 24px grid, stroked in currentColor.
-const NAV_ICONS = {
-  home: '<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/>',
-  review:
-    '<path d="M9 4H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2"/><rect x="9" y="2.5" width="6" height="3.5" rx="1"/><path d="m9 13.5 2 2 4-4"/>',
-  sales:
-    '<path d="M5 8h14l-1 12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
-  cards:
-    '<rect x="3" y="7" width="13" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/>',
-  tag: '<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
-  pin: '<path d="M9 3h6l-1 6 3 3v2H7v-2l3-3-1-6z"/><path d="M12 14v7"/>',
-  category:
-    '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
-  plus: '<path d="M12 5v14M5 12h14"/>',
-  production:
-    '<path d="M12 3 20 7.5v9L12 21l-8-4.5v-9L12 3z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/>',
-  events:
-    '<path d="M4 6h16a1 1 0 0 1 1 1v3a2 2 0 0 0 0 4v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3a2 2 0 0 0 0-4V7a1 1 0 0 1 1-1z"/><path d="M15 8v8" stroke-dasharray="1.5 2.5"/>',
-  analytics: '<path d="M4 20h16M7 16v-4M12 16V7M17 16v-7"/>',
-  receipt: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><path d="M9 8h6M9 12h6M9 16h3"/>',
-  expenses: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h3"/>',
-  guru: '<path d="M2 9.5 12 5l10 4.5-10 4.5L2 9.5z"/><path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5M22 9.5V14"/>',
-  goals:
-    '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill="currentColor"/>',
-  content:
-    '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m3 16 5-5 5 5M13 14l3-3 5 5"/>',
-  growth: '<path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
-  search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
-  more: '<circle cx="12" cy="12" r="9"/><path d="M8 12h.01M12 12h.01M16 12h.01" stroke-width="2.6"/>',
-  sync: '<path d="M20 12a8 8 0 0 1-14.3 4.9M4 12a8 8 0 0 1 14.3-4.9"/><path d="M18.5 3v4.2h-4.2M5.5 21v-4.2h4.2"/>',
-  bell: '<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15L6 16z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
-  keyboard:
-    '<rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6.5 10h.01M10 10h.01M14 10h.01M17.5 10h.01M8 14h8" stroke-width="2"/>',
-  activity: '<path d="M3 12h4l3-8 4 16 3-8h4"/>',
-  archive:
-    '<rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9M10 13h4"/>',
-  signout: '<path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="m15 16 4-4-4-4M19 12H9"/>',
-  chevrons: '<path d="m8 9 4-4 4 4M8 15l4 4 4-4"/>',
-  chevron: '<path d="m9 6 6 6-6 6"/>',
-  pencil: '<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="m13.5 6.5 4 4"/>',
-  check: '<path d="m5 12.5 4.5 4.5L19 7"/>',
-  trash: '<path d="M4 7h16M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13M9 7V4h6v3"/>',
-  close: '<path d="M6 6l12 12M18 6 6 18"/>',
-};
-
-function navIcon(name) {
-  return `<svg class="vpc-ico" viewBox="0 0 24 24" aria-hidden="true">${NAV_ICONS[name] || ''}</svg>`;
-}
+// Icons come from the shared set in icons.svg (see VPCUtil.icon in util.js).
+const navIcon = (name) => VPCUtil.icon(name);
 window.vpcIcon = navIcon;
 function navEsc(s) {
   return String(s).replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -212,6 +167,7 @@ function navAccountActions({ keyboard }) {
   const acts = [{ value: 'sync', label: 'Sync now', icon: 'sync' }];
   if ('Notification' in window && Notification.permission === 'default')
     acts.push({ value: 'reminders', label: 'Turn on reminders', icon: 'bell' });
+  if (keyboard) acts.push({ value: 'appearance', label: 'Appearance', icon: 'contrast' });
   acts.push({ value: 'backoffice', label: 'Back office', icon: 'archive' });
   if (keyboard) acts.push({ value: 'shortcuts', label: 'Keyboard shortcuts', icon: 'keyboard' });
   acts.push({ value: 'activity', label: 'Activity log', icon: 'activity' });
@@ -220,6 +176,8 @@ function navAccountActions({ keyboard }) {
 }
 
 function injectAppNav() {
+  // A focused page (Show Mode) asks for no navigation chrome.
+  if (document.body.dataset.nav === 'none') return trackHeaderHeight();
   const groups = navGroups();
 
   const side = document.createElement('div');
@@ -286,6 +244,11 @@ function openMoreSheet(trigger) {
         <nav class="vpc-nav" aria-label="All pages">${navLinksHTML()}</nav>
         <div class="vpc-nav-label">Account</div>
         <div class="vpc-sheet-who">${navWhoHTML()}</div>
+        <div class="vpc-sheet-row"><span id="vpc-theme-label">Appearance</span>
+          <div class="seg" id="vpc-theme-seg" aria-labelledby="vpc-theme-label">
+            <button data-value="auto">Auto</button><button data-value="light">Light</button><button data-value="dark">Dark</button>
+          </div>
+        </div>
         ${navAccountActions({ keyboard: false })
           .map(
             (a) =>
@@ -295,6 +258,9 @@ function openMoreSheet(trigger) {
       </div>
     </div>`;
   document.body.appendChild(wrap);
+  vpcSeg(wrap.querySelector('#vpc-theme-seg'), (v) => VPCUtil.setTheme(v)).set(
+    VPCUtil.themeChoice()
+  );
   document.documentElement.classList.add('vpc-sheet-open');
   trigger?.setAttribute('aria-expanded', 'true');
   const sheet = wrap.querySelector('.vpc-sheet');
@@ -365,6 +331,17 @@ function runNavAction(action, el) {
     closeMoreSheet(false);
     if (navCurrentPage() === VAULT && typeof window.openCatModal === 'function') openCatModal();
     else location.href = VAULT + '#newcat';
+  } else if (action === 'appearance') {
+    vpcMenu(el, {
+      label: 'Appearance',
+      current: VPCUtil.themeChoice(),
+      options: [
+        { value: 'auto', label: 'Match device', color: 'transparent' },
+        { value: 'light', label: 'Light', color: 'transparent' },
+        { value: 'dark', label: 'Dark', color: 'transparent' },
+      ],
+      onSelect: (v) => VPCUtil.setTheme(v),
+    });
   } else if (action === 'backoffice') {
     closeMoreSheet(false);
     location.href = VAULT + '#backoffice';
@@ -407,7 +384,7 @@ window.vpcMenu = function (anchor, { label, options, current, onSelect, header, 
       .map((o) =>
         isChoice
           ? `<button type="button" role="menuitemradio" aria-checked="${o.value === current}" data-value="${esc(o.value)}">` +
-            `<span class="vpc-menu-check" aria-hidden="true">✓</span>${esc(o.label)}` +
+            `<span class="vpc-menu-check" aria-hidden="true">${VPCUtil.icon('check')}</span>${esc(o.label)}` +
             `<span class="vpc-menu-dot" aria-hidden="true" style="background:${o.color || 'var(--text2)'}"></span></button>`
           : `<button type="button" role="menuitem" data-value="${esc(o.value)}"${o.danger ? ' class="is-danger"' : ''}>` +
             `${o.icon || ''}${esc(o.label)}</button>`
@@ -726,13 +703,194 @@ document.addEventListener('keydown', (e) => {
   // Search, shortcuts and the activity log close first (their own handler).
   if (document.querySelector('#search-overlay, #shortcuts-overlay, #audit-overlay')) return;
   const top = [...document.querySelectorAll('.modal-overlay.open')].pop();
-  if (!top) return;
-  const cancel = [...top.querySelectorAll('button')].find(
+  if (top) closeDialog(top);
+});
+
+// ── MOTION AND SMALL MOMENTS ───────────────────────
+// Each one does a job; all of them respect reduced motion.
+const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Numbers roll to their new value (about 400ms), keeping the format of the
+// text they replace ("$4,111.00", "74.9%", "47"). Reduced motion: instant.
+window.vpcRoll = function (el, text, duration = 400) {
+  if (!el) return;
+  text = String(text);
+  const parse = (t) => parseFloat(String(t).replace(/[^0-9.-]/g, ''));
+  const from = parse(el.textContent);
+  const to = parse(text);
+  // A newer roll on the same element (quick taps) takes over from this one.
+  const token = (el._roll = (el._roll || 0) + 1);
+  // "-$1,234.50" → sign, "$", the number (its decimals), and what follows.
+  const m = text.match(/^(-?)([^0-9]*)[0-9][0-9,]*(?:\.([0-9]+))?(.*)$/);
+  if (reducedMotion() || !m || !isFinite(from) || !isFinite(to) || from === to) {
+    el.textContent = text;
+    return;
+  }
+  const [, , prefix, frac = '', suffix] = m;
+  const fmt = (v) =>
+    (v < 0 ? '-' : '') +
+    prefix +
+    Math.abs(v).toLocaleString('en-US', {
+      minimumFractionDigits: frac.length,
+      maximumFractionDigits: frac.length,
+    }) +
+    suffix;
+  const start = performance.now();
+  (function frame(t) {
+    if (el._roll !== token) return;
+    const k = Math.min(1, (t - start) / duration);
+    el.textContent = k < 1 ? fmt(from + (to - from) * (1 - Math.pow(1 - k, 3))) : text;
+    if (k < 1) requestAnimationFrame(frame);
+  })(start);
+};
+
+// Long-press on touch screens (the right-click of a phone). The handler gets
+// a point to open a menu at.
+window.vpcLongPress = function (el, handler, ms = 450) {
+  let timer = null;
+  let start = null;
+  let startTarget = null;
+  el.addEventListener('pointerdown', (e) => {
+    // A long press whose lift produced no click (the finger came up over
+    // the menu it opened) mustn't swallow the next ordinary tap.
+    el._longPressed = false;
+    if (e.pointerType !== 'touch') return;
+    start = { x: e.clientX, y: e.clientY };
+    startTarget = e.target;
+    timer = setTimeout(() => {
+      timer = null;
+      el._longPressed = true;
+      navigator.vibrate?.(10);
+      handler({
+        clientX: start.x,
+        clientY: start.y,
+        currentTarget: el,
+        target: startTarget,
+        preventDefault() {},
+      });
+    }, ms);
+  });
+  const cancel = (e) => {
+    if (
+      timer &&
+      e.type === 'pointermove' &&
+      Math.hypot(e.clientX - start.x, e.clientY - start.y) < 10
+    )
+      return;
+    clearTimeout(timer);
+    timer = null;
+  };
+  el.addEventListener('pointermove', cancel);
+  el.addEventListener('pointerup', cancel);
+  el.addEventListener('pointercancel', cancel);
+  // The click that ends a long press shouldn't also open the row.
+  el.addEventListener(
+    'click',
+    (e) => {
+      if (el._longPressed) {
+        el._longPressed = false;
+        e.stopImmediatePropagation();
+        e.preventDefault();
+      }
+    },
+    true
+  );
+  el.addEventListener('contextmenu', (e) => {
+    if (e.pointerType === 'touch' || el._longPressed) e.preventDefault();
+  });
+};
+
+// Swipe a phone sheet down by its top edge to close it, like iOS. Touch
+// events, not pointer events: the browser would take a downward drag as a
+// scroll and cancel the pointer stream, so the sheet never followed.
+function enableSheetSwipe() {
+  let drag = null;
+  document.addEventListener(
+    'touchstart',
+    (e) => {
+      drag = null;
+      if (e.touches.length !== 1 || window.innerWidth > 700) return;
+      const sheet = e.target.closest?.('.modal-overlay.open > .modal, .vpc-sheet');
+      if (!sheet || sheet.scrollTop > 0) return;
+      const { clientY } = e.touches[0];
+      if (clientY - sheet.getBoundingClientRect().top > 64) return; // the top edge, not the content
+      const now = performance.now();
+      drag = { sheet, y0: clientY, dy: 0, moved: false, lastY: clientY, lastT: now, v: 0 };
+    },
+    { passive: true }
+  );
+  document.addEventListener(
+    'touchmove',
+    (e) => {
+      if (!drag) return;
+      const y = e.touches[0].clientY;
+      // Upward first: the content scrolls as usual.
+      if (!drag.moved && y < drag.y0) {
+        drag = null;
+        return;
+      }
+      e.preventDefault(); // the sheet follows the finger instead of the page scrolling
+      const now = performance.now();
+      drag.v = (y - drag.lastY) / Math.max(1, now - drag.lastT);
+      drag.lastY = y;
+      drag.lastT = now;
+      if (!drag.moved) drag.sheet.style.transition = 'none';
+      drag.moved = true;
+      drag.dy = Math.max(0, y - drag.y0);
+      drag.sheet.style.transform = `translateY(${drag.dy}px)`;
+    },
+    { passive: false }
+  );
+  const end = () => {
+    if (!drag) return;
+    const { sheet, dy, moved, v, lastT } = drag;
+    drag = null;
+    if (!moved) return; // a tap
+    const flick = v > 0.5 && performance.now() - lastT < 100;
+    sheet.style.transition = 'transform var(--t-move) var(--ease-sheet)';
+    if (dy > 120 || (flick && dy > 40)) {
+      sheet.style.transform = 'translateY(100%)';
+      setTimeout(() => {
+        sheet.style.transform = '';
+        sheet.style.transition = '';
+        if (sheet.classList.contains('vpc-sheet')) closeMoreSheet(true);
+        else closeDialog(sheet.closest('.modal-overlay'));
+      }, 220);
+    } else {
+      sheet.style.transform = '';
+      setTimeout(() => (sheet.style.transition = ''), 320);
+    }
+  };
+  document.addEventListener('touchend', end);
+  document.addEventListener('touchcancel', end);
+}
+// Close a dialog the way its own Cancel button would.
+function closeDialog(overlay) {
+  if (!overlay) return;
+  const cancel = [...overlay.querySelectorAll('button')].find(
     (b) => b.classList.contains('sheet-close') || /^(cancel|close)$/i.test(b.textContent.trim())
   );
   if (cancel) cancel.click();
-  else top.classList.remove('open');
-});
+  else overlay.classList.remove('open');
+}
+
+// The title bar gains its hairline only once content passes under it. A
+// page with a large title starts with a clear bar and shows its small title
+// there only after the large one has scrolled away.
+function watchScroll() {
+  const root = document.documentElement;
+  const onScroll = () => root.classList.toggle('scrolled', window.scrollY > 4);
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+  const large = document.querySelector('.large-title');
+  if (large && 'IntersectionObserver' in window) {
+    root.classList.add('has-large-title');
+    const header = parseFloat(getComputedStyle(root).getPropertyValue('--header-h')) || 58;
+    new IntersectionObserver(([en]) => root.classList.toggle('title-in', !en.isIntersecting), {
+      rootMargin: `-${header}px 0px 0px 0px`,
+    }).observe(large);
+  }
+}
 
 // ── GLOBAL SEARCH ──────────────────────────────────
 function buildSearchIndex() {
@@ -743,7 +901,7 @@ function buildSearchIndex() {
   orders.forEach((o) =>
     results.push({
       type: 'Order',
-      icon: '📦',
+      icon: 'receipt',
       title: o.customer,
       sub: `${o.product} · $${o.salePrice} · ${o.date}`,
       url: 'vault-pine-collective.html',
@@ -754,7 +912,7 @@ function buildSearchIndex() {
   jt.forEach((s) =>
     results.push({
       type: 'Jet Tag Sale',
-      icon: '🏷',
+      icon: 'tag',
       title: s.chars.join(', '),
       sub: `${s.qty} tags · $${s.revenue} · ${s.date}${s.notes ? ' · ' + s.notes : ''}`,
       url: 'vault-pine-collective.html',
@@ -765,7 +923,7 @@ function buildSearchIndex() {
   pins.forEach((s) =>
     results.push({
       type: 'Pin Sale',
-      icon: '📌',
+      icon: 'pin',
       title: s.chars.join(', '),
       sub: `${s.qty} pins · $${s.revenue} · ${s.date}${s.notes ? ' · ' + s.notes : ''}`,
       url: 'vault-pine-collective.html',
@@ -783,7 +941,7 @@ function buildSearchIndex() {
   JSON.parse(localStorage.getItem(K.catSales) || '[]').forEach((s) =>
     results.push({
       type: `${(cats[s.catId] || {}).name || 'Category'} Sale`,
-      icon: ((cats[s.catId] || {}).emoji || '').trim() || '🛍',
+      icon: 'category',
       title: (s.items || []).map((iid) => catItemNames[s.catId + '/' + iid] || iid).join(', '),
       sub: `${s.qty} sold · $${s.revenue} · ${s.date}${s.notes ? ' · ' + s.notes : ''}`,
       url: 'vault-pine-collective.html',
@@ -795,7 +953,7 @@ function buildSearchIndex() {
   events.forEach((ev) =>
     results.push({
       type: 'Event',
-      icon: '🎪',
+      icon: 'events',
       title: ev.name,
       sub: `${ev.location || ''} · ${ev.start}${ev.boothCost ? ' · Booth $' + ev.boothCost : ''}`,
       url: 'vault-pine-collective.html',
@@ -807,7 +965,7 @@ function buildSearchIndex() {
     inv.forEach((it) =>
       results.push({
         type: 'Inventory',
-        icon: '🃏',
+        icon: 'cards',
         title: it.name || 'Inventory item',
         sub: `${it.cat || ''} · qty ${it.qty || 1} · $${(+it.value || 0).toFixed(2)} ${it.lot ? 'total' : 'ea'}${it.notes ? ' · ' + it.notes : ''}`,
         url: 'inventory.html',
@@ -820,7 +978,7 @@ function buildSearchIndex() {
     goals.forEach((g) => {
       results.push({
         type: 'Goal',
-        icon: '🎯',
+        icon: 'goals',
         title: g.title || g.name || 'Goal',
         sub: g.desc || '',
         url: 'goals-dashboard.html',
@@ -828,7 +986,7 @@ function buildSearchIndex() {
       (g.objectives || []).forEach((ob) =>
         results.push({
           type: 'Objective',
-          icon: '✅',
+          icon: 'check',
           title: ob.text || 'Objective',
           sub: `Under: ${g.title || ''}`,
           url: 'goals-dashboard.html',
@@ -842,7 +1000,7 @@ function buildSearchIndex() {
     exps.forEach((e) =>
       results.push({
         type: 'Expense',
-        icon: '💸',
+        icon: 'expenses',
         title: e.description || e.category,
         sub: `${e.category} · $${(e.amount || 0).toFixed(2)} · ${e.date}${e.notes ? ' · ' + e.notes : ''}`,
         url: 'expenses.html',
@@ -852,7 +1010,7 @@ function buildSearchIndex() {
     recs.forEach((r) =>
       results.push({
         type: 'Recurring',
-        icon: '🔄',
+        icon: 'repeat',
         title: r.name,
         sub: `${r.category} · $${(r.amount || 0).toFixed(2)}/mo`,
         url: 'expenses.html',
@@ -865,78 +1023,84 @@ function buildSearchIndex() {
       title: 'Vault & Pine Collective',
       sub: 'Sales Hub — orders, business expenses, jet tags, pins, filament, back office',
       url: 'vault-pine-collective.html',
-      icon: '🌲',
+      icon: 'sales',
       type: 'Page',
     },
     {
       title: 'Analytics',
       sub: 'Margins, show breakdowns, trends',
       url: 'analytics.html',
-      icon: '📈',
+      icon: 'analytics',
       type: 'Page',
     },
     {
       title: 'Goals & Objectives',
       sub: 'Track your goals',
       url: 'goals-dashboard.html',
-      icon: '🎯',
+      icon: 'goals',
       type: 'Page',
     },
     {
       title: 'Personal Expenses',
       sub: 'Track monthly spending & budget',
       url: 'expenses.html',
-      icon: '💸',
+      icon: 'expenses',
       type: 'Page',
     },
     {
       title: 'Daily Review',
       sub: 'Morning briefing — goals, expenses, alerts',
       url: 'review.html',
-      icon: '📋',
+      icon: 'review',
       type: 'Page',
     },
     {
       title: 'Financial Guru',
       sub: 'Academy lessons, health score, milestones, calculators',
       url: 'guru.html',
-      icon: '🥋',
+      icon: 'guru',
       type: 'Page',
     },
-    { title: 'Home', sub: 'Command Center overview', url: 'index.html', icon: '⌂', type: 'Page' },
+    {
+      title: 'Home',
+      sub: 'Command Center overview',
+      url: 'index.html',
+      icon: 'home',
+      type: 'Page',
+    },
     {
       title: 'Card Inventory',
       sub: 'Singles, slabs, sealed — stock value over time',
       url: 'inventory.html',
-      icon: '🃏',
+      icon: 'cards',
       type: 'Page',
     },
     {
       title: 'Production Hub',
       sub: 'Print queue and stock levels',
       url: 'production.html',
-      icon: '🖨️',
+      icon: 'production',
       type: 'Page',
     },
     {
       title: 'Events & Tables',
       sub: 'Shows, vendor tables, payments, ROI',
       url: 'events.html',
-      icon: '🎪',
+      icon: 'events',
       type: 'Page',
     },
     {
       title: 'Content Planner',
       sub: 'Posts calendar, queue, templates',
       url: 'content.html',
-      icon: '📱',
+      icon: 'content',
       type: 'Page',
     },
     {
       title: 'Instagram Growth',
       sub: 'Follower snapshots and goal',
       url: 'growth.html',
-      icon: '🚀',
+      icon: 'growth',
       type: 'Page',
     },
   ].forEach((p) => results.push(p));
@@ -960,7 +1124,7 @@ function openSearch() {
   overlay.innerHTML = `
     <div style="width:90%;max-width:580px;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
       <div style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);">
-        <span style="color:var(--text2);font-size:1.1rem;">🔍</span>
+        <span style="color:var(--text2);display:flex">${VPCUtil.icon('search')}</span>
         <input id="search-input" placeholder="Search orders, customers, events, goals…"
           style="flex:1;background:none;border:none;outline:none;font-size:0.95rem;color:var(--text);font-family:inherit;"
           oninput="runSearch(this.value)" autofocus>
@@ -1004,12 +1168,12 @@ window.runSearch = function (q) {
       (r, i) => `
     <a href="${r.url}" onclick="closeSearch()" style="display:flex;align-items:center;gap:12px;padding:10px 18px;text-decoration:none;transition:background 0.1s;color:var(--text);"
        onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='none'">
-      <span style="font-size:1.2rem;flex-shrink:0">${r.icon}</span>
+      <span class="search-ico">${VPCUtil.icon(r.icon)}</span>
       <div style="flex:1;min-width:0;">
-        <div style="font-weight:600;font-size:0.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.title}</div>
-        <div style="font-size:0.75rem;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.sub}</div>
+        <div style="font-weight:600;font-size:0.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${VPCUtil.esc(r.title)}</div>
+        <div style="font-size:0.75rem;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${VPCUtil.esc(r.sub)}</div>
       </div>
-      <span style="font-size:0.75rem;color:var(--text2);border:1px solid var(--border);border-radius:8px;padding:2px 7px;flex-shrink:0">${r.type}</span>
+      <span style="font-size:0.75rem;color:var(--text2);border:1px solid var(--border);border-radius:8px;padding:2px 7px;flex-shrink:0">${VPCUtil.esc(r.type)}</span>
     </a>
   `
     )
@@ -1194,7 +1358,7 @@ function showAuditLog() {
         <div style="font-size:0.9rem;font-weight:600;">Audit Log <span style="font-size:0.75rem;color:var(--text2);font-weight:400">(last ${Math.min(log.length, 60)} of ${log.length} entries)</span></div>
         <div style="display:flex;gap:8px;">
           <button onclick="localStorage.removeItem('${AUDIT_KEY}');document.getElementById('audit-overlay').remove()" style="background:none;border:1px solid var(--border);border-radius:8px;color:var(--red);padding:5px 12px;font-size:0.75rem;cursor:pointer;font-family:inherit;">Clear Log</button>
-          <button onclick="document.getElementById('audit-overlay').remove()" style="background:none;border:1px solid var(--border);border-radius:8px;color:var(--text2);padding:5px 12px;font-size:0.75rem;cursor:pointer;font-family:inherit;">✕ Close</button>
+          <button onclick="document.getElementById('audit-overlay').remove()" style="background:none;border:1px solid var(--border);border-radius:8px;color:var(--text2);padding:5px 12px;font-size:0.75rem;cursor:pointer;font-family:inherit;">Close</button>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:110px 54px 130px 1fr;gap:10px;padding:0 0 8px;border-bottom:1px solid var(--border);font-size:0.75rem;font-weight:600;color:var(--text2);">
@@ -1539,6 +1703,8 @@ document.addEventListener('DOMContentLoaded', () => {
   injectAppNav();
   vpcEnhanceForms();
   watchDialogs();
+  enableSheetSwipe();
+  watchScroll();
   registerSW();
   // Deferred: daily reminder check (only if reminders are turned on)
   setTimeout(checkAndNotify, 2000);

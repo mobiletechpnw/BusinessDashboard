@@ -33,6 +33,7 @@ const PAGES = [
   'growth.html',
   'events.html',
   'inventory.html',
+  'show.html',
   'vendor-calendar.html',
   'event-signup.html',
 ];
@@ -390,6 +391,35 @@ async function runProfile(browser, { name, viewport, mobile, seeded }) {
     }
     await pg.screenshot({ path: path.join(dir, 'inventory-filters.png') });
     for (const e of errs) failures.push(`[${name}] inventory: ${e}`);
+    await pg.close();
+  }
+
+  // Show Mode: once the first cloud pull settles, a tap logs a sale dated
+  // today and the total moves; Undo takes it back.
+  {
+    const pg = await ctx.newPage();
+    const errs = [];
+    pg.on('pageerror', (e) => errs.push(`pageerror: ${e.message}`));
+    await pg.goto(BASE + 'show.html', { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await pg.waitForFunction(() => document.getElementById('sWait')?.hidden, null, {
+      timeout: 12000,
+    });
+    const tags = () => pg.evaluate(() => JSON.parse(localStorage.getItem('vp_jettags_v1') || '[]'));
+    const before = (await tags()).length;
+    await pg.click('.sell[data-key="jt"]');
+    await pg.waitForTimeout(600);
+    const after = await tags();
+    const rec = after[after.length - 1];
+    const today = await pg.evaluate(() => new Date().toLocaleDateString('en-CA'));
+    if (after.length !== before + 1 || !rec || rec.date !== today)
+      errs.push('a Jet Tag tap did not log a sale for today');
+    const total = await pg.$eval('#sTotal', (e) => e.textContent);
+    if (total === '$0') errs.push('the total did not move');
+    await pg.screenshot({ path: path.join(dir, 'show-mode-logged.png') });
+    await pg.click('#sUndo');
+    await pg.waitForTimeout(400);
+    if ((await tags()).length !== before) errs.push('Undo did not take the sale back');
+    for (const e of errs) failures.push(`[${name}] show mode: ${e}`);
     await pg.close();
   }
 

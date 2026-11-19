@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#121213">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="styles.css">
+<script src="util.js"></script>
+<script src="shared.js" defer></script>
+<script src="supabase-sync.js" defer></script>
+<title>Show Mode</title>
+<style>
+/* Show Mode: one figure, one tap per sale. Made for a phone held at a booth,
+   so everything is big, close to the thumb, and readable under hall lights. */
+header.show-bar { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; }
+.show-bar .brand { text-align: center; }
+.show-done {
+  justify-self: start; display: inline-flex; align-items: center; min-height: 44px;
+  color: var(--accent); font-size: 1.0625rem; text-decoration: none;
+}
+.show-theme {
+  justify-self: end; display: grid; place-items: center;
+  width: 44px; height: 44px; min-height: 44px; padding: 0;
+  background: transparent; color: var(--accent);
+}
+.show-theme .vpc-ico { width: 22px; height: 22px; }
+
+main.show { max-width: 960px; margin: 0 auto; padding: 20px 32px calc(48px + var(--chrome-bottom)); }
+
+/* The day so far */
+.show-head { text-align: center; margin: 12px 0 28px; }
+.show-event {
+  display: inline-flex; align-items: center; gap: 6px; max-width: 100%;
+  font-size: 0.8125rem; color: var(--label-2);
+}
+.show-event .vpc-ico { width: 16px; height: 16px; flex: none; }
+.show-event-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex: none; }
+.show-total {
+  margin-top: 6px; font: 700 64px/1.05 var(--font); letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.show-count { margin-top: 4px; font-size: 0.9375rem; color: var(--label-2); }
+.show-wait {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin: -12px 0 16px; font-size: 0.8125rem; color: var(--label-2);
+}
+.show-wait .vpc-ico { width: 16px; height: 16px; animation: show-spin 1s linear infinite; }
+@keyframes show-spin { to { transform: rotate(360deg); } }
+
+/* The buttons: one tap logs one sale */
+.show-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (min-width: 700px) { .show-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.sell {
+  position: relative; display: flex; flex-direction: column; align-items: stretch;
+  justify-content: space-between; gap: 12px; min-height: 124px; padding: 16px;
+  border-radius: var(--r-lg); background: var(--surface); color: var(--label);
+  box-shadow: var(--shadow-1), var(--highlight); text-align: left; font-weight: 400;
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+}
+@media (hover: hover) { .sell:hover { background: var(--surface2); } }
+.sell[aria-disabled='true'] { opacity: 0.45; cursor: default; }
+.sell[aria-disabled='true']:active { transform: none; }
+.sell-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.sell-name {
+  font: 600 17px/22px var(--font); letter-spacing: -0.013em; overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.sell-ico { flex: none; color: var(--accent); }
+.sell-ico .vpc-ico { width: 22px; height: 22px; }
+.sell-foot { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.sell-price { font: 600 28px/32px var(--font); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.sell-today { font-size: 0.75rem; font-weight: 500; color: var(--label-2); white-space: nowrap; }
+.sell.other { background: var(--fill); box-shadow: none; }
+.sell.other .sell-price { color: var(--accent); font-size: 17px; line-height: 22px; }
+/* The tick that confirms a tap */
+.sell-done {
+  position: absolute; top: 12px; right: 12px; display: grid; place-items: center;
+  width: 28px; height: 28px; border-radius: 50%; background: var(--green); color: var(--bg);
+  opacity: 0; pointer-events: none;
+}
+.sell-done .vpc-ico { width: 18px; height: 18px; stroke-width: 2.5; }
+.sell.logged .sell-done { animation: sell-tick 1s var(--ease) both; }
+@keyframes sell-tick {
+  0% { opacity: 0; transform: scale(0.5); }
+  18% { opacity: 1; transform: scale(1.1); }
+  30% { transform: scale(1); }
+  75% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.show-unhide {
+  display: block; margin: 14px auto 0; padding: 6px 12px; min-height: 0;
+  background: transparent; color: var(--accent); font-size: 0.875rem; font-weight: 500;
+}
+
+/* Today's sales */
+.show-today { margin-top: 36px; }
+.show-h2 { margin: 0 4px 10px; font: 600 22px/28px var(--font); letter-spacing: -0.018em; }
+.sale-list { border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-1); overflow: hidden; }
+.sale-row { position: relative; display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 6px 8px 16px; }
+.sale-row + .sale-row::before {
+  content: ''; position: absolute; top: 0; left: 16px; right: 0;
+  border-top: var(--hairline) solid var(--separator);
+}
+.sale-main { flex: 1; min-width: 0; }
+.sale-name { font-size: 0.9375rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sale-sub { font-size: 0.75rem; color: var(--label-2); margin-top: 1px; }
+.sale-amt { font-size: 0.9375rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.sale-del {
+  display: grid; place-items: center; width: 44px; height: 44px; min-height: 44px; padding: 0;
+  background: transparent; color: var(--label-2);
+}
+.sale-del .vpc-ico { width: 18px; height: 18px; }
+@media (hover: hover) { .sale-del:hover { color: var(--red); } }
+.sale-empty { padding: 18px 16px; font-size: 0.9375rem; color: var(--label-2); text-align: center; }
+.sale-spacer { width: 44px; flex: none; }
+.show-foot { margin-top: 20px; font-size: 0.75rem; color: var(--label-2); text-align: center; }
+
+/* Undo, for the sale just logged */
+.show-toast {
+  position: fixed; left: 50%; bottom: calc(20px + var(--chrome-bottom)); z-index: 600;
+  display: flex; align-items: center; gap: 8px; width: max-content; max-width: calc(100vw - 32px);
+  padding: 6px 6px 6px 18px; border-radius: var(--r-full);
+  background: var(--surface2); color: var(--label); box-shadow: var(--shadow-pop);
+  transform: translate(-50%, calc(100% + 32px)); opacity: 0; pointer-events: none;
+  transition: transform var(--t-move) var(--spring), opacity var(--t-base) var(--ease);
+}
+.show-toast.show { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+.show-toast-text { min-width: 0; font-size: 0.9375rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.show-toast-text { margin-right: 4px; }
+/* Said to screen readers, not shown (the toast has no room for it) */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.show-toast button { flex: none; min-height: 36px; padding: 0 13px; background: var(--fill); color: var(--accent); font-size: 0.9375rem; }
+.show-toast:not(.has-undo) #sUndo, .show-toast:not(.has-which) #sWhich { display: none; }
+.show-toast:not(.has-undo):not(.has-which) { padding-right: 18px; }
+
+/* Which Jet Tag or Pin: the characters, with what's left of each */
+.char-help { margin: -10px 0 14px; font-size: 0.8125rem; color: var(--label-2); }
+.char-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (min-width: 701px) { .char-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.char-btn {
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px;
+  min-height: 60px; padding: 10px 14px; border-radius: var(--r-md); background: var(--fill);
+  color: var(--label); font-size: 0.9375rem; font-weight: 600; text-align: left; touch-action: manipulation;
+}
+.char-btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.char-left { font-size: 0.75rem; font-weight: 500; color: var(--label-2); }
+.char-left.is-low { color: var(--orange); }
+.char-btn:disabled { opacity: 0.45; cursor: default; }
+.char-btn:disabled:active { transform: none; }
+.sale-char {
+  min-height: 0; padding: 0; margin-left: 2px; background: none; border-radius: 0;
+  color: var(--accent); font-size: 0.75rem; font-weight: 500;
+}
+@media (max-width: 700px) { .sale-char { padding: 6px 0; margin: -6px 0 -6px 2px; } }
+
+/* Another amount: a number pad */
+.pad-amount {
+  margin: 0 0 16px; text-align: center; font: 700 48px/1.1 var(--font);
+  letter-spacing: -0.02em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere;
+}
+.pad-amount.is-empty { color: var(--label-3); }
+.pad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 18px; }
+.pad button {
+  min-height: 56px; padding: 0; border-radius: var(--r-md); background: var(--fill); color: var(--label);
+  font-size: 1.5rem; font-weight: 500; font-variant-numeric: tabular-nums;
+  display: grid; place-items: center; touch-action: manipulation;
+}
+.pad .vpc-ico { width: 26px; height: 26px; }
+
+@media (max-width: 700px) {
+  main.show { padding: 12px 16px calc(32px + var(--chrome-bottom)); }
+  .show-head { margin: 8px 0 22px; }
+}
+@media (max-width: 380px) {
+  .show-toast { gap: 6px; padding-left: 14px; }
+  .show-toast button { padding: 0 10px; }
+  .show-total { font-size: 52px; }
+  .sell { min-height: 112px; padding: 14px; }
+  .sell-price { font-size: 24px; }
+}
+</style>
+</head>
+<body data-nav="none">
+
+<header class="show-bar">
+  <a class="show-done" href="index.html">Done</a>
+  <div class="brand">Show Mode</div>
+  <button type="button" class="show-theme" id="themeBtn"></button>
+</header>
+
+<main class="show">
+  <section class="show-head">
+    <div class="show-event" id="sEvent"></div>
+    <div class="show-total" id="sTotal">$0</div>
+    <div class="show-count" id="sCount">No sales yet today</div>
+  </section>
+
+  <p class="show-wait" id="sWait" hidden></p>
+  <section class="show-grid" id="sGrid" aria-label="Tap to log a sale"></section>
+  <div id="sUnhide"></div>
+
+  <section class="show-today" aria-labelledby="sTodayTitle">
+    <h2 class="show-h2" id="sTodayTitle">Today</h2>
+    <div class="sale-list" id="sList"></div>
+  </section>
+  <p class="show-foot" id="sFoot"></p>
+</main>
+
+<div class="modal-overlay" id="padSheet">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="padTitle">
+    <h2 id="padTitle">Another amount</h2>
+    <div class="pad-amount is-empty" id="padAmount" aria-live="polite">$0</div>
+    <div class="pad" id="pad">
+      <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
+      <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
+      <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
+      <button type="button" data-k=".">.</button><button type="button" data-k="0">0</button>
+      <button type="button" data-k="del" aria-label="Delete" id="padDel"></button>
+    </div>
+    <div class="field">
+      <label for="padWhat">What was it? (optional)</label>
+      <input type="text" id="padWhat" placeholder="Custom" autocomplete="off" list="padNames">
+      <datalist id="padNames"></datalist>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-ghost" onclick="closePad()">Cancel</button>
+      <button type="button" class="btn-primary" id="padSave" onclick="savePad()" disabled>Log sale</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="charSheet">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="charTitle">
+    <h2 id="charTitle">Which one?</h2>
+    <p class="char-help" id="charHelp" hidden></p>
+    <div class="char-grid" id="charGrid"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn-ghost" onclick="closeChars()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="show-toast" id="sToast" role="status" aria-live="polite">
+  <span class="show-toast-text" id="sToastText"></span>
+  <button type="button" id="sWhich">Which one?</button>
+  <button type="button" id="sUndo">Undo</button>
+</div>
+
+<script>
+'use strict';
+// ══════════════════════════════════════════════════
+//  SHOW MODE — one tap per sale, at the booth
+// ══════════════════════════════════════════════════
+// A tap writes the same record the Sales Hub's own forms write, so a Show
+// Mode sale is an ordinary sale everywhere else: Today, Analytics, and the
+// show's return on the Events page (which counts sales by date).
+const K = VPCUtil.KEYS;
+const $ = id => document.getElementById(id);
+const esc = s => VPCUtil.esc(s == null ? '' : String(s));
+const attr = s => VPCUtil.escAttr(s == null ? '' : String(s));
+const icon = (name, cls) => VPCUtil.icon(name, cls);
+const cents = n => Math.round((+n || 0) * 100) / 100;
+const fmt$ = n => {
+  n = cents(n);
+  return '$' + n.toLocaleString('en-US', { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 });
+};
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const readArr = key => {
+  try { const v = JSON.parse(localStorage.getItem(key) || '[]'); return Array.isArray(v) ? v : []; }
+  catch (e) { return []; }
+};
+const writeArr = (key, arr) => localStorage.setItem(key, JSON.stringify(arr));
+const dayOf = x => String((x && x.date) || '').slice(0, 10);
+const today = () => VPCUtil.todayStr();
+const plural = (n, one, many = one + 's') => `${n} ${n === 1 ? one : many}`;
+const unitsOf = o => Math.max(1, +o.sets || 1);
+const unitPrice = s => (+s.revenue || 0) / Math.max(1, +s.qty || 1);
+
+// Buttons hidden on this device (a long press or right-click on a button).
+const HIDDEN_KEY = 'vpc_show_hidden';
+const hiddenKeys = () => { try { return JSON.parse(localStorage.getItem(HIDDEN_KEY) || '[]'); } catch (e) { return []; } };
+const setHidden = arr => { try { localStorage.setItem(HIDDEN_KEY, JSON.stringify(arr)); } catch (e) {} };
+
+// ── Ready: wait for this page's first pull from the cloud ──
+// Otherwise a tap made while the pull is still on its way makes this device's
+// list look newer than sales logged on another device, and they'd be lost.
+let ready = false;
+function markReady() {
+  if (ready) return;
+  ready = true;
+  render();
+}
+
+// ── Today's show ──
+function todaysEvent() {
+  const t = today();
+  return readArr(K.events).map(VPCUtil.normalizeEvent)
+    .filter(e => e.start && dayOf({ date: e.start }) <= t && dayOf({ date: e.end || e.start }) >= t)
+    .sort((a, b) => String(a.start).localeCompare(String(b.start)))[0] || null;
+}
+
+// ── Characters: which Jet Tag or Pin sold ──
+// The Sales Hub publishes each character's stock (bought plus restocked) to
+// these synced keys whenever it opens; the home page's low-stock alert reads
+// the same lists. What's left = that, less the sales that name the character.
+const CHAR_INV = { jt: K.jetTagInventory, pin: K.pinInventory };
+const CHAR_SALES = { jt: K.jetTags, pin: K.pins };
+const LOW_AT = { jt: 2, pin: 3 };
+const KIND_NAME = { jt: 'Jet Tag', pin: 'Pin' };
+const canPick = kind => readArr(CHAR_INV[kind]).length > 0;
+function charStock(kind) {
+  const sold = {};
+  readArr(CHAR_SALES[kind]).forEach(s => (s.chars || []).forEach(c => {
+    sold[c] = (sold[c] || 0) + (s.charQty?.[c] ?? (s.qty || 1));
+  }));
+  return readArr(CHAR_INV[kind]).map(c => ({ id: c.id, name: c.name || c.id, left: (+c.purchased || 0) - (sold[c.id] || 0) }));
+}
+function charNames(kind, ids) {
+  const inv = readArr(CHAR_INV[kind]);
+  return (ids || []).map(id => (inv.find(c => c.id === id) || {}).name || id).join(', ');
+}
+
+// ── What a tap can sell ──
+// The price you usually charge: the most common unit price in your recent
+// sales of it, so a one-off discount doesn't become the button's price.
+function usualPrice(sales, unit) {
+  const tally = new Map();
+  [...sales].sort((a, b) => dayOf(b).localeCompare(dayOf(a))).slice(0, 30).forEach(s => {
+    const p = cents(unit(s));
+    if (p > 0) tally.set(p, (tally.get(p) || 0) + 1);
+  });
+  let best = null, most = 0;
+  tally.forEach((n, p) => { if (n > most) { best = p; most = n; } }); // newest wins a tie
+  return best;
+}
+
+function sellItems() {
+  const hidden = new Set(hiddenKeys());
+  const orders = VPCUtil.orderList(localStorage);
+  const saved = readArr(K.orderProducts).filter(p => p && p.name);
+  const past = new Map();
+  orders.forEach(o => {
+    if (!o.product || o.product === 'Custom') return;
+    if (!past.has(o.product)) past.set(o.product, []);
+    past.get(o.product).push(o);
+  });
+  // Your products: priced as saved, or as you usually sell them. What you've
+  // sold lately comes first; one-off names from long ago stay out. Six at most.
+  const since = new Date();
+  since.setDate(since.getDate() - 90);
+  const cut = since.toLocaleDateString('en-CA');
+  const products = [];
+  new Set([...saved.map(p => p.name), ...past.keys()]).forEach(name => {
+    const p = saved.find(x => x.name === name);
+    const sold = past.get(name) || [];
+    const price = p && +p.price > 0 ? cents(p.price) : usualPrice(sold, o => (+o.salePrice || 0) / unitsOf(o));
+    if (!price) return;
+    const like = sold.filter(o => cents((+o.salePrice || 0) / unitsOf(o)) === price)
+      .sort((a, b) => dayOf(b).localeCompare(dayOf(a)))[0];
+    const cost = p && p.cost != null && !isNaN(+p.cost) ? cents(p.cost) : like ? cents((+like.cogs || 0) / unitsOf(like)) : 0;
+    products.push({ key: 'order:' + name, kind: 'order', name, price, cost, icon: 'box', saved: p ? 1 : 0,
+      n: sold.length, recent: sold.filter(o => dayOf(o) >= cut).length });
+  });
+  const items = products
+    .filter(i => !hidden.has(i.key) && (i.saved || i.recent || i.n >= 2))
+    .sort((a, b) => b.recent - a.recent || b.saved - a.saved || b.n - a.n)
+    .slice(0, 6);
+  items.push({ key: 'jt', kind: 'jt', name: 'Jet Tag', price: usualPrice(readArr(K.jetTags), unitPrice) || 5, icon: 'tag' });
+  items.push({ key: 'pin', kind: 'pin', name: 'Pin', price: usualPrice(readArr(K.pins), unitPrice) || 5, icon: 'pin' });
+  // Your own categories, when they have a price.
+  const catSales = readArr(K.catSales);
+  VPCUtil.customCategories(localStorage).forEach(c => {
+    const price = +c.sellPrice > 0 ? cents(c.sellPrice) : usualPrice(catSales.filter(s => s.catId === c.id), unitPrice);
+    if (price) items.push({ key: 'cat:' + c.id, kind: 'cat', catId: c.id, name: c.name, price, icon: 'category' });
+  });
+  return items.filter(i => !hidden.has(i.key));
+}
+
+// ── Today's sales, from all four stores, newest first ──
+function todaysSales() {
+  const t = today();
+  const cats = new Map(VPCUtil.customCategories(localStorage).map(c => [c.id, c]));
+  const rows = [];
+  VPCUtil.orderList(localStorage).forEach((o, i) => {
+    if (dayOf(o) === t) rows.push({ store: K.orders, key: 'order:' + o.product, rec: o, i, name: o.product || 'Order', qty: unitsOf(o), amount: +o.salePrice || 0 });
+  });
+  [[K.jetTags, 'jt', 'Jet Tag'], [K.pins, 'pin', 'Pin']].forEach(([store, key, name]) =>
+    readArr(store).forEach((s, i) => {
+      if (dayOf(s) === t) {
+        const who = charNames(key, s.chars);
+        rows.push({ store, key, kind: key, rec: s, i, name: who ? `${name} · ${who}` : name, qty: +s.qty || 1, amount: +s.revenue || 0 });
+      }
+    }));
+  readArr(K.catSales).forEach((s, i) => {
+    const c = cats.get(s.catId);
+    if (c && dayOf(s) === t) rows.push({ store: K.catSales, key: 'cat:' + c.id, rec: s, i, name: c.name, qty: +s.qty || 1, amount: +s.revenue || 0 });
+  });
+  return rows.sort((a, b) => (b.rec.loggedAt || 0) - (a.rec.loggedAt || 0) || b.i - a.i);
+}
+
+// ── Render ──
+let ITEMS = [];
+function render() {
+  const t = today();
+  const ev = todaysEvent();
+  $('sEvent').innerHTML = ev
+    ? `<span class="live-dot" aria-hidden="true"></span><span class="show-event-text">${esc(ev.name || 'Show')}${ev.location ? ' · ' + esc(ev.location) : ''}</span>`
+    : `${icon('calendar')}<span class="show-event-text">No show on your calendar today</span>`;
+
+  const day = VPCUtil.salesBetween(t, t);
+  window.vpcRoll ? vpcRoll($('sTotal'), fmt$(day.revenue)) : ($('sTotal').textContent = fmt$(day.revenue));
+  $('sCount').textContent = day.count ? `${plural(day.count, 'sale')} today` : 'No sales yet today';
+
+  const sales = todaysSales();
+  const soldToday = new Map();
+  sales.forEach(r => soldToday.set(r.key, (soldToday.get(r.key) || 0) + r.qty));
+
+  $('sWait').hidden = ready;
+  $('sWait').innerHTML = ready ? '' : `${icon('sync')}Getting your latest sales…`;
+
+  ITEMS = sellItems();
+  const focused = document.activeElement?.closest?.('.sell')?.dataset.key;
+  const html = ITEMS.map(it => {
+    const n = soldToday.get(it.key) || 0;
+    return `<button type="button" class="sell" data-key="${attr(it.key)}" aria-label="${attr(`Log ${it.name}, ${fmt$(it.price)}${n ? `, ${n} sold today` : ''}`)}"${ready ? '' : ' aria-disabled="true"'}>` +
+      `<span class="sell-top"><span class="sell-name">${esc(it.name)}</span><span class="sell-ico">${icon(it.icon)}</span></span>` +
+      `<span class="sell-foot"><span class="sell-price">${fmt$(it.price)}</span>${n ? `<span class="sell-today">${n} today</span>` : ''}</span>` +
+      `<span class="sell-done" aria-hidden="true">${icon('check')}</span></button>`;
+  }).join('') +
+    `<button type="button" class="sell other" data-key="other"${ready ? '' : ' aria-disabled="true"'}>` +
+    `<span class="sell-top"><span class="sell-name">Another amount</span><span class="sell-ico">${icon('plus')}</span></span>` +
+    `<span class="sell-foot"><span class="sell-price">Number pad</span></span></button>`;
+  const grid = $('sGrid');
+  if (grid._html !== html) {
+    grid.innerHTML = html;
+    grid._html = html;
+    if (focused) grid.querySelector(`.sell[data-key="${CSS.escape(focused)}"]`)?.focus();
+  }
+
+  const hiddenCount = hiddenKeys().length;
+  $('sUnhide').innerHTML = hiddenCount
+    ? `<button type="button" class="show-unhide" onclick="unhideAll()">Show ${plural(hiddenCount, 'hidden button')}</button>` : '';
+
+  $('sList').innerHTML = sales.length ? sales.map(r => {
+    const time = r.rec.loggedAt ? new Date(r.rec.loggedAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
+    const who = r.store === K.orders && r.rec.customer && r.rec.customer !== 'Walk-up' ? r.rec.customer : '';
+    const sub = [time, who].filter(Boolean).join(' · ') || 'Logged in the Sales Hub';
+    const mine = !!r.rec.loggedAt;   // Show Mode sales can be removed here
+    const pick = mine && r.kind && !(r.rec.chars || []).length && canPick(r.kind)
+      ? ` · <button type="button" class="sale-char" data-store="${attr(r.store)}" data-id="${attr(r.rec.id)}" data-kind="${r.kind}">Choose character</button>` : '';
+    return `<div class="sale-row"><div class="sale-main"><div class="sale-name">${esc(r.name)}${r.qty > 1 ? ` ×${r.qty}` : ''}</div>` +
+      `<div class="sale-sub">${esc(sub)}${pick}</div></div><div class="sale-amt">${fmt$(r.amount)}</div>` +
+      (mine ? `<button type="button" class="sale-del" aria-label="Remove ${attr(r.name)} sale" data-store="${attr(r.store)}" data-id="${attr(r.rec.id)}">${icon('trash')}</button>`
+            : '<span class="sale-spacer"></span>') + '</div>';
+  }).join('') : '<div class="sale-empty">Sales you log today show here.</div>';
+}
+window.renderAll = render;
+
+// ── Log a sale ──
+let lastSale = null;   // the one Undo takes back
+function logSale(item, qty = 1, { char = null } = {}) {
+  if (!ready) { showToast('Getting your latest sales first…'); return; }
+  if (char) {
+    const c = charStock(item.kind).find(x => x.id === char);
+    if (c && c.left < qty) { showToast(`Only ${Math.max(0, c.left)} ${c.name} left`); return; }
+  }
+  const ev = todaysEvent();
+  const notes = ev ? `Show Mode · ${ev.name || 'Show'}` : 'Show Mode';
+  const base = { id: uid(), date: today(), loggedAt: Date.now() };
+  let store, rec;
+  if (item.kind === 'order') {
+    VPCUtil.seedOrders(localStorage); // a device that has never opened the Sales Hub
+    store = K.orders;
+    rec = { ...base, customer: 'Walk-up', product: item.name, sets: qty, salePrice: cents(item.price * qty),
+      cogs: cents(item.cost * qty), referredBy: '', notes, payStatus: 'paid', fulfillStatus: 'completed', printStatus: 'printed' };
+  } else if (item.kind === 'cat') {
+    store = K.catSales;
+    rec = { ...base, catId: item.catId, qty, revenue: cents(item.price * qty), items: [], itemQty: {}, notes };
+  } else {
+    store = item.kind === 'jt' ? K.jetTags : K.pins;
+    rec = { ...base, qty, revenue: cents(item.price * qty), chars: char ? [char] : [], charQty: char ? { [char]: qty } : {}, notes };
+  }
+  writeArr(store, [...readArr(store), rec]);
+  const who = char ? charNames(item.kind, [char]) : '';
+  const label = `${qty > 1 ? qty + ' × ' : ''}${item.name}${who ? ' · ' + who : ''} · ${fmt$(item.price * qty)}`;
+  window.auditLog?.('SHOW_SALE', store, label);
+  navigator.vibrate?.(10);
+  // A Jet Tag or Pin logged with one tap can say which character afterwards.
+  const which = !char && (item.kind === 'jt' || item.kind === 'pin') && canPick(item.kind);
+  lastSale = { store, id: rec.id, label, kind: item.kind, qty, which };
+  render();
+  const btn = $('sGrid').querySelector(`.sell[data-key="${CSS.escape(item.key)}"]`);
+  if (btn) { btn.classList.remove('logged'); void btn.offsetWidth; btn.classList.add('logged'); }
+  // With "Which one?" there's no room for "logged"; the tick on the button says it.
+  showToast(which ? label : `${label} logged`, { undo: true, which, said: which ? 'logged' : '' });
+}
+
+// Name the character on a sale already logged (from the toast, or Today's list).
+function assignChar(store, id, kind, cid) {
+  const arr = readArr(store);
+  const rec = arr.find(x => x.id === id);
+  if (!rec) return;
+  const qty = Math.max(1, +rec.qty || 1);
+  const c = charStock(kind).find(x => x.id === cid);
+  if (c && c.left < qty) { showToast(`Only ${Math.max(0, c.left)} ${c.name} left`); return; }
+  rec.chars = [cid];
+  rec.charQty = { [cid]: qty };
+  writeArr(store, arr);
+  const who = charNames(kind, [cid]);
+  window.auditLog?.('SHOW_SALE_CHARACTER', store, who);
+  if (lastSale && lastSale.id === id) lastSale.which = false;
+  render();
+  showToast(`${KIND_NAME[kind]} · ${who} saved`);
+}
+
+function removeSale(store, id) {
+  const arr = readArr(store);
+  const rec = arr.find(x => x.id === id);
+  if (!rec) return false;
+  writeArr(store, arr.filter(x => x.id !== id));
+  window.auditLog?.('UNDO_SHOW_SALE', store, rec.product || rec.notes || '');
+  if (lastSale && lastSale.id === id) lastSale = null;
+  render();
+  return true;
+}
+
+// ── Undo toast ──
+let toastTimer = null;
+function showToast(text, { undo = false, which = false, said = '' } = {}) {
+  const t = $('sToast');
+  $('sToastText').innerHTML = esc(text) + (said ? `<span class="sr-only"> ${esc(said)}</span>` : '');
+  t.classList.toggle('has-undo', undo);
+  t.classList.toggle('has-which', which);
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), undo ? 5000 : 2600);
+}
+$('sWhich').addEventListener('click', () => {
+  if (!lastSale || !lastSale.which) return;
+  const { store, id, kind, qty } = lastSale;
+  $('sToast').classList.remove('show');
+  openChars(kind, qty, cid => assignChar(store, id, kind, cid));
+});
+$('sUndo').addEventListener('click', () => {
+  if (!lastSale) return;
+  const { store, id, label } = lastSale;
+  if (removeSale(store, id)) showToast(`Removed ${label}`);
+});
+
+// ── Taps, long presses and right-clicks ──
+const grid = $('sGrid');
+grid.addEventListener('click', e => {
+  const btn = e.target.closest('.sell');
+  if (!btn || btn.getAttribute('aria-disabled') === 'true') return;
+  if (btn.dataset.key === 'other') return openPad();
+  const item = ITEMS.find(i => i.key === btn.dataset.key);
+  if (item) logSale(item);
+});
+// A right-click opens the menu at the pointer; a long press opens it under
+// the button, so the lifting finger can't land on an item.
+function sellMenu(btn, at) {
+  const item = ITEMS.find(i => i.key === btn.dataset.key);
+  if (!item || !ready) return;
+  vpcMenu(btn, {
+    label: item.name, at,
+    options: [
+      ...((item.kind === 'jt' || item.kind === 'pin') && canPick(item.kind)
+        ? [{ value: 'char', label: 'Choose character…', icon: icon(item.icon) }] : []),
+      { value: '2', label: `Sell 2 · ${fmt$(item.price * 2)}` },
+      { value: '3', label: `Sell 3 · ${fmt$(item.price * 3)}` },
+      { value: 'pad', label: 'Another price…', icon: icon('pencil') },
+      { value: 'hide', label: 'Hide this button', icon: icon('close') },
+    ],
+    onSelect: v => {
+      if (v === 'hide') { setHidden([...new Set([...hiddenKeys(), item.key])]); render(); showToast(`${item.name} hidden`); }
+      else if (v === 'pad') openPad(item.name);
+      else if (v === 'char') openChars(item.kind, 1, cid => logSale(item, 1, { char: cid }));
+      else logSale(item, +v);
+    },
+  });
+}
+grid.addEventListener('contextmenu', e => {
+  const btn = e.target.closest('.sell:not(.other)');
+  if (!btn || e.pointerType === 'touch' || grid._longPressed) return;
+  e.preventDefault();
+  sellMenu(btn, { x: e.clientX, y: e.clientY });
+});
+function unhideAll() { setHidden([]); render(); }
+
+$('sList').addEventListener('click', e => {
+  const pick = e.target.closest('.sale-char');
+  if (pick) {
+    const { store, id, kind } = pick.dataset;
+    const rec = readArr(store).find(x => x.id === id);
+    if (rec) openChars(kind, Math.max(1, +rec.qty || 1), cid => assignChar(store, id, kind, cid));
+    return;
+  }
+  const del = e.target.closest('.sale-del');
+  if (!del) return;
+  if (!confirm('Remove this sale?')) return;
+  removeSale(del.dataset.store, del.dataset.id);
+});
+
+// ── The character picker ──
+let charPick = null;
+function openChars(kind, qty, onPick) {
+  const list = charStock(kind).sort((a, b) => a.name.localeCompare(b.name));
+  $('charTitle').textContent = `Which ${KIND_NAME[kind]}?`;
+  const help = !list.length ? `Open ${KIND_NAME[kind]}s in the Sales Hub once to load your characters.`
+    : qty > 1 ? `All ${qty} go to the one you pick.` : '';
+  $('charHelp').textContent = help;
+  $('charHelp').hidden = !help;
+  $('charGrid').innerHTML = list.map(c =>
+    `<button type="button" class="char-btn" data-id="${attr(c.id)}"${c.left < qty ? ' disabled' : ''}>` +
+    `<span>${esc(c.name)}</span><span class="char-left${c.left > 0 && c.left <= LOW_AT[kind] ? ' is-low' : ''}">${c.left > 0 ? `${c.left} left` : 'Sold out'}</span></button>`
+  ).join('');
+  charPick = onPick;
+  $('charSheet').classList.add('open');
+  $('charGrid').querySelector('button:not(:disabled)')?.focus({ preventScroll: true });
+}
+function closeChars() { $('charSheet').classList.remove('open'); charPick = null; }
+$('charGrid').addEventListener('click', e => {
+  const b = e.target.closest('.char-btn');
+  if (!b || b.disabled || !charPick) return;
+  const onPick = charPick;
+  closeChars();
+  onPick(b.dataset.id);
+});
+$('charSheet').addEventListener('click', e => { if (e.target === $('charSheet')) closeChars(); });
+
+// ── Another amount ──
+let padText = '';
+function padValue() { return cents(parseFloat(padText) || 0); }
+function padRender() {
+  const v = padText ? '$' + padText.replace(/^(\d+)/, d => (+d).toLocaleString('en-US')) : '$0';
+  $('padAmount').textContent = v;
+  $('padAmount').classList.toggle('is-empty', !padText);
+  $('padSave').disabled = !(padValue() > 0);
+}
+function padKey(k) {
+  if (k === 'del') padText = padText.slice(0, -1);
+  else if (k === '.') { if (!padText.includes('.')) padText = (padText || '0') + '.'; }
+  else if (/^\d$/.test(k)) {
+    const [whole, frac] = padText.split('.');
+    if (frac !== undefined ? frac.length < 2 : whole.length < 6) padText = padText === '0' ? k : padText + k;
+  }
+  padRender();
+}
+function openPad(name = '') {
+  padText = '';
+  $('padWhat').value = name;
+  $('padNames').innerHTML = ITEMS.map(i => `<option value="${attr(i.name)}">`).join('');
+  padRender();
+  $('padSheet').classList.add('open');
+  $('pad').querySelector('button')?.focus({ preventScroll: true });
+}
+function closePad() { $('padSheet').classList.remove('open'); }
+function savePad() {
+  const amount = padValue();
+  if (!(amount > 0)) return;
+  const what = $('padWhat').value.trim();
+  const known = ITEMS.find(i => i.name.toLowerCase() === what.toLowerCase());
+  closePad();
+  logSale(known ? { ...known, price: amount } : { key: 'other', kind: 'order', name: what || 'Custom', price: amount, cost: 0 });
+}
+$('padDel').innerHTML = icon('backspace');
+$('pad').addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (b) padKey(b.dataset.k); });
+document.addEventListener('keydown', e => {
+  if (!$('padSheet').classList.contains('open') || e.target.matches('input, textarea')) return;
+  if (/^[0-9.]$/.test(e.key)) { padKey(e.key); e.preventDefault(); }
+  else if (e.key === 'Backspace') { padKey('del'); e.preventDefault(); }
+  else if (e.key === 'Enter' && padValue() > 0) { savePad(); e.preventDefault(); }
+});
+$('padSheet').addEventListener('click', e => { if (e.target === $('padSheet')) closePad(); });
+
+// ── Appearance: one tap between light (bright halls) and dark ──
+function paintThemeBtn() {
+  const dark = VPCUtil.applyTheme() === 'dark';
+  $('themeBtn').innerHTML = icon(dark ? 'sun' : 'moon');
+  $('themeBtn').setAttribute('aria-label', dark ? 'Use light appearance' : 'Use dark appearance');
+}
+$('themeBtn').addEventListener('click', () => VPCUtil.setTheme(VPCUtil.applyTheme() === 'dark' ? 'light' : 'dark'));
+window.addEventListener('vpc:themechange', paintThemeBtn);
+paintThemeBtn();
+
+// ── Keep the screen awake while the show is on ──
+let wakeLock = null;
+async function keepAwake() {
+  if (!('wakeLock' in navigator) || document.visibilityState !== 'visible' || wakeLock) return;
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+    $('sFoot').textContent = 'The screen stays on while Show Mode is open.';
+    wakeLock.addEventListener('release', () => { wakeLock = null; $('sFoot').textContent = ''; });
+  } catch (e) { /* not allowed here (battery saver, or no tap yet) */ }
+}
+document.addEventListener('visibilitychange', keepAwake);
+document.addEventListener('pointerdown', keepAwake, { passive: true });
+
+render();
+keepAwake();
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.vpcLongPress) vpcLongPress(grid, e => {
+    const btn = e.target?.closest?.('.sell:not(.other)');
+    if (btn) sellMenu(btn);
+  });
+  if (window.VpcSync && VpcSync.ready) {
+    VpcSync.ready.then(markReady);
+    setTimeout(markReady, 8000); // a slow hall connection mustn't block the booth
+  } else markReady();
+});
+</script>
+</body>
+</html>

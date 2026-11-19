@@ -834,6 +834,46 @@
       return d >= from && d <= to;
     });
 
+  // ── Icons ──────────────────────────────────────────
+  // One line-icon set, in icons.svg. Returns an inline <svg> that uses a
+  // symbol from it; .vpc-ico (styles.css) sizes it and strokes it in the
+  // current text colour, so icons follow state colours and both themes.
+  const icon = (name, cls = '') =>
+    `<svg class="vpc-ico${cls ? ' ' + cls : ''}" aria-hidden="true"><use href="icons.svg#${name}"/></svg>`;
+
+  // ── Theme ──────────────────────────────────────────
+  // 'auto' follows the device; 'light' and 'dark' are pinned from the
+  // account menu. Stored per device. applyTheme() runs at load (below),
+  // before the page paints, so a page never flashes the wrong theme.
+  const THEME_KEY = 'vpc_theme';
+  const themeChoice = () => {
+    try {
+      const v = localStorage.getItem(THEME_KEY);
+      return v === 'light' || v === 'dark' ? v : 'auto';
+    } catch (e) {
+      return 'auto';
+    }
+  };
+  const applyTheme = (choice = themeChoice()) => {
+    const root = document.documentElement;
+    if (choice === 'light' || choice === 'dark') root.dataset.theme = choice;
+    else delete root.dataset.theme;
+    const light =
+      choice === 'light' ||
+      (choice === 'auto' && window.matchMedia('(prefers-color-scheme: light)').matches);
+    // The browser and status bar match the title bar.
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = light ? '#f9f9fb' : '#121213';
+    return light ? 'light' : 'dark';
+  };
+  const setTheme = (choice) => {
+    try {
+      localStorage.setItem(THEME_KEY, choice);
+    } catch (e) {}
+    applyTheme(choice);
+    window.dispatchEvent(new CustomEvent('vpc:themechange'));
+  };
+
   const api = {
     money,
     sumMoney,
@@ -855,11 +895,30 @@
     HISTORICAL_ORDERS,
     orderList,
     seedOrders,
+    icon,
+    themeChoice,
+    applyTheme,
+    setTheme,
   };
 
   // Browser global + CommonJS (for the test runner).
   root.VPCUtil = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
+
+  // Theme first, so the page paints in the right colours.
+  if (typeof document !== 'undefined' && typeof window !== 'undefined' && window.matchMedia) {
+    try {
+      applyTheme();
+      window.matchMedia('(prefers-color-scheme: light)').addEventListener?.('change', () => {
+        if (themeChoice() === 'auto') {
+          applyTheme();
+          window.dispatchEvent(new CustomEvent('vpc:themechange'));
+        }
+      });
+    } catch (e) {
+      /* never let the theme block the page */
+    }
+  }
 
   // Fold the two event stores together before any page script reads events.
   // Runs synchronously here (util.js is first in <head>), and only in a real

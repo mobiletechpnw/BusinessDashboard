@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#1c1c1e">
+<meta name="theme-color" content="#121213">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
@@ -28,8 +28,8 @@ header .brand{flex:none;}
 .h-tab:hover{color:var(--text);}
 .h-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 .header-right{display:flex;align-items:center;gap:10px;}
-.btn-primary{background:var(--accent-fill);color:#fff;border:none;border-radius:999px;padding:8px 16px;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;}
-.btn-primary:hover{background:#0077ed;}
+.btn-primary{background:var(--accent-fill);color: var(--on-accent);border:none;border-radius:999px;padding:8px 16px;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.btn-primary:hover{background:var(--accent-fill-hover);}
 .btn-ghost{background:none;border:1px solid var(--border);border-radius:999px;padding:7px 14px;font-size:0.8rem;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;}
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
 
@@ -66,7 +66,7 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
 .search-input{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--text);font-size:0.83rem;outline:none;min-width:220px;}
 .search-input:focus{border-color:var(--accent);}
 .filter-chip{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:0.75rem;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;}
-.filter-chip:hover,.filter-chip.on{background:var(--accent-fill);border-color:var(--accent);color:#fff;}
+.filter-chip:hover,.filter-chip.on{background:var(--accent-fill);border-color:var(--accent);color: var(--on-accent);}
 
 /* CONTENT CARDS */
 .content-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
@@ -82,22 +82,22 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
 .badge{display:inline-flex;align-items:center;gap:3px;font-size:0.75rem;font-weight:600;padding:3px 8px;border-radius:20px;}
 
 /* Category colors */
-.cat-show   {background:rgba(10, 132, 255,.15);color:var(--accent);}
-.cat-product{background:rgba(48, 209, 88,.15);color:var(--green);}
-.cat-card   {background:rgba(191, 90, 242,.15);color:var(--accent2);}
-.cat-custom {background:rgba(255, 214, 10,.15);color:var(--yellow);}
+.cat-show   {background:color-mix(in srgb, var(--accent) 15%, transparent);color:var(--accent);}
+.cat-product{background:color-mix(in srgb, var(--green) 15%, transparent);color:var(--green);}
+.cat-card   {background:color-mix(in srgb, var(--accent2) 15%, transparent);color:var(--accent2);}
+.cat-custom {background:color-mix(in srgb, var(--yellow) 15%, transparent);color:var(--yellow);}
 
 /* Type colors */
-.type-post  {background:rgba(255, 214, 10,.15);color:var(--yellow);}
+.type-post  {background:color-mix(in srgb, var(--yellow) 15%, transparent);color:var(--yellow);}
 .type-story {background:rgba(244,114,182,.15);color:var(--pink);}
 .type-reel  {background:rgba(45,212,191,.15);color:var(--teal);}
-.type-video {background:rgba(255, 159, 10,.15);color:var(--orange);}
+.type-video {background:color-mix(in srgb, var(--orange) 15%, transparent);color:var(--orange);}
 
 /* Status */
-.status-draft    {background:rgba(161, 161, 166,.12);color:var(--text2);}
-.status-ready    {background:rgba(255, 214, 10,.15);color:var(--yellow);}
-.status-scheduled{background:rgba(48, 209, 88,.15);color:var(--green);}
-.status-posted   {background:rgba(10, 132, 255,.15);color:var(--accent);}
+.status-draft    {background:color-mix(in srgb, var(--label-2) 12%, transparent);color:var(--text2);}
+.status-ready    {background:color-mix(in srgb, var(--yellow) 15%, transparent);color:var(--yellow);}
+.status-scheduled{background:color-mix(in srgb, var(--green) 15%, transparent);color:var(--green);}
+.status-posted   {background:color-mix(in srgb, var(--accent) 15%, transparent);color:var(--accent);}
 
 /* Platform pills */
 .platform{font-size:0.75rem;padding:2px 7px;border-radius:12px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);}
@@ -111,7 +111,7 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
 .templates-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
 .template-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;cursor:pointer;transition:all .2s;}
 .template-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:none;}
-.tmpl-icon{font-size:1.8rem;margin-bottom:10px;}
+.tmpl-icon{font-size:1.8rem;margin-bottom:10px;display:flex;color:var(--accent);}
 .tmpl-title{font-size:0.9rem;font-weight:600;margin-bottom:4px;}
 .tmpl-desc{font-size:0.75rem;color:var(--text2);line-height:1.5;}
 .tmpl-footer{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;}
@@ -129,7 +129,7 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
 .platform-select{display:flex;gap:8px;flex-wrap:wrap;}
 .plat-btn{background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:6px 12px;font-size:0.75rem;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;}
-.plat-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(10, 132, 255,.12);}
+.plat-btn.on{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb, var(--accent) 12%, transparent);}
 .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;}
 
 /* Checklist (caption builder) */
@@ -156,24 +156,25 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
 .canva-hero{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;}
 .canva-create-card{border-radius:var(--radius);padding:24px;cursor:pointer;transition:all .2s;text-align:center;text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:10px;}
 .canva-create-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,.25);}
-.canva-create-card.post{background:linear-gradient(135deg,#7c3aed 0%,#4f46e5 100%);border:1px solid rgba(255,255,255,.1);}
-.canva-create-card.story{background:linear-gradient(135deg,#db2777 0%,#f472b6 100%);border:1px solid rgba(255,255,255,.1);}
-.canva-create-icon{font-size:2.4rem;}
-.canva-create-label{font-size:1rem;font-weight:600;color:#fff;letter-spacing:-.2px;}
-.canva-create-sub{font-size:0.75rem;color:rgba(255,255,255,.75);}
+.canva-create-card.post{background:linear-gradient(135deg,#7c3aed 0%,#4f46e5 100%);border:1px solid rgba(255,255,255,0.1);}
+.canva-create-card.story{background:linear-gradient(135deg,#db2777 0%,#f472b6 100%);border:1px solid rgba(255,255,255,0.1);}
+.canva-create-icon{font-size:2.4rem;display:flex;color:var(--on-accent);}
+.canva-create-label{font-size:1rem;font-weight:600;color: var(--on-accent);letter-spacing:-.2px;}
+/* White on the fixed brand gradients, in both themes */
+.canva-create-sub{font-size:0.75rem;color:rgba(255,255,255,0.75);}
 .canva-section-title{font-size:0.75rem;font-weight:600;color:var(--text2);margin-bottom:12px;}
 .canva-quick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:28px;}
 .canva-quick-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .2s;text-decoration:none;display:flex;gap:12px;align-items:flex-start;}
 .canva-quick-card:hover{border-color:var(--accent);transform:translateY(-1px);}
-.canva-quick-icon{font-size:1.5rem;flex-shrink:0;margin-top:2px;}
+.canva-quick-icon{font-size:1.5rem;flex-shrink:0;margin-top:2px;display:flex;color:var(--accent);}
 .canva-quick-title{font-size:0.85rem;font-weight:600;margin-bottom:3px;}
 .canva-quick-sub{font-size:0.75rem;color:var(--text2);line-height:1.4;}
 .canva-quick-badges{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap;}
 .canva-link-input-wrap{display:flex;gap:8px;}
 .canva-link-input-wrap input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:9px 12px;font-size:0.83rem;outline:none;font-family:inherit;}
 .canva-link-input-wrap input:focus{border-color:var(--accent);}
-.canva-open-btn{background:var(--accent-fill);color:#fff;border:none;border-radius:999px;padding:9px 14px;font-size:0.78rem;font-weight:600;cursor:pointer;white-space:nowrap;}
-.canva-open-btn:hover{background:#0077ed;}
+.canva-open-btn{background:var(--accent-fill);color: var(--on-accent);border:none;border-radius:999px;padding:9px 14px;font-size:0.78rem;font-weight:600;cursor:pointer;white-space:nowrap;}
+.canva-open-btn:hover{background:var(--accent-fill-hover);}
 .canva-logo{display:inline-flex;align-items:center;gap:5px;font-size:0.75rem;font-weight:600;color:var(--text2);margin-bottom:20px;}
 .canva-logo svg{width:18px;height:18px;}
 
@@ -184,13 +185,13 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
   .field-row{grid-template-columns:1fr;}
   main{padding:14px;}
   .content-grid{grid-template-columns:1fr;}
-  /* Phones: the title on one row, the page tabs on a full-width row below. */
+  /* Phones: the title and + on one row, the page tabs on a full-width row below. */
   header{flex-wrap:wrap; row-gap:0;}
-  .header-left{flex-wrap:wrap; width:100%; row-gap:0;}
+  .header-left{display:contents;}
+  .header-right{margin-left:auto;}
   header .brand{line-height:48px;}
-  .header-tabs{flex:1 0 100%; margin:0 -14px; padding:0 4px;}
+  .header-tabs{order:3; flex:1 0 100%; margin:0 -14px; padding:0 4px;}
   .h-tab{white-space:nowrap; min-height:44px; padding:0 12px; font-size:0.8125rem;}
-  .header-right .btn-primary{display:none;}
   .btn-ghost{min-height:40px;}
   .toolbar{flex-wrap:wrap;}
   .search-input{min-width:unset; width:100%;}
@@ -216,7 +217,7 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
 .plan-section-title{font-size:0.75rem;font-weight:600;color:var(--text2);margin:0 0 12px;}
 .plan-pillars{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(220px,100%),1fr));gap:12px;margin-bottom:26px;}
 .pillar-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;border-left:3px solid var(--pillar,var(--accent));}
-.pillar-icon{font-size:1.3rem;margin-bottom:6px;}
+.pillar-icon{font-size:1.3rem;margin-bottom:6px;display:flex;color:var(--pillar);}
 .pillar-name{font-size:0.9rem;font-weight:600;margin-bottom:3px;}
 .pillar-goal{font-size:0.75rem;font-weight:600;color:var(--pillar,var(--accent));margin-bottom:6px;}
 .pillar-desc{font-size:0.78rem;color:var(--text2);line-height:1.5;}
@@ -238,15 +239,15 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
   <div class="header-left">
     <div class="brand">Content Planner</div>
     <nav class="header-tabs">
-      <div class="h-tab active" data-tab="calendar">📅 Calendar</div>
-      <div class="h-tab" data-tab="queue">📋 Queue</div>
-      <div class="h-tab" data-tab="plan">🗓️ Plan</div>
-      <div class="h-tab" data-tab="templates">⚡ Templates</div>
-      <div class="h-tab" data-tab="canva">🎨 Canva</div>
+      <div class="h-tab active" data-tab="calendar">Calendar</div>
+      <div class="h-tab" data-tab="queue">Queue</div>
+      <div class="h-tab" data-tab="plan">Plan</div>
+      <div class="h-tab" data-tab="templates">Templates</div>
+      <div class="h-tab" data-tab="canva">Canva</div>
     </nav>
   </div>
   <div class="header-right">
-    <button class="btn-primary" onclick="openModal()">+ New Content</button>
+    <button class="btn-primary vpc-primary" type="button" onclick="openModal()" aria-label="New content"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#plus"/></svg><span>New Content</span></button>
   </div>
 </header>
 
@@ -277,8 +278,8 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
   <div class="section" id="tab-queue">
     <div class="toolbar">
       <input class="search-input" id="queue-search" placeholder="Search content…" oninput="renderQueue()">
-      <div id="cat-filters" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
-      <div id="status-filters" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+      <div id="cat-filters" class="row-wrap tight"></div>
+      <div id="status-filters" class="row-wrap tight"></div>
     </div>
     <div class="content-grid" id="queue-grid"></div>
   </div>
@@ -287,16 +288,16 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
   <div class="section" id="tab-plan">
     <div class="plan-hero">
       <div class="plan-hero-main">
-        <div style="font-size:1.1rem;font-weight:600;margin-bottom:6px;">🗓️ The Content Engine</div>
+        <div style="font-size:1.1rem;font-weight:600;margin-bottom:6px;">The Content Engine</div>
         <div style="font-size:0.85rem;color:var(--text2);line-height:1.6;max-width:640px;">
-          A repeatable 4-week posting system built for growth. It loads <strong style="color:var(--text)">28 ready-to-shoot posts</strong>
+          A repeatable 4-week posting system built for growth. It loads <strong class="text-1">28 ready-to-shoot posts</strong>
           — captions written, dates set, formats chosen — straight onto your calendar. Reels lead each week for reach,
           stories drive engagement, and posts convert. Reload it any time to schedule the next month.
         </div>
       </div>
       <div class="plan-hero-actions">
-        <button class="btn-primary" onclick="loadContentPlan()">📥 Load Next 4 Weeks</button>
-        <button class="btn-ghost" onclick="clearContentPlan()" style="margin-top:8px;">Remove loaded plan</button>
+        <button class="btn-primary" onclick="loadContentPlan()">Load Next 4 Weeks</button>
+        <button class="btn-ghost mt-8" onclick="clearContentPlan()">Remove loaded plan</button>
       </div>
     </div>
 
@@ -323,12 +324,12 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
 
     <div class="canva-hero">
       <a class="canva-create-card post" href="https://www.canva.com/create/instagram-posts/" target="_blank" rel="noopener">
-        <div class="canva-create-icon">📸</div>
+        <div class="canva-create-icon"><svg class="vpc-ico em" aria-hidden="true"><use href="icons.svg#content"/></svg></div>
         <div class="canva-create-label">New IG Post</div>
         <div class="canva-create-sub">1080 × 1080 px · Square format</div>
       </a>
       <a class="canva-create-card story" href="https://www.canva.com/create/instagram-stories/" target="_blank" rel="noopener">
-        <div class="canva-create-icon">⭕</div>
+        <div class="canva-create-icon"><svg class="vpc-ico em" aria-hidden="true"><use href="icons.svg#story"/></svg></div>
         <div class="canva-create-label">New IG Story</div>
         <div class="canva-create-sub">1080 × 1920 px · Vertical format</div>
       </a>
@@ -339,14 +340,14 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
 
     <div class="canva-section-title">Link a Canva design to a content item</div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:8px;">
-      <div style="font-size:0.8rem;color:var(--text2);margin-bottom:10px;line-height:1.5;">Paste a Canva design URL into the <strong style="color:var(--text)">Canva Design URL</strong> field on any content item (via Edit) to link your design directly to that post.</div>
-      <div style="font-size:0.75rem;color:var(--text2);">You can also open content items and use the <strong style="color:var(--accent)">Open in Canva</strong> button to jump straight to an attached design.</div>
+      <div style="font-size:0.8rem;color:var(--text2);margin-bottom:10px;line-height:1.5;">Paste a Canva design URL into the <strong class="text-1">Canva Design URL</strong> field on any content item (via Edit) to link your design directly to that post.</div>
+      <div class="caption">You can also open content items and use the <strong class="is-accent">Open in Canva</strong> button to jump straight to an attached design.</div>
     </div>
   </div>
 
   <!-- ── TEMPLATES ── -->
   <div class="section" id="tab-templates">
-    <div style="margin-bottom:20px;">
+    <div class="mb-20">
       <div style="font-size:1rem;font-weight:600;margin-bottom:4px;">Content Templates</div>
       <div style="font-size:0.82rem;color:var(--text2);">Click any template to instantly create a new content item from it.</div>
     </div>
@@ -363,19 +364,19 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
       <div class="field">
         <label>Category</label>
         <select id="f-category">
-          <option value="show-schedule">📅 Show Schedule</option>
-          <option value="product">📦 Product</option>
-          <option value="card-spotlight">✨ Card Spotlight</option>
-          <option value="custom">🎨 Custom</option>
+          <option value="show-schedule">Show Schedule</option>
+          <option value="product">Product</option>
+          <option value="card-spotlight">Card Spotlight</option>
+          <option value="custom">Custom</option>
         </select>
       </div>
       <div class="field">
         <label>Content Type</label>
         <select id="f-type">
-          <option value="post">📸 Post</option>
-          <option value="story">⭕ Story</option>
-          <option value="reel">🎬 Reel</option>
-          <option value="video">▶️ Video</option>
+          <option value="post">Post</option>
+          <option value="story">Story</option>
+          <option value="reel">Reel</option>
+          <option value="video">Video</option>
         </select>
       </div>
     </div>
@@ -405,11 +406,11 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
     <div class="field">
       <label>Platforms</label>
       <div class="platform-select" id="platform-select">
-        <div class="plat-btn on" data-p="instagram">📸 Instagram</div>
-        <div class="plat-btn" data-p="tiktok">🎵 TikTok</div>
-        <div class="plat-btn" data-p="twitter">🐦 Twitter/X</div>
-        <div class="plat-btn" data-p="facebook">👥 Facebook</div>
-        <div class="plat-btn" data-p="youtube">▶️ YouTube</div>
+        <div class="plat-btn on" data-p="instagram">Instagram</div>
+        <div class="plat-btn" data-p="tiktok">TikTok</div>
+        <div class="plat-btn" data-p="twitter">Twitter/X</div>
+        <div class="plat-btn" data-p="facebook">Facebook</div>
+        <div class="plat-btn" data-p="youtube">YouTube</div>
       </div>
     </div>
     <div class="field">
@@ -458,7 +459,7 @@ let statusFilter = 'all';
 const TEMPLATES = [
   {
     id: 'show-announcement',
-    icon: '📣',
+    icon: 'volume',
     title: 'Upcoming Show Announcement',
     desc: 'Hype post for an upcoming card show or convention.',
     category: 'show-schedule', type: 'post',
@@ -466,7 +467,7 @@ const TEMPLATES = [
   },
   {
     id: 'show-countdown',
-    icon: '⏳',
+    icon: 'clock',
     title: 'Show Week Countdown',
     desc: 'Story countdown for the week of an upcoming show.',
     category: 'show-schedule', type: 'story',
@@ -474,7 +475,7 @@ const TEMPLATES = [
   },
   {
     id: 'table-locator',
-    icon: '📍',
+    icon: 'map-pin',
     title: 'Show Table Locator',
     desc: 'Story showing exactly where your table is at the show.',
     category: 'show-schedule', type: 'story',
@@ -482,7 +483,7 @@ const TEMPLATES = [
   },
   {
     id: 'sealed-product',
-    icon: '📦',
+    icon: 'box',
     title: 'Sealed Product Available',
     desc: 'Story announcing sealed Pokémon product in stock.',
     category: 'product', type: 'story',
@@ -490,7 +491,7 @@ const TEMPLATES = [
   },
   {
     id: 'pc-showcase',
-    icon: '✨',
+    icon: 'star',
     title: 'PC Showcase',
     desc: 'Post spotlighting a card from your personal collection.',
     category: 'card-spotlight', type: 'post',
@@ -498,7 +499,7 @@ const TEMPLATES = [
   },
   {
     id: 'riser-demo',
-    icon: '🖨️',
+    icon: 'printer',
     title: 'Riser Product Demo',
     desc: 'Reel or post showing your display risers in action.',
     category: 'product', type: 'reel',
@@ -506,7 +507,7 @@ const TEMPLATES = [
   },
   {
     id: 'jet-tag-drop',
-    icon: '🏷️',
+    icon: 'tag',
     title: 'Jet Tag Drop',
     desc: 'Story or post announcing new Jet Tag characters available.',
     category: 'product', type: 'story',
@@ -514,7 +515,7 @@ const TEMPLATES = [
   },
   {
     id: 'pin-drop',
-    icon: '📌',
+    icon: 'pin',
     title: 'Pin Drop',
     desc: 'Story announcing new Pokémon pins available.',
     category: 'product', type: 'story',
@@ -524,21 +525,21 @@ const TEMPLATES = [
 
 // ── CONTENT ENGINE: pillars, weekly rhythm, 4-week arc ──────────────
 const PILLARS = [
-  { icon: '🎬', name: 'Product & Process', goal: 'Reach', color: '#2997ff', desc: 'Reels of risers, Jet Tags & pins being made and shown off. Satisfying, shareable — this is what non-followers find on Explore.' },
-  { icon: '🎪', name: 'Show & Booth', goal: 'Convert', color: '#30d158', desc: 'Announcements, countdowns, table locators and live-from-the-booth stories. Turns the local card community into buyers.' },
-  { icon: '✨', name: 'Card Spotlights', goal: 'Engage', color: '#bf5af2', desc: 'PC showcases, grails and this-or-that polls. Personal, comment-driving content that bonds you to the collector community.' },
-  { icon: '📦', name: 'Drops & Restocks', goal: 'Sell', color: '#ffd60a', desc: 'Sealed product, new pins/tags and month-end bundles. Clear price + CTA aimed at your warm audience.' },
-  { icon: '🤝', name: 'Community & Education', goal: 'Loyalty', color: '#ff6961', desc: 'Q&A, UGC features, how-to carousels and giveaways. Builds saves, trust and a following that sticks around.' },
+  { icon: 'video', name: 'Product & Process', goal: 'Reach', color: 'var(--accent)', desc: 'Reels of risers, Jet Tags & pins being made and shown off. Satisfying, shareable — this is what non-followers find on Explore.' },
+  { icon: 'events', name: 'Show & Booth', goal: 'Convert', color: 'var(--green)', desc: 'Announcements, countdowns, table locators and live-from-the-booth stories. Turns the local card community into buyers.' },
+  { icon: 'star', name: 'Card Spotlights', goal: 'Engage', color: 'var(--accent2)', desc: 'PC showcases, grails and this-or-that polls. Personal, comment-driving content that bonds you to the collector community.' },
+  { icon: 'box', name: 'Drops & Restocks', goal: 'Sell', color: 'var(--yellow)', desc: 'Sealed product, new pins/tags and month-end bundles. Clear price + CTA aimed at your warm audience.' },
+  { icon: 'guru', name: 'Community & Education', goal: 'Loyalty', color: 'var(--red)', desc: 'Q&A, UGC features, how-to carousels and giveaways. Builds saves, trust and a following that sticks around.' },
 ];
 
 const WEEK_RHYTHM = [
-  { day: 'Mon', type: 'Reel',   focus: 'Product / process',    color: '#2997ff' },
-  { day: 'Tue', type: 'Story',  focus: 'Poll / this-or-that',  color: '#bf5af2' },
-  { day: 'Wed', type: 'Post',   focus: 'Spotlight / community', color: '#bf5af2' },
-  { day: 'Thu', type: 'Story',  focus: 'Behind the scenes',    color: '#ff6961' },
-  { day: 'Fri', type: 'Reel',   focus: 'Drop / restock',       color: '#ffd60a' },
-  { day: 'Sat', type: 'Story',  focus: 'Show / weekend order',  color: '#30d158' },
-  { day: 'Sun', type: 'Post',   focus: 'Educational / recap',  color: '#ff6961' },
+  { day: 'Mon', type: 'Reel',   focus: 'Product / process',    color: 'var(--accent)' },
+  { day: 'Tue', type: 'Story',  focus: 'Poll / this-or-that',  color: 'var(--accent2)' },
+  { day: 'Wed', type: 'Post',   focus: 'Spotlight / community', color: 'var(--accent2)' },
+  { day: 'Thu', type: 'Story',  focus: 'Behind the scenes',    color: 'var(--red)' },
+  { day: 'Fri', type: 'Reel',   focus: 'Drop / restock',       color: 'var(--yellow)' },
+  { day: 'Sat', type: 'Story',  focus: 'Show / weekend order',  color: 'var(--green)' },
+  { day: 'Sun', type: 'Post',   focus: 'Educational / recap',  color: 'var(--red)' },
 ];
 
 const PLAN_ARC = [
@@ -676,7 +677,7 @@ function renderPlan() {
   const pil = document.getElementById('plan-pillars');
   if (pil) pil.innerHTML = PILLARS.map(p => `
     <div class="pillar-card" style="--pillar:${p.color}">
-      <div class="pillar-icon">${p.icon}</div>
+      <div class="pillar-icon">${VPCUtil.icon(p.icon, 'em')}</div>
       <div class="pillar-name">${esc(p.name)}</div>
       <div class="pillar-goal">${esc(p.goal)}</div>
       <div class="pillar-desc">${esc(p.desc)}</div>
@@ -730,7 +731,7 @@ function loadContentPlan() {
   if (typeof auditLog === 'function') auditLog('LOAD_CONTENT_PLAN', 'vpc_content_v1', `${added} added, ${updated} updated`);
   renderAll();
   document.querySelector('.h-tab[data-tab="calendar"]').click();
-  alert(`✅ Plan loaded — starts Monday ${fmtDate(monISO)}.\n\n${added} posts added${updated ? `, ${updated} updated` : ''}. Open the Calendar (navigate with Next →) to see them. Remember to re-date Week 2 to your real show.`);
+  alert(`Plan loaded — starts Monday ${fmtDate(monISO)}.\n\n${added} posts added${updated ? `, ${updated} updated` : ''}. Open the Calendar (navigate with Next →) to see them. Remember to re-date Week 2 to your real show.`);
 }
 
 function clearContentPlan() {
@@ -761,7 +762,6 @@ const CAT_CSS    = {'show-schedule':'cat-show','product':'cat-product','card-spo
 const TYPE_CSS   = {'post':'type-post','story':'type-story','reel':'type-reel','video':'type-video'};
 const STATUS_CSS = {'draft':'status-draft','ready':'status-ready','scheduled':'status-scheduled','posted':'status-posted'};
 const STATUS_DOT = {'draft':'dot-draft','ready':'dot-ready','scheduled':'dot-scheduled','posted':'dot-posted'};
-const PLAT_ICONS = {instagram:'📸',tiktok:'🎵',twitter:'🐦',facebook:'👥',youtube:'▶️'};
 
 // ── STATS ──────────────────────────────────────────
 function renderStats() {
@@ -804,7 +804,7 @@ function renderCalendar() {
     const dayItems = all.filter(c => c.date === iso);
     const chips = dayItems.map(c => `
       <div class="cal-chip ${CAT_CSS[c.category]||'cat-custom'}" onclick="openModal('${c.id}')" title="${esc(c.title)}">
-        <span style="opacity:.7">${c.type==='story'?'⭕':c.type==='reel'?'🎬':c.type==='video'?'▶️':'📸'}</span>
+        <span style="opacity:.7;display:flex">${VPCUtil.icon(c.type==='story'?'story':(c.type==='reel'||c.type==='video')?'video':'content', 'em')}</span>
         ${esc(c.title.length>18?c.title.slice(0,18)+'…':c.title)}
       </div>`).join('');
     return `<div class="day-col${isToday?' today':''}">
@@ -847,26 +847,26 @@ function renderQueue() {
 
   const el = document.getElementById('queue-grid');
   if (!items.length) {
-    el.innerHTML = `<div class="empty" style="grid-column:1/-1">
-      <div class="empty-icon">📭</div>
+    el.innerHTML = `<div class="empty span-all">
+      <div class="empty-icon"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#inbox"/></svg></div>
       <div class="empty-title">No content found</div>
       <div class="empty-sub">Try changing your filters or create new content.</div>
     </div>`;
     return;
   }
   el.innerHTML = items.map(c => {
-    const plats = (c.platforms||[]).map(p=>`<span class="platform">${PLAT_ICONS[p]||''} ${p}</span>`).join('');
+    const plats = (c.platforms||[]).map(p=>`<span class="platform">${esc(p)}</span>`).join('');
     const canvaBtn = c.canvaUrl
-      ? `<a class="icon-btn" title="Open in Canva" href="${esc(c.canvaUrl)}" target="_blank" rel="noopener" style="text-decoration:none">🎨</a>`
-      : `<button class="icon-btn" title="Add Canva design" onclick="openModal('${c.id}')" style="opacity:.45">🎨</button>`;
+      ? `<a class="icon-btn" title="Open in Canva" href="${esc(c.canvaUrl)}" target="_blank" rel="noopener" style="text-decoration:none"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#content"/></svg></a>`
+      : `<button class="icon-btn" title="Add Canva design" onclick="openModal('${c.id}')" style="opacity:.45"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#content"/></svg></button>`;
     return `<div class="content-card">
       <div class="card-top">
         <div class="card-title">${esc(c.title)}</div>
         <div class="card-actions">
           ${canvaBtn}
-          <button class="icon-btn" title="Edit" onclick="openModal('${c.id}')">✏️</button>
-          <button class="icon-btn" title="Mark posted" onclick="markPosted('${c.id}')" ${c.status==='posted'?'style="opacity:.4"':''}>✅</button>
-          <button class="icon-btn" title="Delete" onclick="deleteContent('${c.id}')">✕</button>
+          <button class="icon-btn" title="Edit" onclick="openModal('${c.id}')"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#pencil"/></svg></button>
+          <button class="icon-btn" title="Mark posted" onclick="markPosted('${c.id}')" ${c.status==='posted'?'style="opacity:.4"':''}><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#check"/></svg></button>
+          <button class="icon-btn" title="Delete" aria-label="Delete" onclick="deleteContent('${c.id}')">${VPCUtil.icon('trash')}</button>
         </div>
       </div>
       <div class="card-body">
@@ -877,8 +877,8 @@ function renderQueue() {
         </div>
         ${plats?`<div style="display:flex;gap:5px;flex-wrap:wrap">${plats}</div>`:''}
         ${c.caption?`<div class="card-caption">${esc(c.caption)}</div>`:''}
-        <div class="card-date">${c.date?`📅 <span>${fmtDate(c.date)}${c.time?' · '+c.time:''}</span>`:'<span style="color:var(--text2)">No date set</span>'}</div>
-        ${c.notes?`<div style="font-size:0.75rem;color:var(--text2)">💡 ${esc(c.notes)}</div>`:''}
+        <div class="card-date">${c.date?`${VPCUtil.icon('calendar', 'inline')}<span>${fmtDate(c.date)}${c.time?' · '+c.time:''}</span>`:'<span class="text-2">No date set</span>'}</div>
+        ${c.notes?`<div class="caption">${esc(c.notes)}</div>`:''}
       </div>
     </div>`;
   }).join('');
@@ -888,7 +888,7 @@ function renderQueue() {
 function renderTemplates() {
   document.getElementById('templates-grid').innerHTML = TEMPLATES.map(t => `
     <div class="template-card" onclick="createFromTemplate('${t.id}')">
-      <div class="tmpl-icon">${t.icon}</div>
+      <div class="tmpl-icon">${VPCUtil.icon(t.icon, 'em')}</div>
       <div class="tmpl-title">${esc(t.title)}</div>
       <div class="tmpl-desc">${esc(t.desc)}</div>
       <div class="tmpl-footer">
@@ -996,20 +996,20 @@ function openCanvaUrl() {
 }
 
 const CANVA_QUICK = [
-  { icon:'📣', title:'Show Announcement Post', sub:'Bold post announcing an upcoming card show.',      type:'post',  href:'https://www.canva.com/create/instagram-posts/' },
-  { icon:'⏳', title:'Show Countdown Story',   sub:'Story countdown sticker for show week.',           type:'story', href:'https://www.canva.com/create/instagram-stories/' },
-  { icon:'📍', title:'Table Locator Story',    sub:'Show followers exactly where to find your table.', type:'story', href:'https://www.canva.com/create/instagram-stories/' },
-  { icon:'📦', title:'Sealed Product Drop',    sub:'Eye-catching story for new sealed stock.',         type:'story', href:'https://www.canva.com/create/instagram-stories/' },
-  { icon:'✨', title:'PC Showcase Post',       sub:'Spotlight a prized card from your collection.',    type:'post',  href:'https://www.canva.com/create/instagram-posts/' },
-  { icon:'🖨️', title:'Riser Product Demo',     sub:'Show off your 3D-printed display risers.',        type:'post',  href:'https://www.canva.com/create/instagram-posts/' },
-  { icon:'🏷️', title:'Jet Tag Drop Story',     sub:'Announce new Jet Tag characters in stock.',       type:'story', href:'https://www.canva.com/create/instagram-stories/' },
-  { icon:'📌', title:'Pin Drop Post',          sub:'Show new Pokémon pins available.',                type:'post',  href:'https://www.canva.com/create/instagram-posts/' },
+  { icon:'volume', title:'Show Announcement Post', sub:'Bold post announcing an upcoming card show.',      type:'post',  href:'https://www.canva.com/create/instagram-posts/' },
+  { icon:'clock', title:'Show Countdown Story',   sub:'Story countdown sticker for show week.',           type:'story', href:'https://www.canva.com/create/instagram-stories/' },
+  { icon:'map-pin', title:'Table Locator Story',    sub:'Show followers exactly where to find your table.', type:'story', href:'https://www.canva.com/create/instagram-stories/' },
+  { icon:'box', title:'Sealed Product Drop',    sub:'Eye-catching story for new sealed stock.',         type:'story', href:'https://www.canva.com/create/instagram-stories/' },
+  { icon:'star', title:'PC Showcase Post',       sub:'Spotlight a prized card from your collection.',    type:'post',  href:'https://www.canva.com/create/instagram-posts/' },
+  { icon:'printer', title:'Riser Product Demo',     sub:'Show off your 3D-printed display risers.',        type:'post',  href:'https://www.canva.com/create/instagram-posts/' },
+  { icon:'tag', title:'Jet Tag Drop Story',     sub:'Announce new Jet Tag characters in stock.',       type:'story', href:'https://www.canva.com/create/instagram-stories/' },
+  { icon:'pin', title:'Pin Drop Post',          sub:'Show new Pokémon pins available.',                type:'post',  href:'https://www.canva.com/create/instagram-posts/' },
 ];
 
 function renderCanva() {
   document.getElementById('canva-quick-grid').innerHTML = CANVA_QUICK.map(q => `
     <a class="canva-quick-card" href="${q.href}" target="_blank" rel="noopener">
-      <div class="canva-quick-icon">${q.icon}</div>
+      <div class="canva-quick-icon">${VPCUtil.icon(q.icon, 'em')}</div>
       <div>
         <div class="canva-quick-title">${esc(q.title)}</div>
         <div class="canva-quick-sub">${esc(q.sub)}</div>
@@ -1050,6 +1050,5 @@ window.renderAll = renderAll;
 
 renderAll();
 </script>
-<button class="fab" onclick="openModal()" title="Add Content" aria-label="Add Content">＋</button>
 </body>
 </html>

@@ -361,7 +361,7 @@ const VpcSync = {
         const localSize = (localStorage.getItem(c.key) || '').length;
         const cloudSize = JSON.stringify(c.value).length;
         return `<div style="background:rgba(255, 214, 10,0.08);border:1px solid rgba(255, 214, 10,0.3);border-radius:8px;padding:14px;margin-bottom:12px;">
-        <div style="font-size:0.82rem;font-weight:600;margin-bottom:8px;color:var(--yellow,#ffd60a)">⚠ Conflict: <code style="font-size:0.78rem;background:rgba(0,0,0,0.2);padding:2px 6px;border-radius:8px">${c.key}</code></div>
+        <div style="font-size:0.82rem;font-weight:600;margin-bottom:8px;color:var(--yellow,#ffd60a)">Conflict: <code style="font-size:0.78rem;background:rgba(0,0,0,0.2);padding:2px 6px;border-radius:8px">${c.key}</code></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.75rem;">
           <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:8px;">
             <div style="color:#a1a1a6;margin-bottom:4px">Local Version</div>
@@ -499,6 +499,13 @@ const VpcSync = {
   },
 };
 
+// Resolves once this page's first pull from the cloud has finished (or
+// failed). A page that writes the moment it opens (Show Mode) waits for it,
+// so a fresh tap can't make this device's copy look newer than changes from
+// another device that the pull is still bringing down.
+let _firstSyncDone;
+VpcSync.ready = new Promise((resolve) => (_firstSyncDone = resolve));
+
 // ── DOMContentLoaded ──────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -514,9 +521,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Pull latest cloud data; re-render if new data arrived (fixes blank-on-new-device bug)
-  const { pulled } = await VpcSync.sync();
-  if (pulled > 0 && typeof window.renderAll === 'function') {
-    window.renderAll();
+  try {
+    const { pulled } = await VpcSync.sync();
+    if (pulled > 0 && typeof window.renderAll === 'function') {
+      window.renderAll();
+    }
+  } finally {
+    _firstSyncDone();
   }
 
   window.addEventListener('online', () => VpcSync.flushQueue());
