@@ -26,7 +26,7 @@ body { display:block; overflow-x:hidden; }
 .btn-ghost:hover { border-color:var(--accent); color:var(--accent); background:color-mix(in srgb, var(--accent) 6%, transparent); }
 
 /* STAT BAR — glassmorphism strip */
-.stat-bar { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; padding:12px 24px; background:transparent; }
+.stat-bar { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; padding:12px 24px; background:transparent; max-width:1300px; margin:0 auto; }
 .stat-cell {
   background:var(--surface);
   border:1px solid var(--border);
@@ -226,7 +226,7 @@ main { padding:0 0 24px; }
 .vt-bill-btn:hover { background:color-mix(in srgb, var(--accent) 12%, transparent); }
 
 /* TAB BAR */
-.ev-tab-bar { border-bottom:1px solid var(--border); background:transparent; display:flex; padding:0 24px; flex-shrink:0; gap:4px; }
+.ev-tab-bar { border-bottom:1px solid var(--border); background:transparent; display:flex; padding:0 max(24px, calc((100% - 1300px) / 2 + 24px)); flex-shrink:0; gap:4px; }
 .ev-tab { padding:10px 16px; font-size:.8rem; font-weight:600; color:var(--text2); cursor:pointer; border-bottom:2px solid transparent; transition:all .15s; user-select:none; white-space:nowrap; border-radius:8px 8px 0 0; }
 .ev-tab:hover { color:var(--text); background:color-mix(in srgb, var(--label) 3%, transparent); }
 .ev-tab.active { color:var(--accent); border-bottom-color:var(--accent); background:color-mix(in srgb, var(--accent) 5%, transparent); }
@@ -266,7 +266,7 @@ main { padding:0 0 24px; }
   <div class="brand">Events &amp; Tables</div>
   <div class="header-right">
     <button class="btn-ghost" onclick="generateShareLink()" title="Generate a shareable link for vendors">Share Calendar</button>
-    <button class="btn-ghost" onclick="openVendorModal()">+ Vendor</button>
+    <button class="btn-ghost" onclick="openVendorModal()"><svg class="vpc-ico inline" aria-hidden="true"><use href="icons.svg#plus"/></svg>Add Vendor</button>
     <button class="btn-primary vpc-primary" type="button" onclick="openEventModal()" aria-label="New event"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#plus"/></svg><span>New Event</span></button>
   </div>
 </header>
@@ -295,8 +295,8 @@ main { padding:0 0 24px; }
       <div class="empty-title" id="empty-title">No data yet</div>
       <div class="empty-sub" id="empty-sub">Add your events and vendors to start tracking table payments.</div>
       <div class="empty-actions">
-        <button class="btn-ghost" onclick="openVendorModal()">+ Add Vendor</button>
-        <button class="btn-primary" onclick="openEventModal()">+ Add Event</button>
+        <button class="btn-ghost" onclick="openVendorModal()"><svg class="vpc-ico inline" aria-hidden="true"><use href="icons.svg#plus"/></svg>Add Vendor</button>
+        <button class="btn-primary" onclick="openEventModal()"><svg class="vpc-ico inline" aria-hidden="true"><use href="icons.svg#plus"/></svg>Add Event</button>
       </div>
     </div>
   </div><!-- /#panel-matrix — this close was missing, so the parser nested

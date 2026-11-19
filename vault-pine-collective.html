@@ -30,7 +30,8 @@
   /* ── Sales sub-tab bar ── */
   .tab-bar {
     display: flex; gap: 0; border-bottom: 1px solid var(--border);
-    padding: 0 32px; background: var(--surface);
+    /* full-width bar, its tabs lined up with the content column */
+    padding: 0 max(24px, calc((100% - 1300px) / 2 + 24px)); background: var(--surface);
     position: sticky; top: var(--header-h); z-index: 150;
   }
   .tab { padding: 13px 18px; font-size: 0.83rem; font-weight: 600; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; user-select: none; }
@@ -397,7 +398,7 @@
         <div class="card">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
             <div class="card-title" style="margin-bottom:0">Upcoming Deliveries</div>
-            <button onclick="openAddDelivery()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:3px 10px;font-size:0.75rem;cursor:pointer">+ Add</button>
+            <button onclick="openAddDelivery()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:3px 10px;font-size:0.75rem;cursor:pointer"><svg class="vpc-ico inline" aria-hidden="true"><use href="icons.svg#plus"/></svg>Add</button>
           </div>
           <div id="pipelineList"></div>
         </div>
@@ -788,7 +789,7 @@
           <option>Custom</option>
         </select>
         <div class="row-wrap tight">
-          <button type="button" class="btn-ghost btn-small" onclick="openOrderProductModal()">+ New Product</button>
+          <button type="button" class="btn-ghost btn-small" onclick="openOrderProductModal()"><svg class="vpc-ico inline" aria-hidden="true"><use href="icons.svg#plus"/></svg>New Product</button>
           <button type="button" class="btn-ghost" id="aoEditProduct" style="font-size:0.75rem;padding:5px 10px;margin-top:6px;display:none" onclick="openOrderProductModal(document.getElementById('aoProduct').value)">Edit Product</button>
         </div>
       </div>
@@ -921,8 +922,8 @@
         <div class="subhead below" id="jtSubtitle">150 tags purchased · $112 total cost ($0.75/ea) · Sell price $5.00/ea</div>
       </div>
       <div class="row-wrap">
-        <button class="btn-ghost" onclick="openJtCharModal()">+ New Character</button>
-        <button class="btn-ghost" onclick="openJtRestockModal()">+ Restock</button>
+        <button class="btn-ghost" onclick="openJtCharModal()"><svg class="vpc-ico inline" aria-hidden="true"><use href="icons.svg#plus"/></svg>New Character</button>
+        <button class="btn-ghost" onclick="openJtRestockModal()"><svg class="vpc-ico inline" aria-hidden="true"><use href="icons.svg#plus"/></svg>Restock</button>
       </div>
     </div>
 
@@ -1044,7 +1045,7 @@
     <div class="field">
       <label>New characters in this order</label>
       <div id="jtOrderNewChars"></div>
-      <button class="btn-ghost btn-small" onclick="jtAddOrderNewCharRow()">+ Add new character</button>
+      <button class="btn-ghost btn-small" onclick="jtAddOrderNewCharRow()"><svg class="vpc-ico inline" aria-hidden="true"><use href="icons.svg#plus"/></svg>Add new character</button>
     </div>
     <div id="jtOrderPreview" style="background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:4px;font-size:0.82rem;color:var(--text2);display:none"></div>
     <div class="field"><label>Notes (optional)</label><input type="text" id="jtRestockNotes" placeholder="e.g. July vendor order"></div>
@@ -1096,8 +1097,8 @@
         <div class="subhead below" id="pinSubtitle">240 pins purchased · $228 total cost ($0.95/ea) · Sell price tracked per sale</div>
       </div>
       <div class="row-wrap">
-        <button class="btn-ghost" onclick="openPinCharModal()">+ New Character</button>
-        <button class="btn-ghost" onclick="openPinRestockModal()">+ Restock</button>
+        <button class="btn-ghost" onclick="openPinCharModal()"><svg class="vpc-ico inline" aria-hidden="true"><use href="icons.svg#plus"/></svg>New Character</button>
+        <button class="btn-ghost" onclick="openPinRestockModal()"><svg class="vpc-ico inline" aria-hidden="true"><use href="icons.svg#plus"/></svg>Restock</button>
       </div>
     </div>
 
@@ -1215,7 +1216,7 @@
     <div class="field">
       <label>New characters in this order</label>
       <div id="pinOrderNewChars"></div>
-      <button class="btn-ghost btn-small" onclick="pinAddOrderNewCharRow()">+ Add new character</button>
+      <button class="btn-ghost btn-small" onclick="pinAddOrderNewCharRow()"><svg class="vpc-ico inline" aria-hidden="true"><use href="icons.svg#plus"/></svg>Add new character</button>
     </div>
     <div id="pinOrderPreview" style="background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:4px;font-size:0.82rem;color:var(--text2);display:none"></div>
     <div class="field"><label>Notes (optional)</label><input type="text" id="pinRestockNotes" placeholder="e.g. July vendor order"></div>
@@ -1310,7 +1311,7 @@
     <div class="field">
       <label>New items in this order</label>
       <div id="coNewItems"></div>
-      <button class="btn-ghost btn-small" onclick="catAddOrderNewItemRow()">+ Add new item</button>
+      <button class="btn-ghost btn-small" onclick="catAddOrderNewItemRow()"><svg class="vpc-ico inline" aria-hidden="true"><use href="icons.svg#plus"/></svg>Add new item</button>
     </div>
     <div id="coPreview" style="background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:4px;font-size:0.82rem;color:var(--text2);display:none"></div>
     <div class="field"><label>Notes (optional)</label><input type="text" id="coNotes" placeholder="e.g. July vendor order"></div>
@@ -3108,7 +3109,7 @@ function printerCardHTML(printer) {
 
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
       <div class="section-label">Credit Log</div>
-      <button class="btn-primary" style="padding:5px 12px;font-size:.75rem" onclick="openPrinterCreditModal('${printer.id}')">+ Apply Credit</button>
+      <button class="btn-primary" style="padding:5px 12px;font-size:.75rem" onclick="openPrinterCreditModal('${printer.id}')">${VPCUtil.icon('plus', 'inline')}Apply Credit</button>
     </div>
     <div style="max-height:180px;overflow-y:auto">
       ${logRows || '<div style="font-size:.78rem;color:var(--text2);padding:10px 0">No credits logged yet.</div>'}
@@ -3772,7 +3773,7 @@ function renderExpCategoryBars() {
           </div>
         </div>`;
       }).join('')
-    : '<div style="color:var(--text2);font-size:.83rem">No expenses logged yet. Click "+ Add Expense" to get started.</div>';
+    : '<div style="color:var(--text2);font-size:.83rem">No expenses logged yet. Use Add Expense at the top to get started.</div>';
 }
 
 // ── Revenue vs Expenses bar chart ──
@@ -3866,7 +3867,7 @@ function renderExpTable() {
         <td colspan="4" class="text-2">Total — ${exps.length} expense${exps.length!==1?'s':''}</td>
         <td class="num">${fmt$(total)}</td><td></td>
       </tr>`
-    : '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:40px">No expenses yet. Click "+ Add Expense" to start.</td></tr>');
+    : '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:40px">No expenses yet. Use Add Expense at the top to start.</td></tr>');
 }
 function sortExpTable(col) {
   if (expSortCol === col) expSortDir *= -1; else { expSortCol = col; expSortDir = -1; }
@@ -4299,7 +4300,7 @@ function renderJtSalesLog() {
   const sales  = getJtSales().slice().sort((a,b) => b.date.localeCompare(a.date));
   const tbody  = document.getElementById('jtSalesTbody');
   if (!sales.length) {
-    tbody.innerHTML = `<tr><td colspan="8" class="empty-block">No sales logged yet — click <strong>+ Log Sale</strong> to start tracking.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="empty-block">No sales logged yet — use <strong>Log Sale</strong> at the top to start tracking.</td></tr>`;
     return;
   }
   const avgCost = jtAvgCost();
@@ -4844,7 +4845,7 @@ function renderPinSalesLog() {
   const sales = getPinSales().slice().sort((a,b) => b.date.localeCompare(a.date));
   const tbody = document.getElementById('pinSalesTbody');
   if (!sales.length) {
-    tbody.innerHTML = `<tr><td colspan="8" class="empty-block">No pin sales logged yet — click <strong>+ Log Sale</strong> to start tracking.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="empty-block">No pin sales logged yet — use <strong>Log Sale</strong> at the top to start tracking.</td></tr>`;
     return;
   }
   const avgCost  = pinAvgCost();
@@ -5311,8 +5312,8 @@ function catSectionHtml(cat) {
       </div>
       <div class="row-wrap">
         <button class="btn-ghost" onclick="openCatModal('${cat.id}')" title="Rename, restyle, or delete this category">Edit</button>
-        <button class="btn-ghost" onclick="openCatItemModal('${cat.id}')">+ New Item</button>
-        <button class="btn-ghost" onclick="openCatOrderModal('${cat.id}')">+ Restock</button>
+        <button class="btn-ghost" onclick="openCatItemModal('${cat.id}')">${VPCUtil.icon('plus', 'inline')}New Item</button>
+        <button class="btn-ghost" onclick="openCatOrderModal('${cat.id}')">${VPCUtil.icon('plus', 'inline')}Restock</button>
       </div>
     </div>
     <div class="grid-2 mb-20">
@@ -5405,7 +5406,7 @@ function renderCatSection(catId) {
 
 function renderCatInvGrid(cat, t, el) {
   if (!t.stock.length) {
-    el.innerHTML = `<div style="grid-column:1/-1;color:var(--text2);font-size:.83rem;padding:12px 0">No items yet — click <strong>+ New Item</strong> to add your first ${esc(catUnit(cat))}.</div>`;
+    el.innerHTML = `<div style="grid-column:1/-1;color:var(--text2);font-size:.83rem;padding:12px 0">No items yet — use <strong>New Item</strong> to add your first ${esc(catUnit(cat))}.</div>`;
     return;
   }
   const baseById = {};
@@ -5444,7 +5445,7 @@ function renderCatOrderHistory(cat, tbody) {
     notes: r.notes || '', id: r.id,
   }));
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text2)">No orders yet — log your first stock with <strong>+ New Item</strong> or <strong>+ Restock</strong>.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text2)">No orders yet — log your first stock with <strong>New Item</strong> or <strong>Restock</strong>.</td></tr>`;
     return;
   }
   rows.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
@@ -5476,7 +5477,7 @@ function renderCatOrderHistory(cat, tbody) {
 function renderCatSalesLog(cat, t, tbody) {
   const sales = catSales(cat.id).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   if (!sales.length) {
-    tbody.innerHTML = `<tr><td colspan="8" class="empty-block">No sales logged yet — click <strong>+ Log Sale</strong> to start tracking.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="empty-block">No sales logged yet — use <strong>Log Sale</strong> at the top to start tracking.</td></tr>`;
     return;
   }
   const nameById = {};
