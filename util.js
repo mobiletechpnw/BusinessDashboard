@@ -911,7 +911,8 @@
     if (!(days >= 1)) return [];
     const step = TREND_STEPS.find((n) => days / n <= 14) || Math.ceil(days / 14);
     const out = [];
-    for (let end = to; daysBetween(from, end) >= 0; ) {
+    let end = to;
+    while (daysBetween(from, end) >= 0) {
       let start = addDays(end, 1 - step);
       if (daysBetween(from, start) < 0) start = from;
       out.unshift({ from: start, to: end, days: daysBetween(start, end) + 1 });
