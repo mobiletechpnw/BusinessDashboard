@@ -73,6 +73,8 @@
   .belt-head { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
   .belt-band { width: 38px; height: 12px; border-radius: 8px; flex-shrink: 0; box-shadow: none; background: var(--belt-c); }
   .belt-name { font-size: 0.95rem; font-weight: 600; letter-spacing: -0.2px; }
+  .belt-done { color: var(--green); margin-left: 0.3em; }
+  .belt-done .vpc-ico { margin-right: 0; }
   .belt-sub { font-size: 0.75rem; color: var(--text2); }
   .belt-progress { margin-left: auto; font-size: 0.75rem; color: var(--text2); font-weight: 600; white-space: nowrap; }
   .belt-track { height: 4px; background: color-mix(in srgb, var(--label) 6%, transparent); border-radius: 3px; overflow: hidden; margin-bottom: 14px; }
@@ -106,7 +108,7 @@
     background: var(--surface);
     border: 1px solid var(--glass-border);
   }
-  .score-icon { font-size: 1.2rem; flex-shrink: 0; width: 34px; text-align: center; }
+  .score-icon { font-size: 1.2rem; flex-shrink: 0; width: 34px; display: flex; justify-content: center; color: var(--accent); }
   .score-info { flex: 1; min-width: 0; }
   .score-name { font-size: 0.84rem; font-weight: 600; }
   .score-tip { font-size: 0.75rem; color: var(--text2); margin-top: 3px; line-height: 1.5; }
@@ -122,7 +124,8 @@
   }
   .mile.earned { border-color: color-mix(in srgb, var(--yellow) 35%, transparent); background: linear-gradient(160deg, color-mix(in srgb, var(--yellow) 7%, transparent) 0%, color-mix(in srgb, var(--label) 1%, transparent) 100%); }
   .mile.locked { opacity: 0.45; filter: grayscale(0.7); }
-  .mile-ico { font-size: 1.9rem; margin-bottom: 8px; }
+  .mile-ico { font-size: 1.9rem; margin-bottom: 8px; display: flex; justify-content: center; color: var(--label-2); }
+  .mile.earned .mile-ico { color: var(--yellow); }
   .mile-name { font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; }
   .mile-how { font-size: 0.75rem; color: var(--text2); line-height: 1.5; }
   .mile-tag { display: inline-block; margin-top: 9px; font-size: 0.75rem; font-weight: 600; padding: 2px 9px; border-radius: 20px; }
@@ -162,7 +165,7 @@
   .lm-takeaway b { color: var(--green); display: block; font-size: 0.75rem; margin-bottom: 5px; }
   .lm-quiz { background: color-mix(in srgb, var(--accent) 5%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent); border-radius: 12px; padding: 16px; margin: 16px 0; }
   .lm-quiz-q { font-size: 0.82rem; font-weight: 600; margin-bottom: 11px; }
-  .lm-quiz-q::before { content: '🧠 Quick check — '; color: var(--accent); }
+  .lm-quiz-q::before { content: 'Quick check — '; color: var(--accent); }
   .quiz-opt {
     display: block; width: 100%; text-align: left;
     background: color-mix(in srgb, var(--label) 4%, transparent); border: 1px solid var(--border); color: var(--text2);
@@ -226,7 +229,7 @@
   .nw-row:last-child { border-bottom: none; }
   .nw-row-name { flex: 1; font-size: 0.82rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .nw-row-amt { font-size: 0.84rem; font-weight: 600; font-variant-numeric: tabular-nums; }
-  .nw-row-del { background: none; border: none; color: var(--text2); cursor: pointer; font-size: 0.8rem; padding: 2px 5px; min-height: unset; opacity: 0.5; font-family: inherit; transition: opacity 0.15s; }
+  .nw-row-del { display: flex; background: none; border: none; color: var(--text2); cursor: pointer; font-size: 0.8rem; padding: 2px 5px; min-height: unset; opacity: 0.5; font-family: inherit; transition: opacity 0.15s; }
   .nw-row-del:hover { opacity: 1; color: var(--red); }
   .nw-empty { font-size: 0.75rem; color: var(--text2); padding: 14px 0; text-align: center; }
   .nw-chip { background: color-mix(in srgb, var(--accent) 8%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent); color: var(--accent); border-radius: 20px; padding: 4px 11px; font-size: 0.75rem; cursor: pointer; font-family: inherit; transition: all 0.15s; }
@@ -253,7 +256,7 @@
     background: var(--surface);
     border: 1px solid var(--glass-border); border-radius: 12px; padding: 13px 18px;
   }
-  .rr-icon { font-size: 1.2rem; text-align: center; }
+  .rr-icon { font-size: 1.2rem; display: flex; justify-content: center; color: var(--accent); }
   .rr-name { font-size: 0.84rem; font-weight: 600; }
   .rr-sub { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
   .rr-vals { text-align: right; }
@@ -322,7 +325,7 @@
         <div class="hstat"><b id="hs-belts">0/5</b><span>Belts</span></div>
         <div class="hstat"><b id="hs-miles">0/12</b><span>Milestones</span></div>
       </div>
-      <button class="btn-continue" id="btn-continue" onclick="continueLearning()">▶ Continue Learning</button>
+      <button class="btn-continue" id="btn-continue" onclick="continueLearning()">Continue Learning</button>
     </div>
   </div>
 
@@ -814,7 +817,7 @@ function renderAcademy() {
       <div class="belt-head">
         <div class="belt-band"></div>
         <div>
-          <div class="belt-name">${b.name} ${done === lessons.length ? '✓' : ''}</div>
+          <div class="belt-name">${b.name}${done === lessons.length ? `<span class="belt-done" title="Belt complete">${VPCUtil.icon('check', 'inline')}</span>` : ''}</div>
           <div class="belt-sub">${b.sub}</div>
         </div>
         <div class="belt-progress">${done} / ${lessons.length} complete</div>
@@ -823,7 +826,7 @@ function renderAcademy() {
       <div class="lesson-grid">
         ${lessons.map((l, i) => `
           <div class="lesson-card ${g.completed[l.id] ? 'done' : ''}" onclick="openLesson('${l.id}')">
-            <div class="lesson-num">${g.completed[l.id] ? '✓' : i + 1}</div>
+            <div class="lesson-num">${g.completed[l.id] ? VPCUtil.icon('check', 'sm') : i + 1}</div>
             <div>
               <div class="lesson-t">${l.title}</div>
               <div class="lesson-m">${l.min} min read · ${g.completed[l.id] ? 'Completed' : 'Not started'}</div>
@@ -851,7 +854,7 @@ function openLesson(id) {
   modal.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
       <span class="lm-belt">${belt.name} · ${belt.sub}</span>
-      <button onclick="closeLesson()" style="background:none;border:none;color:var(--text2);font-size:1rem;cursor:pointer;padding:0;min-height:unset;font-family:inherit;">✕</button>
+      <button type="button" class="sheet-close" onclick="closeLesson()" aria-label="Close">${VPCUtil.icon('close')}</button>
     </div>
     <div class="lm-title">${l.title}</div>
     <div class="lm-body">${l.body.map(p => `<p>${p}</p>`).join('')}</div>
@@ -864,7 +867,7 @@ function openLesson(id) {
     <div class="lm-actions">
       ${l.action ? `<a class="lm-action-link" href="${l.action.url}">${l.action.label}</a>` : ''}
       <button class="btn-complete ${isDone ? 'is-done' : ''}" id="btn-complete" onclick="completeLesson()">
-        ${isDone ? '✓ Lesson completed' : 'Mark lesson complete'}
+        ${isDone ? 'Lesson completed' : 'Mark lesson complete'}
       </button>
     </div>
   `;
@@ -880,8 +883,8 @@ function answerQuiz(btn, picked, correct) {
   });
   const fb = document.getElementById('quiz-feedback');
   fb.textContent = picked === correct
-    ? '✓ Correct — that\'s the guru mindset.'
-    : '✗ Not quite — the highlighted answer is the one to remember.';
+    ? 'Correct — that\'s the guru mindset.'
+    : 'Not quite — the highlighted answer is the one to remember.';
   fb.style.color = picked === correct ? 'var(--green)' : 'var(--red)';
 }
 
@@ -894,7 +897,7 @@ function completeLesson() {
     if (window.auditLog) auditLog('learn', GURU_KEY, 'Completed lesson: ' + currentLesson.title);
   }
   const btn = document.getElementById('btn-complete');
-  btn.textContent = '✓ Lesson completed';
+  btn.textContent = 'Lesson completed';
   btn.classList.add('is-done');
   renderAll();
 }
@@ -947,7 +950,7 @@ function computeHealth() {
 
   // 1 · Budget set — 10
   comp.push({
-    icon: '🎯', name: 'Monthly budget set', max: 10,
+    icon: 'goals', name: 'Monthly budget set', max: 10,
     pts: budget.total > 0 ? 10 : 0,
     tip: budget.total > 0 ? `Budget of ${fmt$(budget.total)} is active.` : 'Set a monthly budget in Expenses — even a rough number creates accountability.',
     url: 'expenses.html',
@@ -962,11 +965,11 @@ function computeHealth() {
     wbPts = Math.max(0, Math.round(12 - overPct / 5));
     wbTip = `Over budget by ${Math.round(overPct)}% — freeze one category for the rest of the month to recover points.`;
   }
-  comp.push({ icon: '💸', name: 'Spending within budget', max: 12, pts: wbPts, tip: wbTip, url: 'expenses.html' });
+  comp.push({ icon: 'expenses', name: 'Spending within budget', max: 12, pts: wbPts, tip: wbTip, url: 'expenses.html' });
 
   // 3 · Logging habit — 10
   comp.push({
-    icon: '🧾', name: 'Expenses logged this week', max: 10,
+    icon: 'receipt', name: 'Expenses logged this week', max: 10,
     pts: loggedThisWeek ? 10 : 0,
     tip: loggedThisWeek ? 'Logging habit is alive — awareness before control.' : 'No expenses logged in 7 days. Log as you spend; ten seconds per entry.',
     url: 'expenses.html',
@@ -979,11 +982,11 @@ function computeHealth() {
     recPts = 3;
     recTip = `Recurring bills are ${Math.round(recurringTotal / budget.total * 100)}% of budget — above the 50% comfort line. Time for a subscription audit.`;
   } else { recPts = 8; recTip = `${recurring.length} recurring bill${recurring.length > 1 ? 's' : ''} tracked (${fmt$(recurringTotal)}/mo) — fixed load under control.`; }
-  comp.push({ icon: '🔄', name: 'Recurring bills tracked', max: 8, pts: recPts, tip: recTip, url: 'expenses.html' });
+  comp.push({ icon: 'repeat', name: 'Recurring bills tracked', max: 8, pts: recPts, tip: recTip, url: 'expenses.html' });
 
   // 5 · Sales logged this month — 10
   comp.push({
-    icon: '💵', name: 'Sales logged this month', max: 10,
+    icon: 'sales', name: 'Sales logged this month', max: 10,
     pts: salesThisMonth ? 10 : 0,
     tip: salesThisMonth ? 'Sales data is flowing — your analytics stay honest.' : 'No sales logged this month. Log every sale the same day, even cash ones.',
     url: 'vault-pine-collective.html',
@@ -998,7 +1001,7 @@ function computeHealth() {
       ? `Gross margin ${margin.toFixed(1)}% — at or above the 40% health line.`
       : `Gross margin ${margin.toFixed(1)}% — below the 40% target. Check pricing or COGS accuracy.`;
   }
-  comp.push({ icon: '📈', name: 'Gross margin ≥ 40%', max: 12, pts: mgPts, tip: mgTip, url: 'analytics.html' });
+  comp.push({ icon: 'growth', name: 'Gross margin ≥ 40%', max: 12, pts: mgPts, tip: mgTip, url: 'analytics.html' });
 
   // 7 · Goal hygiene — 10
   let glPts = 0;
@@ -1012,7 +1015,7 @@ function computeHealth() {
       : datedGoals.length < activeGoals.length
         ? `${activeGoals.length - datedGoals.length} goal${activeGoals.length - datedGoals.length > 1 ? 's' : ''} missing a deadline — add dates to create urgency.`
         : 'Goals are active, dated, and none overdue. Textbook hygiene.';
-  comp.push({ icon: '🥅', name: 'Goal hygiene', max: 10, pts: glPts, tip: glTip, url: 'goals-dashboard.html' });
+  comp.push({ icon: 'check', name: 'Goal hygiene', max: 10, pts: glPts, tip: glTip, url: 'goals-dashboard.html' });
 
   // 8 · Net worth tracked — 10
   let nwPts = 0;
@@ -1028,11 +1031,11 @@ function computeHealth() {
       : nw.net <= 0
         ? `Net worth is ${fmt$(nw.net)}. Chip away at liabilities — the trend matters more than the number.`
         : `Net worth ${fmt$(nw.net)} and climbing across ${nwSnaps} snapshots. This is mastery.`;
-  comp.push({ icon: '💰', name: 'Net worth tracked', max: 10, pts: nwPts, tip: nwTip, url: 'guru.html' });
+  comp.push({ icon: 'briefcase', name: 'Net worth tracked', max: 10, pts: nwPts, tip: nwTip, url: 'guru.html' });
 
   // 9 · Academy progress — 18
   comp.push({
-    icon: '📚', name: 'Guru Academy progress', max: 18,
+    icon: 'guru', name: 'Guru Academy progress', max: 18,
     pts: Math.round(doneLessons / LESSONS.length * 18),
     tip: doneLessons === LESSONS.length ? 'Full curriculum complete — Financial Guru.' : `${doneLessons} of ${LESSONS.length} lessons done. Each lesson is 2–3 minutes.`,
     url: 'guru.html',
@@ -1043,11 +1046,11 @@ function computeHealth() {
 }
 
 function gradeFor(score) {
-  if (score >= 95) return { name: 'Financial Guru', icon: '🥋', color: 'var(--accent2)', line: 'Full mastery — your money runs on systems, not stress.' };
-  if (score >= 80) return { name: 'Money Master',   icon: '🏆', color: 'var(--green)', line: 'Strong fundamentals everywhere. Polish the last details.' };
-  if (score >= 60) return { name: 'Practitioner',   icon: '💪', color: 'var(--accent)', line: 'Solid habits forming. The score rows below show your next points.' };
-  if (score >= 40) return { name: 'Student',        icon: '📖', color: 'var(--yellow)', line: 'Foundations are appearing. Focus on budget + logging consistency.' };
-  return { name: 'Apprentice', icon: '🌱', color: 'var(--red)', line: 'Everyone starts here. Two quick wins: set a budget, log this week\'s expenses.' };
+  if (score >= 95) return { name: 'Financial Guru', color: 'var(--accent2)', line: 'Full mastery — your money runs on systems, not stress.' };
+  if (score >= 80) return { name: 'Money Master',   color: 'var(--green)', line: 'Strong fundamentals everywhere. Polish the last details.' };
+  if (score >= 60) return { name: 'Practitioner',   color: 'var(--accent)', line: 'Solid habits forming. The score rows below show your next points.' };
+  if (score >= 40) return { name: 'Student',        color: 'var(--yellow)', line: 'Foundations are appearing. Focus on budget + logging consistency.' };
+  return { name: 'Apprentice', color: 'var(--red)', line: 'Everyone starts here. Two quick wins: set a budget, log this week\'s expenses.' };
 }
 
 function renderHealth() {
@@ -1070,12 +1073,12 @@ function renderHealth() {
   })(start);
 
   document.getElementById('hero-grade').innerHTML =
-    `${grade.icon} Health grade: <strong style="color:${grade.color}">${grade.name}</strong> — ${grade.line}`;
+    `Health grade: <strong style="color:${grade.color}">${grade.name}</strong> — ${grade.line}`;
 
   // Breakdown rows
   document.getElementById('score-breakdown').innerHTML = comp.map(c => `
     <div class="score-row">
-      <div class="score-icon">${c.icon}</div>
+      <div class="score-icon">${VPCUtil.icon(c.icon, 'em')}</div>
       <div class="score-info">
         <div class="score-name">${c.name}</div>
         <div class="score-tip">${c.tip} <a href="${c.url}" style="color:var(--accent);text-decoration:none;">Open →</a></div>
@@ -1119,22 +1122,22 @@ function computeMilestones() {
   const income = loadIncome();
 
   return [
-    { ico: '🌱', name: 'First Dollar Tracked', how: 'Log your first expense',                          ok: expenses.length >= 1 },
-    { ico: '🧾', name: 'Ten in the Books',     how: 'Log 10 expenses',                                 ok: expenses.length >= 10 },
-    { ico: '🎯', name: 'Budget Boss',          how: 'Set a monthly budget',                            ok: budget.total > 0 },
-    { ico: '🛡️', name: 'Month Under Budget',  how: 'Finish a full month under budget',                ok: budget.total > 0 && lastMonthSpent > 0 && lastMonthSpent <= budget.total },
-    { ico: '💵', name: 'First Sale',           how: 'Log your first sale',                             ok: orders.length >= 1 },
-    { ico: '🏆', name: '$1K Club',             how: 'Reach $1,000 all-time revenue',                   ok: totalRev >= 1000 },
-    { ico: '📈', name: 'Margin Master',        how: 'Hold 40%+ gross margin across 5+ orders',         ok: orders.length >= 5 && margin >= 40 },
-    { ico: '🔄', name: 'Bill Watcher',         how: 'Track at least one recurring bill',               ok: recurring.length >= 1 },
-    { ico: '✅', name: 'Goal Getter',          how: 'Complete your first goal',                        ok: goals.some(x => x.done) },
-    { ico: '💰', name: 'Net Worth Known',      how: 'Log your assets &amp; liabilities',               ok: (nw.data.assets.length + nw.data.liabilities.length) >= 1 },
-    { ico: '📊', name: 'Trend Tracker',        how: 'Save 2+ net-worth snapshots',                     ok: nwSnaps >= 2 },
-    { ico: '🟢', name: 'In the Green',         how: 'Reach a positive net worth',                      ok: (nw.data.assets.length + nw.data.liabilities.length) >= 1 && nw.net > 0 },
-    { ico: '🧭', name: 'Income Mapped',        how: 'Set your monthly take-home income',               ok: income > 0 },
-    { ico: '📚', name: 'First Lesson',         how: 'Complete a Guru Academy lesson',                  ok: doneLessons >= 1 },
-    { ico: '🥋', name: 'Belt Earned',          how: 'Complete every lesson in one belt',               ok: beltsEarned(g) >= 1 },
-    { ico: '🧠', name: 'Financial Guru',       how: 'Complete all 25 Academy lessons',                 ok: doneLessons >= LESSONS.length },
+    { ico: 'expenses', name: 'First Dollar Tracked', how: 'Log your first expense',                          ok: expenses.length >= 1 },
+    { ico: 'receipt', name: 'Ten in the Books',     how: 'Log 10 expenses',                                 ok: expenses.length >= 10 },
+    { ico: 'goals', name: 'Budget Boss',          how: 'Set a monthly budget',                            ok: budget.total > 0 },
+    { ico: 'shield', name: 'Month Under Budget',  how: 'Finish a full month under budget',                ok: budget.total > 0 && lastMonthSpent > 0 && lastMonthSpent <= budget.total },
+    { ico: 'tag', name: 'First Sale',           how: 'Log your first sale',                             ok: orders.length >= 1 },
+    { ico: 'sales', name: '$1K Club',             how: 'Reach $1,000 all-time revenue',                   ok: totalRev >= 1000 },
+    { ico: 'growth', name: 'Margin Master',        how: 'Hold 40%+ gross margin across 5+ orders',         ok: orders.length >= 5 && margin >= 40 },
+    { ico: 'repeat', name: 'Bill Watcher',         how: 'Track at least one recurring bill',               ok: recurring.length >= 1 },
+    { ico: 'check', name: 'Goal Getter',          how: 'Complete your first goal',                        ok: goals.some(x => x.done) },
+    { ico: 'briefcase', name: 'Net Worth Known',      how: 'Log your assets &amp; liabilities',               ok: (nw.data.assets.length + nw.data.liabilities.length) >= 1 },
+    { ico: 'analytics', name: 'Trend Tracker',        how: 'Save 2+ net-worth snapshots',                     ok: nwSnaps >= 2 },
+    { ico: 'bolt', name: 'In the Green',         how: 'Reach a positive net worth',                      ok: (nw.data.assets.length + nw.data.liabilities.length) >= 1 && nw.net > 0 },
+    { ico: 'map-pin', name: 'Income Mapped',        how: 'Set your monthly take-home income',               ok: income > 0 },
+    { ico: 'review', name: 'First Lesson',         how: 'Complete a Guru Academy lesson',                  ok: doneLessons >= 1 },
+    { ico: 'guru', name: 'Belt Earned',          how: 'Complete every lesson in one belt',               ok: beltsEarned(g) >= 1 },
+    { ico: 'star', name: 'Financial Guru',       how: 'Complete all 25 Academy lessons',                 ok: doneLessons >= LESSONS.length },
   ];
 }
 
@@ -1142,10 +1145,10 @@ function renderMilestones() {
   const miles = computeMilestones();
   document.getElementById('mile-grid').innerHTML = miles.map(m => `
     <div class="mile ${m.ok ? 'earned' : 'locked'}">
-      <div class="mile-ico">${m.ico}</div>
+      <div class="mile-ico">${VPCUtil.icon(m.ico, 'em')}</div>
       <div class="mile-name">${m.name}</div>
       <div class="mile-how">${m.how}</div>
-      <div class="mile-tag">${m.ok ? '★ Earned' : 'Locked'}</div>
+      <div class="mile-tag">${m.ok ? 'Earned' : 'Locked'}</div>
     </div>`).join('');
   return miles.filter(m => m.ok).length;
 }
@@ -1170,10 +1173,10 @@ function calcMargin() {
   if (!price || isNaN(cost) || price <= 0) { el.innerHTML = 'Enter price and cost to see your margin.'; return; }
   const margin = (price - cost) / price * 100;
   const markup = cost > 0 ? (price - cost) / cost * 100 : 0;
-  const verdict = margin >= 60 ? '💪 Excellent — premium territory.'
-    : margin >= 40 ? '✅ Healthy — right in the 40–60% target zone.'
-    : margin >= 30 ? '⚡ Workable, but thin. Consider a price test.'
-    : '🚨 Danger zone — this price barely covers making the thing.';
+  const verdict = margin >= 60 ? 'Excellent — premium territory.'
+    : margin >= 40 ? 'Healthy — right in the 40–60% target zone.'
+    : margin >= 30 ? 'Workable, but thin. Consider a price test.'
+    : 'Danger zone — this price barely covers making the thing.';
   el.innerHTML = `Gross margin: <span class="big">${margin.toFixed(1)}%</span> &nbsp; <b>${fmt$(price - cost)}</b> kept per sale<br>
     Markup on cost: <b>${markup.toFixed(0)}%</b><br>${verdict}`;
 }
@@ -1188,7 +1191,7 @@ function calcFund() {
   const pct = Math.min(100, saved / target * 100);
   const gap = Math.max(0, target - saved);
   el.innerHTML = `Target: <span class="big">${fmt$(target)}</span> (${months} months of cover)<br>
-    Progress: <b>${pct.toFixed(0)}%</b> — ${gap > 0 ? `<b>${fmt$(gap)}</b> to go. At $50/week that's ~${Math.ceil(gap / 50 / 4.33)} months.` : 'fully funded. 🛡️'}
+    Progress: <b>${pct.toFixed(0)}%</b> — ${gap > 0 ? `<b>${fmt$(gap)}</b> to go. At $50/week that's ~${Math.ceil(gap / 50 / 4.33)} months.` : 'fully funded.'}
     <div style="height:6px;background:color-mix(in srgb, var(--label) 7%, transparent);border-radius:3px;margin-top:9px;overflow:hidden;">
       <div style="height:100%;width:${pct}%;background:var(--green);border-radius:3px;transition:width .5s;"></div>
     </div>`;
@@ -1386,7 +1389,7 @@ function renderNetWorth() {
       <div class="nw-row">
         <span class="nw-row-name">${VPCUtil.esc(x.name)}</span>
         <span class="nw-row-amt" style="color:${kind === 'asset' ? 'var(--green)' : 'var(--red)'}">${fmt$(x.amount)}</span>
-        <button class="nw-row-del" onclick="deleteNwItem('${kind}','${x.id}')" title="Remove">✕</button>
+        <button class="nw-row-del" onclick="deleteNwItem('${kind}','${x.id}')" title="Remove" aria-label="Remove ${VPCUtil.escAttr(x.name)}">${VPCUtil.icon('trash', 'sm')}</button>
       </div>`).join('')
     : `<div class="nw-empty">Nothing added yet${kind === 'asset' ? ' — add cash, savings, equipment…' : ' — add cards, loans…'}</div>`;
   document.getElementById('nw-asset-list').innerHTML = renderList(data.assets, 'asset');
@@ -1490,7 +1493,7 @@ function renderReportCard() {
 
   const hasData = last.revenue > 0 || last.expenses > 0 || last.netWorth !== null;
   if (!hasData) {
-    gradeEl.textContent = '🌱';
+    gradeEl.textContent = '—';
     gradeEl.style.color = 'var(--green)';
     verdictEl.innerHTML = `No full month of history yet for <b class="text-1">${monthLabel(lastM)}</b>. Your first real report card writes itself once a completed month is behind you — keep logging sales, expenses, and a monthly net-worth snapshot. The pace tracker below is already live.`;
     rowsEl.innerHTML = '';
@@ -1498,16 +1501,16 @@ function renderReportCard() {
   }
 
   const rows = [
-    { icon: '💵', name: 'Revenue',       sub: `${last.orders} order${last.orders !== 1 ? 's' : ''}`, cur: last.revenue,  prev: prev.revenue,  up: true,  fmt: fmt$ },
-    { icon: '💸', name: 'Expenses',      sub: 'Personal spending',                                   cur: last.expenses, prev: prev.expenses, up: false, fmt: fmt$ },
-    { icon: '📈', name: 'Profit Margin', sub: 'Gross, on orders',                                    cur: last.margin,   prev: prev.margin,   up: true,  fmt: v => v === null ? '—' : v.toFixed(0) + '%' },
-    { icon: '💰', name: 'Net Worth',     sub: 'End-of-month snapshot',                               cur: last.netWorth, prev: prev.netWorth, up: true,  fmt: v => v === null ? '—' : (v < 0 ? '-' : '') + fmt$(v) },
-    { icon: '💪', name: 'Health Score',  sub: 'Out of 100',                                          cur: last.score,    prev: prev.score,    up: true,  fmt: v => v === null ? '—' : v + '' },
+    { icon: 'sales', name: 'Revenue',       sub: `${last.orders} order${last.orders !== 1 ? 's' : ''}`, cur: last.revenue,  prev: prev.revenue,  up: true,  fmt: fmt$ },
+    { icon: 'expenses', name: 'Expenses',      sub: 'Personal spending',                                   cur: last.expenses, prev: prev.expenses, up: false, fmt: fmt$ },
+    { icon: 'growth', name: 'Profit Margin', sub: 'Gross, on orders',                                    cur: last.margin,   prev: prev.margin,   up: true,  fmt: v => v === null ? '—' : v.toFixed(0) + '%' },
+    { icon: 'briefcase', name: 'Net Worth',     sub: 'End-of-month snapshot',                               cur: last.netWorth, prev: prev.netWorth, up: true,  fmt: v => v === null ? '—' : (v < 0 ? '-' : '') + fmt$(v) },
+    { icon: 'activity', name: 'Health Score',  sub: 'Out of 100',                                          cur: last.score,    prev: prev.score,    up: true,  fmt: v => v === null ? '—' : v + '' },
   ];
 
   rowsEl.innerHTML = rows.map(r => `
     <div class="report-row">
-      <div class="rr-icon">${r.icon}</div>
+      <div class="rr-icon">${VPCUtil.icon(r.icon, 'em')}</div>
       <div><div class="rr-name">${r.name}</div><div class="rr-sub">${r.sub}</div></div>
       <div class="rr-vals">
         <div class="rr-now">${r.fmt(r.cur)}</div>
@@ -1572,12 +1575,12 @@ function renderAll() {
   for (const b of BELTS) {
     if (beltDone(b.id, g) === beltLessons(b.id).length) rank = b.name;
   }
-  document.getElementById('rank-chip').textContent = `🥋 ${rank}`;
+  document.getElementById('rank-chip').textContent = rank;
 
   const next = LESSONS.find(l => !g.completed[l.id]);
   document.getElementById('btn-continue').textContent = next
-    ? (done === 0 ? '▶ Start Lesson 1: ' + next.title.slice(0, 26) + (next.title.length > 26 ? '…' : '') : '▶ Continue Learning')
-    : '🥋 Curriculum complete — review Milestones';
+    ? (done === 0 ? 'Start Lesson 1: ' + next.title.slice(0, 26) + (next.title.length > 26 ? '…' : '') : 'Continue Learning')
+    : 'Curriculum complete — review Milestones';
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeLesson(); closeNwItem(); } });

@@ -384,7 +384,7 @@ window.vpcMenu = function (anchor, { label, options, current, onSelect, header, 
       .map((o) =>
         isChoice
           ? `<button type="button" role="menuitemradio" aria-checked="${o.value === current}" data-value="${esc(o.value)}">` +
-            `<span class="vpc-menu-check" aria-hidden="true">✓</span>${esc(o.label)}` +
+            `<span class="vpc-menu-check" aria-hidden="true">${VPCUtil.icon('check')}</span>${esc(o.label)}` +
             `<span class="vpc-menu-dot" aria-hidden="true" style="background:${o.color || 'var(--text2)'}"></span></button>`
           : `<button type="button" role="menuitem" data-value="${esc(o.value)}"${o.danger ? ' class="is-danger"' : ''}>` +
             `${o.icon || ''}${esc(o.label)}</button>`
@@ -901,7 +901,7 @@ function buildSearchIndex() {
   orders.forEach((o) =>
     results.push({
       type: 'Order',
-      icon: '📦',
+      icon: 'receipt',
       title: o.customer,
       sub: `${o.product} · $${o.salePrice} · ${o.date}`,
       url: 'vault-pine-collective.html',
@@ -912,7 +912,7 @@ function buildSearchIndex() {
   jt.forEach((s) =>
     results.push({
       type: 'Jet Tag Sale',
-      icon: '🏷',
+      icon: 'tag',
       title: s.chars.join(', '),
       sub: `${s.qty} tags · $${s.revenue} · ${s.date}${s.notes ? ' · ' + s.notes : ''}`,
       url: 'vault-pine-collective.html',
@@ -923,7 +923,7 @@ function buildSearchIndex() {
   pins.forEach((s) =>
     results.push({
       type: 'Pin Sale',
-      icon: '📌',
+      icon: 'pin',
       title: s.chars.join(', '),
       sub: `${s.qty} pins · $${s.revenue} · ${s.date}${s.notes ? ' · ' + s.notes : ''}`,
       url: 'vault-pine-collective.html',
@@ -941,7 +941,7 @@ function buildSearchIndex() {
   JSON.parse(localStorage.getItem(K.catSales) || '[]').forEach((s) =>
     results.push({
       type: `${(cats[s.catId] || {}).name || 'Category'} Sale`,
-      icon: ((cats[s.catId] || {}).emoji || '').trim() || '🛍',
+      icon: 'category',
       title: (s.items || []).map((iid) => catItemNames[s.catId + '/' + iid] || iid).join(', '),
       sub: `${s.qty} sold · $${s.revenue} · ${s.date}${s.notes ? ' · ' + s.notes : ''}`,
       url: 'vault-pine-collective.html',
@@ -953,7 +953,7 @@ function buildSearchIndex() {
   events.forEach((ev) =>
     results.push({
       type: 'Event',
-      icon: '🎪',
+      icon: 'events',
       title: ev.name,
       sub: `${ev.location || ''} · ${ev.start}${ev.boothCost ? ' · Booth $' + ev.boothCost : ''}`,
       url: 'vault-pine-collective.html',
@@ -965,7 +965,7 @@ function buildSearchIndex() {
     inv.forEach((it) =>
       results.push({
         type: 'Inventory',
-        icon: '🃏',
+        icon: 'cards',
         title: it.name || 'Inventory item',
         sub: `${it.cat || ''} · qty ${it.qty || 1} · $${(+it.value || 0).toFixed(2)} ${it.lot ? 'total' : 'ea'}${it.notes ? ' · ' + it.notes : ''}`,
         url: 'inventory.html',
@@ -978,7 +978,7 @@ function buildSearchIndex() {
     goals.forEach((g) => {
       results.push({
         type: 'Goal',
-        icon: '🎯',
+        icon: 'goals',
         title: g.title || g.name || 'Goal',
         sub: g.desc || '',
         url: 'goals-dashboard.html',
@@ -986,7 +986,7 @@ function buildSearchIndex() {
       (g.objectives || []).forEach((ob) =>
         results.push({
           type: 'Objective',
-          icon: '✅',
+          icon: 'check',
           title: ob.text || 'Objective',
           sub: `Under: ${g.title || ''}`,
           url: 'goals-dashboard.html',
@@ -1000,7 +1000,7 @@ function buildSearchIndex() {
     exps.forEach((e) =>
       results.push({
         type: 'Expense',
-        icon: '💸',
+        icon: 'expenses',
         title: e.description || e.category,
         sub: `${e.category} · $${(e.amount || 0).toFixed(2)} · ${e.date}${e.notes ? ' · ' + e.notes : ''}`,
         url: 'expenses.html',
@@ -1010,7 +1010,7 @@ function buildSearchIndex() {
     recs.forEach((r) =>
       results.push({
         type: 'Recurring',
-        icon: '🔄',
+        icon: 'repeat',
         title: r.name,
         sub: `${r.category} · $${(r.amount || 0).toFixed(2)}/mo`,
         url: 'expenses.html',
@@ -1023,78 +1023,84 @@ function buildSearchIndex() {
       title: 'Vault & Pine Collective',
       sub: 'Sales Hub — orders, business expenses, jet tags, pins, filament, back office',
       url: 'vault-pine-collective.html',
-      icon: '🌲',
+      icon: 'sales',
       type: 'Page',
     },
     {
       title: 'Analytics',
       sub: 'Margins, show breakdowns, trends',
       url: 'analytics.html',
-      icon: '📈',
+      icon: 'analytics',
       type: 'Page',
     },
     {
       title: 'Goals & Objectives',
       sub: 'Track your goals',
       url: 'goals-dashboard.html',
-      icon: '🎯',
+      icon: 'goals',
       type: 'Page',
     },
     {
       title: 'Personal Expenses',
       sub: 'Track monthly spending & budget',
       url: 'expenses.html',
-      icon: '💸',
+      icon: 'expenses',
       type: 'Page',
     },
     {
       title: 'Daily Review',
       sub: 'Morning briefing — goals, expenses, alerts',
       url: 'review.html',
-      icon: '📋',
+      icon: 'review',
       type: 'Page',
     },
     {
       title: 'Financial Guru',
       sub: 'Academy lessons, health score, milestones, calculators',
       url: 'guru.html',
-      icon: '🥋',
+      icon: 'guru',
       type: 'Page',
     },
-    { title: 'Home', sub: 'Command Center overview', url: 'index.html', icon: '⌂', type: 'Page' },
+    {
+      title: 'Home',
+      sub: 'Command Center overview',
+      url: 'index.html',
+      icon: 'home',
+      type: 'Page',
+    },
     {
       title: 'Card Inventory',
       sub: 'Singles, slabs, sealed — stock value over time',
       url: 'inventory.html',
-      icon: '🃏',
+      icon: 'cards',
       type: 'Page',
     },
     {
       title: 'Production Hub',
       sub: 'Print queue and stock levels',
       url: 'production.html',
-      icon: '🖨️',
+      icon: 'production',
       type: 'Page',
     },
     {
       title: 'Events & Tables',
       sub: 'Shows, vendor tables, payments, ROI',
       url: 'events.html',
-      icon: '🎪',
+      icon: 'events',
       type: 'Page',
     },
     {
       title: 'Content Planner',
       sub: 'Posts calendar, queue, templates',
       url: 'content.html',
-      icon: '📱',
+      icon: 'content',
       type: 'Page',
     },
     {
       title: 'Instagram Growth',
       sub: 'Follower snapshots and goal',
       url: 'growth.html',
-      icon: '🚀',
+      icon: 'growth',
       type: 'Page',
     },
   ].forEach((p) => results.push(p));
@@ -1118,7 +1124,7 @@ function openSearch() {
   overlay.innerHTML = `
     <div style="width:90%;max-width:580px;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
       <div style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);">
-        <span style="color:var(--text2);font-size:1.1rem;">🔍</span>
+        <span style="color:var(--text2);display:flex">${VPCUtil.icon('search')}</span>
         <input id="search-input" placeholder="Search orders, customers, events, goals…"
           style="flex:1;background:none;border:none;outline:none;font-size:0.95rem;color:var(--text);font-family:inherit;"
           oninput="runSearch(this.value)" autofocus>
@@ -1162,12 +1168,12 @@ window.runSearch = function (q) {
       (r, i) => `
     <a href="${r.url}" onclick="closeSearch()" style="display:flex;align-items:center;gap:12px;padding:10px 18px;text-decoration:none;transition:background 0.1s;color:var(--text);"
        onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='none'">
-      <span style="font-size:1.2rem;flex-shrink:0">${r.icon}</span>
+      <span class="search-ico">${VPCUtil.icon(r.icon)}</span>
       <div style="flex:1;min-width:0;">
-        <div style="font-weight:600;font-size:0.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.title}</div>
-        <div style="font-size:0.75rem;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.sub}</div>
+        <div style="font-weight:600;font-size:0.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${VPCUtil.esc(r.title)}</div>
+        <div style="font-size:0.75rem;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${VPCUtil.esc(r.sub)}</div>
       </div>
-      <span style="font-size:0.75rem;color:var(--text2);border:1px solid var(--border);border-radius:8px;padding:2px 7px;flex-shrink:0">${r.type}</span>
+      <span style="font-size:0.75rem;color:var(--text2);border:1px solid var(--border);border-radius:8px;padding:2px 7px;flex-shrink:0">${VPCUtil.esc(r.type)}</span>
     </a>
   `
     )
@@ -1352,7 +1358,7 @@ function showAuditLog() {
         <div style="font-size:0.9rem;font-weight:600;">Audit Log <span style="font-size:0.75rem;color:var(--text2);font-weight:400">(last ${Math.min(log.length, 60)} of ${log.length} entries)</span></div>
         <div style="display:flex;gap:8px;">
           <button onclick="localStorage.removeItem('${AUDIT_KEY}');document.getElementById('audit-overlay').remove()" style="background:none;border:1px solid var(--border);border-radius:8px;color:var(--red);padding:5px 12px;font-size:0.75rem;cursor:pointer;font-family:inherit;">Clear Log</button>
-          <button onclick="document.getElementById('audit-overlay').remove()" style="background:none;border:1px solid var(--border);border-radius:8px;color:var(--text2);padding:5px 12px;font-size:0.75rem;cursor:pointer;font-family:inherit;">✕ Close</button>
+          <button onclick="document.getElementById('audit-overlay').remove()" style="background:none;border:1px solid var(--border);border-radius:8px;color:var(--text2);padding:5px 12px;font-size:0.75rem;cursor:pointer;font-family:inherit;">Close</button>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:110px 54px 130px 1fr;gap:10px;padding:0 0 8px;border-bottom:1px solid var(--border);font-size:0.75rem;font-weight:600;color:var(--text2);">

@@ -361,7 +361,7 @@ const VpcSync = {
         const localSize = (localStorage.getItem(c.key) || '').length;
         const cloudSize = JSON.stringify(c.value).length;
         return `<div style="background:rgba(255, 214, 10,0.08);border:1px solid rgba(255, 214, 10,0.3);border-radius:8px;padding:14px;margin-bottom:12px;">
-        <div style="font-size:0.82rem;font-weight:600;margin-bottom:8px;color:var(--yellow,#ffd60a)">⚠ Conflict: <code style="font-size:0.78rem;background:rgba(0,0,0,0.2);padding:2px 6px;border-radius:8px">${c.key}</code></div>
+        <div style="font-size:0.82rem;font-weight:600;margin-bottom:8px;color:var(--yellow,#ffd60a)">Conflict: <code style="font-size:0.78rem;background:rgba(0,0,0,0.2);padding:2px 6px;border-radius:8px">${c.key}</code></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.75rem;">
           <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:8px;">
             <div style="color:#a1a1a6;margin-bottom:4px">Local Version</div>

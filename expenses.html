@@ -251,7 +251,7 @@
 <button class="fab" id="exp-fab" onclick="expFabAction()" title="Add Expense" aria-label="Add">＋</button>
 
 <footer>
-  <a href="index.html">⌂ Home</a> &nbsp;·&nbsp; Personal Expenses &nbsp;·&nbsp; Vault &amp; Pine Collective
+  <a href="index.html">Home</a> &nbsp;·&nbsp; Personal Expenses &nbsp;·&nbsp; Vault &amp; Pine Collective
 </footer>
 
 <!-- ── Add / Edit Expense Modal ── -->
@@ -368,15 +368,15 @@ const BDG_KEY = VPCUtil.KEYS.expenseBudget;
 
 // ── Categories ──
 const CATS = [
-  { id: 'Housing',       icon: '🏠', color: 'var(--accent)' },
-  { id: 'Food',          icon: '🍔', color: 'var(--green)' },
-  { id: 'Transport',     icon: '🚗', color: 'var(--orange)' },
-  { id: 'Subscriptions', icon: '📱', color: 'var(--accent2)' },
-  { id: 'Health',        icon: '💊', color: 'var(--red)' },
-  { id: 'Insurance',     icon: '🛡️', color: 'var(--yellow)' },
-  { id: 'Entertainment', icon: '🎮', color: '#22d3ee' },
-  { id: 'Business',      icon: '💼', color: 'var(--text2)' },
-  { id: 'Other',         icon: '📦', color: 'var(--label-3)' },
+  { id: 'Housing',       icon: 'home', color: 'var(--accent)' },
+  { id: 'Food',          icon: 'food', color: 'var(--green)' },
+  { id: 'Transport',     icon: 'car', color: 'var(--orange)' },
+  { id: 'Subscriptions', icon: 'repeat', color: 'var(--accent2)' },
+  { id: 'Health',        icon: 'activity', color: 'var(--red)' },
+  { id: 'Insurance',     icon: 'shield', color: 'var(--yellow)' },
+  { id: 'Entertainment', icon: 'gamepad', color: '#22d3ee' },
+  { id: 'Business',      icon: 'briefcase', color: 'var(--text2)' },
+  { id: 'Other',         icon: 'box', color: 'var(--label-3)' },
 ];
 const catMap = Object.fromEntries(CATS.map(c => [c.id, c]));
 
@@ -459,8 +459,8 @@ function renderKPI() {
   }
 
   if (topCat) {
-    const c = catMap[topCat[0]] || { icon: '📦' };
-    $('kpi-top-cat').textContent = c.icon + ' ' + topCat[0];
+    const c = catMap[topCat[0]] || { icon: 'box' };
+    $('kpi-top-cat').innerHTML = VPCUtil.icon(c.icon, 'inline') + VPCUtil.esc(topCat[0]);
     $('kpi-top-cat').style.color = 'var(--text)';
     $('kpi-top-cat').style.fontSize = '1rem';
   } else {
@@ -512,10 +512,10 @@ function renderEntries() {
     const d = new Date(date + 'T00:00:00');
     const dayLabel = d.toLocaleDateString('en-US', { weekday:'long', month:'short', day:'numeric' });
     const rows = items.map(e => {
-      const c = catMap[e.category] || { icon:'📦', color:'var(--label-3)' };
+      const c = catMap[e.category] || { icon:'box', color:'var(--label-3)' };
       return `
         <div class="expense-row">
-          <div class="cat-icon" style="background:${c.color}22;color:${c.color}">${c.icon}</div>
+          <div class="cat-icon" style="background:color-mix(in srgb, ${c.color} 13%, transparent);color:${c.color}">${VPCUtil.icon(c.icon)}</div>
           <div class="exp-desc">
             <div class="exp-name">${VPCUtil.esc(e.description || e.category)}</div>
             <div class="exp-meta">${VPCUtil.esc(e.category)}${e.notes ? ' · ' + VPCUtil.esc(e.notes) : ''}</div>
@@ -558,12 +558,12 @@ function renderBreakdown() {
   const maxAmt = sorted[0]?.[1] || 1;
 
   $('cat-breakdown').innerHTML = sorted.map(([catId, amt]) => {
-    const c = catMap[catId] || { icon:'📦', color:'var(--label-3)' };
+    const c = catMap[catId] || { icon:'box', color:'var(--label-3)' };
     const w = (amt / maxAmt * 100).toFixed(0);
     const pct = (amt / total * 100).toFixed(0);
     return `
       <div class="cat-row">
-        <div class="cat-name"><span style="color:${c.color}">${c.icon}</span> ${catId}</div>
+        <div class="cat-name"><span style="color:${c.color};display:flex">${VPCUtil.icon(c.icon, 'sm')}</span> ${catId}</div>
         <div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:${w}%;background:${c.color}"></div></div>
         <div class="cat-amount" style="color:${c.color}">${fmt(amt)}</div>
         <div class="cat-pct">${pct}%</div>
@@ -645,16 +645,16 @@ function renderRecurring() {
   const today = new Date();
 
   $('rec-list').innerHTML = recs.map(r => {
-    const c = catMap[r.category] || { icon:'📦', color:'var(--label-3)' };
+    const c = catMap[r.category] || { icon:'box', color:'var(--label-3)' };
     const dueDay = r.day || 1;
     const dueDate = new Date(today.getFullYear(), today.getMonth(), dueDay);
     const isPast = dueDate < today && dueDate.getMonth() === today.getMonth();
     const isToday = dueDate.toDateString() === today.toDateString();
-    const dueLabel = isToday ? '⚡ Due today' : isPast ? `Due on ${dueDay}${ordinal(dueDay)} (past)` : `Due ${dueDay}${ordinal(dueDay)}`;
+    const dueLabel = isToday ? 'Due today' : isPast ? `Due on ${dueDay}${ordinal(dueDay)} (past)` : `Due ${dueDay}${ordinal(dueDay)}`;
 
     return `
       <div class="rec-row">
-        <div class="cat-icon" style="background:${c.color}22;color:${c.color}">${c.icon}</div>
+        <div class="cat-icon" style="background:color-mix(in srgb, ${c.color} 13%, transparent);color:${c.color}">${VPCUtil.icon(c.icon)}</div>
         <div class="rec-info">
           <div class="rec-name">${VPCUtil.esc(r.name)}</div>
           <div class="rec-meta">${VPCUtil.esc(r.category)} · ${freqLabel(r.frequency)} · <span style="color:${isToday?'var(--yellow)':isPast?'var(--text2)':'var(--accent)'}">${dueLabel}</span></div>
@@ -695,8 +695,8 @@ function toMonthly(r) {
 function buildCatPills(selected) {
   $('cat-pills').innerHTML = CATS.map(c => `
     <div class="cat-pill${selected===c.id?' selected':''}" onclick="selectCat('${c.id}',this)"
-      style="${selected===c.id?`border-color:${c.color};color:${c.color};background:${c.color}22`:''}"
-    >${c.icon} ${c.id}</div>`).join('');
+      style="${selected===c.id?`border-color:${c.color};color:${c.color};background:color-mix(in srgb, ${c.color} 13%, transparent)`:''}"
+    >${VPCUtil.icon(c.icon, 'inline')}${c.id}</div>`).join('');
   $('exp-cat').value = selected;
 }
 

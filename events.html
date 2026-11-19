@@ -393,7 +393,7 @@ main { padding:0 0 24px; }
     <div class="bill-actions">
       <button class="btn-ghost" onclick="copyBill()" id="bill-copy-btn">Copy</button>
       <button class="btn-ghost" onclick="textBill()" id="bill-sms-btn" style="display:none">Text</button>
-      <button class="btn-ghost" onclick="emailBill()" id="bill-email-btn" style="display:none">✉️ Email</button>
+      <button class="btn-ghost" onclick="emailBill()" id="bill-email-btn" style="display:none">Email</button>
       <button class="btn-ghost" onclick="printBill()">Print / PDF</button>
       <button class="btn-primary" onclick="shareBill()">Share</button>
     </div>
@@ -459,7 +459,7 @@ async function generateShareLink() {
   } else if (result && result.ok) {
     const c = result.counts;
     showToastMsg(
-      `✅ Shared calendar updated — ${c.tables} booking(s) across ${c.events} event(s).` +
+      `Shared calendar updated — ${c.tables} booking(s) across ${c.events} event(s).` +
       (c.hidden ? ` ${c.hidden} private event(s) hidden.` : '')
     );
   }
@@ -468,7 +468,7 @@ async function generateShareLink() {
 
   if (navigator.clipboard?.writeText) {
     navigator.clipboard.writeText(url)
-      .then(() => showToastMsg('📋 Public calendar link copied — it always stays current!'))
+      .then(() => showToastMsg('Public calendar link copied — it always stays current'))
       .catch(() => promptCopy(url));
   } else {
     promptCopy(url);
@@ -610,14 +610,14 @@ function renderMatrix() {
     row += `<td class="td-event${isPast ? ' is-past' : ''}">
       <div class="ev-name">${esc(ev.name)}</div>
       <div class="ev-meta">
-        ${ev.date     ? `📅 ${fmtDate(ev.date)}<br>` : ''}
-        ${ev.location ? `📍 ${esc(ev.location)}` : ''}
+        ${ev.date     ? `${VPCUtil.icon('calendar', 'inline')}${fmtDate(ev.date)}<br>` : ''}
+        ${ev.location ? `${VPCUtil.icon('map-pin', 'inline')}${esc(ev.location)}` : ''}
       </div>
       <div>
         <span class="ev-approve-pill ${ev.approved ? 'is-approved' : 'is-pending'}"
           onclick="toggleEventApproved('${ev.id}')"
           title="${ev.approved ? 'Tap to mark as unapproved' : 'Tap to mark as approved'}">
-          ${ev.approved ? '✓ Approved' : '○ Unapproved'}
+          ${ev.approved ? 'Approved' : 'Unapproved'}
         </span>
         ${ev.private ? `<span class="ev-private-badge" title="Hidden from the shared vendor calendar">Private</span>` : ''}
       </div>
@@ -639,11 +639,11 @@ function renderMatrix() {
             <div class="cell-price-val">${fmtMoney(t.price)}</div>
             ${t.qty != null ? `<div class="cell-qty">${qtyLabel(t.qty)}</div>` : ''}
             <div class="cell-row">
-              <span class="status-pill ${t.paid?'pill-paid':'pill-unpaid'}">${t.paid ? '✓ Paid' : '● Unpaid'}</span>
+              <span class="status-pill ${t.paid?'pill-paid':'pill-unpaid'}">${t.paid ? 'Paid' : 'Unpaid'}</span>
               <button class="quick-btn ${t.paid?'quick-btn-unpay':'quick-btn-pay'}"
                 onclick="event.stopPropagation(); quickToggle('${t.id}')"
                 title="${t.paid ? 'Mark as unpaid' : 'Mark as paid'}">
-                ${t.paid ? '↩ Unpaid' : '✓ Paid'}
+                ${t.paid ? 'Mark unpaid' : 'Mark paid'}
               </button>
             </div>
           </div>
@@ -703,7 +703,7 @@ function renderMatrix() {
         ${due > 0
           ? `<span class="vt-due">${fmtMoney(due)} due</span>`
           : tot > 0
-            ? `<span class="vt-allpaid">all paid ✓</span>`
+            ? `<span class="vt-allpaid">all paid</span>`
             : `<span class="text-2">—</span>`}
       </div>
       ${tot > 0 ? `<button class="vt-bill-btn" onclick="openBillModal('${v.id}')">Bill</button>` : ''}
@@ -762,7 +762,7 @@ function openEventModal(id) {
 function updateEvApprovedToggle() {
   const btn = document.getElementById('ev-approved-toggle');
   if (evApproved) {
-    btn.textContent = '✓ Approved — tap to mark as Unapproved';
+    btn.textContent = 'Approved — tap to mark as Unapproved';
     btn.className   = 'paid-big-toggle is-paid';
   } else {
     btn.textContent = '○ Unapproved — tap to mark as Approved';
@@ -778,10 +778,10 @@ function flipEvApproved() {
 function updateEvPrivateToggle() {
   const btn = document.getElementById('ev-private-toggle');
   if (evPrivate) {
-    btn.textContent = '🔒 Private — hidden from shared calendar (tap to make Public)';
+    btn.textContent = 'Private — hidden from shared calendar (tap to make Public)';
     btn.className   = 'paid-big-toggle is-private';
   } else {
-    btn.textContent = '🌐 Public — shown on shared calendar (tap to make Private)';
+    btn.textContent = 'Public — shown on shared calendar (tap to make Private)';
     btn.className   = 'paid-big-toggle is-paid';
   }
 }
@@ -895,7 +895,7 @@ function openCellModal(evId, vnId) {
 function updatePaidToggle() {
   const btn = document.getElementById('cl-paid-toggle');
   if (cellPaid) {
-    btn.textContent = '✓ Paid — tap to mark as Unpaid';
+    btn.textContent = 'Paid — tap to mark as Unpaid';
     btn.className   = 'paid-big-toggle is-paid';
   } else {
     btn.textContent = '○ Unpaid — tap to mark as Paid';
@@ -984,7 +984,7 @@ function renderBill() {
 
   let h;
   if (!lines.length) {
-    h = `<div class="bill-empty-msg">${unpaidOnly ? 'No unpaid items — this vendor is all settled ✓' : 'No table entries for this vendor yet.'}</div>`;
+    h = `<div class="bill-empty-msg">${unpaidOnly ? 'No unpaid items — this vendor is all settled' : 'No table entries for this vendor yet.'}</div>`;
   } else {
     h = `<table class="bill-table"><thead><tr><th>Event</th><th style="text-align:right">Table</th><th style="text-align:center">Status</th></tr></thead><tbody>`;
     lines.forEach(l => {
@@ -994,14 +994,14 @@ function renderBill() {
           <div class="bill-ev-date">${l.date ? fmtDate(l.date) : ''}${l.location ? ` · ${esc(l.location)}` : ''}${l.qty != null ? ` · ${qtyLabel(l.qty)}` : ''}</div>
         </td>
         <td class="num">${fmtMoney(l.price)}</td>
-        <td style="text-align:center"><span class="status-pill ${l.paid?'pill-paid':'pill-unpaid'}">${l.paid ? '✓ Paid' : '● Unpaid'}</span></td>
+        <td style="text-align:center"><span class="status-pill ${l.paid?'pill-paid':'pill-unpaid'}">${l.paid ? 'Paid' : 'Unpaid'}</span></td>
       </tr>`;
     });
     h += `</tbody></table>`;
     h += `<div class="bill-totals">
       <div class="row"><span>Total tables</span><span>${fmtMoney(total)}</span></div>
       <div class="row"><span>Paid so far</span><span class="is-green">${fmtMoney(paidAmt)}</span></div>
-      <div class="row due ${due === 0 ? 'zero' : ''}"><span>${due === 0 ? 'All paid ✓' : 'Balance due'}</span><span>${fmtMoney(due)}</span></div>
+      <div class="row due ${due === 0 ? 'zero' : ''}"><span>${due === 0 ? 'All paid' : 'Balance due'}</span><span>${fmtMoney(due)}</span></div>
     </div>`;
   }
   document.getElementById('bill-body').innerHTML = h;
@@ -1029,7 +1029,7 @@ function copyBill() {
   const done = () => {
     const btn = document.getElementById('bill-copy-btn');
     const old = btn.textContent;
-    btn.textContent = '✓ Copied!';
+    btn.textContent = 'Copied';
     setTimeout(() => { btn.textContent = old; }, 1600);
   };
   if (navigator.clipboard?.writeText) {
@@ -1216,7 +1216,7 @@ function renderROI() {
     if ((tableCost > 0 || revenue > 0) && netAfterTables > bestNet) { bestNet = netAfterTables; bestName = ev.name; }
 
     const badgeCls  = roiPct === null ? '' : roiPct >= 100 ? 'badge-green' : roiPct >= 0 ? 'badge-yellow' : 'badge-red';
-    const badgeTxt  = roiPct === null ? '— no cost logged' : roiPct >= 100 ? '💰 Strong ROI' : roiPct >= 0 ? '📊 Break-even' : '❌ Loss';
+    const badgeTxt  = roiPct === null ? '— no cost logged' : roiPct >= 100 ? 'Strong ROI' : roiPct >= 0 ? 'Break-even' : 'Loss';
     const netColor  = netAfterTables >= 0 ? 'var(--green)' : 'var(--red)';
     const roiTxt    = roiPct !== null ? `${roiPct >= 0 ? '+' : ''}${roiPct.toFixed(0)}%` : '—';
 
@@ -1226,9 +1226,9 @@ function renderROI() {
           <div>
             <div class="roi-event-name">${esc(ev.name)}</div>
             <div class="roi-event-meta">
-              ${d0 ? `📅 ${fmtDate(d0)}${d1 !== d0 ? ` – ${fmtDate(d1)}` : ''}` : ''}
-              ${ev.location ? ` · 📍 ${esc(ev.location)}` : ''}
-              · <span style="color:${ev.approved ? 'var(--green)' : 'var(--yellow)'}">${ev.approved ? '✓ Approved' : '○ Unapproved'}</span>
+              ${d0 ? `${VPCUtil.icon('calendar', 'inline')}${fmtDate(d0)}${d1 !== d0 ? ` – ${fmtDate(d1)}` : ''}` : ''}
+              ${ev.location ? ` · ${VPCUtil.icon('map-pin', 'inline')}${esc(ev.location)}` : ''}
+              · <span style="color:${ev.approved ? 'var(--green)' : 'var(--yellow)'}">${ev.approved ? 'Approved' : 'Unapproved'}</span>
             </div>
           </div>
           <span class="roi-badge ${badgeCls}">${badgeTxt}</span>
@@ -1412,7 +1412,7 @@ function copySignupLink(eventId) {
   const url = window.location.href.replace(/\/[^\/]*(\?.*)?$/, '/event-signup.html') + '?d=' + encodeURIComponent(enc);
   if (navigator.clipboard?.writeText) {
     navigator.clipboard.writeText(url)
-      .then(() => showToastMsg('🔗 Sign-up link copied — share it with vendors!'))
+      .then(() => showToastMsg('Sign-up link copied — share it with vendors'))
       .catch(() => promptCopy(url));
   } else {
     promptCopy(url);
@@ -1464,7 +1464,7 @@ function renderSignupsModal() {
     <div class="su-summary-line"><span>Crew claims</span><strong>${list.length}</strong></div>
     <div class="su-summary-line"><span>Tables to book</span><strong>${claimed || '—'}${unreadable ? ` <span class="su-summary-warn">+${unreadable} unclear</span>` : ''}</strong></div>
     <div class="su-summary-line"><span>Bills it creates</span><strong>${unit != null ? fmtMoney(blockCost) : '<span class="su-summary-warn">set a table price on the event</span>'}</strong></div>
-    <button class="btn-accept su-accept-all" onclick="acceptAllSignups()">✓ Book the block — accept all ${list.length} &amp; create bills</button>
+    <button class="btn-accept su-accept-all" onclick="acceptAllSignups()">Book the block — accept all ${list.length} &amp; create bills</button>
   </div>`;
 
   h += list.map(s => {
@@ -1473,13 +1473,13 @@ function renderSignupsModal() {
     <div class="su-row">
       <div class="su-row-name">${esc(s.name)}</div>
       <div class="su-row-meta">
-        ${s.table_pref ? `🪑 ${esc(s.table_pref)}${cost != null ? ` &nbsp;→&nbsp; <strong class="su-cost">${fmtMoney(cost)}</strong>` : qty == null && s.table_pref ? ' <span class="su-summary-warn">(can’t read a table count — bills at $0)</span>' : ''}<br>` : ''}
-        ${s.contact ? `📇 ${esc(s.contact)}<br>` : ''}
-        ${s.created_at ? `🕒 ${esc(new Date(s.created_at).toLocaleDateString())}` : ''}
+        ${s.table_pref ? `Table: ${esc(s.table_pref)}${cost != null ? ` &nbsp;→&nbsp; <strong class="su-cost">${fmtMoney(cost)}</strong>` : qty == null && s.table_pref ? ' <span class="su-summary-warn">(can’t read a table count — bills at $0)</span>' : ''}<br>` : ''}
+        ${s.contact ? `Contact: ${esc(s.contact)}<br>` : ''}
+        ${s.created_at ? `Sent ${esc(new Date(s.created_at).toLocaleDateString())}` : ''}
       </div>
       ${s.notes ? `<div class="su-row-notes">${esc(s.notes)}</div>` : ''}
       <div class="su-row-actions">
-        <button class="btn-accept" onclick="acceptSignup('${s.id}')">✓ Accept → ${cost != null ? `bill ${fmtMoney(cost)}` : 'add booking'}</button>
+        <button class="btn-accept" onclick="acceptSignup('${s.id}')">Accept → ${cost != null ? `bill ${fmtMoney(cost)}` : 'add booking'}</button>
         <button class="btn-dismiss" onclick="dismissSignup('${s.id}')">Dismiss</button>
       </div>
     </div>`;
@@ -1560,7 +1560,7 @@ async function acceptAllSignups() {
   renderAll();
   renderSignupsModal();
   showToastMsg(
-    `✅ Crew block booked — ${list.length} claim(s) accepted${billed > 0 ? `, ${fmtMoney(billed)} in bills created` : ''}.` +
+    `Crew block booked — ${list.length} claim(s) accepted${billed > 0 ? `, ${fmtMoney(billed)} in bills created` : ''}.` +
     (uncleared ? ` ${uncleared} couldn't be cleared from the server and may reappear.` : '')
   );
 }

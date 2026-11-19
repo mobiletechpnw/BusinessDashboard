@@ -163,6 +163,7 @@
     font-size: 0.8rem; color: var(--on-accent); transition: all 0.15s;
   }
   .ritual-step.done .step-check { background: var(--green); border-color: var(--green); }
+  .step-check .vpc-ico { width: 14px; height: 14px; stroke-width: 2.5; }
   .step-icon { flex-shrink: 0; display: flex; color: var(--accent); }
   .step-icon .vpc-ico { width: 20px; height: 20px; }
   .step-body { flex: 1; min-width: 0; }
@@ -354,9 +355,9 @@ function renderAlerts() {
   try {
     const g = JSON.parse(localStorage.getItem(VPCUtil.KEYS.goals) || '{"goals":[]}');
     const od = (g.goals||[]).filter(x => !x.done && x.due && new Date(x.due+'T00:00:00') < today);
-    if (od.length) alerts.push({ type:'danger', icon:'⚠', text:`${od.length} goal${od.length>1?'s':''} overdue — immediate attention needed`, url:'goals-dashboard.html', label:'View Goals' });
+    if (od.length) alerts.push({ type:'danger', text:`${od.length} goal${od.length>1?'s':''} overdue — immediate attention needed`, url:'goals-dashboard.html', label:'View Goals' });
     const soon = (g.goals||[]).filter(x => !x.done && x.due && new Date(x.due+'T00:00:00') <= week && new Date(x.due+'T00:00:00') >= today);
-    if (soon.length) alerts.push({ type:'warning', icon:'⏰', text:`${soon.length} goal${soon.length>1?'s':''} due within the next 7 days`, url:'goals-dashboard.html', label:'View Goals' });
+    if (soon.length) alerts.push({ type:'warning', text:`${soon.length} goal${soon.length>1?'s':''} due within the next 7 days`, url:'goals-dashboard.html', label:'View Goals' });
   } catch(e) {}
 
   // Budget check
@@ -368,8 +369,8 @@ function renderAlerts() {
       const pct = total / budget.total * 100;
       const dom = now.getDate(), dim = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
       const proj = (total / dom) * dim;
-      if (total > budget.total) alerts.push({ type:'danger', icon:'💸', text:`Budget exceeded — spent ${fmt(total)} vs ${fmt(budget.total)} limit`, url:'expenses.html', label:'View Expenses' });
-      else if (pct > 80) alerts.push({ type:'warning', icon:'💸', text:`Budget at ${Math.round(pct)}% — projected ${fmt(proj)} by month end`, url:'expenses.html', label:'View Expenses' });
+      if (total > budget.total) alerts.push({ type:'danger', text:`Budget exceeded — spent ${fmt(total)} vs ${fmt(budget.total)} limit`, url:'expenses.html', label:'View Expenses' });
+      else if (pct > 80) alerts.push({ type:'warning', text:`Budget at ${Math.round(pct)}% — projected ${fmt(proj)} by month end`, url:'expenses.html', label:'View Expenses' });
     }
   } catch(e) {}
 
@@ -380,11 +381,11 @@ function renderAlerts() {
     const dueThisWeek = recs.filter(r => r.day >= todayDay && r.day <= todayDay + 7);
     if (dueThisWeek.length) {
       const total = dueThisWeek.reduce((s,r)=>s+(r.amount||0),0);
-      alerts.push({ type:'warning', icon:'🔄', text:`${dueThisWeek.length} recurring bill${dueThisWeek.length>1?'s':''} due this week (${fmt(total)})`, url:'expenses.html', label:'View Recurring' });
+      alerts.push({ type:'warning', text:`${dueThisWeek.length} recurring bill${dueThisWeek.length>1?'s':''} due this week (${fmt(total)})`, url:'expenses.html', label:'View Recurring' });
     }
   } catch(e) {}
 
-  if (!alerts.length) alerts.push({ type:'ok', icon:'✅', text:'All clear — no urgent items today. Keep up the great work!', url:null });
+  if (!alerts.length) alerts.push({ type:'ok', text:'All clear — no urgent items today. Keep up the great work!', url:null });
 
   el.innerHTML = alerts.map(a => `
     <div class="alert-item alert-${a.type}">
@@ -721,7 +722,7 @@ function ritualSaveSnapshot() {
   localStorage.setItem(VPCUtil.KEYS.networth, JSON.stringify(d));
   const r = loadRitual(); r.weekState.checked['snapshot'] = true; saveRitual(r);
   if (window.auditLog) auditLog('snapshot', VPCUtil.KEYS.networth, `Net worth ${fmt(a-l)} (ritual)`);
-  showToast('📸 Snapshot saved — net worth ' + fmt(a - l));
+  showToast('Snapshot saved — net worth ' + fmt(a - l));
   renderRitual();
 }
 
@@ -748,7 +749,7 @@ function renderRitual() {
 
   $('ritual-steps').innerHTML = steps.map(s => `
     <div class="ritual-step ${checked[s.id] ? 'done' : ''}" onclick="toggleRitualStep('${s.id}')">
-      <div class="step-check">${checked[s.id] ? '✓' : ''}</div>
+      <div class="step-check">${checked[s.id] ? VPCUtil.icon('check') : ''}</div>
       <div class="step-icon">${VPCUtil.icon(s.icon)}</div>
       <div class="step-body">
         <div class="step-label">${s.label}</div>
@@ -775,7 +776,7 @@ function renderRitual() {
     if (r.reflections.length > 26) r.reflections = r.reflections.slice(-26);
     saveRitual(r);
     if (window.auditLog) auditLog('ritual', RITUAL_KEY, 'Completed weekly money ritual ' + wk);
-    showToast('🥋 Weekly ritual complete — streak ' + computeStreak(r.completions) + '!');
+    showToast('Weekly ritual complete — streak ' + computeStreak(r.completions));
   }
 
   const streak = computeStreak(r.completions);
@@ -784,7 +785,7 @@ function renderRitual() {
   const banner = $('ritual-done-banner');
   if (r.completions.includes(wk)) {
     banner.style.display = 'block';
-    banner.innerHTML = `<b>✓ This week's ritual is done.</b> ${streak > 1 ? `That's <b>${streak} weeks</b> in a row — this is exactly how financial discipline compounds.` : 'First week down. Come back next week to start a streak.'} Reviewed ${r.completions.length} week${r.completions.length>1?'s':''} total.`;
+    banner.innerHTML = `<b>This week's ritual is done.</b> ${streak > 1 ? `That's <b>${streak} weeks</b> in a row — this is exactly how financial discipline compounds.` : 'First week down. Come back next week to start a streak.'} Reviewed ${r.completions.length} week${r.completions.length>1?'s':''} total.`;
   } else {
     banner.style.display = 'block';
     banner.style.background = 'color-mix(in srgb, var(--accent) 6%, transparent)';

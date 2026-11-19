@@ -427,6 +427,26 @@ strong {
 .vpc-menu button[aria-checked='true'] .vpc-menu-check {
   visibility: visible;
 }
+.vpc-menu-check .vpc-ico {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.5;
+}
+/* A search result's icon, in a quiet square like the navigation's */
+.search-ico {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-sm);
+  background: var(--fill);
+  color: var(--accent);
+}
+.search-ico .vpc-ico {
+  width: 17px;
+  height: 17px;
+}
 .vpc-menu-dot {
   width: 8px;
   height: 8px;
@@ -1420,6 +1440,24 @@ div.modal-overlay {
   font-weight: 600;
   letter-spacing: -0.012em;
 }
+/* A sheet's round close button */
+.sheet-close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  min-height: 0;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--fill);
+  color: var(--label-2);
+}
+.sheet-close .vpc-ico {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.4;
+}
 /* The Save row never scrolls out of sight. */
 .modal-overlay > .modal > .modal-actions {
   position: sticky;
@@ -1782,11 +1820,28 @@ div.modal-overlay {
 
 /* ── Icons in context (icons.svg via VPCUtil.icon) ── */
 .e-icon .vpc-ico,
-.empty-icon .vpc-ico {
+.empty-icon .vpc-ico,
+.empty .icon .vpc-ico {
   width: 44px;
   height: 44px;
   stroke-width: 1.5;
   color: var(--label-3);
+}
+/* Icon sizes: sm for lists and chips; inline sits in a line of text; em
+   fills a slot that was sized for an emoji glyph. */
+.vpc-ico.sm {
+  width: 16px;
+  height: 16px;
+}
+.vpc-ico.inline {
+  width: 1.15em;
+  height: 1.15em;
+  margin-right: 0.3em;
+  vertical-align: -0.2em;
+}
+.vpc-ico.em {
+  width: 1em;
+  height: 1em;
 }
 .icon-btn .vpc-ico,
 .act-btn .vpc-ico {

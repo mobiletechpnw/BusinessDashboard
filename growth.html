@@ -467,7 +467,7 @@ function renderGoal(m) {
   bar.style.width = pct.toFixed(1) + '%';
   const remaining = data.goal - m.current;
   if (remaining <= 0) {
-    txt.textContent = `🎉 Goal reached — ${m.current.toLocaleString()} / ${data.goal.toLocaleString()}`;
+    txt.textContent = `Goal reached — ${m.current.toLocaleString()} / ${data.goal.toLocaleString()}`;
     eta.textContent = '';
     return;
   }
@@ -495,7 +495,7 @@ function drawChart() {
     }
   }
   if (s.length < 2) {
-    wrap.innerHTML = `<div class="empty"><div class="icon">📉</div><h3>Not enough data yet</h3><p>Log at least two snapshots to see your growth curve.</p></div>`;
+    wrap.innerHTML = `<div class="empty"><div class="icon">${VPCUtil.icon('growth')}</div><h3>Not enough data yet</h3><p>Log at least two snapshots to see your growth curve.</p></div>`;
     return;
   }
 
@@ -551,7 +551,7 @@ function renderTable() {
   const empty = document.getElementById('snapEmpty');
   if (!s.length) {
     body.innerHTML = '';
-    empty.innerHTML = `<div class="empty"><div class="icon">📸</div><h3>No snapshots yet</h3><p>Tap “Log Snapshot” and drop in your current follower count to start the trend.</p></div>`;
+    empty.innerHTML = `<div class="empty"><div class="icon">${VPCUtil.icon('content')}</div><h3>No snapshots yet</h3><p>Tap “Log Snapshot” and drop in your current follower count to start the trend.</p></div>`;
     return;
   }
   empty.innerHTML = '';

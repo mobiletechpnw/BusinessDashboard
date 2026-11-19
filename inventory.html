@@ -307,9 +307,9 @@ const { esc, escAttr, fmtMoney, fmtDate, money, sumMoney, todayStr } = VPCUtil;
 // The three buckets are fixed on purpose — Singles / Slabs / Sealed is how
 // card inventory is actually carried to (and priced at) shows.
 const CATS = {
-  singles: { icon: '🃏', label: 'Singles', color: 'var(--accent)',  fill: 'linear-gradient(90deg,var(--accent),var(--blue-pill))' },
-  slabs:   { icon: '🏆', label: 'Slabs',   color: 'var(--yellow)',  fill: 'linear-gradient(90deg,var(--yellow),#fcd34d)' },
-  sealed:  { icon: '📦', label: 'Sealed',  color: 'var(--accent2)',        fill: 'linear-gradient(90deg,var(--accent2),#c4b5fd)' },
+  singles: { icon: 'cards', label: 'Singles', color: 'var(--accent)',  fill: 'linear-gradient(90deg,var(--accent),var(--blue-pill))' },
+  slabs:   { icon: 'star', label: 'Slabs',   color: 'var(--yellow)',  fill: 'linear-gradient(90deg,var(--yellow),#fcd34d)' },
+  sealed:  { icon: 'box', label: 'Sealed',  color: 'var(--accent2)',        fill: 'linear-gradient(90deg,var(--accent2),#c4b5fd)' },
 };
 const catOf = it => (CATS[it.cat] ? it.cat : 'singles'); // tolerate bad data
 
@@ -352,7 +352,7 @@ function renderStats() {
 
   const top = Object.entries(t.byCat).sort((a, b) => b[1].value - a[1].value)[0];
   const hasAny = top && top[1].value > 0;
-  document.getElementById('st-top').textContent = hasAny ? `${CATS[top[0]].icon} ${CATS[top[0]].label}` : '—';
+  document.getElementById('st-top').innerHTML = hasAny ? VPCUtil.icon(CATS[top[0]].icon, 'inline') + CATS[top[0]].label : '—';
   document.getElementById('st-top-sub').textContent = hasAny ? `${fmtMoney(top[1].value)} of market value` : 'by market value';
 }
 
@@ -362,7 +362,7 @@ function renderCatCards() {
     const b = t.byCat[key];
     const share = t.value > 0 ? (b.value / t.value) * 100 : 0;
     return `<div class="cat-card${filterCat === key ? ' active' : ''}" onclick="setFilter(filterCat === '${key}' ? 'all' : '${key}')">
-      <div class="cat-head"><span>${c.icon}</span> ${c.label}</div>
+      <div class="cat-head">${VPCUtil.icon(c.icon, 'sm')} ${c.label}</div>
       <div class="cat-value" style="color:${c.color}">${fmtMoney(b.value)}</div>
       <div class="cat-sub">${b.count} item${b.count === 1 ? '' : 's'} · ${share.toFixed(0)}% of value${b.cost > 0 ? ` · paid ${fmtMoney(b.cost)}` : ''}</div>
       <div class="cat-bar"><div class="cat-bar-fill" style="width:${share}%;background:${c.fill}"></div></div>
@@ -419,7 +419,7 @@ function renderTable() {
       : `<td class="num">${fmtMoney(v)}</td>`;
     h += `<tr onclick="openItemModal('${escAttr(it.id)}')">
       <td><div class="inv-name">${esc(it.name || 'Unnamed item')}</div>${it.notes ? `<div class="inv-notes">${esc(it.notes)}</div>` : ''}</td>
-      <td><span class="cat-chip chip-${catOf(it)}">${c.icon} ${c.label}</span>${lotChip}</td>
+      <td><span class="cat-chip chip-${catOf(it)}">${VPCUtil.icon(c.icon, 'inline')}${c.label}</span>${lotChip}</td>
       <td class="num">${itemQty(it)}</td>
       ${eaCell(it.cost)}
       ${eaCell(it.value)}
@@ -526,9 +526,9 @@ const getSnaps = () => { try { const v = JSON.parse(localStorage.getItem(SNAP_KE
 const setSnaps = v => localStorage.setItem(SNAP_KEY, JSON.stringify(v));
 
 const SNAP_CATS = [
-  { key: 'singles', label: 'Singles', icon: '🃏', color: 'var(--accent)' },
-  { key: 'slabs',   label: 'Slabs',   icon: '🏆', color: 'var(--yellow)' },
-  { key: 'sealed',  label: 'Sealed',  icon: '📦', color: 'var(--accent2)' },
+  { key: 'singles', label: 'Singles', icon: 'cards', color: 'var(--accent)' },
+  { key: 'slabs',   label: 'Slabs',   icon: 'star', color: 'var(--yellow)' },
+  { key: 'sealed',  label: 'Sealed',  icon: 'box', color: 'var(--accent2)' },
 ];
 
 function snapNow() {
@@ -777,7 +777,7 @@ function renderSnapTable(snaps) {
       <td class="num" style="font-weight:600">${fmtMoney(s.value || 0)}</td>
       <td class="num text-2">${fmtMoney(s.cost || 0)}</td>
       <td class="num">${delta}</td>
-      <td class="num"><button class="btn-ghost" style="padding:3px 9px;font-size:0.75rem" onclick="deleteSnapshot('${escAttr(s.id)}')" title="Delete snapshot">✕</button></td>
+      <td class="num"><button class="icon-btn" onclick="deleteSnapshot('${escAttr(s.id)}')" title="Delete snapshot" aria-label="Delete snapshot">${VPCUtil.icon('trash')}</button></td>
     </tr>`;
   }).join('');
   wrap.innerHTML = `<table class="inv"><thead><tr>

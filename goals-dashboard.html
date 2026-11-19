@@ -375,7 +375,7 @@ function render() {
   });
 
   if (!goals.length) {
-    grid.innerHTML = `<div class="empty"><div class="icon">🎯</div><h3>No goals yet</h3><p>Add your first goal to get started.</p></div>`;
+    grid.innerHTML = `<div class="empty"><div class="icon">${VPCUtil.icon('goals')}</div><h3>No goals yet</h3><p>Add your first goal to get started.</p></div>`;
   } else {
     grid.innerHTML = goals.map(goalHTML).join('');
   }
@@ -438,7 +438,7 @@ function objHTML(gid, o) {
     ${o.due ? `<span class="obj-due ${dueClass}">${fmtDate(o.due)}</span>` : ''}
     <div class="obj-actions">
       <button class="icon-btn btn-icon" title="Edit" onclick="openObjModal('${gid}','${o.id}')"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#pencil"/></svg></button>
-      <button class="icon-btn btn-icon" title="Delete" onclick="deleteObj('${gid}','${o.id}')">✕</button>
+      <button class="icon-btn btn-icon" title="Delete" aria-label="Delete objective" onclick="deleteObj('${gid}','${o.id}')">${VPCUtil.icon('trash')}</button>
     </div>
   </div>`;
 }

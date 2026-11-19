@@ -111,7 +111,7 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
 .templates-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
 .template-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;cursor:pointer;transition:all .2s;}
 .template-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:none;}
-.tmpl-icon{font-size:1.8rem;margin-bottom:10px;}
+.tmpl-icon{font-size:1.8rem;margin-bottom:10px;display:flex;color:var(--accent);}
 .tmpl-title{font-size:0.9rem;font-weight:600;margin-bottom:4px;}
 .tmpl-desc{font-size:0.75rem;color:var(--text2);line-height:1.5;}
 .tmpl-footer{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;}
@@ -158,7 +158,7 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
 .canva-create-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,.25);}
 .canva-create-card.post{background:linear-gradient(135deg,#7c3aed 0%,#4f46e5 100%);border:1px solid rgba(255,255,255,0.1);}
 .canva-create-card.story{background:linear-gradient(135deg,#db2777 0%,#f472b6 100%);border:1px solid rgba(255,255,255,0.1);}
-.canva-create-icon{font-size:2.4rem;}
+.canva-create-icon{font-size:2.4rem;display:flex;color:var(--on-accent);}
 .canva-create-label{font-size:1rem;font-weight:600;color: var(--on-accent);letter-spacing:-.2px;}
 /* White on the fixed brand gradients, in both themes */
 .canva-create-sub{font-size:0.75rem;color:rgba(255,255,255,0.75);}
@@ -166,7 +166,7 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
 .canva-quick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:28px;}
 .canva-quick-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .2s;text-decoration:none;display:flex;gap:12px;align-items:flex-start;}
 .canva-quick-card:hover{border-color:var(--accent);transform:translateY(-1px);}
-.canva-quick-icon{font-size:1.5rem;flex-shrink:0;margin-top:2px;}
+.canva-quick-icon{font-size:1.5rem;flex-shrink:0;margin-top:2px;display:flex;color:var(--accent);}
 .canva-quick-title{font-size:0.85rem;font-weight:600;margin-bottom:3px;}
 .canva-quick-sub{font-size:0.75rem;color:var(--text2);line-height:1.4;}
 .canva-quick-badges{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap;}
@@ -217,7 +217,7 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
 .plan-section-title{font-size:0.75rem;font-weight:600;color:var(--text2);margin:0 0 12px;}
 .plan-pillars{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(220px,100%),1fr));gap:12px;margin-bottom:26px;}
 .pillar-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;border-left:3px solid var(--pillar,var(--accent));}
-.pillar-icon{font-size:1.3rem;margin-bottom:6px;}
+.pillar-icon{font-size:1.3rem;margin-bottom:6px;display:flex;color:var(--pillar);}
 .pillar-name{font-size:0.9rem;font-weight:600;margin-bottom:3px;}
 .pillar-goal{font-size:0.75rem;font-weight:600;color:var(--pillar,var(--accent));margin-bottom:6px;}
 .pillar-desc{font-size:0.78rem;color:var(--text2);line-height:1.5;}
@@ -324,12 +324,12 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
 
     <div class="canva-hero">
       <a class="canva-create-card post" href="https://www.canva.com/create/instagram-posts/" target="_blank" rel="noopener">
-        <div class="canva-create-icon">📸</div>
+        <div class="canva-create-icon"><svg class="vpc-ico em" aria-hidden="true"><use href="icons.svg#content"/></svg></div>
         <div class="canva-create-label">New IG Post</div>
         <div class="canva-create-sub">1080 × 1080 px · Square format</div>
       </a>
       <a class="canva-create-card story" href="https://www.canva.com/create/instagram-stories/" target="_blank" rel="noopener">
-        <div class="canva-create-icon">⭕</div>
+        <div class="canva-create-icon"><svg class="vpc-ico em" aria-hidden="true"><use href="icons.svg#story"/></svg></div>
         <div class="canva-create-label">New IG Story</div>
         <div class="canva-create-sub">1080 × 1920 px · Vertical format</div>
       </a>
@@ -376,7 +376,7 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
           <option value="post">Post</option>
           <option value="story">Story</option>
           <option value="reel">Reel</option>
-          <option value="video">▶️ Video</option>
+          <option value="video">Video</option>
         </select>
       </div>
     </div>
@@ -410,7 +410,7 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
         <div class="plat-btn" data-p="tiktok">TikTok</div>
         <div class="plat-btn" data-p="twitter">Twitter/X</div>
         <div class="plat-btn" data-p="facebook">Facebook</div>
-        <div class="plat-btn" data-p="youtube">▶️ YouTube</div>
+        <div class="plat-btn" data-p="youtube">YouTube</div>
       </div>
     </div>
     <div class="field">
@@ -459,7 +459,7 @@ let statusFilter = 'all';
 const TEMPLATES = [
   {
     id: 'show-announcement',
-    icon: '📣',
+    icon: 'volume',
     title: 'Upcoming Show Announcement',
     desc: 'Hype post for an upcoming card show or convention.',
     category: 'show-schedule', type: 'post',
@@ -467,7 +467,7 @@ const TEMPLATES = [
   },
   {
     id: 'show-countdown',
-    icon: '⏳',
+    icon: 'clock',
     title: 'Show Week Countdown',
     desc: 'Story countdown for the week of an upcoming show.',
     category: 'show-schedule', type: 'story',
@@ -475,7 +475,7 @@ const TEMPLATES = [
   },
   {
     id: 'table-locator',
-    icon: '📍',
+    icon: 'map-pin',
     title: 'Show Table Locator',
     desc: 'Story showing exactly where your table is at the show.',
     category: 'show-schedule', type: 'story',
@@ -483,7 +483,7 @@ const TEMPLATES = [
   },
   {
     id: 'sealed-product',
-    icon: '📦',
+    icon: 'box',
     title: 'Sealed Product Available',
     desc: 'Story announcing sealed Pokémon product in stock.',
     category: 'product', type: 'story',
@@ -491,7 +491,7 @@ const TEMPLATES = [
   },
   {
     id: 'pc-showcase',
-    icon: '✨',
+    icon: 'star',
     title: 'PC Showcase',
     desc: 'Post spotlighting a card from your personal collection.',
     category: 'card-spotlight', type: 'post',
@@ -499,7 +499,7 @@ const TEMPLATES = [
   },
   {
     id: 'riser-demo',
-    icon: '🖨️',
+    icon: 'printer',
     title: 'Riser Product Demo',
     desc: 'Reel or post showing your display risers in action.',
     category: 'product', type: 'reel',
@@ -507,7 +507,7 @@ const TEMPLATES = [
   },
   {
     id: 'jet-tag-drop',
-    icon: '🏷️',
+    icon: 'tag',
     title: 'Jet Tag Drop',
     desc: 'Story or post announcing new Jet Tag characters available.',
     category: 'product', type: 'story',
@@ -515,7 +515,7 @@ const TEMPLATES = [
   },
   {
     id: 'pin-drop',
-    icon: '📌',
+    icon: 'pin',
     title: 'Pin Drop',
     desc: 'Story announcing new Pokémon pins available.',
     category: 'product', type: 'story',
@@ -525,11 +525,11 @@ const TEMPLATES = [
 
 // ── CONTENT ENGINE: pillars, weekly rhythm, 4-week arc ──────────────
 const PILLARS = [
-  { icon: '🎬', name: 'Product & Process', goal: 'Reach', color: 'var(--accent)', desc: 'Reels of risers, Jet Tags & pins being made and shown off. Satisfying, shareable — this is what non-followers find on Explore.' },
-  { icon: '🎪', name: 'Show & Booth', goal: 'Convert', color: 'var(--green)', desc: 'Announcements, countdowns, table locators and live-from-the-booth stories. Turns the local card community into buyers.' },
-  { icon: '✨', name: 'Card Spotlights', goal: 'Engage', color: 'var(--accent2)', desc: 'PC showcases, grails and this-or-that polls. Personal, comment-driving content that bonds you to the collector community.' },
-  { icon: '📦', name: 'Drops & Restocks', goal: 'Sell', color: 'var(--yellow)', desc: 'Sealed product, new pins/tags and month-end bundles. Clear price + CTA aimed at your warm audience.' },
-  { icon: '🤝', name: 'Community & Education', goal: 'Loyalty', color: 'var(--red)', desc: 'Q&A, UGC features, how-to carousels and giveaways. Builds saves, trust and a following that sticks around.' },
+  { icon: 'video', name: 'Product & Process', goal: 'Reach', color: 'var(--accent)', desc: 'Reels of risers, Jet Tags & pins being made and shown off. Satisfying, shareable — this is what non-followers find on Explore.' },
+  { icon: 'events', name: 'Show & Booth', goal: 'Convert', color: 'var(--green)', desc: 'Announcements, countdowns, table locators and live-from-the-booth stories. Turns the local card community into buyers.' },
+  { icon: 'star', name: 'Card Spotlights', goal: 'Engage', color: 'var(--accent2)', desc: 'PC showcases, grails and this-or-that polls. Personal, comment-driving content that bonds you to the collector community.' },
+  { icon: 'box', name: 'Drops & Restocks', goal: 'Sell', color: 'var(--yellow)', desc: 'Sealed product, new pins/tags and month-end bundles. Clear price + CTA aimed at your warm audience.' },
+  { icon: 'guru', name: 'Community & Education', goal: 'Loyalty', color: 'var(--red)', desc: 'Q&A, UGC features, how-to carousels and giveaways. Builds saves, trust and a following that sticks around.' },
 ];
 
 const WEEK_RHYTHM = [
@@ -677,7 +677,7 @@ function renderPlan() {
   const pil = document.getElementById('plan-pillars');
   if (pil) pil.innerHTML = PILLARS.map(p => `
     <div class="pillar-card" style="--pillar:${p.color}">
-      <div class="pillar-icon">${p.icon}</div>
+      <div class="pillar-icon">${VPCUtil.icon(p.icon, 'em')}</div>
       <div class="pillar-name">${esc(p.name)}</div>
       <div class="pillar-goal">${esc(p.goal)}</div>
       <div class="pillar-desc">${esc(p.desc)}</div>
@@ -731,7 +731,7 @@ function loadContentPlan() {
   if (typeof auditLog === 'function') auditLog('LOAD_CONTENT_PLAN', 'vpc_content_v1', `${added} added, ${updated} updated`);
   renderAll();
   document.querySelector('.h-tab[data-tab="calendar"]').click();
-  alert(`✅ Plan loaded — starts Monday ${fmtDate(monISO)}.\n\n${added} posts added${updated ? `, ${updated} updated` : ''}. Open the Calendar (navigate with Next →) to see them. Remember to re-date Week 2 to your real show.`);
+  alert(`Plan loaded — starts Monday ${fmtDate(monISO)}.\n\n${added} posts added${updated ? `, ${updated} updated` : ''}. Open the Calendar (navigate with Next →) to see them. Remember to re-date Week 2 to your real show.`);
 }
 
 function clearContentPlan() {
@@ -762,7 +762,6 @@ const CAT_CSS    = {'show-schedule':'cat-show','product':'cat-product','card-spo
 const TYPE_CSS   = {'post':'type-post','story':'type-story','reel':'type-reel','video':'type-video'};
 const STATUS_CSS = {'draft':'status-draft','ready':'status-ready','scheduled':'status-scheduled','posted':'status-posted'};
 const STATUS_DOT = {'draft':'dot-draft','ready':'dot-ready','scheduled':'dot-scheduled','posted':'dot-posted'};
-const PLAT_ICONS = {instagram:'📸',tiktok:'🎵',twitter:'🐦',facebook:'👥',youtube:'▶️'};
 
 // ── STATS ──────────────────────────────────────────
 function renderStats() {
@@ -805,7 +804,7 @@ function renderCalendar() {
     const dayItems = all.filter(c => c.date === iso);
     const chips = dayItems.map(c => `
       <div class="cal-chip ${CAT_CSS[c.category]||'cat-custom'}" onclick="openModal('${c.id}')" title="${esc(c.title)}">
-        <span style="opacity:.7">${c.type==='story'?'⭕':c.type==='reel'?'🎬':c.type==='video'?'▶️':'📸'}</span>
+        <span style="opacity:.7;display:flex">${VPCUtil.icon(c.type==='story'?'story':(c.type==='reel'||c.type==='video')?'video':'content', 'em')}</span>
         ${esc(c.title.length>18?c.title.slice(0,18)+'…':c.title)}
       </div>`).join('');
     return `<div class="day-col${isToday?' today':''}">
@@ -856,7 +855,7 @@ function renderQueue() {
     return;
   }
   el.innerHTML = items.map(c => {
-    const plats = (c.platforms||[]).map(p=>`<span class="platform">${PLAT_ICONS[p]||''} ${p}</span>`).join('');
+    const plats = (c.platforms||[]).map(p=>`<span class="platform">${esc(p)}</span>`).join('');
     const canvaBtn = c.canvaUrl
       ? `<a class="icon-btn" title="Open in Canva" href="${esc(c.canvaUrl)}" target="_blank" rel="noopener" style="text-decoration:none"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#content"/></svg></a>`
       : `<button class="icon-btn" title="Add Canva design" onclick="openModal('${c.id}')" style="opacity:.45"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#content"/></svg></button>`;
@@ -867,7 +866,7 @@ function renderQueue() {
           ${canvaBtn}
           <button class="icon-btn" title="Edit" onclick="openModal('${c.id}')"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#pencil"/></svg></button>
           <button class="icon-btn" title="Mark posted" onclick="markPosted('${c.id}')" ${c.status==='posted'?'style="opacity:.4"':''}><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#check"/></svg></button>
-          <button class="icon-btn" title="Delete" onclick="deleteContent('${c.id}')">✕</button>
+          <button class="icon-btn" title="Delete" aria-label="Delete" onclick="deleteContent('${c.id}')">${VPCUtil.icon('trash')}</button>
         </div>
       </div>
       <div class="card-body">
@@ -878,7 +877,7 @@ function renderQueue() {
         </div>
         ${plats?`<div style="display:flex;gap:5px;flex-wrap:wrap">${plats}</div>`:''}
         ${c.caption?`<div class="card-caption">${esc(c.caption)}</div>`:''}
-        <div class="card-date">${c.date?`📅 <span>${fmtDate(c.date)}${c.time?' · '+c.time:''}</span>`:'<span class="text-2">No date set</span>'}</div>
+        <div class="card-date">${c.date?`${VPCUtil.icon('calendar', 'inline')}<span>${fmtDate(c.date)}${c.time?' · '+c.time:''}</span>`:'<span class="text-2">No date set</span>'}</div>
         ${c.notes?`<div class="caption">${esc(c.notes)}</div>`:''}
       </div>
     </div>`;
@@ -889,7 +888,7 @@ function renderQueue() {
 function renderTemplates() {
   document.getElementById('templates-grid').innerHTML = TEMPLATES.map(t => `
     <div class="template-card" onclick="createFromTemplate('${t.id}')">
-      <div class="tmpl-icon">${t.icon}</div>
+      <div class="tmpl-icon">${VPCUtil.icon(t.icon, 'em')}</div>
       <div class="tmpl-title">${esc(t.title)}</div>
       <div class="tmpl-desc">${esc(t.desc)}</div>
       <div class="tmpl-footer">
@@ -997,20 +996,20 @@ function openCanvaUrl() {
 }
 
 const CANVA_QUICK = [
-  { icon:'📣', title:'Show Announcement Post', sub:'Bold post announcing an upcoming card show.',      type:'post',  href:'https://www.canva.com/create/instagram-posts/' },
-  { icon:'⏳', title:'Show Countdown Story',   sub:'Story countdown sticker for show week.',           type:'story', href:'https://www.canva.com/create/instagram-stories/' },
-  { icon:'📍', title:'Table Locator Story',    sub:'Show followers exactly where to find your table.', type:'story', href:'https://www.canva.com/create/instagram-stories/' },
-  { icon:'📦', title:'Sealed Product Drop',    sub:'Eye-catching story for new sealed stock.',         type:'story', href:'https://www.canva.com/create/instagram-stories/' },
-  { icon:'✨', title:'PC Showcase Post',       sub:'Spotlight a prized card from your collection.',    type:'post',  href:'https://www.canva.com/create/instagram-posts/' },
-  { icon:'🖨️', title:'Riser Product Demo',     sub:'Show off your 3D-printed display risers.',        type:'post',  href:'https://www.canva.com/create/instagram-posts/' },
-  { icon:'🏷️', title:'Jet Tag Drop Story',     sub:'Announce new Jet Tag characters in stock.',       type:'story', href:'https://www.canva.com/create/instagram-stories/' },
-  { icon:'📌', title:'Pin Drop Post',          sub:'Show new Pokémon pins available.',                type:'post',  href:'https://www.canva.com/create/instagram-posts/' },
+  { icon:'volume', title:'Show Announcement Post', sub:'Bold post announcing an upcoming card show.',      type:'post',  href:'https://www.canva.com/create/instagram-posts/' },
+  { icon:'clock', title:'Show Countdown Story',   sub:'Story countdown sticker for show week.',           type:'story', href:'https://www.canva.com/create/instagram-stories/' },
+  { icon:'map-pin', title:'Table Locator Story',    sub:'Show followers exactly where to find your table.', type:'story', href:'https://www.canva.com/create/instagram-stories/' },
+  { icon:'box', title:'Sealed Product Drop',    sub:'Eye-catching story for new sealed stock.',         type:'story', href:'https://www.canva.com/create/instagram-stories/' },
+  { icon:'star', title:'PC Showcase Post',       sub:'Spotlight a prized card from your collection.',    type:'post',  href:'https://www.canva.com/create/instagram-posts/' },
+  { icon:'printer', title:'Riser Product Demo',     sub:'Show off your 3D-printed display risers.',        type:'post',  href:'https://www.canva.com/create/instagram-posts/' },
+  { icon:'tag', title:'Jet Tag Drop Story',     sub:'Announce new Jet Tag characters in stock.',       type:'story', href:'https://www.canva.com/create/instagram-stories/' },
+  { icon:'pin', title:'Pin Drop Post',          sub:'Show new Pokémon pins available.',                type:'post',  href:'https://www.canva.com/create/instagram-posts/' },
 ];
 
 function renderCanva() {
   document.getElementById('canva-quick-grid').innerHTML = CANVA_QUICK.map(q => `
     <a class="canva-quick-card" href="${q.href}" target="_blank" rel="noopener">
-      <div class="canva-quick-icon">${q.icon}</div>
+      <div class="canva-quick-icon">${VPCUtil.icon(q.icon, 'em')}</div>
       <div>
         <div class="canva-quick-title">${esc(q.title)}</div>
         <div class="canva-quick-sub">${esc(q.sub)}</div>
