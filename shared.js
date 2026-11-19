@@ -34,6 +34,7 @@ const NAV = [
     items: [
       { href: 'production.html', icon: 'production', label: 'Production', tab: 'production' },
       { href: 'events.html', icon: 'events', label: 'Events', tab: 'events' },
+      { href: 'show.html', icon: 'bolt', label: 'Show Mode' },
     ],
   },
   {
@@ -175,6 +176,8 @@ function navAccountActions({ keyboard }) {
 }
 
 function injectAppNav() {
+  // A focused page (Show Mode) asks for no navigation chrome.
+  if (document.body.dataset.nav === 'none') return trackHeaderHeight();
   const groups = navGroups();
 
   const side = document.createElement('div');
@@ -700,13 +703,194 @@ document.addEventListener('keydown', (e) => {
   // Search, shortcuts and the activity log close first (their own handler).
   if (document.querySelector('#search-overlay, #shortcuts-overlay, #audit-overlay')) return;
   const top = [...document.querySelectorAll('.modal-overlay.open')].pop();
-  if (!top) return;
-  const cancel = [...top.querySelectorAll('button')].find(
+  if (top) closeDialog(top);
+});
+
+// ── MOTION AND SMALL MOMENTS ───────────────────────
+// Each one does a job; all of them respect reduced motion.
+const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Numbers roll to their new value (about 400ms), keeping the format of the
+// text they replace ("$4,111.00", "74.9%", "47"). Reduced motion: instant.
+window.vpcRoll = function (el, text, duration = 400) {
+  if (!el) return;
+  text = String(text);
+  const parse = (t) => parseFloat(String(t).replace(/[^0-9.-]/g, ''));
+  const from = parse(el.textContent);
+  const to = parse(text);
+  // A newer roll on the same element (quick taps) takes over from this one.
+  const token = (el._roll = (el._roll || 0) + 1);
+  // "-$1,234.50" → sign, "$", the number (its decimals), and what follows.
+  const m = text.match(/^(-?)([^0-9]*)[0-9][0-9,]*(?:\.([0-9]+))?(.*)$/);
+  if (reducedMotion() || !m || !isFinite(from) || !isFinite(to) || from === to) {
+    el.textContent = text;
+    return;
+  }
+  const [, , prefix, frac = '', suffix] = m;
+  const fmt = (v) =>
+    (v < 0 ? '-' : '') +
+    prefix +
+    Math.abs(v).toLocaleString('en-US', {
+      minimumFractionDigits: frac.length,
+      maximumFractionDigits: frac.length,
+    }) +
+    suffix;
+  const start = performance.now();
+  (function frame(t) {
+    if (el._roll !== token) return;
+    const k = Math.min(1, (t - start) / duration);
+    el.textContent = k < 1 ? fmt(from + (to - from) * (1 - Math.pow(1 - k, 3))) : text;
+    if (k < 1) requestAnimationFrame(frame);
+  })(start);
+};
+
+// Long-press on touch screens (the right-click of a phone). The handler gets
+// a point to open a menu at.
+window.vpcLongPress = function (el, handler, ms = 450) {
+  let timer = null;
+  let start = null;
+  let startTarget = null;
+  el.addEventListener('pointerdown', (e) => {
+    // A long press whose lift produced no click (the finger came up over
+    // the menu it opened) mustn't swallow the next ordinary tap.
+    el._longPressed = false;
+    if (e.pointerType !== 'touch') return;
+    start = { x: e.clientX, y: e.clientY };
+    startTarget = e.target;
+    timer = setTimeout(() => {
+      timer = null;
+      el._longPressed = true;
+      navigator.vibrate?.(10);
+      handler({
+        clientX: start.x,
+        clientY: start.y,
+        currentTarget: el,
+        target: startTarget,
+        preventDefault() {},
+      });
+    }, ms);
+  });
+  const cancel = (e) => {
+    if (
+      timer &&
+      e.type === 'pointermove' &&
+      Math.hypot(e.clientX - start.x, e.clientY - start.y) < 10
+    )
+      return;
+    clearTimeout(timer);
+    timer = null;
+  };
+  el.addEventListener('pointermove', cancel);
+  el.addEventListener('pointerup', cancel);
+  el.addEventListener('pointercancel', cancel);
+  // The click that ends a long press shouldn't also open the row.
+  el.addEventListener(
+    'click',
+    (e) => {
+      if (el._longPressed) {
+        el._longPressed = false;
+        e.stopImmediatePropagation();
+        e.preventDefault();
+      }
+    },
+    true
+  );
+  el.addEventListener('contextmenu', (e) => {
+    if (e.pointerType === 'touch' || el._longPressed) e.preventDefault();
+  });
+};
+
+// Swipe a phone sheet down by its top edge to close it, like iOS. Touch
+// events, not pointer events: the browser would take a downward drag as a
+// scroll and cancel the pointer stream, so the sheet never followed.
+function enableSheetSwipe() {
+  let drag = null;
+  document.addEventListener(
+    'touchstart',
+    (e) => {
+      drag = null;
+      if (e.touches.length !== 1 || window.innerWidth > 700) return;
+      const sheet = e.target.closest?.('.modal-overlay.open > .modal, .vpc-sheet');
+      if (!sheet || sheet.scrollTop > 0) return;
+      const { clientY } = e.touches[0];
+      if (clientY - sheet.getBoundingClientRect().top > 64) return; // the top edge, not the content
+      const now = performance.now();
+      drag = { sheet, y0: clientY, dy: 0, moved: false, lastY: clientY, lastT: now, v: 0 };
+    },
+    { passive: true }
+  );
+  document.addEventListener(
+    'touchmove',
+    (e) => {
+      if (!drag) return;
+      const y = e.touches[0].clientY;
+      // Upward first: the content scrolls as usual.
+      if (!drag.moved && y < drag.y0) {
+        drag = null;
+        return;
+      }
+      e.preventDefault(); // the sheet follows the finger instead of the page scrolling
+      const now = performance.now();
+      drag.v = (y - drag.lastY) / Math.max(1, now - drag.lastT);
+      drag.lastY = y;
+      drag.lastT = now;
+      if (!drag.moved) drag.sheet.style.transition = 'none';
+      drag.moved = true;
+      drag.dy = Math.max(0, y - drag.y0);
+      drag.sheet.style.transform = `translateY(${drag.dy}px)`;
+    },
+    { passive: false }
+  );
+  const end = () => {
+    if (!drag) return;
+    const { sheet, dy, moved, v, lastT } = drag;
+    drag = null;
+    if (!moved) return; // a tap
+    const flick = v > 0.5 && performance.now() - lastT < 100;
+    sheet.style.transition = 'transform var(--t-move) var(--ease-sheet)';
+    if (dy > 120 || (flick && dy > 40)) {
+      sheet.style.transform = 'translateY(100%)';
+      setTimeout(() => {
+        sheet.style.transform = '';
+        sheet.style.transition = '';
+        if (sheet.classList.contains('vpc-sheet')) closeMoreSheet(true);
+        else closeDialog(sheet.closest('.modal-overlay'));
+      }, 220);
+    } else {
+      sheet.style.transform = '';
+      setTimeout(() => (sheet.style.transition = ''), 320);
+    }
+  };
+  document.addEventListener('touchend', end);
+  document.addEventListener('touchcancel', end);
+}
+// Close a dialog the way its own Cancel button would.
+function closeDialog(overlay) {
+  if (!overlay) return;
+  const cancel = [...overlay.querySelectorAll('button')].find(
     (b) => b.classList.contains('sheet-close') || /^(cancel|close)$/i.test(b.textContent.trim())
   );
   if (cancel) cancel.click();
-  else top.classList.remove('open');
-});
+  else overlay.classList.remove('open');
+}
+
+// The title bar gains its hairline only once content passes under it. A
+// page with a large title shows its small title in the bar only after the
+// large one has scrolled away.
+function watchScroll() {
+  const root = document.documentElement;
+  const onScroll = () => root.classList.toggle('scrolled', window.scrollY > 4);
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+  const large = document.querySelector('.large-title');
+  if (large && 'IntersectionObserver' in window) {
+    root.classList.add('has-large-title');
+    const header = parseFloat(getComputedStyle(root).getPropertyValue('--header-h')) || 58;
+    new IntersectionObserver(([en]) => root.classList.toggle('title-in', !en.isIntersecting), {
+      rootMargin: `-${header}px 0px 0px 0px`,
+    }).observe(large);
+  }
+}
 
 // ── GLOBAL SEARCH ──────────────────────────────────
 function buildSearchIndex() {
@@ -1513,6 +1697,8 @@ document.addEventListener('DOMContentLoaded', () => {
   injectAppNav();
   vpcEnhanceForms();
   watchDialogs();
+  enableSheetSwipe();
+  watchScroll();
   registerSW();
   // Deferred: daily reminder check (only if reminders are turned on)
   setTimeout(checkAndNotify, 2000);

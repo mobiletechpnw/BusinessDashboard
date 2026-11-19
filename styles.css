@@ -6,8 +6,8 @@
  * colour only for state, eight type styles, a 4-pt spacing grid, five radii.
  * Full system (light + dark, components, rules): the "Design System" artifact.
  *
- * The dashboard ships its dark theme. Light mode follows the device once the
- * remaining inline colours are tokenised (roadmap #10–#11).
+ * Dark is the base below; light follows the device, or the Appearance
+ * setting in the account menu (see "Light mode").
  *
  * Legacy token names (--text, --text2, --border, --glass-border, --accent2,
  * --radius) are kept as aliases so every page keeps working.
@@ -69,6 +69,7 @@
   --sidebar-w: 232px;
   --header-h: 58px; /* shared.js measures the title bar and keeps this exact */
   --tabbar-h: 50px;
+  --hairline: 1px; /* 0.5px on high-density screens, below */
   --chrome-bottom: env(safe-area-inset-bottom, 0px); /* bottom chrome to keep clear of */
 
   /* Type */
@@ -123,6 +124,12 @@
   --t-base: 200ms;
   --t-move: 320ms;
   --t-sheet: 420ms;
+}
+
+@media (min-resolution: 2dppx) {
+  :root {
+    --hairline: 0.5px;
+  }
 }
 
 /* ── Light mode ──
@@ -640,7 +647,8 @@ header {
   background: var(--chrome);
   -webkit-backdrop-filter: var(--chrome-blur);
   backdrop-filter: var(--chrome-blur);
-  border-bottom: 1px solid var(--separator);
+  border-bottom: var(--hairline) solid transparent;
+  transition: border-color var(--t-base) var(--ease);
   padding: 0 32px;
   display: flex;
   align-items: center;
@@ -649,6 +657,18 @@ header {
   position: sticky;
   top: 0;
   z-index: 200;
+}
+/* The bar gains its hairline once content passes under it (shared.js). */
+html.scrolled header {
+  border-bottom-color: var(--separator);
+}
+/* A page with a large title shows its small title only after scrolling. */
+html.has-large-title header .brand {
+  opacity: 0;
+  transition: opacity var(--t-base) var(--ease);
+}
+html.has-large-title.title-in header .brand {
+  opacity: 1;
 }
 /* One title style for every page: 17px semibold, like a navigation bar. */
 header .brand,
@@ -745,7 +765,7 @@ header h1 span {
   top: 0;
   left: 14px;
   right: 0;
-  border-top: 1px solid var(--separator);
+  border-top: var(--hairline) solid var(--separator);
 }
 .glist-val {
   min-width: 0;
@@ -825,7 +845,7 @@ header h1 span {
   top: 0;
   left: 38px;
   right: 0;
-  border-top: 1px solid var(--separator);
+  border-top: var(--hairline) solid var(--separator);
 }
 .attn-row:hover {
   background: var(--fill-2);
@@ -894,6 +914,12 @@ header h1 span {
     padding-bottom: var(--chrome-bottom);
   }
 }
+/* A page that runs full screen, without the app navigation (Show Mode) */
+body[data-nav='none'] {
+  --chrome-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: 0;
+  padding-bottom: 0;
+}
 
 .vpc-ico {
   width: 20px;
@@ -920,7 +946,7 @@ header h1 span {
   background: var(--chrome);
   -webkit-backdrop-filter: var(--chrome-blur);
   backdrop-filter: var(--chrome-blur);
-  border-right: 1px solid var(--separator);
+  border-right: var(--hairline) solid var(--separator);
 }
 @media (min-width: 1024px) {
   .vpc-sidebar {
@@ -1152,7 +1178,7 @@ html[data-sync='offline'] .vpc-sync-dot {
   background: var(--chrome);
   -webkit-backdrop-filter: var(--chrome-blur);
   backdrop-filter: var(--chrome-blur);
-  border-top: 1px solid var(--separator);
+  border-top: var(--hairline) solid var(--separator);
 }
 @media (min-width: 1024px) {
   .vpc-tabbar {
@@ -1786,6 +1812,21 @@ div.modal-overlay {
   height: 10px;
   border-radius: 50%;
   flex: none;
+}
+
+/* Squircle corners where supported; elsewhere ordinary rounded corners */
+@supports (corner-shape: squircle) {
+  .card,
+  .kpi,
+  .attn-list,
+  .glist,
+  .modal-overlay > .modal,
+  .vpc-menu,
+  .vpc-sheet,
+  .stepper,
+  .seg {
+    corner-shape: squircle;
+  }
 }
 
 /* ── Shared table ── */

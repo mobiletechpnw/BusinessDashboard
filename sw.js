@@ -1,7 +1,7 @@
-const CACHE = 'vpc-v14';
+const CACHE = 'vpc-v15';
 
 // Static assets that rarely change → safe to serve cache-first.
-const STATIC_ASSETS = ['/styles.css', '/manifest.json', '/icon.svg'];
+const STATIC_ASSETS = ['/styles.css', '/manifest.json', '/icon.svg', '/icons.svg'];
 
 // App shell — precached so the app still opens offline, but served
 // network-first (see fetch handler) so code changes appear on the next load
@@ -20,6 +20,8 @@ const SHELL = [
   '/production.html',
   '/content.html',
   '/guru.html',
+  '/growth.html',
+  '/show.html',
   '/vendor-calendar.html',
   '/event-signup.html',
   '/login.html',

@@ -499,6 +499,13 @@ const VpcSync = {
   },
 };
 
+// Resolves once this page's first pull from the cloud has finished (or
+// failed). A page that writes the moment it opens (Show Mode) waits for it,
+// so a fresh tap can't make this device's copy look newer than changes from
+// another device that the pull is still bringing down.
+let _firstSyncDone;
+VpcSync.ready = new Promise((resolve) => (_firstSyncDone = resolve));
+
 // ── DOMContentLoaded ──────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -514,9 +521,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Pull latest cloud data; re-render if new data arrived (fixes blank-on-new-device bug)
-  const { pulled } = await VpcSync.sync();
-  if (pulled > 0 && typeof window.renderAll === 'function') {
-    window.renderAll();
+  try {
+    const { pulled } = await VpcSync.sync();
+    if (pulled > 0 && typeof window.renderAll === 'function') {
+      window.renderAll();
+    }
+  } finally {
+    _firstSyncDone();
   }
 
   window.addEventListener('online', () => VpcSync.flushQueue());

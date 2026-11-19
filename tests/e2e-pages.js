@@ -33,6 +33,7 @@ const PAGES = [
   'growth.html',
   'events.html',
   'inventory.html',
+  'show.html',
   'vendor-calendar.html',
   'event-signup.html',
 ];
