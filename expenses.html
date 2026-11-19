@@ -18,16 +18,18 @@
   /* ── Header ── */
 
   /* ── KPI Strip ── */
-  .kpi-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
-  .kpi { background: var(--surface); padding: 16px 22px; }
+  .kpi-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border-radius: var(--r-lg); overflow: hidden; border-bottom: none; width: calc(100% - 48px); max-width: 1052px; margin: 20px auto 0; }
+  /* One grouped card divided by hairlines, like the Inventory and Content strips */
+  .kpi { background: var(--surface); padding: 16px 22px; border: none; border-radius: 0; box-shadow: none; }
   .kpi-val { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.5px; line-height: 1; }
   .kpi-label { font-size: 0.75rem; color: var(--text2); margin-top: 5px; }
   .kpi-sub { font-size: 0.75rem; margin-top: 3px; }
 
   /* ── Budget bar ── */
   .budget-bar-wrap {
-    background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 12px 32px; display: flex; align-items: center; gap: 16px;
+    background: var(--surface); border-radius: var(--r-lg);
+    width: calc(100% - 48px); max-width: 1052px; margin: 12px auto 20px;
+    padding: 12px 20px; display: flex; align-items: center; gap: 16px;
   }
   .budget-bar-track { flex: 1; background: var(--surface2); border-radius: 8px; height: 8px; overflow: hidden; }
   .budget-bar-fill { height: 8px; border-radius: 8px; transition: width 0.4s; }
@@ -39,7 +41,7 @@
   .toolbar {
     background: var(--chrome); backdrop-filter: blur(18px) saturate(1.2);
     border-bottom: 1px solid var(--border);
-    padding: 0 32px; display: flex; align-items: center;
+    padding: 0 max(24px, calc((100% - 1100px) / 2 + 24px)); display: flex; align-items: center;
     justify-content: space-between; position: sticky; top: var(--header-h); z-index: 150; gap: 16px;
   }
   .month-nav { display: flex; align-items: center; gap: 10px; padding: 12px 0; }
@@ -130,7 +132,7 @@
   footer a { color: var(--accent); text-decoration: none; }
 
   @media (max-width: 700px) {
-    .kpi-strip { grid-template-columns: 1fr 1fr; }
+    .kpi-strip { grid-template-columns: 1fr 1fr; width: calc(100% - 20px); margin-top: 12px; }
     .grid-2 { grid-template-columns: 1fr; }
     .toolbar { padding: 0 12px; }
     main { padding: 14px 10px; }
@@ -140,7 +142,7 @@
     .tabs::-webkit-scrollbar { display: none; }
     .tab { white-space: nowrap; flex-shrink: 0; padding: 12px 14px; }
     /* Hide all add buttons in toolbar/panel — FAB handles this */
-    .budget-bar-wrap { padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
+    .budget-bar-wrap { padding: 10px 14px; flex-wrap: wrap; gap: 8px; width: calc(100% - 20px); margin: 10px auto 14px; }
     .budget-bar-label { min-width: 0; text-align: left; }
     /* Expense row: compact */
     .expense-row { padding: 10px 8px; gap: 10px; }
@@ -167,6 +169,7 @@
   <div class="brand">Personal Expenses</div>
   <button class="btn-primary vpc-primary" id="expPrimary" type="button" onclick="expPrimaryAction()" aria-label="Add expense"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#plus"/></svg><span id="expPrimaryLabel">Add Expense</span></button>
 </header>
+<div class="large-head" style="--col:1100px"><h1 class="large-title">Personal Expenses</h1></div>
 
 
 <!-- KPI strip -->
@@ -494,7 +497,7 @@ function renderEntries() {
     $('entries-list').innerHTML = `
       <div class="empty">
         <div class="e-icon"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#expenses"/></svg></div>
-        <p>No expenses logged for ${MONTH_NAMES[viewMonth]}.<br>Hit <strong>+ Add Expense</strong> to start tracking.</p>
+        <p>No expenses logged for ${MONTH_NAMES[viewMonth]}.<br>Add one with <strong>Add Expense</strong> at the top.</p>
       </div>`;
     return;
   }

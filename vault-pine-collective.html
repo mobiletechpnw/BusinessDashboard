@@ -21,16 +21,22 @@
   header { gap: 12px; }
 
   /* ── KPI tiles (Sales › Overview): label above the number ── */
-  .kpi-bar { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .kpi-bar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
   .kpi { display: flex; flex-direction: column; background: var(--surface); border-radius: var(--r-lg); padding: 16px 18px; min-width: 0; }
   .kpi-val { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .kpi-label { order: -1; font-size: 0.75rem; color: var(--text2); margin-bottom: 4px; }
-  .kpi-sub { font-size: 0.75rem; margin-top: 4px; }
+  .kpi-label { font-size: 0.75rem; color: var(--text2); }
+  .kpi-sub { font-size: 0.75rem; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* Label with the change chip beside it, the figure, then its trend line */
+  .kpi-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 22px; margin-bottom: 2px; }
+  .kpi-head .kpi-label { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .kpi-spark { margin: 10px 0 2px; }
+  .kpi-basis { grid-column: 1 / -1; margin: -4px 0 0; }
 
   /* ── Sales sub-tab bar ── */
   .tab-bar {
     display: flex; gap: 0; border-bottom: 1px solid var(--border);
-    padding: 0 32px; background: var(--surface);
+    /* full-width bar, its tabs lined up with the content column */
+    padding: 0 max(24px, calc((100% - 1300px) / 2 + 24px)); background: var(--surface);
     position: sticky; top: var(--header-h); z-index: 150;
   }
   .tab { padding: 13px 18px; font-size: 0.83rem; font-weight: 600; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; user-select: none; }
@@ -55,8 +61,6 @@
   .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 
   /* ── Chart ── */
-  .chart-wrap { width: 100%; overflow-x: auto; }
-  svg.chart { display: block; }
 
   /* ── Table ── */
   .table-wrap { overflow-x: auto; }
@@ -157,7 +161,9 @@
   .order-sheet .sheet-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
   .order-sheet h2 { margin: 0; overflow-wrap: anywhere; }
   .sheet-sub { margin-top: 3px; font-size: 0.8125rem; color: var(--text2); }
-  .order-sheet .modal-actions .btn-danger-text { margin-right: auto; background: none; color: var(--red); padding-left: 4px; padding-right: 4px; }
+  .modal-actions .btn-danger-text { margin-right: auto; background: none; color: var(--red); padding-left: 4px; padding-right: 4px; }
+  #filamentTbody tr[data-id] { cursor: pointer; }
+  #filamentTbody tr[data-id]:hover td { background: var(--fill-2); }
   .search-input { background: var(--fill); border: 1px solid transparent; border-radius: var(--r-md); color: var(--text); padding: 8px 14px; font-size: 0.875rem; outline: none; width: 240px; }
   .search-input:focus { border-color: var(--accent); }
   .search-input:focus { border-color: var(--accent); }
@@ -186,9 +192,6 @@
   .pipeline-note { font-size: 0.75rem; color: var(--text2); }
 
   /* ── Projection legend ── */
-  .proj-legend { display: flex; gap: 20px; margin-bottom: 16px; flex-wrap: wrap; }
-  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; }
-  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
 
   /* ── Icon buttons ── */
   .icon-btn { background: none; border: none; color: var(--text2); padding: 4px 6px; font-size: 0.85rem; border-radius: 999px; cursor: pointer; }
@@ -286,7 +289,6 @@
     .exp-tab-bar::-webkit-scrollbar { display: none; }
     .exp-tab { white-space: nowrap; }
     .kpi-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-    .kpi:last-child { grid-column: span 2; }
     .kpi { padding: 12px 14px; }
     .kpi-val { font-size: 1.25rem; }
     .jt-stat-bar, .pin-stat-bar, .exp-stat-bar { grid-template-columns: repeat(2, 1fr); }
@@ -304,10 +306,8 @@
     .search-input { width: 100%; }
     .btn-primary, .btn-ghost { padding: 8px 14px; font-size: 0.78rem; min-height: 44px; }
     #backup-banner { width: 92%; flex-wrap: wrap; }
-    /* Phones: the range gets its own row under the title; the main action
-       is a + button, like a navigation bar. */
-    header { flex-wrap: wrap; row-gap: 0; }
-    #rangeSeg { order: 3; flex: 1 0 100%; margin-bottom: 8px; }
+    /* Phones: the range gets its own row under the large title */
+    #rangeSeg { flex: 1 0 100%; }
     #rangeSeg button { flex: 1; padding: 0 4px; }
   }
   @media (max-width: 480px) {
@@ -326,6 +326,10 @@
     <div class="brand" id="vpcTitle">Sales</div>
     <div class="title-sub" id="vpcSub"></div>
   </div>
+  <button class="btn-primary vpc-primary" id="vpcPrimary" type="button" onclick="vpcPrimaryAction()"><svg class="vpc-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span id="vpcPrimaryLabel">New Order</span></button>
+</header>
+<div class="large-head">
+  <div class="large-text"><h1 class="large-title" data-large-from="#vpcTitle">Sales</h1><div class="large-sub" data-large-from="#vpcSub"></div></div>
   <div class="seg" id="rangeSeg" aria-label="Date range">
     <button data-value="all" aria-checked="true">All</button>
     <button data-value="ytd">YTD</button>
@@ -334,8 +338,7 @@
     <button data-value="30d">30D</button>
     <button data-value="7d">7D</button>
   </div>
-  <button class="btn-primary vpc-primary" id="vpcPrimary" type="button" onclick="vpcPrimaryAction()"><svg class="vpc-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span id="vpcPrimaryLabel">New Order</span></button>
-</header>
+</div>
 
 
 <!-- ══════════════════════════════════════════ SALES SECTION ══ -->
@@ -355,30 +358,30 @@
     <div class="panel active" id="panel-overview">
       <div class="kpi-bar">
         <div class="kpi">
+          <div class="kpi-head"><span class="kpi-label">Revenue</span><span class="delta" id="kpiRevChip" hidden></span></div>
           <div class="kpi-val" id="kpiRevenue">—</div>
-          <div class="kpi-label">Total Revenue</div>
+          <svg class="spark kpi-spark" id="kpiRevSpark" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true" focusable="false"></svg>
           <div class="kpi-sub text-2" id="kpiRevSub"></div>
         </div>
         <div class="kpi">
+          <div class="kpi-head"><span class="kpi-label">Profit</span><span class="delta" id="kpiProfitChip" hidden></span></div>
           <div class="kpi-val" id="kpiProfit">—</div>
-          <div class="kpi-label">Gross Profit</div>
+          <svg class="spark kpi-spark" id="kpiProfitSpark" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true" focusable="false"></svg>
           <div class="kpi-sub text-2" id="kpiProfitSub"></div>
         </div>
         <div class="kpi">
+          <div class="kpi-head"><span class="kpi-label">Margin</span><span class="delta" id="kpiRoiChip" hidden></span></div>
           <div class="kpi-val" id="kpiRoi">—</div>
-          <div class="kpi-label">Gross Margin</div>
+          <svg class="spark kpi-spark" id="kpiRoiSpark" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true" focusable="false"></svg>
           <div class="kpi-sub text-2" id="kpiRoiSub"></div>
         </div>
         <div class="kpi">
+          <div class="kpi-head"><span class="kpi-label">Orders</span><span class="delta" id="kpiOrdersChip" hidden></span></div>
           <div class="kpi-val" id="kpiOrders">—</div>
-          <div class="kpi-label">Orders</div>
+          <svg class="spark kpi-spark" id="kpiOrdersSpark" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true" focusable="false"></svg>
           <div class="kpi-sub text-2" id="kpiOrdersSub"></div>
         </div>
-        <div class="kpi">
-          <div class="kpi-val" id="kpiCustomers">—</div>
-          <div class="kpi-label">Avg Order Value</div>
-          <div class="kpi-sub text-2" id="kpiCustSub"></div>
-        </div>
+        <p class="caption kpi-basis" id="kpiBasis" hidden></p>
       </div>
       <div class="attn-list mb-20" id="toPrintList" hidden>
         <button type="button" class="attn-row" data-tone="orange" onclick="showPrintQueue()">
@@ -389,13 +392,13 @@
       </div>
       <div class="card mb-20">
         <div class="card-title">Monthly Revenue &amp; Profit</div>
-        <div class="chart-wrap" id="monthlyChartWrap"></div>
+        <div id="monthlyChartWrap"></div>
       </div>
       <div class="grid-2 mb-20">
         <div class="card">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
             <div class="card-title" style="margin-bottom:0">Upcoming Deliveries</div>
-            <button onclick="openAddDelivery()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:3px 10px;font-size:0.75rem;cursor:pointer">+ Add</button>
+            <button onclick="openAddDelivery()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:3px 10px;font-size:0.75rem;cursor:pointer"><svg class="vpc-ico inline" aria-hidden="true"><use href="icons.svg#plus"/></svg>Add</button>
           </div>
           <div id="pipelineList"></div>
         </div>
@@ -483,13 +486,7 @@
     <div class="panel" id="panel-projections">
       <div class="card mb-20">
         <div class="card-title">Revenue Projection — Next 6 Months</div>
-        <div class="proj-legend">
-          <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div><span>Actual</span></div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--text2);opacity:.5"></div><span>Conservative (8 sets/mo)</span></div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div><span>Moderate (12 sets/mo)</span></div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div><span>Growth (16 sets/mo)</span></div>
-        </div>
-        <div class="chart-wrap" id="projChartWrap"></div>
+        <div id="projChartWrap"></div>
       </div>
       <div class="card">
         <div class="card-title">Scenario Breakdown</div>
@@ -550,6 +547,7 @@
       </div>
       <div class="card">
         <div class="card-title">Purchase History</div>
+        <div class="caption mb-10">Click a purchase to correct it, or right-click for more.</div>
         <div class="table-wrap">
           <table>
             <thead>
@@ -589,7 +587,7 @@
 <!-- Filament Modal -->
 <div class="modal-overlay" id="addFilamentModal">
   <div class="modal">
-    <h2>Log Filament Purchase</h2>
+    <h2 id="afTitle">Log Filament Purchase</h2>
     <div class="field-row">
       <div class="field"><label>Date</label><input type="date" id="afDate" data-error="Pick a date" required></div>
       <div class="field">
@@ -608,8 +606,9 @@
     </div>
     <div class="field"><label>Notes (optional)</label><input type="text" id="afNotes" placeholder="PLA, Matte, bad batch, etc."></div>
     <div class="modal-actions">
+      <button type="button" class="btn-danger-text" id="afDeleteBtn" onclick="deleteFromFilamentSheet()" hidden>Delete</button>
       <button class="btn-ghost" onclick="closeAddFilament()">Cancel</button>
-      <button class="btn-primary" onclick="saveNewFilament()">Save</button>
+      <button class="btn-primary" id="afSaveBtn" onclick="saveNewFilament()">Save</button>
     </div>
   </div>
 </div>
@@ -655,7 +654,7 @@
         </div>
         <div class="card">
           <div class="card-title">Revenue vs Expenses by Month</div>
-          <div class="chart-wrap" id="expMonthlyChart"></div>
+          <div id="expMonthlyChart"></div>
         </div>
       </div>
       <div class="card">
@@ -784,7 +783,7 @@
           <option>Custom</option>
         </select>
         <div class="row-wrap tight">
-          <button type="button" class="btn-ghost btn-small" onclick="openOrderProductModal()">+ New Product</button>
+          <button type="button" class="btn-ghost btn-small" onclick="openOrderProductModal()"><svg class="vpc-ico inline" aria-hidden="true"><use href="icons.svg#plus"/></svg>New Product</button>
           <button type="button" class="btn-ghost" id="aoEditProduct" style="font-size:0.75rem;padding:5px 10px;margin-top:6px;display:none" onclick="openOrderProductModal(document.getElementById('aoProduct').value)">Edit Product</button>
         </div>
       </div>
@@ -917,8 +916,8 @@
         <div class="subhead below" id="jtSubtitle">150 tags purchased · $112 total cost ($0.75/ea) · Sell price $5.00/ea</div>
       </div>
       <div class="row-wrap">
-        <button class="btn-ghost" onclick="openJtCharModal()">+ New Character</button>
-        <button class="btn-ghost" onclick="openJtRestockModal()">+ Restock</button>
+        <button class="btn-ghost" onclick="openJtCharModal()"><svg class="vpc-ico inline" aria-hidden="true"><use href="icons.svg#plus"/></svg>New Character</button>
+        <button class="btn-ghost" onclick="openJtRestockModal()"><svg class="vpc-ico inline" aria-hidden="true"><use href="icons.svg#plus"/></svg>Restock</button>
       </div>
     </div>
 
@@ -1040,7 +1039,7 @@
     <div class="field">
       <label>New characters in this order</label>
       <div id="jtOrderNewChars"></div>
-      <button class="btn-ghost btn-small" onclick="jtAddOrderNewCharRow()">+ Add new character</button>
+      <button class="btn-ghost btn-small" onclick="jtAddOrderNewCharRow()"><svg class="vpc-ico inline" aria-hidden="true"><use href="icons.svg#plus"/></svg>Add new character</button>
     </div>
     <div id="jtOrderPreview" style="background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:4px;font-size:0.82rem;color:var(--text2);display:none"></div>
     <div class="field"><label>Notes (optional)</label><input type="text" id="jtRestockNotes" placeholder="e.g. July vendor order"></div>
@@ -1092,8 +1091,8 @@
         <div class="subhead below" id="pinSubtitle">240 pins purchased · $228 total cost ($0.95/ea) · Sell price tracked per sale</div>
       </div>
       <div class="row-wrap">
-        <button class="btn-ghost" onclick="openPinCharModal()">+ New Character</button>
-        <button class="btn-ghost" onclick="openPinRestockModal()">+ Restock</button>
+        <button class="btn-ghost" onclick="openPinCharModal()"><svg class="vpc-ico inline" aria-hidden="true"><use href="icons.svg#plus"/></svg>New Character</button>
+        <button class="btn-ghost" onclick="openPinRestockModal()"><svg class="vpc-ico inline" aria-hidden="true"><use href="icons.svg#plus"/></svg>Restock</button>
       </div>
     </div>
 
@@ -1211,7 +1210,7 @@
     <div class="field">
       <label>New characters in this order</label>
       <div id="pinOrderNewChars"></div>
-      <button class="btn-ghost btn-small" onclick="pinAddOrderNewCharRow()">+ Add new character</button>
+      <button class="btn-ghost btn-small" onclick="pinAddOrderNewCharRow()"><svg class="vpc-ico inline" aria-hidden="true"><use href="icons.svg#plus"/></svg>Add new character</button>
     </div>
     <div id="pinOrderPreview" style="background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:4px;font-size:0.82rem;color:var(--text2);display:none"></div>
     <div class="field"><label>Notes (optional)</label><input type="text" id="pinRestockNotes" placeholder="e.g. July vendor order"></div>
@@ -1306,7 +1305,7 @@
     <div class="field">
       <label>New items in this order</label>
       <div id="coNewItems"></div>
-      <button class="btn-ghost btn-small" onclick="catAddOrderNewItemRow()">+ Add new item</button>
+      <button class="btn-ghost btn-small" onclick="catAddOrderNewItemRow()"><svg class="vpc-ico inline" aria-hidden="true"><use href="icons.svg#plus"/></svg>Add new item</button>
     </div>
     <div id="coPreview" style="background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:4px;font-size:0.82rem;color:var(--text2);display:none"></div>
     <div class="field"><label>Notes (optional)</label><input type="text" id="coNotes" placeholder="e.g. July vendor order"></div>
@@ -1444,6 +1443,7 @@ function addMonthKey(mk, n) {
 const LAST_MONTH = addMonthKey(THIS_MONTH, -1);
 function todayDate() { return new Date(TODAY + 'T00:00:00'); }
 function monthShort(mk) { return monthLabel(mk).split(' ')[0]; }
+function monthLong(mk) { const [y, m] = mk.split('-').map(Number); return new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }); }
 
 function dueDateClass(d) {
   if (!d) return '';
@@ -1525,22 +1525,13 @@ window.addEventListener('hashchange', routeFromHash);
 // ══════════════════════════════════════════════════════════════
 let ACTIVE_RANGE = 'all';
 
-function getRangeStart(range) {
-  const now = new Date();
-  if (range === 'all') return null;
-  if (range === 'ytd') return new Date(now.getFullYear(), 0, 1);
-  if (range === '6m')  { const d = new Date(now); d.setMonth(d.getMonth() - 6); return d; }
-  if (range === '3m')  { const d = new Date(now); d.setMonth(d.getMonth() - 3); return d; }
-  if (range === '30d') { const d = new Date(now); d.setDate(d.getDate() - 30); return d; }
-  if (range === '7d')  { const d = new Date(now); d.setDate(d.getDate() - 7); return d; }
-  return null;
-}
-
+// A range counts back from today, inclusive: 7D is today and the six days
+// before it (VPCUtil.rangePeriods, which the KPI tiles compare with too).
 function getFilteredOrders() {
   const all = getOrders();
-  const start = getRangeStart(ACTIVE_RANGE);
-  if (!start) return all;
-  return all.filter(o => o.date && new Date(o.date + 'T00:00:00') >= start);
+  if (ACTIVE_RANGE === 'all') return all;
+  const { from } = VPCUtil.rangePeriods(ACTIVE_RANGE, TODAY);
+  return all.filter(o => o.date && o.date >= from);
 }
 
 const RANGE_LABELS = { all: 'All time', ytd: 'Year to date', '6m': 'Last 6 months', '3m': 'Last 3 months', '30d': 'Last 30 days', '7d': 'Last 7 days' };
@@ -1643,76 +1634,107 @@ function daysSince(dateStr) {
 }
 
 // ── Sales KPIs ──
+// Four tiles. Each shows the range's figure, how it moved against the period
+// before (green up, red down, grey within 1%) and a trend line across the
+// range. All has nothing before it, so it shows no chips.
+function kpiTotals(orders) {
+  const revenue = orders.reduce((s, o) => s + o.salePrice, 0);
+  const cogs    = orders.reduce((s, o) => s + o.cogs, 0);
+  const profit  = revenue - cogs;
+  return { revenue, cogs, profit, margin: revenue > 0 ? profit / revenue * 100 : null, orders: orders.length };
+}
 function renderKPIs() {
+  const all    = getOrders();
   const orders = getFilteredOrders();
-  const totalRev  = orders.reduce((s, o) => s + o.salePrice, 0);
-  const totalProf = orders.reduce((s, o) => s + o.salePrice - o.cogs, 0);
-  const totalCogs = orders.reduce((s, o) => s + o.cogs, 0);
-  const custMap   = byCustomer(orders);
-  const custCount = Object.keys(custMap).length;
-  const thisMonth = THIS_MONTH;
-  const thisMoOrders = orders.filter(o => o.date.startsWith(thisMonth));
-  const thisMoRev = thisMoOrders.reduce((s, o) => s + o.salePrice, 0);
-  const grossMargin = totalRev > 0 ? (totalProf / totalRev * 100).toFixed(1) : '0.0';
-  const avgOrderVal = orders.length ? totalRev / orders.length : 0;
+  const t      = kpiTotals(orders);
+  const period = VPCUtil.rangePeriods(ACTIVE_RANGE, TODAY, all.length ? all[0].date : TODAY);
+  const before = period.prev
+    ? kpiTotals(all.filter(o => o.date >= period.prev.from && o.date <= period.prev.to)) : null;
+  const custCount = Object.keys(byCustomer(orders)).length;
+  const pct = (n) => n == null ? '—' : n.toFixed(1) + '%';
 
   // Values roll to their new figure when the range changes (vpcRoll, shared.js).
   const setVal = (id, text) => {
     const el = document.getElementById(id);
     if (window.vpcRoll) vpcRoll(el, String(text)); else el.textContent = text;
   };
-  setVal('kpiRevenue', fmt$(totalRev));
-  setVal('kpiProfit', fmt$(totalProf));
-  setVal('kpiRoi', grossMargin + '%');
-  setVal('kpiOrders', orders.length);
-  setVal('kpiCustomers', fmt$(avgOrderVal));
-  document.getElementById('kpiRevSub').textContent    = `${fmt$(thisMoRev)} this month`;
-  document.getElementById('kpiProfitSub').textContent = `COGS: ${fmt$(totalCogs)}`;
-  document.getElementById('kpiRoiSub').textContent    = `${fmt$(totalCogs)} total COGS`;
-  document.getElementById('kpiOrdersSub').textContent = `${thisMoOrders.length} this month`;
-  document.getElementById('kpiCustSub').textContent   = `${custCount} unique customers`;
+  const setText = (id, text) => { document.getElementById(id).textContent = text; };
+  setVal('kpiRevenue', fmt$(t.revenue));
+  setVal('kpiProfit', fmt$(t.profit));
+  setVal('kpiRoi', pct(t.margin));
+  setVal('kpiOrders', t.orders);
+  setText('kpiRevSub', t.orders ? `${fmt$(t.revenue / t.orders)} average order` : 'No orders in this range');
+  setText('kpiProfitSub', `${fmt$(t.cogs)} cost of goods`);
+  setText('kpiRoiSub', t.orders ? `${fmt$(t.profit / t.orders)} profit per order` : '');
+  setText('kpiOrdersSub', `${custCount} customer${custCount === 1 ? '' : 's'}`);
 
-  // header quick-stats
+  // Change chips: "+12%" to the eye, a full sentence to a screen reader.
+  const setChip = (id, change, was) => {
+    const el = document.getElementById(id);
+    el.hidden = !change;
+    if (!change) { el.removeAttribute('title'); return; }
+    el.dataset.dir = change.dir;
+    const said = change.dir === 'flat'
+      ? `About the same as ${period.before} (${was})`
+      : `${change.dir === 'up' ? 'Up' : 'Down'} ${change.text.replace(/^[+−]/, '')} on ${period.before} (${was})`;
+    el.title = said;
+    el.innerHTML = `<span aria-hidden="true">${change.text}</span><span class="sr-only">${esc(said)}</span>`;
+  };
+  setChip('kpiRevChip', before && VPCUtil.periodChange(t.revenue, before.revenue), before && fmt$(before.revenue));
+  setChip('kpiProfitChip', before && VPCUtil.periodChange(t.profit, before.profit), before && fmt$(before.profit));
+  setChip('kpiRoiChip', before && t.margin != null && VPCUtil.periodChange(t.margin, before.margin, true), before && pct(before.margin));
+  setChip('kpiOrdersChip', before && VPCUtil.periodChange(t.orders, before.orders), before && String(before.orders));
+  const basis = document.getElementById('kpiBasis');
+  basis.hidden = !before;
+  basis.textContent = before ? `Changes compare with ${period.before}.` : '';
+
+  // Trend lines: the range in up to 14 steps, each step's figure per day so a
+  // short first step doesn't dip. Margin is a ratio, so it isn't per day.
+  const steps = VPCUtil.trendBuckets(period.from, period.to).map(b => {
+    const bt = kpiTotals(orders.filter(o => o.date >= b.from && o.date <= b.to));
+    return { revenue: bt.revenue / b.days, profit: bt.profit / b.days, margin: bt.margin, orders: bt.orders / b.days };
+  });
+  const setSpark = (id, values, zero = true) => {
+    const p = VPCUtil.sparkPath(values, { zero });
+    document.getElementById(id).innerHTML = p
+      ? `<path class="spark-area" d="${p.area}"/><path class="spark-line" d="${p.line}" vector-effect="non-scaling-stroke"/>` +
+        `<path class="spark-dot" d="M${p.end[0]} ${p.end[1]}h0" vector-effect="non-scaling-stroke"/>`
+      : '';
+  };
+  setSpark('kpiRevSpark', steps.map(x => x.revenue));
+  setSpark('kpiProfitSpark', steps.map(x => x.profit));
+  setSpark('kpiRoiSpark', steps.map(x => x.margin), false);
+  setSpark('kpiOrdersSpark', steps.map(x => x.orders));
 }
 
 // ── Monthly Chart ──
+// One column a month: revenue in grey, the profit kept from it in blue.
 function renderMonthlyChart() {
-  const orders  = getOrders();
-  const monthly = byMonth(orders);
+  const monthly = byMonth(getOrders());
   const months  = Object.keys(monthly).sort();
+  const wrap = document.getElementById('monthlyChartWrap');
   if (!months.length) {
-    document.getElementById('monthlyChartWrap').innerHTML =
-      '<div style="color:var(--text2);font-size:.82rem;padding:18px 0">No orders yet — the chart appears with your first logged order.</div>';
+    wrap.innerHTML = '<div class="empty-line">No orders yet. The chart appears with your first order.</div>';
     return;
   }
-  const maxRev  = Math.max(...months.map(m => monthly[m].revenue));
-  const H = 220, pad = 44, barW = 32, gap = 58;
-  const stride = barW * 2 + gap;                          // full horizontal span of one month (two bars + gap)
-  const W = Math.max(pad + months.length * stride, 600);  // width MUST track the stride or the last months clip
-  let bars = '', axes = '';
-  [0, 0.25, 0.5, 0.75, 1].forEach(pct => {
-    const y = pad + (H - pad * 2) * (1 - pct);
-    const val = Math.round(maxRev * pct);
-    axes += `<line x1="${pad}" x2="${W-10}" y1="${y}" y2="${y}" stroke="var(--separator)" stroke-width="1"/>
-             <text x="${pad-6}" y="${y+4}" fill="var(--text2)" font-size="9" text-anchor="end">$${val>=1000?(val/1000).toFixed(0)+'k':val}</text>`;
+  wrap.innerHTML = VPCUtil.chart({
+    label: 'Revenue and profit by month',
+    overlay: true,
+    fmt: VPCUtil.fmtAxisMoney,
+    height: 200,
+    cols: months.map(mk => {
+      const m = monthly[mk];
+      return { x: monthLabel(mk), tip: { t: monthLong(mk), r: [
+        ['ref', 'Revenue', fmt$(m.revenue)],
+        ['main', 'Profit', fmt$(m.profit)],
+        ['', 'Orders', String(m.count)],
+      ] } };
+    }),
+    series: [
+      { k: 'ref', name: 'Revenue', values: months.map(mk => monthly[mk].revenue) },
+      { k: 'main', name: 'Profit', values: months.map(mk => monthly[mk].profit) },
+    ],
   });
-  months.forEach((mk, i) => {
-    const x = pad + i * stride;
-    const m = monthly[mk];
-    const rH = Math.max(2, (m.revenue / maxRev) * (H - pad * 2));
-    const pH = Math.max(2, (m.profit  / maxRev) * (H - pad * 2));
-    const ry = H - pad - rH, py = H - pad - pH;
-    bars += `
-      <rect x="${x}" y="${ry}" width="${barW}" height="${rH}" fill="#34d39955" rx="3"/>
-      <rect x="${x+barW+4}" y="${py}" width="${barW}" height="${pH}" fill="var(--accent)" opacity="0.8" rx="3"/>
-      <text x="${x+barW}" y="${H-pad+14}" fill="var(--text2)" font-size="9" text-anchor="middle">${monthLabel(mk)}</text>
-      <text x="${x+barW/2}" y="${ry-3}" fill="var(--green)" font-size="8.5" text-anchor="middle">$${m.revenue>=1000?(m.revenue/1000).toFixed(1)+'k':m.revenue}</text>
-      <text x="${x+barW+barW/2+4}" y="${py-3}" fill="var(--accent)" font-size="8.5" text-anchor="middle">$${m.profit>=1000?(m.profit/1000).toFixed(1)+'k':Math.round(m.profit)}</text>`;
-  });
-  const legend = `<text x="${W-160}" y="18" fill="var(--green)" font-size="10" font-weight="600">■ Revenue</text>
-                  <text x="${W-80}" y="18" fill="var(--accent)" font-size="10" font-weight="600">■ Profit</text>`;
-  document.getElementById('monthlyChartWrap').innerHTML =
-    `<svg class="chart" viewBox="0 0 ${W} ${H}" style="min-width:${W}px;height:${H}px">${axes}${bars}${legend}</svg>`;
 }
 
 // ── Pipeline ──
@@ -2304,14 +2326,14 @@ function renderProjections() {
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
   }
   const scenarios = [
-    { label:'Conservative', sets:8,  price:90, color:'#8892b066' },
-    { label:'Moderate',     sets:12, price:90, color:'var(--accent)' },
-    { label:'Growth',       sets:16, price:92, color:'var(--yellow)' },
+    { label:'Conservative', sets:8,  price:90, k:'ref2' },
+    { label:'Moderate',     sets:12, price:90, k:'ref' },
+    { label:'Growth',       sets:16, price:92, k:'ref2' },
   ];
   document.getElementById('scenarioTbody').innerHTML = scenarios.map(s => {
     const moRev = s.sets * s.price, moProf = s.sets * (s.price - 21.33);
     return `<tr>
-      <td><strong style="color:${s.color}">${s.label}</strong></td>
+      <td><strong>${s.label}</strong></td>
       <td class="num">${s.sets}</td><td class="num">${fmt$(s.price)}</td>
       <td class="num">${fmt$(moRev)}</td><td class="num">${fmt$(moProf)}</td>
       <td class="num">${fmt$(moRev*6)}</td><td class="num">${fmt$(moProf*6)}</td>
@@ -2326,35 +2348,26 @@ function renderProjections() {
     return;
   }
   const futureMonths = [1,2,3,4,5,6].map(n => addMonths(lastMonth, n));
-
   const allMonths = [...months, ...futureMonths];
-  const W = Math.max(allMonths.length * 80, 700), H = 230, pad = 50, gap = 60;
-  const allVals = [...months.map(mk => monthly[mk].revenue), ...scenarios.flatMap(s => futureMonths.map(() => s.sets * s.price))];
-  const maxVal = Math.max(...allVals) * 1.1;
-  const pxX = i => pad + i * gap;
-  const pxY = v => pad + (H - pad * 2) * (1 - v / maxVal);
-
-  let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" style="min-width:${W}px;height:${H}px">`;
-  [0, 0.25, 0.5, 0.75, 1].forEach(pct => {
-    const y = pxY(maxVal * pct), v = Math.round(maxVal * pct);
-    svg += `<line x1="${pad}" x2="${W-10}" y1="${y}" y2="${y}" stroke="var(--separator)" stroke-width="1"/>
-            <text x="${pad-6}" y="${y+4}" fill="var(--text2)" font-size="9" text-anchor="end">${v>=1000?(v/1000).toFixed(0)+'k':v}</text>`;
+  const last = months.length - 1;
+  const actual = months.map(mk => monthly[mk].revenue);
+  document.getElementById('projChartWrap').innerHTML = VPCUtil.chart({
+    kind: 'line',
+    label: 'Revenue by month, then six months projected three ways',
+    fmt: VPCUtil.fmtAxisMoney,
+    height: 220,
+    cols: allMonths.map((mk, i) => i <= last
+      ? { x: monthLabel(mk), tip: { t: monthLong(mk), r: [['main', 'Revenue', fmt$(actual[i])]] } }
+      : { x: monthLabel(mk), tip: { t: `${monthLong(mk)}, projected`, r: scenarios.map(sc => [sc.k, sc.label, fmt$(sc.sets * sc.price)]) } }),
+    series: [
+      // Each scenario starts from the latest real month
+      ...scenarios.map(sc => ({ k: sc.k, dash: true, end: sc.label,
+        values: allMonths.map((mk, i) => i < last ? null : i === last ? actual[last] : sc.sets * sc.price) })),
+      { k: 'main', area: true, values: allMonths.map((mk, i) => i <= last ? actual[i] : null) },
+    ],
+    divider: { at: months.length, label: 'Projected' },
+    keys: [['main', 'Revenue'], ['ref', 'Projected']],
   });
-  const divX = pxX(months.length - 0.5);
-  svg += `<line x1="${divX}" x2="${divX}" y1="${pad}" y2="${H-pad}" stroke="var(--separator)" stroke-width="1" stroke-dasharray="4,3"/>
-          <text x="${divX+4}" y="${pad-4}" fill="var(--text2)" font-size="9">Projected →</text>`;
-  const actPts = months.map((mk, i) => `${pxX(i)},${pxY(monthly[mk].revenue)}`).join(' ');
-  svg += `<polyline points="${actPts}" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linejoin="round"/>`;
-  months.forEach((mk, i) => { svg += `<circle cx="${pxX(i)}" cy="${pxY(monthly[mk].revenue)}" r="4" fill="var(--green)"/>`; });
-  scenarios.forEach(s => {
-    const pts = futureMonths.map((mk, i) => `${pxX(months.length+i)},${pxY(s.sets*s.price)}`).join(' ');
-    svg += `<polyline points="${pxX(months.length-1)},${pxY(monthly[lastMonth].revenue)} ${pts}" fill="none" stroke="${s.color}" stroke-width="2" stroke-dasharray="5,3" stroke-linejoin="round"/>`;
-  });
-  allMonths.forEach((mk, i) => {
-    svg += `<text x="${pxX(i)}" y="${H-pad+14}" fill="${i>=months.length?'var(--label-3)':'var(--text2)'}" font-size="9" text-anchor="middle">${monthLabel(mk)}</text>`;
-  });
-  svg += '</svg>';
-  document.getElementById('projChartWrap').innerHTML = svg;
 }
 
 // ── Insights ──
@@ -3104,7 +3117,7 @@ function printerCardHTML(printer) {
 
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
       <div class="section-label">Credit Log</div>
-      <button class="btn-primary" style="padding:5px 12px;font-size:.75rem" onclick="openPrinterCreditModal('${printer.id}')">+ Apply Credit</button>
+      <button class="btn-primary" style="padding:5px 12px;font-size:.75rem" onclick="openPrinterCreditModal('${printer.id}')">${VPCUtil.icon('plus', 'inline')}Apply Credit</button>
     </div>
     <div style="max-height:180px;overflow-y:auto">
       ${logRows || '<div style="font-size:.78rem;color:var(--text2);padding:10px 0">No credits logged yet.</div>'}
@@ -3390,6 +3403,12 @@ const LS_FILAMENT_KEY = VPCUtil.KEYS.filament;
 // this safe even if two devices migrate before their first sync.
 const LS_FILAMENT_MIGRATED = 'riser_filament_seed_migrated_v1';
 function initFilament() {
+  // Purchases saved without an id get one, so every row can be edited.
+  const stored = JSON.parse(localStorage.getItem(LS_FILAMENT_KEY) || 'null');
+  if (Array.isArray(stored) && stored.some(f => !f.id)) {
+    stored.forEach(f => { if (!f.id) f.id = uid(); });
+    localStorage.setItem(LS_FILAMENT_KEY, JSON.stringify(stored));
+  }
   if (localStorage.getItem(LS_FILAMENT_MIGRATED)) return;
   const extra = JSON.parse(localStorage.getItem(LS_FILAMENT_KEY) || '[]');
   const have = new Set(extra.map(f => f.id));
@@ -3442,43 +3461,30 @@ function renderFilament() {
 }
 
 function renderFilamentTrend(items) {
+  const el = document.getElementById('filamentTrendChart');
   if (items.length < 2) {
-    document.getElementById('filamentTrendChart').innerHTML =
-      '<div class="empty-line">The trend appears once you have two or more purchases.</div>';
+    el.innerHTML = '<div class="empty-line">The trend appears once you have two or more purchases.</div>';
     return;
   }
-  const W = 420, H = 180, pad = 44;
-  const prs = items.map(f => f.perRoll);
-  const maxPR = Math.max(...prs) * 1.1;
-  const minPR = Math.min(...prs) * 0.9;
-  function px(i) { return pad + (i / (items.length - 1)) * (W - pad - 16); }
-  function py(v) { return pad + (1 - (v - minPR) / (maxPR - minPR)) * (H - pad * 2); }
-  let grid = '', dots = '', labels = '';
-  [minPR, (minPR+maxPR)/2, maxPR].forEach(v => {
-    const y = py(v);
-    grid += `<line x1="${pad}" x2="${W}" y1="${y}" y2="${y}" stroke="var(--separator)" stroke-width="1"/>
-             <text x="${pad-4}" y="${y+4}" fill="var(--text2)" font-size="9" text-anchor="end">${fmt$(v)}</text>`;
-  });
   const avg = items.reduce((s,f) => s + f.perRoll, 0) / items.length;
-  const ay = py(avg);
-  grid += `<line x1="${pad}" x2="${W}" y1="${ay}" y2="${ay}" stroke="var(--text2)" stroke-width="1" stroke-dasharray="3,3"/>
-           <text x="${W-2}" y="${ay-3}" fill="var(--text2)" font-size="8" text-anchor="end">avg ${fmt$(avg)}</text>`;
-  const pts = items.map((f,i) => `${px(i)},${py(f.perRoll)}`).join(' ');
-  const areaBase = py(minPR);
-  const areaPath = `M${px(0)},${areaBase} ` + items.map((f,i) => `L${px(i)},${py(f.perRoll)}`).join(' ') + ` L${px(items.length-1)},${areaBase} Z`;
-  const line = `<path d="${areaPath}" fill="var(--accent2)" opacity=".08"/>
-    <polyline points="${pts}" fill="none" stroke="var(--accent2)" stroke-width="2" stroke-linejoin="round"/>`;
-  items.forEach((f,i) => {
-    const isBad = f.notes.includes('bad');
-    const color = isBad ? 'var(--red)' : 'var(--accent2)';
-    dots += `<circle cx="${px(i)}" cy="${py(f.perRoll)}" r="${isBad?5:3.5}" fill="${color}"/>`;
-    if (i === 0 || i === items.length - 1) labels += `<text x="${px(i)}" y="${py(f.perRoll)-6}" fill="${color}" font-size="8.5" text-anchor="middle">${fmt$(f.perRoll)}</text>`;
+  const bad = (f) => (f.notes || '').toLowerCase().includes('bad');
+  const marks = items.map((f, i) => bad(f) ? { i, k: 'bad' } : null).filter(Boolean);
+  el.innerHTML = VPCUtil.chart({
+    kind: 'line',
+    label: 'Cost per roll, purchase by purchase',
+    zero: false,
+    fmt: VPCUtil.fmtAxisMoney,
+    height: 160,
+    cols: items.map(f => ({ x: monthLabel(f.date.slice(0, 7)), tip: { t: VPCUtil.fmtDate(f.date), r: [
+      ['main', 'Per roll', fmt$(f.perRoll)],
+      ['', f.brand || 'Filament', `${f.qty} roll${f.qty === 1 ? '' : 's'}`],
+      ...(bad(f) ? [['bad', 'Bad batch', '']] : []),
+    ] } })),
+    series: [{ k: 'main', values: items.map(f => f.perRoll) }],
+    refs: [{ v: avg, label: `Average ${fmt$(avg)}` }],
+    marks,
+    keys: marks.length ? [['main', 'Cost per roll'], ['bad', 'Bad batch']] : [],
   });
-  const startLabel = `<text x="${px(0)}" y="${H-4}" fill="var(--text2)" font-size="8" text-anchor="middle">${fmtDate(items[0].date)}</text>`;
-  const endLabel = `<text x="${px(items.length-1)}" y="${H-4}" fill="var(--text2)" font-size="8" text-anchor="middle">${fmtDate(items[items.length-1].date)}</text>`;
-  document.getElementById('filamentTrendChart').innerHTML =
-    `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px">${grid}${line}${dots}${labels}${startLabel}${endLabel}
-     <text x="${W-2}" y="14" fill="var(--red)" font-size="8.5" text-anchor="end">● bad batch</text></svg>`;
 }
 
 function renderFilamentMonthly(items) {
@@ -3494,24 +3500,16 @@ function renderFilamentMonthly(items) {
       '<div class="empty-line">No purchases logged yet.</div>';
     return;
   }
-  const maxVal = Math.max(...months.map(m => monthMap[m].total));
-  const W = Math.max(months.length * 70, 380), H = 160, pad = 40, barW = 28;
-  let bars = '', axes = '';
-  [0, 0.5, 1].forEach(pct => {
-    const y = pad + (H - pad * 2) * (1 - pct);
-    axes += `<line x1="${pad}" x2="${W}" y1="${y}" y2="${y}" stroke="var(--separator)" stroke-width="1"/>
-             <text x="${pad-4}" y="${y+4}" fill="var(--text2)" font-size="9" text-anchor="end">$${Math.round(maxVal*pct)}</text>`;
+  document.getElementById('filamentMonthlyChart').innerHTML = VPCUtil.chart({
+    label: 'Filament spend by month',
+    fmt: VPCUtil.fmtAxisMoney,
+    height: 160,
+    cols: months.map(mk => ({ x: monthLabel(mk), tip: { t: monthLong(mk), r: [
+      ['main', 'Spent', fmt$(monthMap[mk].total)],
+      ['', 'Rolls', String(monthMap[mk].rolls)],
+    ] } })),
+    series: [{ k: 'main', values: months.map(mk => monthMap[mk].total) }],
   });
-  months.forEach((mk,i) => {
-    const x = pad + i * (barW + 42), m = monthMap[mk];
-    const h = Math.max(3, (m.total / maxVal) * (H - pad * 2)), y = H - pad - h;
-    bars += `<rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="var(--accent2)" opacity=".8" rx="3"/>
-             <text x="${x+barW/2}" y="${y-3}" fill="var(--accent2)" font-size="8.5" text-anchor="middle">$${Math.round(m.total)}</text>
-             <text x="${x+barW/2}" y="${H-pad+13}" fill="var(--text2)" font-size="8.5" text-anchor="middle">${monthLabel(mk)}</text>
-             <text x="${x+barW/2}" y="${H-pad+23}" fill="var(--label-3)" font-size="7.5" text-anchor="middle">${m.rolls}r</text>`;
-  });
-  document.getElementById('filamentMonthlyChart').innerHTML =
-    `<div class="chart-wrap"><svg class="chart" viewBox="0 0 ${W} ${H}" style="min-width:${W}px;height:${H}px">${axes}${bars}</svg></div>`;
 }
 
 function renderFilamentBrands(items) {
@@ -3581,12 +3579,13 @@ function renderFilamentTable(items) {
     const isAdj = f.notes.toLowerCase().includes('found') || f.perRoll < 1;
     const rowStyle = isBad ? 'background:var(--red-tint)' : isAdj ? 'background:var(--blue-tint)' : '';
     const noteCol = isBad ? 'var(--red)' : isAdj ? 'var(--accent)' : 'var(--text2)';
-    return `<tr style="${rowStyle}">
+    const open = f.id ? ` data-id="${f.id}" tabindex="0" onclick="openAddFilament('${f.id}')" onkeydown="if(event.key==='Enter'&&event.target===this)openAddFilament('${f.id}')" oncontextmenu="filamentContextMenu(event,'${f.id}')"` : '';
+    return `<tr style="${rowStyle}"${open}>
       <td class="nowrap">${fmtDate(f.date)}</td>
       <td class="num">${f.qty}</td>
       <td class="num">${fmt$(f.total)}</td>
       <td class="num" style="color:${isBad?'var(--red)':'var(--text)'};font-weight:${f.perRoll<11?'700':'400'}">${fmt$(f.perRoll)}</td>
-      <td><span class="badge" style="background:var(--surface2);color:var(--text2)">${f.brand}</span></td>
+      <td><span class="badge" style="background:var(--surface2);color:var(--text2)">${esc(f.brand)}</span></td>
       <td style="font-size:.75rem;color:${noteCol}">${esc(f.notes)||'—'}</td>
     </tr>`;
   }).join('');
@@ -3601,23 +3600,77 @@ function renderFilamentTable(items) {
   </tr>`;
 }
 
-function openAddFilament() {
-  document.getElementById('afDate').value = TODAY;
+// One sheet logs a purchase and corrects one: openAddFilament(id) edits.
+let filEditId = null;
+function openAddFilament(id) {
+  const f = id ? getFilament().find(x => x.id === id) : null;
+  if (id && !f) { toast('Purchase not found.'); return; }
+  filEditId = f ? f.id : null;
+  document.getElementById('afTitle').textContent = f ? 'Edit Filament Purchase' : 'Log Filament Purchase';
+  document.getElementById('afSaveBtn').textContent = f ? 'Save Changes' : 'Save';
+  document.getElementById('afDeleteBtn').hidden = !f;
+  document.getElementById('afDate').value = f ? f.date : TODAY;
+  const brand = document.getElementById('afBrand');
+  const b = f ? f.brand : 'Elegoo';
+  if (b && ![...brand.options].some(o => o.value === b)) brand.add(new Option(b, b));
+  brand.value = b || brand.options[0].value;
+  document.getElementById('afQty').value   = f ? f.qty : 4;
+  document.getElementById('afTotal').value = f ? f.total : '';
+  document.getElementById('afNotes').value = f ? (f.notes || '') : '';
+  window.vpcSyncForms?.(document.getElementById('addFilamentModal'));
   document.getElementById('addFilamentModal').classList.add('open');
   setTimeout(() => document.getElementById('afTotal').focus(), 50);
 }
-function closeAddFilament() { document.getElementById('addFilamentModal').classList.remove('open'); }
+function closeAddFilament() { filEditId = null; document.getElementById('addFilamentModal').classList.remove('open'); }
 function saveNewFilament() {
   if (window.vpcValidate && !vpcValidate('addFilamentModal')) return;
   const total = parseFloat(document.getElementById('afTotal').value);
   const qty   = parseInt(document.getElementById('afQty').value) || 1;
   const date  = document.getElementById('afDate').value;
   if (!date || isNaN(total)) { toast('Fill in Date and Total Cost.'); return; }
-  saveFilamentEntry({ id: uid(), date, qty, total, brand: document.getElementById('afBrand').value, notes: document.getElementById('afNotes').value.trim() });
+  const entry = { date, qty, total, brand: document.getElementById('afBrand').value, notes: document.getElementById('afNotes').value.trim() };
+  if (filEditId) {
+    const arr = JSON.parse(localStorage.getItem(LS_FILAMENT_KEY) || '[]');
+    const f = arr.find(x => x.id === filEditId);
+    if (!f) { toast('Purchase not found.'); return; }
+    Object.assign(f, entry);
+    localStorage.setItem(LS_FILAMENT_KEY, JSON.stringify(arr));
+    if (typeof auditLog === 'function') auditLog('EDIT_FILAMENT', LS_FILAMENT_KEY, `${date} · ${qty} rolls · ${fmt$(total)}`);
+    toast('Filament purchase updated.');
+  } else {
+    saveFilamentEntry({ id: uid(), ...entry });
+    toast(`Filament logged: ${qty} rolls @ ${fmt$(total/qty)}/roll`);
+  }
   closeAddFilament();
   renderFilament();
-  toast(`Filament logged: ${qty} rolls @ ${fmt$(total/qty)}/roll`);
 }
+function deleteFilament(id) {
+  const f = getFilament().find(x => x.id === id);
+  if (!f || !confirm(`Delete the ${fmtDate(f.date)} purchase (${f.qty} rolls, ${fmt$(f.total)})?`)) return false;
+  localStorage.setItem(LS_FILAMENT_KEY, JSON.stringify(JSON.parse(localStorage.getItem(LS_FILAMENT_KEY) || '[]').filter(x => x.id !== id)));
+  if (typeof auditLog === 'function') auditLog('DELETE_FILAMENT', LS_FILAMENT_KEY, `${f.date} · ${f.qty} rolls · ${fmt$(f.total)}`);
+  renderFilament();
+  toast('Filament purchase deleted.');
+  return true;
+}
+function deleteFromFilamentSheet() { if (filEditId && deleteFilament(filEditId)) closeAddFilament(); }
+function filamentContextMenu(e, id) {
+  e.preventDefault();
+  vpcMenu(e.currentTarget, {
+    label: 'Filament purchase', at: e.longPress ? undefined : { x: e.clientX, y: e.clientY },
+    options: [
+      { value: 'edit', label: 'Edit', icon: vpcIcon('pencil') },
+      { value: 'delete', label: 'Delete', icon: vpcIcon('trash'), danger: true },
+    ],
+    onSelect: v => (v === 'edit' ? openAddFilament(id) : deleteFilament(id)),
+  });
+}
+document.addEventListener('DOMContentLoaded', () => {
+  vpcLongPress(document.getElementById('filamentTbody'), e => {
+    const row = e.target?.closest?.('tr[data-id]');
+    if (row) filamentContextMenu({ ...e, currentTarget: row, longPress: true }, row.dataset.id);
+  });
+});
 document.getElementById('addFilamentModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeAddFilament(); });
 
 // ══════════════════════════════════════════════════════════════
@@ -3707,7 +3760,7 @@ function renderExpCategoryBars() {
           </div>
         </div>`;
       }).join('')
-    : '<div style="color:var(--text2);font-size:.83rem">No expenses logged yet. Click "+ Add Expense" to get started.</div>';
+    : '<div style="color:var(--text2);font-size:.83rem">No expenses logged yet. Use Add Expense at the top to get started.</div>';
 }
 
 // ── Revenue vs Expenses bar chart ──
@@ -3717,30 +3770,23 @@ function renderExpMonthlyChart() {
   const expMonthly = {};
   exps.forEach(e => { const mk = monthKey(e.date); expMonthly[mk] = (expMonthly[mk]||0) + e.amount; });
   const allMks = [...new Set([...Object.keys(revMonthly), ...Object.keys(expMonthly)])].sort();
-  if (!allMks.length) { document.getElementById('expMonthlyChart').innerHTML = '<div style="color:var(--text2);font-size:.83rem;padding:20px">No data yet.</div>'; return; }
-  const maxVal = Math.max(...allMks.map(mk => Math.max(revMonthly[mk]?.revenue||0, expMonthly[mk]||0)), 1);
-  const W = Math.max(allMks.length * 90, 500), H = 200, pad = 44, barW = 28, gap = 62;
-  let bars = '', axes = '';
-  [0, 0.25, 0.5, 0.75, 1].forEach(pct => {
-    const y = pad + (H-pad*2)*(1-pct), v = Math.round(maxVal*pct);
-    axes += `<line x1="${pad}" x2="${W-10}" y1="${y}" y2="${y}" stroke="var(--separator)" stroke-width="1"/>
-             <text x="${pad-6}" y="${y+4}" fill="var(--text2)" font-size="9" text-anchor="end">$${v>=1000?(v/1000).toFixed(0)+'k':v}</text>`;
+  if (!allMks.length) { document.getElementById('expMonthlyChart').innerHTML = '<div class="empty-line">No revenue or expenses yet.</div>'; return; }
+  const rev = (mk) => revMonthly[mk]?.revenue || 0;
+  const exp = (mk) => expMonthly[mk] || 0;
+  document.getElementById('expMonthlyChart').innerHTML = VPCUtil.chart({
+    label: 'Revenue and expenses by month',
+    fmt: VPCUtil.fmtAxisMoney,
+    height: 200,
+    cols: allMks.map(mk => ({ x: monthLabel(mk), tip: { t: monthLong(mk), r: [
+      ['main', 'Revenue', fmt$(rev(mk))],
+      ['ref', 'Expenses', fmt$(exp(mk))],
+      ['', 'Net', fmt$(rev(mk) - exp(mk))],
+    ] } })),
+    series: [
+      { k: 'main', name: 'Revenue', values: allMks.map(rev) },
+      { k: 'ref', name: 'Expenses', values: allMks.map(exp) },
+    ],
   });
-  allMks.forEach((mk, i) => {
-    const x   = pad + i*(barW*2+gap);
-    const rev = revMonthly[mk]?.revenue||0, exp = expMonthly[mk]||0;
-    const rH  = Math.max(2, (rev/maxVal)*(H-pad*2)), eH = Math.max(2, (exp/maxVal)*(H-pad*2));
-    const ry  = H-pad-rH, ey = H-pad-eH;
-    bars += `<rect x="${x}" y="${ry}" width="${barW}" height="${rH}" fill="#34d39944" rx="3"/>
-             <rect x="${x+barW+4}" y="${ey}" width="${barW}" height="${eH}" fill="#f8717166" rx="3"/>
-             <text x="${x+barW}" y="${H-pad+14}" fill="var(--text2)" font-size="9" text-anchor="middle">${monthLabel(mk)}</text>`;
-    if (rev > 0) bars += `<text x="${x+barW/2}" y="${ry-3}" fill="var(--green)" font-size="8" text-anchor="middle">$${rev>=1000?(rev/1000).toFixed(1)+'k':Math.round(rev)}</text>`;
-    if (exp > 0) bars += `<text x="${x+barW+barW/2+4}" y="${ey-3}" fill="var(--red)" font-size="8" text-anchor="middle">$${exp>=1000?(exp/1000).toFixed(1)+'k':Math.round(exp)}</text>`;
-  });
-  const legend = `<text x="${W-180}" y="18" fill="var(--green)" font-size="10" font-weight="600">■ Revenue</text>
-                  <text x="${W-100}" y="18" fill="var(--red)" font-size="10" font-weight="600">■ Expenses</text>`;
-  document.getElementById('expMonthlyChart').innerHTML =
-    `<svg class="chart" viewBox="0 0 ${W} ${H}" style="min-width:${W}px;height:${H}px">${axes}${bars}${legend}</svg>`;
 }
 
 // ── Recent expenses list ──
@@ -3801,7 +3847,7 @@ function renderExpTable() {
         <td colspan="4" class="text-2">Total — ${exps.length} expense${exps.length!==1?'s':''}</td>
         <td class="num">${fmt$(total)}</td><td></td>
       </tr>`
-    : '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:40px">No expenses yet. Click "+ Add Expense" to start.</td></tr>');
+    : '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:40px">No expenses yet. Use Add Expense at the top to start.</td></tr>');
 }
 function sortExpTable(col) {
   if (expSortCol === col) expSortDir *= -1; else { expSortCol = col; expSortDir = -1; }
@@ -4234,7 +4280,7 @@ function renderJtSalesLog() {
   const sales  = getJtSales().slice().sort((a,b) => b.date.localeCompare(a.date));
   const tbody  = document.getElementById('jtSalesTbody');
   if (!sales.length) {
-    tbody.innerHTML = `<tr><td colspan="8" class="empty-block">No sales logged yet — click <strong>+ Log Sale</strong> to start tracking.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="empty-block">No sales logged yet — use <strong>Log Sale</strong> at the top to start tracking.</td></tr>`;
     return;
   }
   const avgCost = jtAvgCost();
@@ -4779,7 +4825,7 @@ function renderPinSalesLog() {
   const sales = getPinSales().slice().sort((a,b) => b.date.localeCompare(a.date));
   const tbody = document.getElementById('pinSalesTbody');
   if (!sales.length) {
-    tbody.innerHTML = `<tr><td colspan="8" class="empty-block">No pin sales logged yet — click <strong>+ Log Sale</strong> to start tracking.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="empty-block">No pin sales logged yet — use <strong>Log Sale</strong> at the top to start tracking.</td></tr>`;
     return;
   }
   const avgCost  = pinAvgCost();
@@ -5246,8 +5292,8 @@ function catSectionHtml(cat) {
       </div>
       <div class="row-wrap">
         <button class="btn-ghost" onclick="openCatModal('${cat.id}')" title="Rename, restyle, or delete this category">Edit</button>
-        <button class="btn-ghost" onclick="openCatItemModal('${cat.id}')">+ New Item</button>
-        <button class="btn-ghost" onclick="openCatOrderModal('${cat.id}')">+ Restock</button>
+        <button class="btn-ghost" onclick="openCatItemModal('${cat.id}')">${VPCUtil.icon('plus', 'inline')}New Item</button>
+        <button class="btn-ghost" onclick="openCatOrderModal('${cat.id}')">${VPCUtil.icon('plus', 'inline')}Restock</button>
       </div>
     </div>
     <div class="grid-2 mb-20">
@@ -5340,7 +5386,7 @@ function renderCatSection(catId) {
 
 function renderCatInvGrid(cat, t, el) {
   if (!t.stock.length) {
-    el.innerHTML = `<div style="grid-column:1/-1;color:var(--text2);font-size:.83rem;padding:12px 0">No items yet — click <strong>+ New Item</strong> to add your first ${esc(catUnit(cat))}.</div>`;
+    el.innerHTML = `<div style="grid-column:1/-1;color:var(--text2);font-size:.83rem;padding:12px 0">No items yet — use <strong>New Item</strong> to add your first ${esc(catUnit(cat))}.</div>`;
     return;
   }
   const baseById = {};
@@ -5379,7 +5425,7 @@ function renderCatOrderHistory(cat, tbody) {
     notes: r.notes || '', id: r.id,
   }));
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text2)">No orders yet — log your first stock with <strong>+ New Item</strong> or <strong>+ Restock</strong>.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text2)">No orders yet — log your first stock with <strong>New Item</strong> or <strong>Restock</strong>.</td></tr>`;
     return;
   }
   rows.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
@@ -5411,7 +5457,7 @@ function renderCatOrderHistory(cat, tbody) {
 function renderCatSalesLog(cat, t, tbody) {
   const sales = catSales(cat.id).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   if (!sales.length) {
-    tbody.innerHTML = `<tr><td colspan="8" class="empty-block">No sales logged yet — click <strong>+ Log Sale</strong> to start tracking.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="empty-block">No sales logged yet — use <strong>Log Sale</strong> at the top to start tracking.</td></tr>`;
     return;
   }
   const nameById = {};

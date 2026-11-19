@@ -24,7 +24,7 @@
   .btn-danger { background:color-mix(in srgb, var(--red) 12%, transparent); color:var(--red); border:1px solid color-mix(in srgb, var(--red) 35%, transparent); border-radius:999px; padding:9px 16px; font-size:.82rem; font-weight:600; cursor:pointer; font-family:inherit; }
 
   /* ── KPI strip ── */
-  .stat-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--border); border-bottom:1px solid var(--border); }
+  .stat-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--border); border-radius: var(--r-lg); overflow: hidden; border-bottom: none; width:calc(100% - 48px); max-width:1152px; margin:20px auto 0; }
   .stat-cell { background:var(--surface); padding:16px 22px; }
   .stat-val { font-size:1.5rem; font-weight:600; letter-spacing:-.5px; line-height:1; }
   .stat-lbl { font-size:0.75rem; color:var(--text2); margin-top:5px; }
@@ -104,16 +104,13 @@
   .snap-sub { font-size:0.75rem; color:var(--text2); margin-top:3px; max-width:520px; line-height:1.5; }
   .snap-legend { display:flex; gap:14px; flex-wrap:wrap; margin:10px 0 2px; }
   .snap-key { display:flex; align-items:center; gap:6px; font-size:0.75rem; color:var(--text2); font-weight:600; }
-  .snap-swatch { width:10px; height:10px; border-radius:3px; flex-shrink:0; }
   #snap-chart-box { position:relative; margin-top:6px; }
-  #snap-chart svg { display:block; width:100%; height:auto; }
-  .snap-tip { position:absolute; pointer-events:none; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:8px 12px; font-size:0.75rem; line-height:1.7; display:none; z-index:50; box-shadow:0 8px 30px rgba(0,0,0,.45); white-space:nowrap; }
   .snap-empty { text-align:center; color:var(--text2); font-size:.8rem; padding:26px 10px; line-height:1.6; }
 
 
   @media(max-width:820px) {
     .cat-grid { grid-template-columns:1fr; }
-    .stat-bar { grid-template-columns:repeat(2,1fr); }
+    .stat-bar { grid-template-columns:repeat(2,1fr); width:calc(100% - 24px); margin-top:16px; }
     main { padding:16px 12px 90px; }
   }
   @media(max-width:480px) {
@@ -131,6 +128,7 @@
     <button class="btn-primary vpc-primary" type="button" onclick="openItemModal()" aria-label="Add item"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#plus"/></svg><span>Add Item</span></button>
   </div>
 </header>
+<div class="large-head" style="--col:1200px"><h1 class="large-title">Card Inventory</h1></div>
 
 
 <div class="stat-bar">
@@ -174,7 +172,7 @@
     <div class="empty-icon"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#cards"/></svg></div>
     <div class="empty-title" id="empty-title">No inventory yet</div>
     <div class="empty-sub" id="empty-sub">Add your singles, slabs, and sealed product to see what your collection-for-sale is worth at a glance.</div>
-    <button class="btn-primary" onclick="openItemModal()">+ Add First Item</button>
+    <button class="btn-primary" onclick="openItemModal()"><svg class="vpc-ico inline" aria-hidden="true"><use href="icons.svg#plus"/></svg>Add First Item</button>
   </div>
 
   <!-- ── Value over time: one snapshot per show ── -->
@@ -189,7 +187,6 @@
     </div>
     <div id="snap-chart-box">
       <div id="snap-chart"></div>
-      <div class="snap-tip" id="snap-tip"></div>
     </div>
     <div class="snap-empty" id="snap-empty">No snapshots yet — take your first one after your next show (or right now, for a starting point).</div>
     <div class="table-scroll" id="snap-table" style="margin-top:10px"></div>
@@ -640,116 +637,36 @@ function renderSnapCurrent(snaps) {
   el.innerHTML = h; el.style.display = 'block';
 }
 
-// Round a max value up to a "nice" axis ceiling (1/2/2.5/5 × 10^n).
-function niceCeil(v) {
-  if (v <= 0) return 100;
-  const p = Math.pow(10, Math.floor(Math.log10(v)));
-  for (const m of [1, 2, 2.5, 5, 10]) if (v <= m * p) return m * p;
-  return 10 * p;
-}
-const fmtAxis$ = v => v >= 1000 ? '$' + (+(v / 1000).toFixed(1)) + 'k' : '$' + Math.round(v);
-
-let snapPts = []; // chart geometry cache for the hover layer
-
+// Value over time: one blue line, spaced by date. The scale hugs the values
+// when they cluster high, so growth between shows doesn't flatten against
+// $0. Each point's value box breaks the total down and shows the change
+// since the show before.
 function renderSnapChart(snaps) {
   const box   = document.getElementById('snap-chart');
   const empty = document.getElementById('snap-empty');
-  document.getElementById('snap-tip').style.display = 'none';
-  if (!snaps.length) {
-    box.innerHTML = ''; empty.style.display = 'block'; snapPts = [];
-    return;
-  }
+  if (!snaps.length) { box.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
-
-  const W = Math.max(320, document.getElementById('snap-chart-box').clientWidth || 700);
-  const H = 230, padL = 52, padR = 16, padT = 26, padB = 28;
-  const plotW = W - padL - padR, plotH = H - padT - padB;
-
-  // One line: each snapshot's TOTAL value (never summed across dates).
-  // The y domain hugs the data when values cluster high, so growth between
-  // shows stays visible instead of flattening against a $0 baseline.
   const vals = snaps.map(s => s.value || 0);
-  const vMax = Math.max(...vals), vMin = Math.min(...vals);
-  const yTop = niceCeil(vMax * 1.05) || 100;
-  const step = yTop / 10;
-  let yBot = vMin >= yTop * 0.5 ? Math.max(0, Math.floor((vMin * 0.95) / step) * step) : 0;
-  if (yBot >= yTop) yBot = 0;
-  const yPos = v => padT + plotH - ((v - yBot) / (yTop - yBot)) * plotH;
-
   const t0 = new Date(snaps[0].date).getTime();
-  const t1 = new Date(snaps[snaps.length - 1].date).getTime();
-  const xPos = s => snaps.length === 1 ? padL + plotW / 2
-    : padL + ((new Date(s.date).getTime() - t0) / Math.max(1, t1 - t0)) * plotW;
-
-  snapPts = snaps.map(s => ({ x: xPos(s), snap: s }));
-
-  // Grid + y labels (recessive)
-  let g = '';
-  const steps = 4;
-  for (let i = 0; i <= steps; i++) {
-    const v = yBot + ((yTop - yBot) / steps) * i, y = yPos(v);
-    g += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="color-mix(in srgb, var(--label) 6%, transparent)" stroke-width="1"/>`;
-    g += `<text x="${padL - 8}" y="${y + 3}" text-anchor="end" font-size="10" fill="var(--text2)">${fmtAxis$(v)}</text>`;
-  }
-
-  const LINE = 'var(--green)'; // the page's market-value green
-  let marks = '';
-  const pts = snaps.map((s, i) => ({ x: snapPts[i].x, y: yPos(s.value || 0) }));
-  if (snaps.length > 1) {
-    marks += `<path d="M${pts.map(p => `${p.x},${p.y}`).join(' L')} L${pts[pts.length - 1].x},${padT + plotH} L${pts[0].x},${padT + plotH} Z" fill="${LINE}" fill-opacity="0.09"/>`;
-    marks += `<path d="M${pts.map(p => `${p.x},${p.y}`).join(' L')}" fill="none" stroke="${LINE}" stroke-width="2" stroke-linejoin="round"/>`;
-  }
-  snaps.forEach((s, i) => {
-    marks += `<circle cx="${pts[i].x}" cy="${pts[i].y}" r="4" fill="${LINE}" stroke="var(--bg)" stroke-width="1.5"/>`;
-    // Growth since the previous show, right on the chart.
-    if (i > 0 && snaps.length <= 12) {
-      const d = money((s.value || 0) - (snaps[i - 1].value || 0));
-      const col = d > 0 ? 'var(--green)' : d < 0 ? 'var(--red)' : 'var(--text2)';
-      const anchor = i === snaps.length - 1 ? 'end' : 'middle';
-      marks += `<text x="${anchor === 'end' ? pts[i].x + 4 : pts[i].x}" y="${Math.max(10, pts[i].y - 12)}" text-anchor="${anchor}" font-size="10" font-weight="700" fill="${col}">${d >= 0 ? '+' : '−'}${fmtAxis$(Math.abs(d))}</text>`;
-    }
+  const span = Math.max(1, new Date(snaps[snaps.length - 1].date).getTime() - t0);
+  box.innerHTML = VPCUtil.chart({
+    kind: 'line',
+    label: 'Inventory value over time',
+    zero: Math.min(...vals) < Math.max(...vals) * 0.5,
+    fmt: VPCUtil.fmtAxisMoney,
+    height: 220,
+    cols: snaps.map((s, i) => {
+      const d = i ? money((s.value || 0) - (snaps[i - 1].value || 0)) : null;
+      return { x: VPCUtil.fmtDate(s.date).replace(/, \d{4}$/, ''), tip: { t: VPCUtil.fmtDate(s.date) + (s.label ? ` · ${s.label}` : ''), r: [
+        ...SNAP_CATS.map(c => ['', c.label, fmtMoney(snapCatVal(s, c.key))]),
+        ['main', 'Total', fmtMoney(s.value || 0)],
+        ['', 'Cost', fmtMoney(s.cost || 0)],
+        ...(d == null ? [] : [['', 'Change', `${d >= 0 ? '+' : '−'}${fmtMoney(Math.abs(d))}`]]),
+      ] } };
+    }),
+    xs: snaps.length > 1 ? snaps.map(s => (new Date(s.date).getTime() - t0) / span) : null,
+    series: [{ k: 'main', area: true, values: vals }],
   });
-  const last = snaps[snaps.length - 1], lastP = pts[pts.length - 1];
-  marks += `<text x="${snaps.length === 1 ? lastP.x : W - padR}" y="${Math.max(12, lastP.y - (snaps.length > 1 ? 26 : 12))}" text-anchor="${snaps.length === 1 ? 'middle' : 'end'}" font-size="11" font-weight="700" fill="var(--text)">Total ${fmtMoney(last.value)}</text>`;
-
-  // X labels: first + last (+ middle when there's room).
-  let xl = '';
-  const xLabelIdx = snaps.length <= 2 ? snaps.map((_, i) => i)
-    : [0, Math.floor((snaps.length - 1) / 2), snaps.length - 1];
-  [...new Set(xLabelIdx)].forEach(i => {
-    const anchor = i === 0 ? 'start' : i === snaps.length - 1 ? 'end' : 'middle';
-    xl += `<text x="${snapPts[i].x}" y="${H - 8}" text-anchor="${snaps.length === 1 ? 'middle' : anchor}" font-size="10" fill="var(--text2)">${fmtDate(snaps[i].date)}</text>`;
-  });
-
-  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Inventory value over time">
-    ${g}<g id="snap-marks">${marks}</g>
-    <line id="snap-cross" x1="0" y1="${padT}" x2="0" y2="${padT + plotH}" stroke="color-mix(in srgb, var(--label) 25%, transparent)" stroke-width="1" style="display:none"/>
-    ${xl}
-  </svg>`;
-
-  // Hover layer: crosshair snaps to the nearest snapshot; tooltip shows all buckets.
-  const svg = box.querySelector('svg');
-  const tip = document.getElementById('snap-tip');
-  const cross = svg.querySelector('#snap-cross');
-  svg.addEventListener('pointermove', e => {
-    if (!snapPts.length) return;
-    const r = svg.getBoundingClientRect();
-    const mx = (e.clientX - r.left) * (W / r.width);
-    let best = snapPts[0];
-    snapPts.forEach(p => { if (Math.abs(p.x - mx) < Math.abs(best.x - mx)) best = p; });
-    const s = best.snap;
-    cross.setAttribute('x1', best.x); cross.setAttribute('x2', best.x);
-    cross.style.display = '';
-    tip.innerHTML = `<strong>${fmtDate(s.date)}</strong>${s.label ? ' · ' + esc(s.label) : ''}<br>` +
-      SNAP_CATS.map(c => `<span class="snap-swatch" style="background:${c.color};display:inline-block;margin-right:5px"></span>${c.label} ${fmtMoney(snapCatVal(s, c.key))}`).join('<br>') +
-      `<br><strong>Total ${fmtMoney(s.value)}</strong> <span class="text-2">· cost ${fmtMoney(s.cost || 0)}</span>`;
-    tip.style.display = 'block';
-    const boxR = document.getElementById('snap-chart-box').getBoundingClientRect();
-    const px = best.x * (r.width / W) + r.left - boxR.left;
-    tip.style.left = Math.min(Math.max(4, px + 12), boxR.width - tip.offsetWidth - 4) + 'px';
-    tip.style.top = '10px';
-  });
-  svg.addEventListener('pointerleave', () => { tip.style.display = 'none'; cross.style.display = 'none'; });
 }
 
 function renderSnapTable(snaps) {
@@ -783,11 +700,6 @@ function renderSnapTable(snaps) {
   </tr></thead><tbody>${rows}</tbody></table>`;
 }
 
-let snapResizeRaf = null;
-window.addEventListener('resize', () => {
-  if (snapResizeRaf) return;
-  snapResizeRaf = requestAnimationFrame(() => { snapResizeRaf = null; renderSnapshots(); });
-});
 
 renderAll();
 </script>

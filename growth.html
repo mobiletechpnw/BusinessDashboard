@@ -90,8 +90,6 @@
   .panel-sub { font-size: 0.76rem; color: var(--text2); }
 
   /* Chart */
-  .chart-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .chart { display: block; }
   .range-group { display: flex; gap: 6px; }
   .range-btn { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); padding: 6px 12px; font-size: 0.75rem; }
   .range-btn.active { background: var(--accent-fill); color: var(--on-accent); border-color: var(--accent); }
@@ -238,7 +236,7 @@
         <button class="range-btn active" data-range="all">All</button>
       </div>
     </div>
-    <div class="chart-wrap" id="chartWrap"></div>
+    <div id="chartWrap"></div>
   </div>
 
   <!-- Snapshots -->
@@ -503,49 +501,26 @@ function drawChart() {
     return;
   }
 
-  const W = Math.max(680, s.length * 46), H = 260, pad = 40, padR = 16, padB = 30;
-  const vals = s.map(x => x.followers);
-  let maxV = Math.max(...vals, data.goal || 0);
-  let minV = Math.min(...vals);
-  // pad the range a touch
-  const span = Math.max(1, maxV - minV);
-  maxV = maxV + span * 0.1;
-  minV = Math.max(0, minV - span * 0.1);
-  const range2 = Math.max(1, maxV - minV);
-
-  const pxX = i => pad + (W - pad - padR) * (s.length === 1 ? 0.5 : i / (s.length - 1));
-  const pxY = v => pad * 0.4 + (H - pad * 0.4 - padB) * (1 - (v - minV) / range2);
-
-  let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" style="min-width:${W}px;height:${H}px">`;
-  // gridlines
-  [0, 0.25, 0.5, 0.75, 1].forEach(p => {
-    const v = minV + range2 * p, y = pxY(v);
-    svg += `<line x1="${pad}" x2="${W - padR}" y1="${y}" y2="${y}" stroke="var(--separator)" stroke-width="1"/>
-            <text x="${pad - 6}" y="${y + 4}" fill="var(--text2)" font-size="9" text-anchor="end">${fmtK(Math.round(v))}</text>`;
+  // Followers in blue, spaced by date; the goal dashed in grey. Values show
+  // on hover, tap or the arrow keys (VPCUtil.chart).
+  const t0 = new Date(s[0].date + 'T00:00:00').getTime();
+  const span = Math.max(1, new Date(s[s.length - 1].date + 'T00:00:00').getTime() - t0);
+  wrap.innerHTML = VPCUtil.chart({
+    kind: 'line',
+    label: 'Followers over time',
+    zero: false,
+    height: 240,
+    cols: s.map((x, i) => {
+      const d = i ? x.followers - s[i - 1].followers : null;
+      return { x: shortDate(x.date), tip: { t: VPCUtil.fmtDate(x.date), r: [
+        ['main', 'Followers', x.followers.toLocaleString()],
+        ...(d == null ? [] : [['', 'Change', `${d >= 0 ? '+' : '−'}${Math.abs(d).toLocaleString()}`]]),
+      ] } };
+    }),
+    xs: s.map(x => (new Date(x.date + 'T00:00:00').getTime() - t0) / span),
+    series: [{ k: 'main', area: true, values: s.map(x => x.followers) }],
+    refs: data.goal ? [{ v: data.goal, label: `Goal ${fmtK(data.goal)}` }] : [],
   });
-  // goal line
-  if (data.goal && data.goal >= minV && data.goal <= maxV) {
-    const gy = pxY(data.goal);
-    svg += `<line x1="${pad}" x2="${W - padR}" y1="${gy}" y2="${gy}" stroke="var(--accent2)" stroke-width="1.5" stroke-dasharray="5,3"/>
-            <text x="${W - padR}" y="${gy - 5}" fill="var(--accent2)" font-size="9" text-anchor="end">Goal ${fmtK(data.goal)}</text>`;
-  }
-  // area + line
-  const pts = s.map((x, i) => `${pxX(i)},${pxY(x.followers)}`).join(' ');
-  const areaPts = `${pad},${pxY(minV)} ${pts} ${pxX(s.length - 1)},${pxY(minV)}`;
-  svg += `<polygon points="${areaPts}" fill="url(#grGrad)" opacity="0.25"/>`;
-  svg += `<defs><linearGradient id="grGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--accent)"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>`;
-  svg += `<polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>`;
-  s.forEach((x, i) => {
-    svg += `<circle cx="${pxX(i)}" cy="${pxY(x.followers)}" r="3.5" fill="var(--accent)"><title>${fmtDate(x.date)}: ${x.followers.toLocaleString()}</title></circle>`;
-  });
-  // x labels — thin out if crowded
-  const step = Math.ceil(s.length / 8);
-  s.forEach((x, i) => {
-    if (i % step !== 0 && i !== s.length - 1) return;
-    svg += `<text x="${pxX(i)}" y="${H - padB + 18}" fill="var(--text2)" font-size="9" text-anchor="middle">${shortDate(x.date)}</text>`;
-  });
-  svg += '</svg>';
-  wrap.innerHTML = svg;
 }
 
 // ── Table ────────────────────────────────────────────────────────────

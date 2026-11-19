@@ -834,6 +834,331 @@
       return d >= from && d <= to;
     });
 
+  // ── Periods and trends ─────────────────────────────
+  // Dates are local 'YYYY-MM-DD' strings. The arithmetic runs in UTC, so a
+  // daylight-saving change never moves a day.
+  const pad2 = (n) => String(n).padStart(2, '0');
+  const ymdParts = (s) => String(s).split('-').map(Number);
+  const utcDay = (y, m, d) => new Date(Date.UTC(y, m - 1, d)).toISOString().slice(0, 10);
+  const addDays = (s, n) => {
+    const [y, m, d] = ymdParts(s);
+    return utcDay(y, m, d + n);
+  };
+  const daysBetween = (a, b) => {
+    const [y1, m1, d1] = ymdParts(a);
+    const [y2, m2, d2] = ymdParts(b);
+    return Math.round((Date.UTC(y2, m2 - 1, d2) - Date.UTC(y1, m1 - 1, d1)) / 864e5);
+  };
+
+  // The days a date range covers, counted back from today and inclusive (7d
+  // is today and the six days before it), and the stretch it is compared
+  // with: as many days just before it, or for YTD the same days last year.
+  // 'all' starts at `first`, the earliest record, and has nothing before it.
+  const RANGE_BEFORE = Object.freeze({
+    '7d': 'the 7 days before',
+    '30d': 'the 30 days before',
+    '3m': 'the 3 months before',
+    '6m': 'the 6 months before',
+    ytd: 'the same days last year',
+  });
+  const rangePeriods = (range, today, first) => {
+    const [y, m, d] = ymdParts(today);
+    let from;
+    if (range === '7d') from = addDays(today, -6);
+    else if (range === '30d') from = addDays(today, -29);
+    // The same day 3 or 6 months back (a missing day runs on into the next
+    // month, as Date#setMonth does), then the day after it.
+    else if (range === '3m') from = utcDay(y, m - 3, d + 1);
+    else if (range === '6m') from = utcDay(y, m - 6, d + 1);
+    else if (range === 'ytd') from = `${y}-01-01`;
+    else return { from: first && first < today ? first : today, to: today, prev: null, before: '' };
+    let prev;
+    if (range === 'ytd') {
+      const daysInMonth = new Date(Date.UTC(y - 1, m, 0)).getUTCDate();
+      prev = {
+        from: `${y - 1}-01-01`,
+        to: `${y - 1}-${pad2(m)}-${pad2(Math.min(d, daysInMonth))}`,
+      };
+    } else {
+      const len = daysBetween(from, today) + 1;
+      prev = { from: addDays(from, -len), to: addDays(from, -1) };
+    }
+    return { from, to: today, prev, before: RANGE_BEFORE[range] };
+  };
+
+  // How a figure moved against the period before: percent, or points for a
+  // figure that is itself a percentage. Under 1 either way is steady. null
+  // when there is nothing to compare with.
+  const periodChange = (cur, prev, points = false) => {
+    if (prev == null || !isFinite(prev) || !isFinite(cur) || (!points && prev === 0)) return null;
+    const by = points ? cur - prev : ((cur - prev) / Math.abs(prev)) * 100;
+    const dir = Math.abs(by) < 1 ? 'flat' : by > 0 ? 'up' : 'down';
+    const sign = dir === 'up' ? '+' : '−';
+    let text;
+    if (dir === 'flat') text = 'Steady';
+    else if (points) text = `${sign}${Math.abs(by).toFixed(1)} pts`;
+    else if (by >= 1000 && prev > 0) text = `${Math.round(cur / prev)}×`;
+    else text = `${sign}${Math.round(Math.abs(by))}%`;
+    return { dir, by, text };
+  };
+
+  // Buckets for a trend line over [from, to]: runs of whole days counted back
+  // from `to`, sized so there are no more than 14. A short leftover at the
+  // start joins its neighbour, so one quiet day doesn't start the line at 0.
+  const TREND_STEPS = [1, 3, 7, 14, 30, 61, 91, 182, 365];
+  const trendBuckets = (from, to) => {
+    const days = daysBetween(from, to) + 1;
+    if (!(days >= 1)) return [];
+    const step = TREND_STEPS.find((n) => days / n <= 14) || Math.ceil(days / 14);
+    const out = [];
+    let end = to;
+    while (daysBetween(from, end) >= 0) {
+      let start = addDays(end, 1 - step);
+      if (daysBetween(from, start) < 0) start = from;
+      out.unshift({ from: start, to: end, days: daysBetween(start, end) + 1 });
+      end = addDays(start, -1);
+    }
+    if (out.length > 2 && out[0].days < step / 2) {
+      out[1].from = out[0].from;
+      out[1].days += out[0].days;
+      out.shift();
+    }
+    return out;
+  };
+
+  // A sparkline in a w×h box: the line, the area under it and the last
+  // point. Null values are skipped. `zero` keeps 0 on the scale, so a small
+  // figure doesn't look like a big one. null with fewer than two points.
+  const sparkPath = (values, { w = 100, h = 30, pad = 3, zero = true } = {}) => {
+    const pts = values.map((v, i) => [i, v]).filter(([, v]) => v != null && isFinite(v));
+    if (pts.length < 2) return null;
+    let lo = Math.min(...pts.map((p) => p[1]));
+    let hi = Math.max(...pts.map((p) => p[1]));
+    if (zero) {
+      lo = Math.min(lo, 0);
+      hi = Math.max(hi, 0);
+    }
+    const span = hi - lo;
+    const num = (n) => +n.toFixed(2);
+    const x = (i) => num((i / (values.length - 1)) * w);
+    const y = (v) =>
+      num(span ? h - pad - ((v - lo) / span) * (h - pad * 2) : hi === 0 ? h - pad : h / 2);
+    const xy = pts.map(([i, v]) => [x(i), y(v)]);
+    const line = xy.map(([a, b], k) => `${k ? 'L' : 'M'}${a} ${b}`).join(' ');
+    const last = xy[xy.length - 1];
+    return { line, area: `${line} L${last[0]} ${h} L${xy[0][0]} ${h} Z`, end: last };
+  };
+
+  // ── Charts ─────────────────────────────────────────
+  // One builder for every chart in the app: bars (side by side, or one over
+  // the other) or lines. The main series is blue and what it's compared with
+  // grey (styles.css .vchart). Gridlines are faint, and values show on hover,
+  // tap or the arrow keys (shared.js) instead of printed on every bar. The
+  // chart fills its card, and scrolls sideways only when its columns don't
+  // fit, starting at the latest. Returns HTML.
+
+  // Round gridline values from a round floor to a round ceiling, about
+  // `count` steps apart.
+  const niceScale = (lo, hi, count = 4) => {
+    if (!(hi > lo)) hi = lo + (Math.abs(lo) || 1);
+    const raw = (hi - lo) / count;
+    const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    const f = raw / mag;
+    const step = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * mag;
+    const bottom = Math.floor(lo / step + 1e-9) * step;
+    const top = Math.ceil(hi / step - 1e-9) * step;
+    const ticks = [];
+    for (let v = bottom; v <= top + step / 2; v += step) ticks.push(+v.toFixed(10));
+    return { lo: bottom, hi: top, ticks };
+  };
+  // Short axis labels: 1500 → 1.5k, and with a $ for money.
+  const fmtAxisNum = (v) => {
+    const a = Math.abs(v);
+    const n = a >= 1000 ? `${+(a / 1000).toFixed(1)}k` : `${+a.toFixed(a % 1 ? 2 : 0)}`;
+    return (v < 0 ? '−' : '') + n;
+  };
+  const fmtAxisMoney = (v) => {
+    const s = fmtAxisNum(v);
+    return s[0] === '−' ? `−$${s.slice(1)}` : `$${s}`;
+  };
+
+  // o.cols    [{ x: 'Oct', tip: { t: 'October 2026', r: [[key, label, value]] } }]
+  //           key picks the swatch in the tip: 'main', 'ref', 'ref2', 'bad'
+  // o.series  [{ k: 'main'|'ref'|'ref2', name, values: [n|null], dash, area, end }]
+  //           drawn in order, so put the main series last
+  // o.kind    'bar' (default) or 'line'      o.overlay  bars over each other
+  // o.refs    [{ v, label }]  dashed lines across, such as a goal or average
+  // o.marks   [{ i, k: 'bad' }]  points picked out on the main line
+  // o.divider { at, label }  a dashed line before column `at`
+  // o.xs      0–1 positions, for points spaced by time instead of evenly
+  // o.zero    false lets the scale hug the data instead of starting at 0
+  // o.fmt     axis label formatter      o.height  plot height in px
+  // o.minCol  px per column before the chart scrolls (bars 48, lines 0)
+  // o.label   what the chart shows, for screen readers
+  // o.keys    legend entries [[key, label]]; by default the named series
+  const chart = (o) => {
+    const cols = o.cols || [];
+    const n = cols.length;
+    if (!n) return '';
+    const series = (o.series || []).filter(Boolean);
+    const isLine = o.kind === 'line';
+    const refs = o.refs || [];
+    const fmt = o.fmt || fmtAxisNum;
+    const r2 = (x) => +(+x).toFixed(2);
+    const ok = (v) => v != null && isFinite(v);
+    const vals = series
+      .flatMap((s) => s.values)
+      .concat(refs.map((r) => r.v))
+      .filter(ok);
+    let lo = vals.length ? Math.min(...vals) : 0;
+    let hi = vals.length ? Math.max(...vals) : 1;
+    if (o.zero !== false) {
+      lo = Math.min(lo, 0);
+      hi = Math.max(hi, 0);
+    }
+    const sc = niceScale(lo, hi, o.ticks || 4);
+    const pct = (v) => ((v - sc.lo) / (sc.hi - sc.lo)) * 100;
+    const zero = pct(Math.min(Math.max(0, sc.lo), sc.hi));
+    // Bars sit in the middle of equal columns; line points run edge to edge
+    // of an inset pane (or by time, with o.xs)
+    const xs = o.xs
+      ? o.xs.map((x) => x * 100)
+      : cols.map((_, i) => (isLine ? (n > 1 ? (i / (n - 1)) * 100 : 50) : ((i + 0.5) / n) * 100));
+    const edge = (i) => [
+      i ? (xs[i - 1] + xs[i]) / 2 : 0,
+      i < n - 1 ? (xs[i] + xs[i + 1]) / 2 : 100,
+    ];
+    const K = isLine || o.overlay ? 1 : Math.max(1, series.length);
+    const main = series.find((s) => (s.k || 'main') === 'main') || series[series.length - 1];
+
+    const ylab = sc.ticks.map((v) => fmt(v));
+    const grid = sc.ticks
+      .map((v) => `<i${v === 0 ? ' class="zero"' : ''} style="bottom:${r2(pct(v))}%"></i>`)
+      .join('');
+    const yAxis = sc.ticks
+      .map((v, j) => `<span style="bottom:${r2(pct(v))}%">${esc(ylab[j])}</span>`)
+      .join('');
+
+    // Columns: one hit area per value, holding its bars
+    const colsHtml = cols
+      .map((c, i) => {
+        const [a, b] = edge(i);
+        const px = b > a ? ((xs[i] - a) / (b - a)) * 100 : 50;
+        let bars = '';
+        if (!isLine)
+          series.forEach((s, k) => {
+            const v = s.values[i];
+            if (!ok(v)) return;
+            const p = pct(v);
+            const h = Math.max(Math.abs(p - zero), v ? 0.6 : 0);
+            bars += `<i class="vchart-bar ${s.k || 'main'}${v < 0 ? ' neg' : ''}" style="--k:${o.overlay ? 0 : k};bottom:${r2(Math.min(p, zero))}%;height:${r2(h)}%"></i>`;
+          });
+        const tip = escAttr(JSON.stringify(c.tip || { t: c.x || '' }));
+        return `<div class="vchart-col" data-i="${i}" data-tip="${tip}" style="left:${r2(a)}%;width:${r2(b - a)}%;--px:${r2(px)}%">${bars}</div>`;
+      })
+      .join('');
+
+    // Lines, in a 1000×1000 box stretched over the plot (strokes stay even)
+    let svg = '';
+    if (isLine) {
+      const P = (i, v) => `${r2(xs[i] * 10)} ${r2(1000 - pct(v) * 10)}`;
+      const base = r2(1000 - zero * 10);
+      series.forEach((s) => {
+        const segs = [];
+        let run = [];
+        s.values.forEach((v, i) => {
+          if (ok(v)) run.push(i);
+          else if (run.length) (segs.push(run), (run = []));
+        });
+        if (run.length) segs.push(run);
+        const cls = `${s.k || 'main'}${s.dash ? ' dash' : ''}`;
+        segs.forEach((seg) => {
+          const d = seg.map((i, j) => `${j ? 'L' : 'M'}${P(i, s.values[i])}`).join(' ');
+          if (s.area && seg.length > 1)
+            svg += `<path class="vchart-area" d="${d} L${r2(xs[seg[seg.length - 1]] * 10)} ${base} L${r2(xs[seg[0]] * 10)} ${base} Z"/>`;
+          svg +=
+            seg.length > 1
+              ? `<path class="vchart-line ${cls}" d="${d}"/>`
+              : `<path class="vchart-dot ${cls}" d="M${P(seg[0], s.values[seg[0]])}h0"/>`;
+        });
+      });
+      if (main) {
+        const mv = main.values;
+        (o.marks || []).forEach((m) => {
+          if (ok(mv[m.i]))
+            svg += `<path class="vchart-dot ${m.k || 'main'}" d="M${P(m.i, mv[m.i])}h0"/>`;
+        });
+        let last = -1;
+        mv.forEach((v, i) => ok(v) && (last = i));
+        if (last >= 0 && o.lastDot !== false)
+          svg += `<path class="vchart-dot main" d="M${P(last, mv[last])}h0"/>`;
+        // The point under the pointer: a ring, then a dot
+        mv.forEach((v, i) => {
+          if (!ok(v)) return;
+          svg += `<path class="vchart-pt ring" data-i="${i}" d="M${P(i, v)}h0"/><path class="vchart-pt" data-i="${i}" d="M${P(i, v)}h0"/>`;
+        });
+      }
+    }
+
+    // Reference lines are named in the legend, so no label sits on the data
+    const refsHtml = refs
+      .map((r) => `<div class="vchart-ref" style="bottom:${r2(pct(r.v))}%"></div>`)
+      .join('');
+    const divHtml = o.divider
+      ? `<div class="vchart-div" style="left:${r2(edge(o.divider.at)[0])}%"><span>${esc(o.divider.label || '')}</span></div>`
+      : '';
+    const endHtml = series
+      .filter((s) => s.end)
+      .map((s) => {
+        let j = -1;
+        s.values.forEach((v, i) => ok(v) && (j = i));
+        if (j < 0) return '';
+        const y = pct(s.values[j]);
+        // Above its last point, or below when the line runs along the top
+        return `<span class="vchart-end${y > 82 ? ' below' : ''}" style="left:${r2(xs[j])}%;bottom:${r2(y)}%">${esc(s.end)}</span>`;
+      })
+      .join('');
+
+    // Axis labels along the bottom: every column for bars, about six for
+    // lines, never the same label twice in a row
+    const every = o.xEvery || (isLine ? Math.max(1, Math.ceil(n / 6)) : 1);
+    let shown = null;
+    const xl = cols
+      .map((c, i) => {
+        if (!c.x || c.x === shown || !(i === n - 1 || (i % every === 0 && n - 1 - i >= every)))
+          return '';
+        shown = c.x;
+        return `<span style="left:${r2(xs[i])}%">${esc(c.x)}</span>`;
+      })
+      .join('');
+
+    const keys = (
+      o.keys || series.filter((s) => s.name).map((s) => [s.k || 'main', s.name])
+    ).slice();
+    keys.sort((a, b) => (a[0] === 'main' ? -1 : 0) - (b[0] === 'main' ? -1 : 0));
+    refs.forEach((r) => r.label && keys.push(['dash', r.label]));
+    const legend = keys.length
+      ? `<div class="vchart-legend">${keys.map(([k, label]) => `<span><i class="key ${k}"></i>${esc(label)}</span>`).join('')}</div>`
+      : '';
+    const minCol = o.minCol != null ? o.minCol : isLine ? 0 : 48;
+    const H = o.height || 200;
+    const yw = Math.max(...ylab.map((t) => t.length));
+    return (
+      `<div class="vchart ${isLine ? 'is-line' : 'is-bar'}" role="group" tabindex="0" aria-label="${escAttr(o.label || 'Chart')}. Use the arrow keys to read each value." style="--K:${K}${o.barMax ? `;--bar-max:${o.barMax}px` : ''}">` +
+      legend +
+      `<div class="vchart-body"><div class="vchart-y" style="width:${yw}ch;height:${H}px">${yAxis}</div>` +
+      `<div class="vchart-scroll"><div class="vchart-inner"${minCol ? ` style="min-width:${n * minCol}px"` : ''}>` +
+      `<div class="vchart-plot" style="height:${H}px"><div class="vchart-grid">${grid}</div>${refsHtml}<div class="vchart-pane">` +
+      (svg
+        ? `<svg viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true" focusable="false">${svg}</svg>`
+        : '') +
+      divHtml +
+      endHtml +
+      `<div class="vchart-cols">${colsHtml}</div></div></div>` +
+      `<div class="vchart-x">${xl}</div></div></div></div></div>`
+    );
+  };
+
   // ── Icons ──────────────────────────────────────────
   // One line-icon set, in icons.svg. Returns an inline <svg> that uses a
   // symbol from it; .vpc-ico (styles.css) sizes it and strokes it in the
@@ -892,6 +1217,16 @@
     customCatTotals,
     salesInPeriod,
     salesBetween,
+    addDays,
+    daysBetween,
+    rangePeriods,
+    periodChange,
+    trendBuckets,
+    sparkPath,
+    niceScale,
+    fmtAxisNum,
+    fmtAxisMoney,
+    chart,
     HISTORICAL_ORDERS,
     orderList,
     seedOrders,

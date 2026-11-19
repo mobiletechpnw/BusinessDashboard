@@ -15,7 +15,7 @@
 <style>
   body { min-height: 100vh; }
 
-  .tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 32px; background: var(--surface); position: sticky; top: var(--header-h); z-index: 150; }
+  .tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 max(24px, calc((100% - 1300px) / 2 + 24px)); background: var(--surface); position: sticky; top: var(--header-h); z-index: 150; }
   .tab { padding: 14px 20px; font-size: 0.84rem; font-weight: 600; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; user-select: none; }
   .tab:hover { color: var(--text); }
   .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
@@ -75,27 +75,10 @@
   .badge-yellow { background: color-mix(in srgb, var(--yellow) 15%, transparent); color: var(--yellow); }
   .badge-red { background: color-mix(in srgb, var(--red) 15%, transparent); color: var(--red); }
 
-  /* Bar chart — grouped side-by-side bars per month */
-  .bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 200px; padding: 0 4px; overflow-x: auto; }
-  .bar-col { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 44px; gap: 4px; }
-  .bar-wrap { display: flex; flex-direction: row; align-items: flex-end; gap: 2px; flex: 1; width: 100%; justify-content: center; }
-  .bar { width: 44%; border-radius: 3px 3px 0 0; transition: opacity 0.15s; cursor: default; position: relative; min-height: 3px; }
-  .bar:hover { opacity: 0.75; }
-  .bar-label { font-size: 0.75rem; color: var(--text2); white-space: nowrap; }
-  .bar-val { font-size: 0.75rem; font-weight: 600; color: var(--text2); line-height: 1; }
-
-  /* Legend */
-  .legend { display: flex; gap: 16px; margin-bottom: 16px; }
-  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--text2); }
-  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
-
   /* Empty state */
   .empty { text-align: center; padding: 48px 24px; color: var(--text2); font-size: 0.88rem; }
   .empty .e-icon { font-size: 2.5rem; margin-bottom: 12px; }
 
-  /* Tooltip */
-  .tooltip-val { position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); background: #000; color: var(--on-accent); font-size: 0.75rem; padding: 3px 6px; border-radius: 8px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.15s; }
-  .bar:hover .tooltip-val { opacity: 1; }
 
   /* P&L Statement */
   .pnl-header { margin-bottom: 22px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
@@ -126,8 +109,6 @@
     .tab-bar { padding: 0 8px; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
     .tab-bar::-webkit-scrollbar { display: none; }
     .tab { padding: 12px 14px; font-size: 0.78rem; white-space: nowrap; min-height: 44px; }
-    .bar-chart { gap: 3px; }
-    .bar-col { min-width: 36px; }
     .show-grid { grid-template-columns: 1fr; }
     .cost-row { flex-wrap: wrap; gap: 8px; }
     table { font-size: 0.76rem; }
@@ -238,11 +219,7 @@
   <div id="kpi-trends" class="kpi-strip mb-28"></div>
   <div class="card mb-24">
     <div class="card-title">Monthly Revenue & Profit</div>
-    <div class="legend">
-      <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div> Revenue</div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Profit</div>
-    </div>
-    <div id="monthly-chart" class="bar-chart"></div>
+    <div id="monthly-chart"></div>
   </div>
   <div class="grid-2">
     <div class="card">
@@ -403,8 +380,8 @@ function renderMargins() {
   // Revenue mix horizontal bar
   const lines = [
     { name: 'Risers',   rev: rRevenue,   profit: rRevenue - rCOGS,   units: rUnits,   color: 'var(--accent)' },
-    { name: 'Jet Tags', rev: jtRevenue,  profit: jtRevenue - jtCOGS, units: jtUnits,  color: 'var(--accent2)' },
-    { name: 'Pins',     rev: pinRevenue, profit: pinRevenue - pinCOGS, units: pinUnits, color: 'var(--orange)' },
+    { name: 'Jet Tags', rev: jtRevenue,  profit: jtRevenue - jtCOGS, units: jtUnits,  color: 'var(--accent)' },
+    { name: 'Pins',     rev: pinRevenue, profit: pinRevenue - pinCOGS, units: pinUnits, color: 'var(--accent)' },
   ];
   const maxRev = Math.max(...lines.map(l => l.rev), 1);
   $('product-line-chart').innerHTML = lines.map(l => {
@@ -595,7 +572,6 @@ function renderTrends() {
   });
 
   const keys = Object.keys(monthly).sort();
-  const maxRev = Math.max(...Object.values(monthly).map(m => m.rev), 1);
 
   const totalRevAll = Object.values(monthly).reduce((s,m) => s + m.rev, 0);
   const totalProfAll = Object.values(monthly).reduce((s,m) => s + m.profit, 0);
@@ -618,30 +594,26 @@ function renderTrends() {
   if (keys.length === 0) {
     $('monthly-chart').innerHTML = `<div class="empty" style="width:100%"><div class="e-icon"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#growth"/></svg></div>No sales data yet.</div>`;
   } else {
-    $('monthly-chart').innerHTML = keys.map(k => {
-      const m = monthly[k];
-      const revH   = Math.max((m.rev    / maxRev) * 160, 4);
-      const profH  = Math.max((m.profit / maxRev) * 160, 2);
-      const label  = k.slice(5); // MM
-      const months = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      // Include the 2-digit year ("Dec 25") — month alone turns ambiguous once
-      // the data spans more than a year.
-      const lbl    = (months[parseInt(label)] || label) + ' ' + k.slice(2, 4);
-      return `
-        <div class="bar-col">
-          <div class="bar-val">${fmtK(m.rev)}</div>
-          <div class="bar-wrap">
-            <div class="bar" style="height:${revH}px;background:var(--accent);opacity:0.7">
-              <span class="tooltip-val">${fmt(m.rev)}</span>
-            </div>
-            <div class="bar" style="height:${profH}px;background:var(--green);opacity:0.85">
-              <span class="tooltip-val">${fmt(m.profit)} profit</span>
-            </div>
-          </div>
-          <div class="bar-label">${lbl}</div>
-        </div>`;
-    }).join('');
+    const lbl = (k) => new Date(+k.slice(0, 4), +k.slice(5, 7) - 1, 1);
+    $('monthly-chart').innerHTML = VPCUtil.chart({
+      label: 'Revenue and profit by month',
+      overlay: true,
+      fmt: VPCUtil.fmtAxisMoney,
+      height: 200,
+      cols: keys.map(k => ({
+        x: lbl(k).toLocaleDateString('en-US', { month: 'short' }) + ' ' + k.slice(2, 4),
+        tip: { t: lbl(k).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }), r: [
+          ['ref', 'Revenue', fmt(monthly[k].rev)],
+          ['main', 'Profit', fmt(monthly[k].profit)],
+        ] },
+      })),
+      series: [
+        { k: 'ref', name: 'Revenue', values: keys.map(k => monthly[k].rev) },
+        { k: 'main', name: 'Profit', values: keys.map(k => monthly[k].profit) },
+      ],
+    });
   }
+
 
   // Top customers
   const custMap = {};

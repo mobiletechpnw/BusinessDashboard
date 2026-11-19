@@ -583,6 +583,16 @@ button:active {
   background: #5a2b2b;
 }
 
+/* Read by screen readers, not shown */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* ── Shared KPI strip ── */
 .kpi-strip {
   display: grid;
@@ -621,6 +631,348 @@ button:active {
 .kpi-sub {
   font-size: 0.75rem;
   margin-top: 4px;
+}
+/* Change against the period before: a small chip, green up, red down,
+   grey when steady. The sign carries the direction for anyone who can't
+   tell the colours apart. */
+.delta {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--text2);
+  background: var(--fill);
+}
+.delta[data-dir='up'] {
+  color: var(--green);
+  background: color-mix(in srgb, var(--green) 12%, transparent);
+}
+.delta[data-dir='down'] {
+  color: var(--red);
+  background: color-mix(in srgb, var(--red) 12%, transparent);
+}
+/* Trend line: drawn in a 100×30 box stretched to the tile, the stroke kept
+   even by vector-effect; the dot marks the latest step. */
+.spark {
+  display: block;
+  width: 100%;
+  height: 30px;
+  overflow: visible;
+}
+.spark-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.75;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.spark-area {
+  fill: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+.spark-dot {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+
+/* ── Charts (VPCUtil.chart in util.js; values on hover in shared.js) ──
+   Blue for the main series, grey for what it's compared with, faint
+   gridlines, labels in HTML so they stay sharp at 12px. */
+:root {
+  --chart-grid: color-mix(in srgb, var(--text) 7%, transparent);
+  --chart-base: color-mix(in srgb, var(--text) 18%, transparent);
+  --chart-ref: color-mix(in srgb, var(--text2) 42%, transparent);
+  --chart-ref2: color-mix(in srgb, var(--text2) 24%, transparent);
+}
+.vchart {
+  --bar-max: 32px;
+  position: relative;
+  border-radius: 8px;
+}
+.vchart:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 6px;
+}
+.vchart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-bottom: 10px;
+  font-size: 0.75rem;
+  color: var(--text2);
+}
+.vchart-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.key {
+  width: 10px;
+  height: 10px;
+  flex: none;
+  border-radius: 3px;
+  background: var(--chart-ref);
+}
+.key.main {
+  background: var(--accent);
+}
+.key.ref2 {
+  background: var(--chart-ref2);
+}
+.key.bad {
+  background: var(--red);
+  border-radius: 50%;
+}
+.key.dash {
+  width: 14px;
+  height: 0;
+  border-top: 2px dashed var(--chart-ref);
+  border-radius: 0;
+  background: none;
+}
+.vchart-body {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  padding-top: 8px;
+}
+.vchart-y {
+  position: relative;
+  box-sizing: content-box;
+  padding-right: 8px;
+  font-size: 0.75rem;
+  color: var(--text2);
+  font-variant-numeric: tabular-nums;
+}
+.vchart-y span {
+  position: absolute;
+  right: 8px;
+  transform: translateY(50%);
+  line-height: 1;
+  white-space: nowrap;
+}
+/* Right-to-left so a chart too wide for its card opens at the latest */
+.vchart-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  direction: rtl;
+  scrollbar-width: thin;
+}
+.vchart-inner {
+  direction: ltr;
+}
+.vchart-plot {
+  position: relative;
+}
+/* Lines sit in a pane inset from the edges, so the first and last points
+   and their labels aren't cut off */
+.vchart-pane {
+  position: absolute;
+  inset: 0;
+}
+.vchart.is-line .vchart-pane {
+  left: 24px;
+  right: 24px;
+}
+.vchart-grid i {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--chart-grid);
+}
+.vchart-grid i.zero {
+  background: var(--chart-base);
+}
+.vchart svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.vchart path {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+.vchart path.vchart-area {
+  fill: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+.vchart-line {
+  stroke: var(--accent);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.vchart-line.ref {
+  stroke: var(--chart-ref);
+  stroke-width: 2;
+}
+.vchart-line.ref2 {
+  stroke: var(--chart-ref2);
+  stroke-width: 2;
+}
+.vchart-line.dash {
+  stroke-dasharray: 6 4;
+}
+.vchart-dot {
+  stroke: var(--accent);
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+.vchart-dot.ref {
+  stroke: var(--chart-ref);
+}
+.vchart-dot.bad {
+  stroke: var(--red);
+}
+.vchart-pt {
+  stroke: transparent;
+  stroke-width: 0;
+  stroke-linecap: round;
+}
+.vchart-pt.is-active {
+  stroke: var(--accent);
+  stroke-width: 9;
+}
+.vchart-pt.ring.is-active {
+  stroke: var(--surface);
+  stroke-width: 14;
+}
+.vchart-cols {
+  position: absolute;
+  inset: 0;
+}
+.vchart-col {
+  --bw: min(var(--bar-max), calc(64% / var(--K)));
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 6px;
+}
+.vchart.is-bar .vchart-col.is-active {
+  background: var(--fill);
+}
+.vchart.is-line .vchart-col.is-active::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--px, 50%);
+  width: 1px;
+  background: var(--chart-base);
+}
+.vchart-bar {
+  position: absolute;
+  width: var(--bw);
+  left: calc(
+    50% - (var(--K) * var(--bw) + (var(--K) - 1) * 3px) / 2 + var(--k, 0) * (var(--bw) + 3px)
+  );
+  border-radius: 4px 4px 1px 1px;
+  background: var(--chart-ref);
+}
+.vchart-bar.main {
+  background: var(--accent);
+}
+.vchart-bar.ref2 {
+  background: var(--chart-ref2);
+}
+.vchart-bar.neg {
+  border-radius: 1px 1px 4px 4px;
+}
+.vchart-ref {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1.5px dashed var(--chart-ref);
+}
+.vchart-div span,
+.vchart-end {
+  position: absolute;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  color: var(--text2);
+  white-space: nowrap;
+}
+.vchart-div {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 1px dashed var(--chart-base);
+}
+.vchart-div span {
+  left: 6px;
+  bottom: 4px;
+}
+/* A series' name just above its last point, to the left */
+.vchart-end {
+  transform: translate(calc(-100% - 6px), -3px);
+}
+.vchart-end.below {
+  transform: translate(calc(-100% - 6px), calc(100% + 3px));
+}
+.vchart-x {
+  position: relative;
+  height: 18px;
+  margin-top: 8px;
+  font-size: 0.75rem;
+  line-height: 18px;
+  color: var(--text2);
+}
+.vchart-x span {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.vchart.is-line .vchart-x {
+  margin-left: 24px;
+  margin-right: 24px;
+}
+/* The value box that follows the pointer */
+.vchart-tip {
+  position: fixed;
+  z-index: 950;
+  display: grid;
+  gap: 3px;
+  min-width: 132px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: var(--shadow-pop);
+  font-size: 0.75rem;
+  line-height: 1.45;
+  pointer-events: none;
+}
+.vchart-tip[hidden] {
+  display: none;
+}
+.vchart-tip b {
+  font-weight: 600;
+  color: var(--text);
+}
+.vchart-tip-row {
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  color: var(--text2);
+}
+.vchart-tip-row .v {
+  color: var(--text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.key.none {
+  visibility: hidden;
 }
 @media (max-width: 680px) {
   .kpi-strip {
@@ -691,13 +1043,77 @@ html.has-large-title:not(.scrolled) header {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
-/* A page with a large title shows its small title only after scrolling. */
-html.has-large-title header .brand {
+/* A page with a large title shows its small title (and subtitle) in the bar
+   only after the large one has scrolled under it. */
+html.has-large-title header .brand,
+html.has-large-title header .title-sub {
   opacity: 0;
   transition: opacity var(--t-base) var(--ease);
 }
-html.has-large-title.title-in header .brand {
+html.has-large-title.title-in header .brand,
+html.has-large-title.title-in header .title-sub {
   opacity: 1;
+}
+/* ── Large title on list pages ──
+   34px bold under the clear bar, lined up with the page's content column
+   (--col). It scrolls under the bar and the small title fades in there
+   (shared.js watchScroll). Where the browser can tie an animation to the
+   scroll, it also fades and settles as it goes. */
+.large-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  width: 100%;
+  max-width: var(--col, 1300px);
+  margin: 0 auto;
+  padding: 4px 24px 12px;
+}
+/* A summary strip right under the title needs less room of its own */
+.large-head + .kpi-strip,
+.large-head + .stat-bar {
+  margin-top: 4px;
+}
+.large-text {
+  min-width: 0;
+}
+.large-title {
+  margin: 0;
+  font-size: 2.125rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+.large-sub {
+  margin-top: 2px;
+  font-size: 0.9375rem;
+  color: var(--text2);
+}
+@media (max-width: 700px) {
+  .large-head {
+    padding: 2px 16px 10px;
+  }
+  .large-title {
+    font-size: 1.875rem;
+  }
+}
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .large-title,
+    .large-sub {
+      transform-origin: 0 100%;
+      animation: large-title-settle linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 48px;
+    }
+  }
+}
+@keyframes large-title-settle {
+  to {
+    opacity: 0;
+    transform: scale(0.94);
+  }
 }
 /* One title style for every page: 17px semibold, like a navigation bar. */
 header .brand,

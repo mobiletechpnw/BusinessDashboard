@@ -256,3 +256,176 @@ test('salesBetween sums every product line inside an inclusive date range', () =
     count: 0,
   });
 });
+
+test('addDays and daysBetween cross months, years and daylight saving', () => {
+  assert.strictEqual(U.addDays('2026-11-19', -6), '2026-11-13');
+  assert.strictEqual(U.addDays('2026-01-01', -1), '2025-12-31');
+  assert.strictEqual(U.addDays('2028-02-28', 1), '2028-02-29');
+  assert.strictEqual(U.addDays('2026-03-07', 2), '2026-03-09');
+  assert.strictEqual(U.daysBetween('2026-11-13', '2026-11-19'), 6);
+  assert.strictEqual(U.daysBetween('2026-03-07', '2026-03-09'), 2);
+  assert.strictEqual(U.daysBetween('2026-11-19', '2026-11-13'), -6);
+});
+
+test('rangePeriods counts back from today and finds the period before', () => {
+  assert.deepStrictEqual(U.rangePeriods('7d', '2026-11-19'), {
+    from: '2026-11-13',
+    to: '2026-11-19',
+    prev: { from: '2026-11-06', to: '2026-11-12' },
+    before: 'the 7 days before',
+  });
+  const m30 = U.rangePeriods('30d', '2026-11-19');
+  assert.strictEqual(m30.from, '2026-10-21');
+  assert.deepStrictEqual(m30.prev, { from: '2026-09-21', to: '2026-10-20' });
+  // 3m starts the day after the same date three months back…
+  assert.strictEqual(U.rangePeriods('3m', '2026-11-19').from, '2026-08-20');
+  assert.strictEqual(U.rangePeriods('6m', '2026-02-10').from, '2025-08-11');
+  // …and a missing day runs on into the next month, like Date#setMonth
+  assert.strictEqual(U.rangePeriods('3m', '2026-05-31').from, '2026-03-04');
+  const p3 = U.rangePeriods('3m', '2026-11-19');
+  assert.strictEqual(U.daysBetween(p3.prev.from, p3.prev.to), U.daysBetween(p3.from, p3.to));
+  assert.strictEqual(p3.prev.to, '2026-08-19');
+  // YTD compares with the same days last year (29 Feb becomes 28 Feb)
+  assert.deepStrictEqual(U.rangePeriods('ytd', '2026-11-19').prev, {
+    from: '2025-01-01',
+    to: '2025-11-19',
+  });
+  assert.deepStrictEqual(U.rangePeriods('ytd', '2028-02-29').prev, {
+    from: '2027-01-01',
+    to: '2027-02-28',
+  });
+  // All starts at the first record and has nothing before it
+  assert.deepStrictEqual(U.rangePeriods('all', '2026-11-19', '2025-03-02'), {
+    from: '2025-03-02',
+    to: '2026-11-19',
+    prev: null,
+    before: '',
+  });
+  assert.strictEqual(U.rangePeriods('all', '2026-11-19').from, '2026-11-19');
+});
+
+test('periodChange reads up, down and steady, in percent or points', () => {
+  assert.strictEqual(U.periodChange(112, 100).dir, 'up');
+  assert.strictEqual(U.periodChange(112, 100).text, '+12%');
+  assert.strictEqual(Math.round(U.periodChange(112, 100).by), 12);
+  assert.strictEqual(U.periodChange(92, 100).text, '−8%');
+  assert.strictEqual(U.periodChange(92, 100).dir, 'down');
+  assert.strictEqual(U.periodChange(100.5, 100).dir, 'flat');
+  assert.strictEqual(U.periodChange(100.5, 100).text, 'Steady');
+  assert.strictEqual(U.periodChange(44.1, 42, true).text, '+2.1 pts');
+  assert.strictEqual(U.periodChange(42.6, 42, true).dir, 'flat');
+  assert.strictEqual(U.periodChange(500, 10).text, '50×');
+  assert.strictEqual(U.periodChange(-50, -100).dir, 'up');
+  assert.strictEqual(U.periodChange(10, 0), null);
+  assert.strictEqual(U.periodChange(10, null), null);
+  assert.strictEqual(U.periodChange(40, 0, true).text, '+40.0 pts');
+});
+
+test('trendBuckets cover the period exactly, at most 14, with no stub at the start', () => {
+  const check = (from, to, n, step) => {
+    const b = U.trendBuckets(from, to);
+    assert.strictEqual(b.length, n, `${from}…${to}`);
+    assert.strictEqual(b[0].from, from);
+    assert.strictEqual(b[b.length - 1].to, to);
+    for (let i = 1; i < b.length; i++) assert.strictEqual(U.addDays(b[i - 1].to, 1), b[i].from);
+    assert.ok(b.every((x) => x.days === U.daysBetween(x.from, x.to) + 1));
+    if (step) assert.ok(b.slice(1).every((x) => x.days === step));
+    return b;
+  };
+  check('2026-11-13', '2026-11-19', 7, 1);
+  check('2026-10-21', '2026-11-19', 10, 3);
+  const q = check('2026-08-20', '2026-11-19', 13, 7);
+  assert.strictEqual(q[0].days, 8); // the one-day stub joined the first week
+  check('2026-05-20', '2026-11-19', 13, 14);
+  check('2026-01-01', '2026-11-19', 11, 30);
+  assert.deepStrictEqual(U.trendBuckets('2026-11-19', '2026-11-19'), [
+    { from: '2026-11-19', to: '2026-11-19', days: 1 },
+  ]);
+  assert.deepStrictEqual(U.trendBuckets('2026-11-20', '2026-11-19'), []);
+});
+
+test('sparkPath scales from zero, skips gaps and needs two points', () => {
+  assert.deepStrictEqual(U.sparkPath([0, 10]), {
+    line: 'M0 27 L100 3',
+    area: 'M0 27 L100 3 L100 30 L0 30 Z',
+    end: [100, 3],
+  });
+  assert.strictEqual(U.sparkPath([5, 10, 10]).line, 'M0 15 L50 3 L100 3');
+  assert.strictEqual(U.sparkPath([40, null, 50], { zero: false }).line, 'M0 27 L100 3');
+  assert.strictEqual(U.sparkPath([0, 0, 0]).line, 'M0 27 L50 27 L100 27');
+  assert.strictEqual(U.sparkPath([7]), null);
+  assert.strictEqual(U.sparkPath([null, 3, null]), null);
+});
+
+test('niceScale picks round gridlines from a round floor to a round ceiling', () => {
+  assert.deepStrictEqual(U.niceScale(0, 1234), { lo: 0, hi: 1500, ticks: [0, 500, 1000, 1500] });
+  assert.deepStrictEqual(U.niceScale(0, 95).ticks, [0, 25, 50, 75, 100]);
+  assert.deepStrictEqual(U.niceScale(18.5, 23.4).ticks, [18, 20, 22, 24]);
+  assert.deepStrictEqual(U.niceScale(-120, 800).ticks, [-250, 0, 250, 500, 750, 1000]);
+  assert.deepStrictEqual(U.niceScale(0, 0).ticks, [0, 0.25, 0.5, 0.75, 1]);
+});
+
+test('chart axis labels are short', () => {
+  assert.deepStrictEqual([0, 1500, 12000, -500, 2.5, 999].map(U.fmtAxisMoney), [
+    '$0',
+    '$1.5k',
+    '$12k',
+    '−$500',
+    '$2.5',
+    '$999',
+  ]);
+  assert.strictEqual(U.fmtAxisNum(4200), '4.2k');
+});
+
+const unescape = (s) =>
+  s
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&');
+
+test('chart builds a column per value, with its values in data-tip', () => {
+  const html = U.chart({
+    label: 'Revenue',
+    overlay: true,
+    fmt: U.fmtAxisMoney,
+    cols: [{ x: 'Jan', tip: { t: 'January', r: [['main', 'Profit', '$5 <net>']] } }, { x: 'Feb' }],
+    series: [
+      { k: 'ref', name: 'Revenue', values: [10, 20] },
+      { k: 'main', name: 'Profit', values: [5, -3] },
+    ],
+  });
+  const cols = [...html.matchAll(/class="vchart-col" data-i="(\d)" data-tip="([^"]*)"/g)];
+  assert.strictEqual(cols.length, 2);
+  assert.deepStrictEqual(JSON.parse(unescape(cols[0][2])), {
+    t: 'January',
+    r: [['main', 'Profit', '$5 <net>']],
+  });
+  assert.deepStrictEqual(JSON.parse(unescape(cols[1][2])), { t: 'Feb' });
+  assert.strictEqual((html.match(/class="vchart-bar /g) || []).length, 4);
+  assert.match(html, /vchart-bar main neg/); // a loss goes below the zero line
+  assert.match(html, /<i class="zero"/);
+  assert.match(html, /aria-label="Revenue\./);
+  // The legend lists the main series first
+  assert.match(
+    html,
+    /<span><i class="key main"><\/i>Profit<\/span><span><i class="key ref"><\/i>Revenue<\/span>/
+  );
+  assert.strictEqual(U.chart({ cols: [] }), '');
+});
+
+test('line charts split at gaps, mark points and label about six columns', () => {
+  const html = U.chart({
+    kind: 'line',
+    cols: Array.from({ length: 12 }, (_, i) => ({ x: 'L' + i })),
+    series: [{ values: [1, 2, null, 4, 5, 6, 7, 8, 9, 10, 11, 12] }],
+    marks: [{ i: 4, k: 'bad' }],
+    refs: [{ v: 6, label: 'Average' }],
+  });
+  assert.strictEqual((html.match(/class="vchart-line main"/g) || []).length, 2);
+  assert.match(html, /vchart-dot bad/);
+  assert.match(html, /<i class="key dash"><\/i>Average/);
+  const labels = [...html.matchAll(/<span style="left:[\d.]+%">(L\d+)<\/span>/g)].map((m) => m[1]);
+  assert.deepStrictEqual(labels, ['L0', 'L2', 'L4', 'L6', 'L8', 'L11']);
+});
