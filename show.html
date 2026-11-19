@@ -123,7 +123,7 @@ main.show { max-width: 960px; margin: 0 auto; padding: 20px 32px calc(48px + var
 /* Undo, for the sale just logged */
 .show-toast {
   position: fixed; left: 50%; bottom: calc(20px + var(--chrome-bottom)); z-index: 600;
-  display: flex; align-items: center; gap: 12px; max-width: calc(100vw - 32px);
+  display: flex; align-items: center; gap: 8px; width: max-content; max-width: calc(100vw - 32px);
   padding: 6px 6px 6px 18px; border-radius: var(--r-full);
   background: var(--surface2); color: var(--label); box-shadow: var(--shadow-pop);
   transform: translate(-50%, calc(100% + 32px)); opacity: 0; pointer-events: none;
@@ -131,9 +131,32 @@ main.show { max-width: 960px; margin: 0 auto; padding: 20px 32px calc(48px + var
 }
 .show-toast.show { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
 .show-toast-text { min-width: 0; font-size: 0.9375rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.show-toast button { flex: none; min-height: 36px; padding: 0 16px; background: var(--fill); color: var(--accent); font-size: 0.9375rem; }
-.show-toast:not(.has-undo) { padding-right: 18px; }
-.show-toast:not(.has-undo) button { display: none; }
+.show-toast-text { margin-right: 4px; }
+/* Said to screen readers, not shown (the toast has no room for it) */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.show-toast button { flex: none; min-height: 36px; padding: 0 13px; background: var(--fill); color: var(--accent); font-size: 0.9375rem; }
+.show-toast:not(.has-undo) #sUndo, .show-toast:not(.has-which) #sWhich { display: none; }
+.show-toast:not(.has-undo):not(.has-which) { padding-right: 18px; }
+
+/* Which Jet Tag or Pin: the characters, with what's left of each */
+.char-help { margin: -10px 0 14px; font-size: 0.8125rem; color: var(--label-2); }
+.char-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (min-width: 701px) { .char-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.char-btn {
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px;
+  min-height: 60px; padding: 10px 14px; border-radius: var(--r-md); background: var(--fill);
+  color: var(--label); font-size: 0.9375rem; font-weight: 600; text-align: left; touch-action: manipulation;
+}
+.char-btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.char-left { font-size: 0.75rem; font-weight: 500; color: var(--label-2); }
+.char-left.is-low { color: var(--orange); }
+.char-btn:disabled { opacity: 0.45; cursor: default; }
+.char-btn:disabled:active { transform: none; }
+.sale-char {
+  min-height: 0; padding: 0; margin-left: 2px; background: none; border-radius: 0;
+  color: var(--accent); font-size: 0.75rem; font-weight: 500;
+}
+@media (max-width: 700px) { .sale-char { padding: 6px 0; margin: -6px 0 -6px 2px; } }
 
 /* Another amount: a number pad */
 .pad-amount {
@@ -154,6 +177,8 @@ main.show { max-width: 960px; margin: 0 auto; padding: 20px 32px calc(48px + var
   .show-head { margin: 8px 0 22px; }
 }
 @media (max-width: 380px) {
+  .show-toast { gap: 6px; padding-left: 14px; }
+  .show-toast button { padding: 0 10px; }
   .show-total { font-size: 52px; }
   .sell { min-height: 112px; padding: 14px; }
   .sell-price { font-size: 24px; }
@@ -209,8 +234,20 @@ main.show { max-width: 960px; margin: 0 auto; padding: 20px 32px calc(48px + var
   </div>
 </div>
 
+<div class="modal-overlay" id="charSheet">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="charTitle">
+    <h2 id="charTitle">Which one?</h2>
+    <p class="char-help" id="charHelp" hidden></p>
+    <div class="char-grid" id="charGrid"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn-ghost" onclick="closeChars()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <div class="show-toast" id="sToast" role="status" aria-live="polite">
   <span class="show-toast-text" id="sToastText"></span>
+  <button type="button" id="sWhich">Which one?</button>
   <button type="button" id="sUndo">Undo</button>
 </div>
 
@@ -265,6 +302,27 @@ function todaysEvent() {
   return readArr(K.events).map(VPCUtil.normalizeEvent)
     .filter(e => e.start && dayOf({ date: e.start }) <= t && dayOf({ date: e.end || e.start }) >= t)
     .sort((a, b) => String(a.start).localeCompare(String(b.start)))[0] || null;
+}
+
+// ── Characters: which Jet Tag or Pin sold ──
+// The Sales Hub publishes each character's stock (bought plus restocked) to
+// these synced keys whenever it opens; the home page's low-stock alert reads
+// the same lists. What's left = that, less the sales that name the character.
+const CHAR_INV = { jt: K.jetTagInventory, pin: K.pinInventory };
+const CHAR_SALES = { jt: K.jetTags, pin: K.pins };
+const LOW_AT = { jt: 2, pin: 3 };
+const KIND_NAME = { jt: 'Jet Tag', pin: 'Pin' };
+const canPick = kind => readArr(CHAR_INV[kind]).length > 0;
+function charStock(kind) {
+  const sold = {};
+  readArr(CHAR_SALES[kind]).forEach(s => (s.chars || []).forEach(c => {
+    sold[c] = (sold[c] || 0) + (s.charQty?.[c] ?? (s.qty || 1));
+  }));
+  return readArr(CHAR_INV[kind]).map(c => ({ id: c.id, name: c.name || c.id, left: (+c.purchased || 0) - (sold[c.id] || 0) }));
+}
+function charNames(kind, ids) {
+  const inv = readArr(CHAR_INV[kind]);
+  return (ids || []).map(id => (inv.find(c => c.id === id) || {}).name || id).join(', ');
 }
 
 // ── What a tap can sell ──
@@ -333,7 +391,10 @@ function todaysSales() {
   });
   [[K.jetTags, 'jt', 'Jet Tag'], [K.pins, 'pin', 'Pin']].forEach(([store, key, name]) =>
     readArr(store).forEach((s, i) => {
-      if (dayOf(s) === t) rows.push({ store, key, rec: s, i, name, qty: +s.qty || 1, amount: +s.revenue || 0 });
+      if (dayOf(s) === t) {
+        const who = charNames(key, s.chars);
+        rows.push({ store, key, kind: key, rec: s, i, name: who ? `${name} · ${who}` : name, qty: +s.qty || 1, amount: +s.revenue || 0 });
+      }
     }));
   readArr(K.catSales).forEach((s, i) => {
     const c = cats.get(s.catId);
@@ -390,8 +451,10 @@ function render() {
     const who = r.store === K.orders && r.rec.customer && r.rec.customer !== 'Walk-up' ? r.rec.customer : '';
     const sub = [time, who].filter(Boolean).join(' · ') || 'Logged in the Sales Hub';
     const mine = !!r.rec.loggedAt;   // Show Mode sales can be removed here
+    const pick = mine && r.kind && !(r.rec.chars || []).length && canPick(r.kind)
+      ? ` · <button type="button" class="sale-char" data-store="${attr(r.store)}" data-id="${attr(r.rec.id)}" data-kind="${r.kind}">Choose character</button>` : '';
     return `<div class="sale-row"><div class="sale-main"><div class="sale-name">${esc(r.name)}${r.qty > 1 ? ` ×${r.qty}` : ''}</div>` +
-      `<div class="sale-sub">${esc(sub)}</div></div><div class="sale-amt">${fmt$(r.amount)}</div>` +
+      `<div class="sale-sub">${esc(sub)}${pick}</div></div><div class="sale-amt">${fmt$(r.amount)}</div>` +
       (mine ? `<button type="button" class="sale-del" aria-label="Remove ${attr(r.name)} sale" data-store="${attr(r.store)}" data-id="${attr(r.rec.id)}">${icon('trash')}</button>`
             : '<span class="sale-spacer"></span>') + '</div>';
   }).join('') : '<div class="sale-empty">Sales you log today show here.</div>';
@@ -400,8 +463,12 @@ window.renderAll = render;
 
 // ── Log a sale ──
 let lastSale = null;   // the one Undo takes back
-function logSale(item, qty = 1) {
+function logSale(item, qty = 1, { char = null } = {}) {
   if (!ready) { showToast('Getting your latest sales first…'); return; }
+  if (char) {
+    const c = charStock(item.kind).find(x => x.id === char);
+    if (c && c.left < qty) { showToast(`Only ${Math.max(0, c.left)} ${c.name} left`); return; }
+  }
   const ev = todaysEvent();
   const notes = ev ? `Show Mode · ${ev.name || 'Show'}` : 'Show Mode';
   const base = { id: uid(), date: today(), loggedAt: Date.now() };
@@ -416,17 +483,39 @@ function logSale(item, qty = 1) {
     rec = { ...base, catId: item.catId, qty, revenue: cents(item.price * qty), items: [], itemQty: {}, notes };
   } else {
     store = item.kind === 'jt' ? K.jetTags : K.pins;
-    rec = { ...base, qty, revenue: cents(item.price * qty), chars: [], charQty: {}, notes };
+    rec = { ...base, qty, revenue: cents(item.price * qty), chars: char ? [char] : [], charQty: char ? { [char]: qty } : {}, notes };
   }
   writeArr(store, [...readArr(store), rec]);
-  const label = `${qty > 1 ? qty + ' × ' : ''}${item.name} · ${fmt$(item.price * qty)}`;
+  const who = char ? charNames(item.kind, [char]) : '';
+  const label = `${qty > 1 ? qty + ' × ' : ''}${item.name}${who ? ' · ' + who : ''} · ${fmt$(item.price * qty)}`;
   window.auditLog?.('SHOW_SALE', store, label);
   navigator.vibrate?.(10);
-  lastSale = { store, id: rec.id, label };
+  // A Jet Tag or Pin logged with one tap can say which character afterwards.
+  const which = !char && (item.kind === 'jt' || item.kind === 'pin') && canPick(item.kind);
+  lastSale = { store, id: rec.id, label, kind: item.kind, qty, which };
   render();
   const btn = $('sGrid').querySelector(`.sell[data-key="${CSS.escape(item.key)}"]`);
   if (btn) { btn.classList.remove('logged'); void btn.offsetWidth; btn.classList.add('logged'); }
-  showToast(`${label} logged`, true);
+  // With "Which one?" there's no room for "logged"; the tick on the button says it.
+  showToast(which ? label : `${label} logged`, { undo: true, which, said: which ? 'logged' : '' });
+}
+
+// Name the character on a sale already logged (from the toast, or Today's list).
+function assignChar(store, id, kind, cid) {
+  const arr = readArr(store);
+  const rec = arr.find(x => x.id === id);
+  if (!rec) return;
+  const qty = Math.max(1, +rec.qty || 1);
+  const c = charStock(kind).find(x => x.id === cid);
+  if (c && c.left < qty) { showToast(`Only ${Math.max(0, c.left)} ${c.name} left`); return; }
+  rec.chars = [cid];
+  rec.charQty = { [cid]: qty };
+  writeArr(store, arr);
+  const who = charNames(kind, [cid]);
+  window.auditLog?.('SHOW_SALE_CHARACTER', store, who);
+  if (lastSale && lastSale.id === id) lastSale.which = false;
+  render();
+  showToast(`${KIND_NAME[kind]} · ${who} saved`);
 }
 
 function removeSale(store, id) {
@@ -442,14 +531,21 @@ function removeSale(store, id) {
 
 // ── Undo toast ──
 let toastTimer = null;
-function showToast(text, undo = false) {
+function showToast(text, { undo = false, which = false, said = '' } = {}) {
   const t = $('sToast');
-  $('sToastText').textContent = text;
+  $('sToastText').innerHTML = esc(text) + (said ? `<span class="sr-only"> ${esc(said)}</span>` : '');
   t.classList.toggle('has-undo', undo);
+  t.classList.toggle('has-which', which);
   t.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), undo ? 5000 : 2600);
 }
+$('sWhich').addEventListener('click', () => {
+  if (!lastSale || !lastSale.which) return;
+  const { store, id, kind, qty } = lastSale;
+  $('sToast').classList.remove('show');
+  openChars(kind, qty, cid => assignChar(store, id, kind, cid));
+});
 $('sUndo').addEventListener('click', () => {
   if (!lastSale) return;
   const { store, id, label } = lastSale;
@@ -473,6 +569,8 @@ function sellMenu(btn, at) {
   vpcMenu(btn, {
     label: item.name, at,
     options: [
+      ...((item.kind === 'jt' || item.kind === 'pin') && canPick(item.kind)
+        ? [{ value: 'char', label: 'Choose character…', icon: icon(item.icon) }] : []),
       { value: '2', label: `Sell 2 · ${fmt$(item.price * 2)}` },
       { value: '3', label: `Sell 3 · ${fmt$(item.price * 3)}` },
       { value: 'pad', label: 'Another price…', icon: icon('pencil') },
@@ -481,6 +579,7 @@ function sellMenu(btn, at) {
     onSelect: v => {
       if (v === 'hide') { setHidden([...new Set([...hiddenKeys(), item.key])]); render(); showToast(`${item.name} hidden`); }
       else if (v === 'pad') openPad(item.name);
+      else if (v === 'char') openChars(item.kind, 1, cid => logSale(item, 1, { char: cid }));
       else logSale(item, +v);
     },
   });
@@ -494,11 +593,45 @@ grid.addEventListener('contextmenu', e => {
 function unhideAll() { setHidden([]); render(); }
 
 $('sList').addEventListener('click', e => {
+  const pick = e.target.closest('.sale-char');
+  if (pick) {
+    const { store, id, kind } = pick.dataset;
+    const rec = readArr(store).find(x => x.id === id);
+    if (rec) openChars(kind, Math.max(1, +rec.qty || 1), cid => assignChar(store, id, kind, cid));
+    return;
+  }
   const del = e.target.closest('.sale-del');
   if (!del) return;
   if (!confirm('Remove this sale?')) return;
   removeSale(del.dataset.store, del.dataset.id);
 });
+
+// ── The character picker ──
+let charPick = null;
+function openChars(kind, qty, onPick) {
+  const list = charStock(kind).sort((a, b) => a.name.localeCompare(b.name));
+  $('charTitle').textContent = `Which ${KIND_NAME[kind]}?`;
+  const help = !list.length ? `Open ${KIND_NAME[kind]}s in the Sales Hub once to load your characters.`
+    : qty > 1 ? `All ${qty} go to the one you pick.` : '';
+  $('charHelp').textContent = help;
+  $('charHelp').hidden = !help;
+  $('charGrid').innerHTML = list.map(c =>
+    `<button type="button" class="char-btn" data-id="${attr(c.id)}"${c.left < qty ? ' disabled' : ''}>` +
+    `<span>${esc(c.name)}</span><span class="char-left${c.left > 0 && c.left <= LOW_AT[kind] ? ' is-low' : ''}">${c.left > 0 ? `${c.left} left` : 'Sold out'}</span></button>`
+  ).join('');
+  charPick = onPick;
+  $('charSheet').classList.add('open');
+  $('charGrid').querySelector('button:not(:disabled)')?.focus({ preventScroll: true });
+}
+function closeChars() { $('charSheet').classList.remove('open'); charPick = null; }
+$('charGrid').addEventListener('click', e => {
+  const b = e.target.closest('.char-btn');
+  if (!b || b.disabled || !charPick) return;
+  const onPick = charPick;
+  closeChars();
+  onPick(b.dataset.id);
+});
+$('charSheet').addEventListener('click', e => { if (e.target === $('charSheet')) closeChars(); });
 
 // ── Another amount ──
 let padText = '';
