@@ -1798,6 +1798,99 @@ div.modal-overlay {
 .mb-20 {
   margin-bottom: 20px;
 }
+.mb-24 {
+  margin-bottom: 24px;
+}
+.mb-28 {
+  margin-bottom: 28px;
+}
+.mt-8 {
+  margin-top: 8px;
+}
+.mt-14 {
+  margin-top: 14px;
+}
+.semibold {
+  font-weight: 600;
+}
+.empty-block {
+  text-align: center;
+  padding: 40px;
+  color: var(--text2);
+}
+/* The Sales Hub's trackers (Jet Tags, Pins, your own categories) */
+.tracker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.tracker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  margin-top: 4px;
+}
+.pick-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 6px;
+}
+.qty-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin-top: 6px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+.qty-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface2);
+}
+.qty-name {
+  min-width: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+input.qty-input,
+input.inline-input {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.85rem;
+  outline: none;
+}
+input.qty-input {
+  width: 64px;
+  text-align: center;
+}
+input.qty-input.on-fill,
+input.inline-input {
+  background: var(--surface2);
+}
+input.inline-input {
+  flex: 1;
+  padding: 7px 10px;
+  font-size: 0.82rem;
+}
+button.btn-small {
+  margin-top: 6px;
+  padding: 5px 10px;
+  font-size: 0.75rem;
+}
 /* Colour helpers last, so they win over the components above */
 .text-1 {
   color: var(--text);
@@ -1813,6 +1906,12 @@ div.modal-overlay {
 }
 .is-yellow {
   color: var(--yellow);
+}
+.is-orange {
+  color: var(--orange);
+}
+.is-accent {
+  color: var(--accent);
 }
 .modal-overlay > .modal.modal-wide {
   width: 580px;

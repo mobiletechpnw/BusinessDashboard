@@ -161,7 +161,7 @@
 <!-- ── MARGINS ── -->
 <div class="panel active" id="tab-margins">
   <div id="kpi-margins" class="kpi-strip"></div>
-  <div class="grid-2" style="margin-bottom:24px">
+  <div class="grid-2 mb-24">
 
     <!-- Cost Config -->
     <div class="card">
@@ -202,7 +202,7 @@
     <!-- Per-product summary -->
     <div class="card">
       <div class="card-title">Revenue by Product Line</div>
-      <div id="product-line-chart" style="margin-top:8px"></div>
+      <div id="product-line-chart" class="mt-8"></div>
     </div>
   </div>
 
@@ -229,14 +229,14 @@
 
 <!-- ── SHOWS ── -->
 <div class="panel" id="tab-shows">
-  <div id="shows-summary" class="kpi-strip" style="margin-bottom:28px"></div>
+  <div id="shows-summary" class="kpi-strip mb-28"></div>
   <div class="show-grid" id="show-cards"></div>
 </div>
 
 <!-- ── TRENDS ── -->
 <div class="panel" id="tab-trends">
-  <div id="kpi-trends" class="kpi-strip" style="margin-bottom:28px"></div>
-  <div class="card" style="margin-bottom:24px">
+  <div id="kpi-trends" class="kpi-strip mb-28"></div>
+  <div class="card mb-24">
     <div class="card-title">Monthly Revenue & Profit</div>
     <div class="legend">
       <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div> Revenue</div>
@@ -471,7 +471,7 @@ function renderShows() {
   const costs = getCosts();
 
   if (events.length === 0) {
-    $('show-cards').innerHTML = `<div class="empty"><div class="e-icon"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#events"/></svg></div>No events logged yet.<br>Add events in the <a href="vault-pine-collective.html#events" style="color:var(--accent)">Events tab</a> to see show comparisons.</div>`;
+    $('show-cards').innerHTML = `<div class="empty"><div class="e-icon"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#events"/></svg></div>No events logged yet.<br>Add events in the <a href="vault-pine-collective.html#events" class="is-accent">Events tab</a> to see show comparisons.</div>`;
     kpiStrip('shows-summary', [
       { val: '0', label: 'Events Logged' },
       { val: '$0', label: 'Total Show Revenue' },
@@ -526,7 +526,7 @@ function renderShows() {
         </div>
         <div class="show-stats">
           <div class="show-stat">
-            <div class="show-stat-val" style="color:var(--accent)">${fmt(rev)}</div>
+            <div class="show-stat-val is-accent">${fmt(rev)}</div>
             <div class="show-stat-label">Revenue</div>
           </div>
           <div class="show-stat">
@@ -773,7 +773,7 @@ function renderPnl() {
     <div class="pnl-row"><span>Jet Tags<span class="pnl-qty">${jtUnits} units</span></span><span>${fmt(jtRevenue)}</span></div>
     <div class="pnl-row"><span>Pins<span class="pnl-qty">${pinUnits} units</span></span><span>${fmt(pinRevenue)}</span></div>
     <div class="pnl-sep"></div>
-    <div class="pnl-total"><span>Total Revenue</span><span style="color:var(--accent)">${fmt(totalRevenue)}</span></div>
+    <div class="pnl-total"><span>Total Revenue</span><span class="is-accent">${fmt(totalRevenue)}</span></div>
 
     <div class="pnl-section">Cost of Goods Sold</div>
     <div class="pnl-row"><span>Riser Materials</span><span class="is-red">${neg(rCogs)}</span></div>

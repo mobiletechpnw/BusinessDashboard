@@ -737,7 +737,7 @@
           <option>Custom</option>
         </select>
         <div class="row-wrap tight">
-          <button type="button" class="btn-ghost" style="font-size:0.75rem;padding:5px 10px;margin-top:6px" onclick="openOrderProductModal()">+ New Product</button>
+          <button type="button" class="btn-ghost btn-small" onclick="openOrderProductModal()">+ New Product</button>
           <button type="button" class="btn-ghost" id="aoEditProduct" style="font-size:0.75rem;padding:5px 10px;margin-top:6px;display:none" onclick="openOrderProductModal(document.getElementById('aoProduct').value)">Edit Product</button>
         </div>
       </div>
@@ -858,7 +858,7 @@
   </div>
 
   <main>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px">
+    <div class="tracker-head">
       <div>
         <div class="title-3">Pokémon Jet Tags Tracker</div>
         <div class="subhead below" id="jtSubtitle">150 tags purchased · $112 total cost ($0.75/ea) · Sell price $5.00/ea</div>
@@ -888,7 +888,7 @@
           <span>Inventory by Character</span>
           <span class="caption" id="jtInventoryDate"></span>
         </div>
-        <div id="jtInventoryGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:4px"></div>
+        <div id="jtInventoryGrid" class="tracker-grid"></div>
       </div>
     </div>
 
@@ -956,7 +956,7 @@
     </div>
     <div class="field">
       <label>Character(s) Sold — select one or more</label>
-      <div id="jtCharSelect" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px"></div>
+      <div id="jtCharSelect" class="pick-grid"></div>
     </div>
     <div class="field">
       <label>Sale Price per Tag ($)</label>
@@ -982,12 +982,12 @@
     </div>
     <div class="field">
       <label>Reorders — qty per character (leave 0 if not in this order)</label>
-      <div id="jtOrderQtyGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:6px;max-height:240px;overflow-y:auto;padding-right:2px"></div>
+      <div id="jtOrderQtyGrid" class="qty-grid"></div>
     </div>
     <div class="field">
       <label>New characters in this order</label>
       <div id="jtOrderNewChars"></div>
-      <button class="btn-ghost" style="font-size:0.75rem;padding:5px 10px;margin-top:6px" onclick="jtAddOrderNewCharRow()">+ Add new character</button>
+      <button class="btn-ghost btn-small" onclick="jtAddOrderNewCharRow()">+ Add new character</button>
     </div>
     <div id="jtOrderPreview" style="background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:4px;font-size:0.82rem;color:var(--text2);display:none"></div>
     <div class="field"><label>Notes (optional)</label><input type="text" id="jtRestockNotes" placeholder="e.g. July vendor order"></div>
@@ -1033,7 +1033,7 @@
   </div>
 
   <main>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px">
+    <div class="tracker-head">
       <div>
         <div class="title-3">Pokémon Pins Tracker</div>
         <div class="subhead below" id="pinSubtitle">240 pins purchased · $228 total cost ($0.95/ea) · Sell price tracked per sale</div>
@@ -1062,7 +1062,7 @@
           <span>Inventory by Character</span>
           <span class="caption" id="pinInventoryDate"></span>
         </div>
-        <div id="pinInventoryGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:4px"></div>
+        <div id="pinInventoryGrid" class="tracker-grid"></div>
       </div>
     </div>
 
@@ -1127,7 +1127,7 @@
     </div>
     <div class="field">
       <label>Character(s) Sold — select one or more</label>
-      <div id="pinCharSelect" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px"></div>
+      <div id="pinCharSelect" class="pick-grid"></div>
     </div>
     <div class="field">
       <label>Sale Price per Pin ($)</label>
@@ -1153,12 +1153,12 @@
     </div>
     <div class="field">
       <label>Reorders — qty per character (leave 0 if not in this order)</label>
-      <div id="pinOrderQtyGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:6px;max-height:240px;overflow-y:auto;padding-right:2px"></div>
+      <div id="pinOrderQtyGrid" class="qty-grid"></div>
     </div>
     <div class="field">
       <label>New characters in this order</label>
       <div id="pinOrderNewChars"></div>
-      <button class="btn-ghost" style="font-size:0.75rem;padding:5px 10px;margin-top:6px" onclick="pinAddOrderNewCharRow()">+ Add new character</button>
+      <button class="btn-ghost btn-small" onclick="pinAddOrderNewCharRow()">+ Add new character</button>
     </div>
     <div id="pinOrderPreview" style="background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:4px;font-size:0.82rem;color:var(--text2);display:none"></div>
     <div class="field"><label>Notes (optional)</label><input type="text" id="pinRestockNotes" placeholder="e.g. July vendor order"></div>
@@ -1248,12 +1248,12 @@
     </div>
     <div class="field">
       <label>Reorders — qty per item (leave 0 if not in this order)</label>
-      <div id="coQtyGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:6px;max-height:240px;overflow-y:auto;padding-right:2px"></div>
+      <div id="coQtyGrid" class="qty-grid"></div>
     </div>
     <div class="field">
       <label>New items in this order</label>
       <div id="coNewItems"></div>
-      <button class="btn-ghost" style="font-size:0.75rem;padding:5px 10px;margin-top:6px" onclick="catAddOrderNewItemRow()">+ Add new item</button>
+      <button class="btn-ghost btn-small" onclick="catAddOrderNewItemRow()">+ Add new item</button>
     </div>
     <div id="coPreview" style="background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:4px;font-size:0.82rem;color:var(--text2);display:none"></div>
     <div class="field"><label>Notes (optional)</label><input type="text" id="coNotes" placeholder="e.g. July vendor order"></div>
@@ -1274,7 +1274,7 @@
     </div>
     <div class="field">
       <label>Item(s) Sold — select one or more</label>
-      <div id="csItemSelect" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px"></div>
+      <div id="csItemSelect" class="pick-grid"></div>
     </div>
     <div class="field">
       <label id="csPriceLabel">Sale Price per Unit ($)</label>
@@ -1295,7 +1295,7 @@
 <!-- ══════════════════════════════════════════ BACK OFFICE ══ -->
 <div class="section" id="section-backoffice">
   <main style="max-width:740px;margin:0 auto">
-    <div style="margin-bottom:28px">
+    <div class="mb-28">
       <div style="font-size:1.1rem;font-weight:600;margin-bottom:4px">Back Office</div>
       <div style="font-size:0.8rem;color:var(--text2)">Data management, backups, and cloud sync controls.</div>
     </div>
@@ -3578,7 +3578,7 @@ function renderExpVsRevenue() {
     const margin = rev > 0 ? (net/rev*100).toFixed(1) : '—';
     const netColor = net >= 0 ? 'var(--text)' : 'var(--red)';
     return `<tr>
-      <td style="font-weight:600">${monthLabel(mk)}</td>
+      <td class="semibold">${monthLabel(mk)}</td>
       <td class="num">${fmt$(rev)}</td>
       <td class="num">${fmt$(gross)}</td>
       <td class="num">${exp > 0 ? fmt$(exp) : '—'}</td>
@@ -3958,7 +3958,7 @@ function renderJtSalesLog() {
   const sales  = getJtSales().slice().sort((a,b) => b.date.localeCompare(a.date));
   const tbody  = document.getElementById('jtSalesTbody');
   if (!sales.length) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text2)">No sales logged yet — click <strong>+ Log Sale</strong> to start tracking.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="empty-block">No sales logged yet — click <strong>+ Log Sale</strong> to start tracking.</td></tr>`;
     return;
   }
   const avgCost = jtAvgCost();
@@ -4033,7 +4033,7 @@ function renderJtLowStock() {
   const soldOut = items.filter(c => c.left === 0);
   titleEl.innerHTML = soldOut.length
     ? `Low Stock — <span class="is-red">${soldOut.length} sold out</span>`
-    : `Low Stock — <span style="color:var(--orange)">${items.length} item${items.length>1?'s':''}</span>`;
+    : `Low Stock — <span class="is-orange">${items.length} item${items.length>1?'s':''}</span>`;
   cardEl.style.borderLeft = '';
   listEl.innerHTML = items.map(c => {
     const isSoldOut = c.left === 0;
@@ -4167,7 +4167,7 @@ function jtUpdateRevPreview() {
     preview.style.display = 'block';
     preview.innerHTML = `<strong class="text-1">Preview:</strong>
       ${qty} tag${qty>1?'s':''} × ${fmt$(price)} = <strong class="is-green">${fmt$(revenue)}</strong>
-      &nbsp;·&nbsp; COGS ${fmt$(cogs)} &nbsp;·&nbsp; Profit <strong style="color:var(--accent)">${fmt$(profit)}</strong>`;
+      &nbsp;·&nbsp; COGS ${fmt$(cogs)} &nbsp;·&nbsp; Profit <strong class="is-accent">${fmt$(profit)}</strong>`;
   } else { preview.style.display = 'none'; }
 }
 
@@ -4212,9 +4212,9 @@ function openJtRestockModal() {
   document.getElementById('jtOrderQtyGrid').innerHTML = jtAllChars().map(c => {
     const left = (c.purchased||0) + (restockMap[c.id]||0) - (soldMap[c.id]||0);
     const leftCol = left === 0 ? 'var(--red)' : left <= 2 ? 'var(--yellow)' : 'var(--text2)';
-    return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px">
-      <span style="font-size:0.78rem;font-weight:600;min-width:0">${esc(c.name)}<br><span style="font-size:0.75rem;font-weight:400;color:${leftCol}">${left} left</span></span>
-      <input type="number" min="0" value="0" data-charid="${c.id}" class="jt-order-qty" oninput="jtUpdateOrderPreview()" style="width:64px;padding:6px 8px;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;outline:none">
+    return `<div class="qty-row">
+      <span class="qty-name">${esc(c.name)}<br><span style="font-size:0.75rem;font-weight:400;color:${leftCol}">${left} left</span></span>
+      <input type="number" min="0" value="0" data-charid="${c.id}" class="jt-order-qty qty-input" oninput="jtUpdateOrderPreview()">
     </div>`;
   }).join('');
   jtUpdateOrderPreview();
@@ -4228,8 +4228,8 @@ function jtAddOrderNewCharRow() {
   row.className = 'jt-order-newchar';
   row.style.cssText = 'display:flex;gap:6px;align-items:center;margin-top:6px';
   row.innerHTML = `
-    <input type="text" placeholder="Character name" maxlength="60" class="jt-nc-name" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 10px;font-size:0.82rem;outline:none">
-    <input type="number" min="1" value="10" class="jt-nc-qty" oninput="jtUpdateOrderPreview()" style="width:64px;padding:6px 8px;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;outline:none">
+    <input type="text" placeholder="Character name" maxlength="60" class="jt-nc-name inline-input">
+    <input type="number" min="1" value="10" class="jt-nc-qty qty-input on-fill" oninput="jtUpdateOrderPreview()">
     <button class="icon-btn" onclick="this.parentElement.remove();jtUpdateOrderPreview()" title="Remove" aria-label="Remove">${VPCUtil.icon('close')}</button>`;
   document.getElementById('jtOrderNewChars').appendChild(row);
   row.querySelector('.jt-nc-name').focus();
@@ -4503,7 +4503,7 @@ function renderPinSalesLog() {
   const sales = getPinSales().slice().sort((a,b) => b.date.localeCompare(a.date));
   const tbody = document.getElementById('pinSalesTbody');
   if (!sales.length) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text2)">No pin sales logged yet — click <strong>+ Log Sale</strong> to start tracking.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="empty-block">No pin sales logged yet — click <strong>+ Log Sale</strong> to start tracking.</td></tr>`;
     return;
   }
   const avgCost  = pinAvgCost();
@@ -4578,7 +4578,7 @@ function renderPinLowStock() {
   const soldOut = items.filter(c => c.left === 0);
   titleEl.innerHTML = soldOut.length
     ? `Low Stock — <span class="is-red">${soldOut.length} sold out</span>`
-    : `Low Stock — <span style="color:var(--orange)">${items.length} item${items.length>1?'s':''}</span>`;
+    : `Low Stock — <span class="is-orange">${items.length} item${items.length>1?'s':''}</span>`;
   cardEl.style.borderLeft = '';
   listEl.innerHTML = items.map(c => {
     const isSoldOut = c.left === 0;
@@ -4756,9 +4756,9 @@ function openPinRestockModal() {
   document.getElementById('pinOrderQtyGrid').innerHTML = pinAllChars().map(c => {
     const left = (c.purchased||0) + (restockMap[c.id]||0) - (soldMap[c.id]||0);
     const leftCol = left === 0 ? 'var(--red)' : left <= 3 ? 'var(--yellow)' : 'var(--text2)';
-    return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px">
-      <span style="font-size:0.78rem;font-weight:600;min-width:0">${esc(c.name)}<br><span style="font-size:0.75rem;font-weight:400;color:${leftCol}">${left} left</span></span>
-      <input type="number" min="0" value="0" data-charid="${c.id}" class="pin-order-qty" oninput="pinUpdateOrderPreview()" style="width:64px;padding:6px 8px;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;outline:none">
+    return `<div class="qty-row">
+      <span class="qty-name">${esc(c.name)}<br><span style="font-size:0.75rem;font-weight:400;color:${leftCol}">${left} left</span></span>
+      <input type="number" min="0" value="0" data-charid="${c.id}" class="pin-order-qty qty-input" oninput="pinUpdateOrderPreview()">
     </div>`;
   }).join('');
   pinUpdateOrderPreview();
@@ -4772,8 +4772,8 @@ function pinAddOrderNewCharRow() {
   row.className = 'pin-order-newchar';
   row.style.cssText = 'display:flex;gap:6px;align-items:center;margin-top:6px';
   row.innerHTML = `
-    <input type="text" placeholder="Character name" maxlength="60" class="pin-nc-name" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 10px;font-size:0.82rem;outline:none">
-    <input type="number" min="1" value="20" class="pin-nc-qty" oninput="pinUpdateOrderPreview()" style="width:64px;padding:6px 8px;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;outline:none">
+    <input type="text" placeholder="Character name" maxlength="60" class="pin-nc-name inline-input">
+    <input type="number" min="1" value="20" class="pin-nc-qty qty-input on-fill" oninput="pinUpdateOrderPreview()">
     <button class="icon-btn" onclick="this.parentElement.remove();pinUpdateOrderPreview()" title="Remove" aria-label="Remove">${VPCUtil.icon('close')}</button>`;
   document.getElementById('pinOrderNewChars').appendChild(row);
   row.querySelector('.pin-nc-name').focus();
@@ -4963,7 +4963,7 @@ function catSectionHtml(cat) {
     <div class="pintat"><div class="pintat-num" data-hook="remaining">0</div><div class="pintat-label">In Stock</div></div>
   </div>
   <main>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px">
+    <div class="tracker-head">
       <div>
         <div class="title-3">${esc(catEmoji(cat))} ${esc(cat.name)} Tracker</div>
         <div class="subhead below" data-hook="subtitle"></div>
@@ -4990,7 +4990,7 @@ function catSectionHtml(cat) {
           <span>Inventory by Item</span>
           <span class="caption" data-hook="invdate"></span>
         </div>
-        <div data-hook="invgrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:4px"></div>
+        <div data-hook="invgrid" class="tracker-grid"></div>
       </div>
     </div>
     <div class="grid-2 mb-20">
@@ -5135,7 +5135,7 @@ function renderCatOrderHistory(cat, tbody) {
 function renderCatSalesLog(cat, t, tbody) {
   const sales = catSales(cat.id).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   if (!sales.length) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text2)">No sales logged yet — click <strong>+ Log Sale</strong> to start tracking.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="empty-block">No sales logged yet — click <strong>+ Log Sale</strong> to start tracking.</td></tr>`;
     return;
   }
   const nameById = {};
@@ -5201,7 +5201,7 @@ function renderCatLowStock(cat, t, titleEl, listEl, cardEl) {
   const soldOut = items.filter(i => i.left === 0);
   titleEl.innerHTML = soldOut.length
     ? `Low Stock — <span class="is-red">${soldOut.length} sold out</span>`
-    : `Low Stock — <span style="color:var(--orange)">${items.length} item${items.length > 1 ? 's' : ''}</span>`;
+    : `Low Stock — <span class="is-orange">${items.length} item${items.length > 1 ? 's' : ''}</span>`;
   cardEl.style.borderLeft = '';
   listEl.innerHTML = items.map(i => {
     const isSoldOut = i.left === 0;
@@ -5330,9 +5330,9 @@ function openCatOrderModal(catId) {
   document.getElementById('coNewItems').innerHTML = '';
   document.getElementById('coQtyGrid').innerHTML = t.stock.length ? t.stock.map(s => {
     const leftCol = s.left === 0 ? 'var(--red)' : s.left <= 3 ? 'var(--yellow)' : 'var(--text2)';
-    return `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px">
-      <span style="font-size:0.78rem;font-weight:600;min-width:0">${esc(s.name)}<br><span style="font-size:0.75rem;font-weight:400;color:${leftCol}">${s.left} left</span></span>
-      <input type="number" min="0" value="0" data-itemid="${s.id}" class="co-order-qty" oninput="catUpdateOrderPreview()" style="width:64px;padding:6px 8px;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;outline:none">
+    return `<div class="qty-row">
+      <span class="qty-name">${esc(s.name)}<br><span style="font-size:0.75rem;font-weight:400;color:${leftCol}">${s.left} left</span></span>
+      <input type="number" min="0" value="0" data-itemid="${s.id}" class="co-order-qty qty-input" oninput="catUpdateOrderPreview()">
     </div>`;
   }).join('') : `<div style="grid-column:1/-1;color:var(--text2);font-size:.8rem;padding:4px 0">No items yet — add the order's items below.</div>`;
   catUpdateOrderPreview();
@@ -5346,8 +5346,8 @@ function catAddOrderNewItemRow() {
   row.className = 'co-order-newitem';
   row.style.cssText = 'display:flex;gap:6px;align-items:center;margin-top:6px';
   row.innerHTML = `
-    <input type="text" placeholder="Item name" maxlength="60" class="co-ni-name" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:7px 10px;font-size:0.82rem;outline:none">
-    <input type="number" min="1" value="10" class="co-ni-qty" oninput="catUpdateOrderPreview()" style="width:64px;padding:6px 8px;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;outline:none">
+    <input type="text" placeholder="Item name" maxlength="60" class="co-ni-name inline-input">
+    <input type="number" min="1" value="10" class="co-ni-qty qty-input on-fill" oninput="catUpdateOrderPreview()">
     <button class="icon-btn" onclick="this.parentElement.remove();catUpdateOrderPreview()" title="Remove" aria-label="Remove">${VPCUtil.icon('close')}</button>`;
   document.getElementById('coNewItems').appendChild(row);
   row.querySelector('.co-ni-name').focus();

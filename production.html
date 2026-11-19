@@ -670,7 +670,7 @@ function renderInventory() {
           <div class="inv-unit">${item.unit || 'units'}</div>
         </div>
         <div class="inv-bar"><div class="inv-bar-fill" style="width:${barPct}%;background:${barClr}"></div></div>
-        <div class="inv-thresh-row" style="margin-top:8px">
+        <div class="inv-thresh-row mt-8">
           Alert when below:
           <input class="thresh-input" type="number" min="0" value="${thresh}"
             oninput="debounceThreshold('${item.id}', this.value)">

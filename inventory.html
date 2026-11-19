@@ -419,7 +419,7 @@ function renderTable() {
       <td class="num">${itemQty(it)}</td>
       ${eaCell(it.cost)}
       ${eaCell(it.value)}
-      <td class="num" style="font-weight:600">${fmtMoney(itemValue(it))}</td>
+      <td class="num semibold">${fmtMoney(itemValue(it))}</td>
       <td class="num ${gCls}">${gain >= 0 ? '+' : '−'}${fmtMoney(Math.abs(gain))}</td>
     </tr>`;
   });
@@ -770,7 +770,7 @@ function renderSnapTable(snaps) {
       <td class="num">${fmtMoney(snapCatVal(s, 'singles'))}</td>
       <td class="num">${fmtMoney(snapCatVal(s, 'slabs'))}</td>
       <td class="num">${fmtMoney(snapCatVal(s, 'sealed'))}</td>
-      <td class="num" style="font-weight:600">${fmtMoney(s.value || 0)}</td>
+      <td class="num semibold">${fmtMoney(s.value || 0)}</td>
       <td class="num text-2">${fmtMoney(s.cost || 0)}</td>
       <td class="num">${delta}</td>
       <td class="num"><button class="icon-btn" onclick="deleteSnapshot('${escAttr(s.id)}')" title="Delete snapshot" aria-label="Delete snapshot">${VPCUtil.icon('trash')}</button></td>

@@ -402,7 +402,7 @@ function renderGoals() {
   try {
     const g = JSON.parse(localStorage.getItem(VPCUtil.KEYS.goals) || '{"goals":[]}');
     const goals = g.goals || [];
-    if (!goals.length) { el.innerHTML = '<div class="empty-msg">No goals yet. <a href="goals-dashboard.html" style="color:var(--accent)">Add one →</a></div>'; return []; }
+    if (!goals.length) { el.innerHTML = '<div class="empty-msg">No goals yet. <a href="goals-dashboard.html" class="is-accent">Add one →</a></div>'; return []; }
 
     const today = new Date(); today.setHours(0,0,0,0);
     const total = goals.length;
