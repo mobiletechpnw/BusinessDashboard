@@ -1043,13 +1043,77 @@ html.has-large-title:not(.scrolled) header {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
-/* A page with a large title shows its small title only after scrolling. */
-html.has-large-title header .brand {
+/* A page with a large title shows its small title (and subtitle) in the bar
+   only after the large one has scrolled under it. */
+html.has-large-title header .brand,
+html.has-large-title header .title-sub {
   opacity: 0;
   transition: opacity var(--t-base) var(--ease);
 }
-html.has-large-title.title-in header .brand {
+html.has-large-title.title-in header .brand,
+html.has-large-title.title-in header .title-sub {
   opacity: 1;
+}
+/* ── Large title on list pages ──
+   34px bold under the clear bar, lined up with the page's content column
+   (--col). It scrolls under the bar and the small title fades in there
+   (shared.js watchScroll). Where the browser can tie an animation to the
+   scroll, it also fades and settles as it goes. */
+.large-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  width: 100%;
+  max-width: var(--col, 1300px);
+  margin: 0 auto;
+  padding: 4px 24px 12px;
+}
+/* A summary strip right under the title needs less room of its own */
+.large-head + .kpi-strip,
+.large-head + .stat-bar {
+  margin-top: 4px;
+}
+.large-text {
+  min-width: 0;
+}
+.large-title {
+  margin: 0;
+  font-size: 2.125rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+.large-sub {
+  margin-top: 2px;
+  font-size: 0.9375rem;
+  color: var(--text2);
+}
+@media (max-width: 700px) {
+  .large-head {
+    padding: 2px 16px 10px;
+  }
+  .large-title {
+    font-size: 1.875rem;
+  }
+}
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .large-title,
+    .large-sub {
+      transform-origin: 0 100%;
+      animation: large-title-settle linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 48px;
+    }
+  }
+}
+@keyframes large-title-settle {
+  to {
+    opacity: 0;
+    transform: scale(0.94);
+  }
 }
 /* One title style for every page: 17px semibold, like a navigation bar. */
 header .brand,

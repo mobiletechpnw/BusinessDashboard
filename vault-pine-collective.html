@@ -306,10 +306,8 @@
     .search-input { width: 100%; }
     .btn-primary, .btn-ghost { padding: 8px 14px; font-size: 0.78rem; min-height: 44px; }
     #backup-banner { width: 92%; flex-wrap: wrap; }
-    /* Phones: the range gets its own row under the title; the main action
-       is a + button, like a navigation bar. */
-    header { flex-wrap: wrap; row-gap: 0; }
-    #rangeSeg { order: 3; flex: 1 0 100%; margin-bottom: 8px; }
+    /* Phones: the range gets its own row under the large title */
+    #rangeSeg { flex: 1 0 100%; }
     #rangeSeg button { flex: 1; padding: 0 4px; }
   }
   @media (max-width: 480px) {
@@ -328,6 +326,10 @@
     <div class="brand" id="vpcTitle">Sales</div>
     <div class="title-sub" id="vpcSub"></div>
   </div>
+  <button class="btn-primary vpc-primary" id="vpcPrimary" type="button" onclick="vpcPrimaryAction()"><svg class="vpc-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span id="vpcPrimaryLabel">New Order</span></button>
+</header>
+<div class="large-head">
+  <div class="large-text"><h1 class="large-title" data-large-from="#vpcTitle">Sales</h1><div class="large-sub" data-large-from="#vpcSub"></div></div>
   <div class="seg" id="rangeSeg" aria-label="Date range">
     <button data-value="all" aria-checked="true">All</button>
     <button data-value="ytd">YTD</button>
@@ -336,8 +338,7 @@
     <button data-value="30d">30D</button>
     <button data-value="7d">7D</button>
   </div>
-  <button class="btn-primary vpc-primary" id="vpcPrimary" type="button" onclick="vpcPrimaryAction()"><svg class="vpc-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span id="vpcPrimaryLabel">New Order</span></button>
-</header>
+</div>
 
 
 <!-- ══════════════════════════════════════════ SALES SECTION ══ -->

@@ -878,6 +878,24 @@ function closeDialog(overlay) {
 // page with a large title starts with a clear bar and shows its small title
 // there only after the large one has scrolled away.
 function watchScroll() {
+  // A large title can follow a title the page changes (the Sales Hub's
+  // section name and subtitle): data-large-from names the one it copies.
+  document.querySelectorAll('[data-large-from]').forEach((el) => {
+    const src = document.querySelector(el.dataset.largeFrom);
+    if (!src) return;
+    const copy = () => {
+      el.textContent = src.textContent;
+      el.hidden = src.hidden || !src.textContent.trim();
+    };
+    copy();
+    new MutationObserver(copy).observe(src, {
+      childList: true,
+      characterData: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['hidden'],
+    });
+  });
   const root = document.documentElement;
   const onScroll = () => root.classList.toggle('scrolled', window.scrollY > 4);
   window.addEventListener('scroll', onScroll, { passive: true });
