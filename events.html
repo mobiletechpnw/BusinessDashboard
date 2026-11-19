@@ -265,7 +265,7 @@ main { padding:0 0 24px; }
 <header>
   <div class="brand">Events &amp; Tables</div>
   <div class="header-right">
-    <button class="btn-ghost" onclick="generateShareLink()" title="Generate a shareable link for vendors">📤 Share Calendar</button>
+    <button class="btn-ghost" onclick="generateShareLink()" title="Generate a shareable link for vendors">Share Calendar</button>
     <button class="btn-ghost" onclick="openVendorModal()">+ Vendor</button>
     <button class="btn-primary" onclick="openEventModal()">+ Event</button>
   </div>
@@ -281,8 +281,8 @@ main { padding:0 0 24px; }
 </div>
 
 <div class="ev-tab-bar">
-  <div class="ev-tab active" data-tab="matrix" onclick="switchEvTab('matrix')">📋 Matrix</div>
-  <div class="ev-tab" data-tab="roi" onclick="switchEvTab('roi')">📈 ROI</div>
+  <div class="ev-tab active" data-tab="matrix" onclick="switchEvTab('matrix')">Matrix</div>
+  <div class="ev-tab" data-tab="roi" onclick="switchEvTab('roi')">ROI</div>
 </div>
 
 <main>
@@ -291,7 +291,7 @@ main { padding:0 0 24px; }
     <!-- Kept OUTSIDE #matrix-wrap: renderMatrix() clears the wrap's innerHTML,
          which would destroy this node and crash the empty-data path. -->
     <div class="empty-state" id="empty-state">
-      <div class="empty-icon">🗓️</div>
+      <div class="empty-icon"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#calendar"/></svg></div>
       <div class="empty-title" id="empty-title">No data yet</div>
       <div class="empty-sub" id="empty-sub">Add your events and vendors to start tracking table payments.</div>
       <div class="empty-actions">
@@ -306,7 +306,7 @@ main { padding:0 0 24px; }
     <div id="roi-kpis" class="kpi-strip" style="margin-bottom:20px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))"></div>
     <div class="roi-grid" id="roi-cards"></div>
     <div class="empty-state" id="roi-empty" style="display:none">
-      <div class="empty-icon">📈</div>
+      <div class="empty-icon"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#growth"/></svg></div>
       <div class="empty-title">No events to analyze</div>
       <div class="empty-sub">Add events (with a table or booth cost) to see ROI per show. Revenue is pulled from your Sales Hub sales on the show's dates.</div>
     </div>
@@ -391,11 +391,11 @@ main { padding:0 0 24px; }
     <label class="bill-filter"><input type="checkbox" id="bill-unpaid-only" onchange="renderBill()"> Unpaid items only</label>
     <div id="bill-body"></div>
     <div class="bill-actions">
-      <button class="btn-ghost" onclick="copyBill()" id="bill-copy-btn">📋 Copy</button>
-      <button class="btn-ghost" onclick="textBill()" id="bill-sms-btn" style="display:none">💬 Text</button>
+      <button class="btn-ghost" onclick="copyBill()" id="bill-copy-btn">Copy</button>
+      <button class="btn-ghost" onclick="textBill()" id="bill-sms-btn" style="display:none">Text</button>
       <button class="btn-ghost" onclick="emailBill()" id="bill-email-btn" style="display:none">✉️ Email</button>
-      <button class="btn-ghost" onclick="printBill()">🖨️ Print / PDF</button>
-      <button class="btn-primary" onclick="shareBill()">📤 Share</button>
+      <button class="btn-ghost" onclick="printBill()">Print / PDF</button>
+      <button class="btn-primary" onclick="shareBill()">Share</button>
     </div>
     <div class="modal-actions" style="margin-top:14px">
       <button class="btn-ghost" onclick="closeModal('bill-modal')">Close</button>
@@ -431,7 +431,7 @@ main { padding:0 0 24px; }
     <div class="modal-ctx" id="su-ctx"></div>
     <div id="su-body"></div>
     <div class="modal-actions" style="margin-top:14px">
-      <button class="btn-ghost" onclick="copySignupLink(_signupEventId)">🔗 Copy Sign-up Link</button>
+      <button class="btn-ghost" onclick="copySignupLink(_signupEventId)">Copy Sign-up Link</button>
       <button class="btn-ghost" onclick="closeModal('signup-modal')">Close</button>
     </div>
   </div>
@@ -594,8 +594,8 @@ function renderMatrix() {
       <div class="th-vendor-name">${esc(v.name)}</div>
       ${v.contact ? `<div class="th-vendor-meta">${esc(v.contact)}</div>` : ''}
       <div>
-        <button class="th-edit-btn" onclick="openVendorModal('${v.id}')">✏️ Edit</button>
-        <button class="th-bill-btn" onclick="openBillModal('${v.id}')">📄 Bill</button>
+        <button class="th-edit-btn" onclick="openVendorModal('${v.id}')">Edit</button>
+        <button class="th-bill-btn" onclick="openBillModal('${v.id}')">Bill</button>
       </div>
     </th>`;
   });
@@ -619,12 +619,12 @@ function renderMatrix() {
           title="${ev.approved ? 'Tap to mark as unapproved' : 'Tap to mark as approved'}">
           ${ev.approved ? '✓ Approved' : '○ Unapproved'}
         </span>
-        ${ev.private ? `<span class="ev-private-badge" title="Hidden from the shared vendor calendar">🔒 Private</span>` : ''}
+        ${ev.private ? `<span class="ev-private-badge" title="Hidden from the shared vendor calendar">Private</span>` : ''}
       </div>
-      <button class="ev-edit-btn" onclick="openEventModal('${ev.id}')">✏️ Edit</button>
+      <button class="ev-edit-btn" onclick="openEventModal('${ev.id}')">Edit</button>
       <div>
-        <button class="ev-signup-btn" onclick="copySignupLink('${ev.id}')" title="Copy a vendor sign-up link to share for this event">🔗 Sign-up Link</button>
-        <button class="ev-signup-btn" onclick="openSignupsModal('${ev.id}')" title="View vendor sign-up requests">📋 Sign-ups${(scMap[ev.id] ? ` (${scMap[ev.id]})` : '')}</button>
+        <button class="ev-signup-btn" onclick="copySignupLink('${ev.id}')" title="Copy a vendor sign-up link to share for this event">Sign-up Link</button>
+        <button class="ev-signup-btn" onclick="openSignupsModal('${ev.id}')" title="View vendor sign-up requests">Sign-ups${(scMap[ev.id] ? ` (${scMap[ev.id]})` : '')}</button>
       </div>
     </td>`;
 
@@ -669,7 +669,7 @@ function renderMatrix() {
 
   // Past but unpaid: a finished show still owes money — never hide these.
   if (pastOwed.length) {
-    h += `<tr class="matrix-section owed"><td colspan="${colSpan}">⚠ Past events — money still owed</td></tr>`;
+    h += `<tr class="matrix-section owed"><td colspan="${colSpan}">Past events — money still owed</td></tr>`;
     pastOwed.forEach(ev => { h += rowFor(ev, true); });
   }
 
@@ -706,7 +706,7 @@ function renderMatrix() {
             ? `<span class="vt-allpaid">all paid ✓</span>`
             : `<span style="color:var(--text2)">—</span>`}
       </div>
-      ${tot > 0 ? `<button class="vt-bill-btn" onclick="openBillModal('${v.id}')">📄 Bill</button>` : ''}
+      ${tot > 0 ? `<button class="vt-bill-btn" onclick="openBillModal('${v.id}')">Bill</button>` : ''}
     </td>`;
   });
   h += `<td class="td-grand">

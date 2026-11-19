@@ -213,7 +213,7 @@
   <!-- Goal -->
   <div class="gpanel">
     <div class="panel-head">
-      <div class="panel-title">🎯 Follower Goal</div>
+      <div class="panel-title">Follower Goal</div>
       <div class="panel-sub" id="goalEta"></div>
     </div>
     <div class="goal-row">
@@ -226,7 +226,7 @@
   <!-- Chart -->
   <div class="gpanel">
     <div class="panel-head">
-      <div class="panel-title">📈 Follower Growth</div>
+      <div class="panel-title">Follower Growth</div>
       <div class="range-group" id="rangeGroup">
         <button class="range-btn" data-range="30">30d</button>
         <button class="range-btn" data-range="90">90d</button>
@@ -239,7 +239,7 @@
   <!-- Snapshots -->
   <div class="gpanel">
     <div class="panel-head">
-      <div class="panel-title">🗓️ Snapshots</div>
+      <div class="panel-title">Snapshots</div>
       <div class="panel-sub">Log your numbers weekly for the cleanest trend.</div>
     </div>
     <div class="table-scroll">
@@ -265,7 +265,7 @@
   <!-- Automation -->
   <div class="gpanel">
     <div class="panel-head">
-      <div class="panel-title">🔌 Auto-Sync</div>
+      <div class="panel-title">Auto-Sync</div>
       <span class="auto-status manual" id="autoStatus"><span class="auto-dot"></span>Manual tracking</span>
     </div>
     <p class="panel-sub" id="autoSummary">
@@ -566,8 +566,8 @@ function renderTable() {
       <td class="snap-num">${x.reach != null ? x.reach.toLocaleString() : '—'}</td>
       <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis" title="${esc(x.note || '')}">${esc(x.note || '')}</td>
       <td><div class="snap-actions">
-        <button class="icon-btn" title="Edit" onclick="openSnapModal('${x.id}')">✏️</button>
-        <button class="icon-btn" title="Delete" onclick="deleteSnap('${x.id}')">🗑</button>
+        <button class="icon-btn" title="Edit" onclick="openSnapModal('${x.id}')"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#pencil"/></svg></button>
+        <button class="icon-btn" title="Delete" onclick="deleteSnap('${x.id}')"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#trash"/></svg></button>
       </div></td>
     </tr>`;
   }).join('');

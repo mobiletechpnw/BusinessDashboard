@@ -196,9 +196,9 @@
     <button class="nav-btn" onclick="shiftMonth(1)">›</button>
   </div>
   <div class="tabs">
-    <div class="tab active" data-tab="month" onclick="switchTab('month')">📅 Entries</div>
-    <div class="tab" data-tab="breakdown" onclick="switchTab('breakdown')">📊 Breakdown</div>
-    <div class="tab" data-tab="recurring" onclick="switchTab('recurring')">🔄 Recurring</div>
+    <div class="tab active" data-tab="month" onclick="switchTab('month')">Entries</div>
+    <div class="tab" data-tab="breakdown" onclick="switchTab('breakdown')">Breakdown</div>
+    <div class="tab" data-tab="recurring" onclick="switchTab('recurring')">Recurring</div>
   </div>
   <button class="add-btn" onclick="openModal()">＋ Add Expense</button>
 </div>
@@ -324,14 +324,14 @@
       <div class="field">
         <label>Category</label>
         <select id="rec-cat">
-          <option value="Housing">🏠 Housing</option>
-          <option value="Transport">🚗 Transport</option>
-          <option value="Food">🍔 Food</option>
-          <option value="Subscriptions">📱 Subscriptions</option>
-          <option value="Health">💊 Health</option>
-          <option value="Insurance">🛡️ Insurance</option>
-          <option value="Business">💼 Business</option>
-          <option value="Other">📦 Other</option>
+          <option value="Housing">Housing</option>
+          <option value="Transport">Transport</option>
+          <option value="Food">Food</option>
+          <option value="Subscriptions">Subscriptions</option>
+          <option value="Health">Health</option>
+          <option value="Insurance">Insurance</option>
+          <option value="Business">Business</option>
+          <option value="Other">Other</option>
         </select>
       </div>
     </div>
@@ -494,7 +494,7 @@ function renderEntries() {
   if (!exps.length) {
     $('entries-list').innerHTML = `
       <div class="empty">
-        <div class="e-icon">💸</div>
+        <div class="e-icon"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#expenses"/></svg></div>
         <p>No expenses logged for ${MONTH_NAMES[viewMonth]}.<br>Hit <strong>+ Add Expense</strong> to start tracking.</p>
       </div>`;
     return;
@@ -522,8 +522,8 @@ function renderEntries() {
           </div>
           <div class="exp-amount" style="color:var(--red)">${fmt(e.amount)}</div>
           <div class="exp-actions">
-            <button class="act-btn" onclick="openModal('${e.id}')" title="Edit">✏️</button>
-            <button class="act-btn del" onclick="deleteExp('${e.id}')" title="Delete">🗑</button>
+            <button class="act-btn" onclick="openModal('${e.id}')" title="Edit"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#pencil"/></svg></button>
+            <button class="act-btn del" onclick="deleteExp('${e.id}')" title="Delete"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#trash"/></svg></button>
           </div>
         </div>`;
     }).join('');
@@ -634,7 +634,7 @@ function renderRecurring() {
   if (!recs.length) {
     $('rec-list').innerHTML = `
       <div class="empty">
-        <div class="e-icon">🔄</div>
+        <div class="e-icon"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#repeat"/></svg></div>
         <p>No recurring expenses yet.<br>Add bills, subscriptions, and fixed monthly costs.</p>
       </div>`;
     $('rec-total-card').style.display = 'none';
@@ -661,8 +661,8 @@ function renderRecurring() {
         </div>
         <div class="rec-amount">${fmt(r.amount)}/${freqShort(r.frequency)}</div>
         <div class="rec-actions">
-          <button class="act-btn" onclick="openRecModal('${r.id}')" title="Edit">✏️</button>
-          <button class="act-btn del" onclick="deleteRec('${r.id}')" title="Remove">🗑</button>
+          <button class="act-btn" onclick="openRecModal('${r.id}')" title="Edit"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#pencil"/></svg></button>
+          <button class="act-btn del" onclick="deleteRec('${r.id}')" title="Remove"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#trash"/></svg></button>
           <button class="act-btn" onclick="logRecurring('${r.id}')" title="Log to this month" style="font-size:0.75rem">＋Log</button>
         </div>
       </div>`;

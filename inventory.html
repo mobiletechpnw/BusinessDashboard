@@ -164,9 +164,9 @@
 
   <div class="filter-row">
     <button class="filter-pill active" data-cat="all" onclick="setFilter('all')">All</button>
-    <button class="filter-pill" data-cat="singles" onclick="setFilter('singles')">🃏 Singles</button>
-    <button class="filter-pill" data-cat="slabs" onclick="setFilter('slabs')">🏆 Slabs</button>
-    <button class="filter-pill" data-cat="sealed" onclick="setFilter('sealed')">📦 Sealed</button>
+    <button class="filter-pill" data-cat="singles" onclick="setFilter('singles')">Singles</button>
+    <button class="filter-pill" data-cat="slabs" onclick="setFilter('slabs')">Slabs</button>
+    <button class="filter-pill" data-cat="sealed" onclick="setFilter('sealed')">Sealed</button>
     <div class="filter-spacer"></div>
     <input type="search" class="inv-search" id="inv-search" placeholder="Search items…" oninput="renderTable()">
   </div>
@@ -174,7 +174,7 @@
   <div class="table-scroll" id="table-wrap"></div>
 
   <div class="empty-state" id="empty-state">
-    <div class="empty-icon">🃏</div>
+    <div class="empty-icon"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#cards"/></svg></div>
     <div class="empty-title" id="empty-title">No inventory yet</div>
     <div class="empty-sub" id="empty-sub">Add your singles, slabs, and sealed product to see what your collection-for-sale is worth at a glance.</div>
     <button class="btn-primary" onclick="openItemModal()">+ Add First Item</button>
@@ -184,11 +184,11 @@
   <div class="snap-section">
     <div class="snap-head">
       <div>
-        <div class="snap-title">📸 Value Over Time</div>
+        <div class="snap-title">Value Over Time</div>
         <div class="snap-sub">Log your inventory value after every show — type the totals for that date (or let it prefill from your item list). Each date stands alone; the chart and table show the difference show to show.</div>
         <div id="snap-current" style="font-size:.82rem;margin-top:8px;display:none"></div>
       </div>
-      <button class="btn-primary" onclick="openSnapModal()">📸 Log Value</button>
+      <button class="btn-primary" onclick="openSnapModal()">Log Value</button>
     </div>
     <div id="snap-chart-box">
       <div id="snap-chart"></div>
@@ -217,15 +217,15 @@
       <label>What It's Worth on This Date ($)</label>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
         <div>
-          <div style="font-size:0.75rem;color:var(--text2);font-weight:600;margin-bottom:4px">🃏 Singles</div>
+          <div style="font-size:0.75rem;color:var(--text2);font-weight:600;margin-bottom:4px">Singles</div>
           <input type="number" id="sn-singles" min="0" step="0.01" placeholder="0" oninput="snUpdateTotal()">
         </div>
         <div>
-          <div style="font-size:0.75rem;color:var(--text2);font-weight:600;margin-bottom:4px">🏆 Slabs</div>
+          <div style="font-size:0.75rem;color:var(--text2);font-weight:600;margin-bottom:4px">Slabs</div>
           <input type="number" id="sn-slabs" min="0" step="0.01" placeholder="0" oninput="snUpdateTotal()">
         </div>
         <div>
-          <div style="font-size:0.75rem;color:var(--text2);font-weight:600;margin-bottom:4px">📦 Sealed</div>
+          <div style="font-size:0.75rem;color:var(--text2);font-weight:600;margin-bottom:4px">Sealed</div>
           <input type="number" id="sn-sealed" min="0" step="0.01" placeholder="0" oninput="snUpdateTotal()">
         </div>
       </div>
@@ -254,15 +254,15 @@
     <div class="field">
       <label>Category</label>
       <div class="cat-pills">
-        <button type="button" class="cat-pill" data-cat="singles" onclick="pickCat('singles')">🃏 Singles</button>
-        <button type="button" class="cat-pill" data-cat="slabs" onclick="pickCat('slabs')">🏆 Slabs</button>
-        <button type="button" class="cat-pill" data-cat="sealed" onclick="pickCat('sealed')">📦 Sealed</button>
+        <button type="button" class="cat-pill" data-cat="singles" onclick="pickCat('singles')">Singles</button>
+        <button type="button" class="cat-pill" data-cat="slabs" onclick="pickCat('slabs')">Slabs</button>
+        <button type="button" class="cat-pill" data-cat="sealed" onclick="pickCat('sealed')">Sealed</button>
       </div>
     </div>
     <div class="field">
       <label>Pricing</label>
       <div class="cat-pills">
-        <button type="button" class="cat-pill" data-mode="each" onclick="pickMode('each')">💲 Per item</button>
+        <button type="button" class="cat-pill" data-mode="each" onclick="pickMode('each')">Per item</button>
         <button type="button" class="cat-pill" data-mode="lot" onclick="pickMode('lot')">Σ Combined total</button>
       </div>
       <div id="im-mode-hint" style="font-size:0.75rem;color:var(--text2);margin-top:6px;line-height:1.5"></div>
@@ -782,7 +782,7 @@ function renderSnapTable(snaps) {
   }).join('');
   wrap.innerHTML = `<table class="inv"><thead><tr>
     <th>Date</th><th>Show / Label</th>
-    <th class="num">🃏 Singles</th><th class="num">🏆 Slabs</th><th class="num">📦 Sealed</th>
+    <th class="num">Singles</th><th class="num">Slabs</th><th class="num">Sealed</th>
     <th class="num">Total Value</th><th class="num">Cost Basis</th><th class="num">Change</th><th></th>
   </tr></thead><tbody>${rows}</tbody></table>`;
 }

@@ -238,11 +238,11 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
   <div class="header-left">
     <div class="brand">Content Planner</div>
     <nav class="header-tabs">
-      <div class="h-tab active" data-tab="calendar">📅 Calendar</div>
-      <div class="h-tab" data-tab="queue">📋 Queue</div>
-      <div class="h-tab" data-tab="plan">🗓️ Plan</div>
-      <div class="h-tab" data-tab="templates">⚡ Templates</div>
-      <div class="h-tab" data-tab="canva">🎨 Canva</div>
+      <div class="h-tab active" data-tab="calendar">Calendar</div>
+      <div class="h-tab" data-tab="queue">Queue</div>
+      <div class="h-tab" data-tab="plan">Plan</div>
+      <div class="h-tab" data-tab="templates">Templates</div>
+      <div class="h-tab" data-tab="canva">Canva</div>
     </nav>
   </div>
   <div class="header-right">
@@ -287,7 +287,7 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
   <div class="section" id="tab-plan">
     <div class="plan-hero">
       <div class="plan-hero-main">
-        <div style="font-size:1.1rem;font-weight:600;margin-bottom:6px;">🗓️ The Content Engine</div>
+        <div style="font-size:1.1rem;font-weight:600;margin-bottom:6px;">The Content Engine</div>
         <div style="font-size:0.85rem;color:var(--text2);line-height:1.6;max-width:640px;">
           A repeatable 4-week posting system built for growth. It loads <strong style="color:var(--text)">28 ready-to-shoot posts</strong>
           — captions written, dates set, formats chosen — straight onto your calendar. Reels lead each week for reach,
@@ -295,7 +295,7 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
         </div>
       </div>
       <div class="plan-hero-actions">
-        <button class="btn-primary" onclick="loadContentPlan()">📥 Load Next 4 Weeks</button>
+        <button class="btn-primary" onclick="loadContentPlan()">Load Next 4 Weeks</button>
         <button class="btn-ghost" onclick="clearContentPlan()" style="margin-top:8px;">Remove loaded plan</button>
       </div>
     </div>
@@ -363,18 +363,18 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
       <div class="field">
         <label>Category</label>
         <select id="f-category">
-          <option value="show-schedule">📅 Show Schedule</option>
-          <option value="product">📦 Product</option>
-          <option value="card-spotlight">✨ Card Spotlight</option>
-          <option value="custom">🎨 Custom</option>
+          <option value="show-schedule">Show Schedule</option>
+          <option value="product">Product</option>
+          <option value="card-spotlight">Card Spotlight</option>
+          <option value="custom">Custom</option>
         </select>
       </div>
       <div class="field">
         <label>Content Type</label>
         <select id="f-type">
-          <option value="post">📸 Post</option>
-          <option value="story">⭕ Story</option>
-          <option value="reel">🎬 Reel</option>
+          <option value="post">Post</option>
+          <option value="story">Story</option>
+          <option value="reel">Reel</option>
           <option value="video">▶️ Video</option>
         </select>
       </div>
@@ -405,10 +405,10 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
     <div class="field">
       <label>Platforms</label>
       <div class="platform-select" id="platform-select">
-        <div class="plat-btn on" data-p="instagram">📸 Instagram</div>
-        <div class="plat-btn" data-p="tiktok">🎵 TikTok</div>
-        <div class="plat-btn" data-p="twitter">🐦 Twitter/X</div>
-        <div class="plat-btn" data-p="facebook">👥 Facebook</div>
+        <div class="plat-btn on" data-p="instagram">Instagram</div>
+        <div class="plat-btn" data-p="tiktok">TikTok</div>
+        <div class="plat-btn" data-p="twitter">Twitter/X</div>
+        <div class="plat-btn" data-p="facebook">Facebook</div>
         <div class="plat-btn" data-p="youtube">▶️ YouTube</div>
       </div>
     </div>
@@ -848,7 +848,7 @@ function renderQueue() {
   const el = document.getElementById('queue-grid');
   if (!items.length) {
     el.innerHTML = `<div class="empty" style="grid-column:1/-1">
-      <div class="empty-icon">📭</div>
+      <div class="empty-icon"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#inbox"/></svg></div>
       <div class="empty-title">No content found</div>
       <div class="empty-sub">Try changing your filters or create new content.</div>
     </div>`;
@@ -857,15 +857,15 @@ function renderQueue() {
   el.innerHTML = items.map(c => {
     const plats = (c.platforms||[]).map(p=>`<span class="platform">${PLAT_ICONS[p]||''} ${p}</span>`).join('');
     const canvaBtn = c.canvaUrl
-      ? `<a class="icon-btn" title="Open in Canva" href="${esc(c.canvaUrl)}" target="_blank" rel="noopener" style="text-decoration:none">🎨</a>`
-      : `<button class="icon-btn" title="Add Canva design" onclick="openModal('${c.id}')" style="opacity:.45">🎨</button>`;
+      ? `<a class="icon-btn" title="Open in Canva" href="${esc(c.canvaUrl)}" target="_blank" rel="noopener" style="text-decoration:none"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#content"/></svg></a>`
+      : `<button class="icon-btn" title="Add Canva design" onclick="openModal('${c.id}')" style="opacity:.45"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#content"/></svg></button>`;
     return `<div class="content-card">
       <div class="card-top">
         <div class="card-title">${esc(c.title)}</div>
         <div class="card-actions">
           ${canvaBtn}
-          <button class="icon-btn" title="Edit" onclick="openModal('${c.id}')">✏️</button>
-          <button class="icon-btn" title="Mark posted" onclick="markPosted('${c.id}')" ${c.status==='posted'?'style="opacity:.4"':''}>✅</button>
+          <button class="icon-btn" title="Edit" onclick="openModal('${c.id}')"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#pencil"/></svg></button>
+          <button class="icon-btn" title="Mark posted" onclick="markPosted('${c.id}')" ${c.status==='posted'?'style="opacity:.4"':''}><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#check"/></svg></button>
           <button class="icon-btn" title="Delete" onclick="deleteContent('${c.id}')">✕</button>
         </div>
       </div>
@@ -878,7 +878,7 @@ function renderQueue() {
         ${plats?`<div style="display:flex;gap:5px;flex-wrap:wrap">${plats}</div>`:''}
         ${c.caption?`<div class="card-caption">${esc(c.caption)}</div>`:''}
         <div class="card-date">${c.date?`📅 <span>${fmtDate(c.date)}${c.time?' · '+c.time:''}</span>`:'<span style="color:var(--text2)">No date set</span>'}</div>
-        ${c.notes?`<div style="font-size:0.75rem;color:var(--text2)">💡 ${esc(c.notes)}</div>`:''}
+        ${c.notes?`<div style="font-size:0.75rem;color:var(--text2)">${esc(c.notes)}</div>`:''}
       </div>
     </div>`;
   }).join('');

@@ -316,7 +316,7 @@
     <div class="tab" data-tab="customers">Customers</div>
     <div class="tab" data-tab="projections">Projections</div>
     <div class="tab" data-tab="insights">Insights</div>
-    <div class="tab" data-tab="filament">🧵 Filament</div>
+    <div class="tab" data-tab="filament">Filament</div>
   </div>
 
   <main>
@@ -484,7 +484,7 @@
     <div class="panel" id="panel-insights">
       <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:18px;flex-wrap:wrap;gap:10px">
         <div>
-          <div style="font-size:1rem;font-weight:600;display:flex;align-items:center;gap:7px">🤖 Smart Insights</div>
+          <div style="font-size:1rem;font-weight:600;display:flex;align-items:center;gap:7px">Smart Insights</div>
           <div id="insightMeta" style="font-size:0.75rem;color:var(--text2);margin-top:3px">Live analysis of your current sales data.</div>
         </div>
         <button class="btn-secondary" onclick="renderInsights()" style="padding:7px 14px;font-size:.78rem">↻ Refresh</button>
@@ -879,11 +879,11 @@
     <!-- Infographics: top sellers + low stock -->
     <div class="grid-2" style="margin-bottom:20px">
       <div class="card">
-        <div class="card-title">🏆 Top Sellers by Character</div>
+        <div class="card-title">Top Sellers by Character</div>
         <div id="jtTopSellersChart"></div>
       </div>
       <div class="card" id="jtLowStockCard">
-        <div class="card-title" id="jtLowStockTitle">⚠️ Low Stock Warning</div>
+        <div class="card-title" id="jtLowStockTitle">Low Stock Warning</div>
         <div id="jtLowStockList"></div>
       </div>
     </div>
@@ -902,7 +902,7 @@
     <div class="grid-2" style="margin-bottom:20px">
       <!-- Order & restock history: every batch bought, what it cost, reorder vs new -->
       <div class="card" style="grid-column:1/-1">
-        <div class="card-title">📦 Order &amp; Restock History</div>
+        <div class="card-title">Order &amp; Restock History</div>
         <div style="font-size:0.75rem;color:var(--text2);margin-bottom:10px">Every batch you've bought — original stock, reorders, and new characters — with what each one cost you.</div>
         <div class="table-wrap">
           <table>
@@ -1054,11 +1054,11 @@
     <!-- Infographics row: top sellers + low stock -->
     <div class="grid-2" style="margin-bottom:20px">
       <div class="card">
-        <div class="card-title">🏆 Top Sellers by Character</div>
+        <div class="card-title">Top Sellers by Character</div>
         <div id="pinTopSellersChart"></div>
       </div>
       <div class="card" id="pinLowStockCard">
-        <div class="card-title" id="pinLowStockTitle">⚠️ Low Stock Warning</div>
+        <div class="card-title" id="pinLowStockTitle">Low Stock Warning</div>
         <div id="pinLowStockList"></div>
       </div>
     </div>
@@ -1076,7 +1076,7 @@
     <div class="grid-2" style="margin-bottom:20px">
       <!-- Order & restock history: every batch bought, what it cost, reorder vs new -->
       <div class="card" style="grid-column:1/-1">
-        <div class="card-title">📦 Order &amp; Restock History</div>
+        <div class="card-title">Order &amp; Restock History</div>
         <div style="font-size:0.75rem;color:var(--text2);margin-bottom:10px">Every batch you've bought — original stock, reorders, and new characters — with what each one cost you.</div>
         <div class="table-wrap">
           <table>
@@ -1303,21 +1303,21 @@
 <div class="section" id="section-backoffice">
   <main style="max-width:740px;margin:0 auto">
     <div style="margin-bottom:28px">
-      <div style="font-size:1.1rem;font-weight:600;margin-bottom:4px">⚙ Back Office</div>
+      <div style="font-size:1.1rem;font-weight:600;margin-bottom:4px">Back Office</div>
       <div style="font-size:0.8rem;color:var(--text2)">Data management, backups, and cloud sync controls.</div>
     </div>
 
     <div class="card" style="margin-bottom:18px">
-      <div class="card-title" style="margin-bottom:14px">☁ Cloud Sync</div>
+      <div class="card-title" style="margin-bottom:14px">Cloud Sync</div>
       <div style="font-size:0.82rem;color:var(--text2);margin-bottom:14px">Your data auto-saves to Supabase on every change — no manual action needed. Use the button below only if you need to force a full upload (e.g. after importing a backup on a new device).</div>
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <button class="btn-primary" onclick="forcePushAll()">☁ Force Push All to Cloud</button>
+        <button class="btn-primary" onclick="forcePushAll()">Force Push All to Cloud</button>
         <div id="bo-sync-status" style="font-size:0.78rem;color:var(--text2)"></div>
       </div>
     </div>
 
     <div class="card" style="margin-bottom:18px">
-      <div class="card-title" style="margin-bottom:14px">💾 Backup &amp; Restore</div>
+      <div class="card-title" style="margin-bottom:14px">Backup &amp; Restore</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <button class="btn-primary" onclick="exportBackup()">⬇ Download Backup</button>
         <button class="btn-secondary" onclick="document.getElementById('importFile').click()">⬆ Restore from File</button>
@@ -1327,7 +1327,7 @@
     </div>
 
     <div class="card">
-      <div class="card-title" style="margin-bottom:14px">📤 Export &amp; Reset</div>
+      <div class="card-title" style="margin-bottom:14px">Export &amp; Reset</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <button class="btn-secondary" onclick="exportOrdersCSV()">↧ Export Orders CSV</button>
         <button class="btn-secondary" style="color:var(--red);border-color:var(--red)" onclick="resetOrdersToDefault()">↺ Reset to 47 Default Orders</button>
@@ -2122,7 +2122,7 @@ function renderInsights() {
     grid.innerHTML = `
       <div class="insight-card">
         <div class="insight-type">getting started</div>
-        <div class="insight-title">📭 No orders to analyze yet</div>
+        <div class="insight-title">No orders to analyze yet</div>
         <div class="insight-body">Log your first order and live, data-driven insights will appear here automatically.</div>
       </div>`;
     return;
@@ -2495,7 +2495,7 @@ function renderUnitsSold() {
     : '';
   card.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:18px">
-      <div style="font-size:0.75rem;font-weight:600;color:var(--text2)">📊 Units Sold</div>
+      <div style="font-size:0.75rem;font-weight:600;color:var(--text2)">Units Sold</div>
       <div style="font-size:.78rem;color:var(--text2)">${esc(rangeLabel)} · risers counted in sets, products in units</div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px">${tiles}</div>
@@ -2757,7 +2757,7 @@ function printerCardHTML(printer) {
 
   const statusBadge = isPaidOff
     ? `<div style="background:#203d28;border:1px solid var(--green);border-radius:8px;padding:7px 14px;text-align:center;white-space:nowrap">
-        <div style="font-size:0.75rem;font-weight:600;color:var(--green);">✅ PAID OFF</div>
+        <div style="font-size:0.75rem;font-weight:600;color:var(--green);">PAID OFF</div>
        </div>`
     : `<div style="background:#453e1a;border:1px solid var(--yellow);border-radius:8px;padding:7px 14px;text-align:center;white-space:nowrap">
         <div style="font-size:0.75rem;font-weight:600;color:var(--yellow);">In Progress</div>
@@ -2842,7 +2842,7 @@ function renderPrinterPayoff() {
   const cardsHTML = PRINTERS.map(p => printerCardHTML(p)).join('');
   card.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
-      <div style="font-size:0.75rem;font-weight:600;color:var(--text2)">🖨 Printer Payoff Tracker</div>
+      <div style="font-size:0.75rem;font-weight:600;color:var(--text2)">Printer Payoff Tracker</div>
       <div style="font-size:.78rem;color:var(--text2)">${paidOff}/${PRINTERS.length} paid off &nbsp;·&nbsp; Total hardware: <strong style="color:var(--text)">${fmt$(totalCost)}</strong></div>
     </div>
     <div class="grid-2" style="gap:16px">${cardsHTML}</div>`;
@@ -2907,7 +2907,7 @@ function renderMonthlyGoal() {
   card.innerHTML = `
     <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px">
       <div>
-        <div style="font-size:0.75rem;font-weight:600;color:var(--text2);margin-bottom:6px">🎯 Monthly Revenue Goal</div>
+        <div style="font-size:0.75rem;font-weight:600;color:var(--text2);margin-bottom:6px">Monthly Revenue Goal</div>
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:.82rem;color:var(--text2)">Target:</span>
           <span style="font-size:1.4rem;font-weight:600;color:var(--text)">${fmt$(goal)}</span>
@@ -3015,7 +3015,7 @@ function renderInstalledBase() {
     </div>`).join('');
   card.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:18px">
-      <div style="font-size:0.75rem;font-weight:600;color:var(--text2)">📦 Installed Base</div>
+      <div style="font-size:0.75rem;font-weight:600;color:var(--text2)">Installed Base</div>
       <div style="font-size:.78rem;color:var(--text2)">Sets currently in the field across all vendors</div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:22px">
@@ -3472,7 +3472,7 @@ function renderRecentExpenses() {
         <span style="font-size:0.75rem;color:var(--text2)">${esc(e.category)}</span>
         <span style="font-size:.83rem;color:var(--red);font-variant-numeric:tabular-nums;white-space:nowrap">${fmt$(e.amount)}</span>
         <span style="font-size:0.75rem;color:var(--text2);white-space:nowrap">${fmtDate(e.date)}</span>
-        <button class="icon-btn" onclick="openExpModal('${e.id}')">✏️</button>
+        <button class="icon-btn" onclick="openExpModal('${e.id}')"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#pencil"/></svg></button>
         <button class="icon-btn" onclick="deleteExpense('${e.id}')">✕</button>
       </div>`).join('')
     : '<div style="color:var(--text2);font-size:.83rem;padding:12px 0">No expenses logged yet.</div>';
@@ -3510,7 +3510,7 @@ function renderExpTable() {
       <td><span class="badge ${e.type==='fixed'?'badge-blue':'badge-yellow'}">${e.type}</span></td>
       <td class="num">${fmt$(e.amount)}</td>
       <td style="text-align:right;white-space:nowrap">
-        <button class="icon-btn" onclick="openExpModal('${e.id}')">✏️</button>
+        <button class="icon-btn" onclick="openExpModal('${e.id}')"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#pencil"/></svg></button>
         <button class="icon-btn" onclick="deleteExpense('${e.id}')">✕</button>
       </td>
     </tr>`;
@@ -3994,13 +3994,12 @@ function renderJtTopSellers() {
   el.innerHTML = sorted.map((c, i) => {
     if (c.sold === 0) return '';
     const pct = (c.sold / max * 100).toFixed(0);
-    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉'
-      : `<span style="display:inline-block;width:18px;text-align:center;font-size:0.75rem;color:var(--text2);font-weight:600">${i+1}</span>`;
-    const barColor = i === 0 ? '#f59e0b' : i === 1 ? '#a1a1a6' : i === 2 ? '#cd7f32' : 'var(--accent)';
+    const medal = `<span class="rank">${i + 1}</span>`;
+    const barColor = 'var(--accent)';
     return `<div style="margin-bottom:11px">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
         <span style="font-size:.83rem;font-weight:600;display:flex;align-items:center;gap:5px">${medal} ${esc(c.name)}</span>
-        <span style="font-size:.8rem;font-weight:600;color:${barColor};font-variant-numeric:tabular-nums">${c.sold} sold</span>
+        <span style="font-size:.8rem;font-weight:600;font-variant-numeric:tabular-nums">${c.sold} sold</span>
       </div>
       <div style="background:var(--surface2);border-radius:99px;height:8px;overflow:hidden">
         <div style="width:${pct}%;background:${barColor};border-radius:99px;height:8px"></div>
@@ -4022,23 +4021,20 @@ function renderJtLowStock() {
   const listEl  = document.getElementById('jtLowStockList');
   const cardEl  = document.getElementById('jtLowStockCard');
   if (!items.length) {
-    titleEl.textContent = '✅ Stock Levels'; cardEl.style.borderLeft = '3px solid var(--green)';
-    listEl.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:14px 0"><span style="font-size:1.6rem">✅</span><span style="color:var(--green);font-size:.88rem;font-weight:600">All characters well-stocked</span></div>`;
+    titleEl.textContent = 'Stock Levels'; cardEl.style.borderLeft = '';
+    listEl.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:14px 0"><span style="color:var(--green);display:flex"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#check"/></svg></span><span style="color:var(--green);font-size:.88rem;font-weight:600">All characters well-stocked</span></div>`;
     return;
   }
   const soldOut = items.filter(c => c.left === 0);
   titleEl.innerHTML = soldOut.length
-    ? `🚫 Low Stock — <span style="color:var(--red)">${soldOut.length} sold out</span>`
-    : `⚠️ Low Stock — <span style="color:var(--yellow)">${items.length} item${items.length>1?'s':''}</span>`;
-  cardEl.style.borderLeft = soldOut.length ? '3px solid var(--red)' : '3px solid var(--yellow)';
+    ? `Low Stock — <span style="color:var(--red)">${soldOut.length} sold out</span>`
+    : `Low Stock — <span style="color:var(--orange)">${items.length} item${items.length>1?'s':''}</span>`;
+  cardEl.style.borderLeft = '';
   listEl.innerHTML = items.map(c => {
     const isSoldOut = c.left === 0;
-    const color = isSoldOut ? 'var(--red)' : 'var(--yellow)';
-    const bg    = isSoldOut ? 'rgba(255, 105, 97,0.08)' : 'rgba(255, 214, 10,0.08)';
-    const bdr   = isSoldOut ? 'rgba(255, 105, 97,0.25)' : 'rgba(255, 214, 10,0.25)';
-    const icon  = isSoldOut ? '🚫' : c.left === 1 ? '🔴' : '⚠️';
-    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;background:${bg};margin-bottom:8px;border:1px solid ${bdr}">
-      <span style="font-size:1.1rem;flex-shrink:0">${icon}</span>
+    const color = isSoldOut || c.left === 1 ? 'var(--red)' : 'var(--orange)';
+    return `<div class="stock-row">
+      <span class="stock-dot" style="background:${color}"></span>
       <div style="flex:1;min-width:0">
         <div style="font-size:.85rem;font-weight:600">${esc(c.name)}</div>
         <div style="font-size:0.75rem;color:var(--text2);margin-top:1px">${(c.sold/c.eff*100).toFixed(0)}% sold · ${c.sold}/${c.eff} moved</div>
@@ -4543,13 +4539,12 @@ function renderPinTopSellers() {
   el.innerHTML = sorted.map((c, i) => {
     if (c.sold === 0) return '';
     const pct = (c.sold / max * 100).toFixed(0);
-    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉'
-      : `<span style="display:inline-block;width:18px;text-align:center;font-size:0.75rem;color:var(--text2);font-weight:600">${i+1}</span>`;
-    const barColor = i === 0 ? '#f59e0b' : i === 1 ? '#a1a1a6' : i === 2 ? '#cd7f32' : 'var(--accent)';
+    const medal = `<span class="rank">${i + 1}</span>`;
+    const barColor = 'var(--accent)';
     return `<div style="margin-bottom:11px">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
         <span style="font-size:.83rem;font-weight:600;display:flex;align-items:center;gap:5px">${medal} ${esc(c.name)}</span>
-        <span style="font-size:.8rem;font-weight:600;color:${barColor};font-variant-numeric:tabular-nums">${c.sold} sold</span>
+        <span style="font-size:.8rem;font-weight:600;font-variant-numeric:tabular-nums">${c.sold} sold</span>
       </div>
       <div style="background:var(--surface2);border-radius:99px;height:8px;overflow:hidden">
         <div style="width:${pct}%;background:${barColor};border-radius:99px;height:8px"></div>
@@ -4571,23 +4566,20 @@ function renderPinLowStock() {
   const listEl  = document.getElementById('pinLowStockList');
   const cardEl  = document.getElementById('pinLowStockCard');
   if (!items.length) {
-    titleEl.textContent = '✅ Stock Levels'; cardEl.style.borderLeft = '3px solid var(--green)';
-    listEl.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:14px 0"><span style="font-size:1.6rem">✅</span><span style="color:var(--green);font-size:.88rem;font-weight:600">All pins well-stocked</span></div>`;
+    titleEl.textContent = 'Stock Levels'; cardEl.style.borderLeft = '';
+    listEl.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:14px 0"><span style="color:var(--green);display:flex"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#check"/></svg></span><span style="color:var(--green);font-size:.88rem;font-weight:600">All pins well-stocked</span></div>`;
     return;
   }
   const soldOut = items.filter(c => c.left === 0);
   titleEl.innerHTML = soldOut.length
-    ? `🚫 Low Stock — <span style="color:var(--red)">${soldOut.length} sold out</span>`
-    : `⚠️ Low Stock — <span style="color:var(--yellow)">${items.length} item${items.length>1?'s':''}</span>`;
-  cardEl.style.borderLeft = soldOut.length ? '3px solid var(--red)' : '3px solid var(--yellow)';
+    ? `Low Stock — <span style="color:var(--red)">${soldOut.length} sold out</span>`
+    : `Low Stock — <span style="color:var(--orange)">${items.length} item${items.length>1?'s':''}</span>`;
+  cardEl.style.borderLeft = '';
   listEl.innerHTML = items.map(c => {
     const isSoldOut = c.left === 0;
-    const color = isSoldOut ? 'var(--red)' : 'var(--yellow)';
-    const bg    = isSoldOut ? 'rgba(255, 105, 97,0.08)' : 'rgba(255, 214, 10,0.08)';
-    const bdr   = isSoldOut ? 'rgba(255, 105, 97,0.25)' : 'rgba(255, 214, 10,0.25)';
-    const icon  = isSoldOut ? '🚫' : c.left === 1 ? '🔴' : '⚠️';
-    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;background:${bg};margin-bottom:8px;border:1px solid ${bdr}">
-      <span style="font-size:1.1rem;flex-shrink:0">${icon}</span>
+    const color = isSoldOut || c.left === 1 ? 'var(--red)' : 'var(--orange)';
+    return `<div class="stock-row">
+      <span class="stock-dot" style="background:${color}"></span>
       <div style="flex:1;min-width:0">
         <div style="font-size:.85rem;font-weight:600">${esc(c.name)}</div>
         <div style="font-size:0.75rem;color:var(--text2);margin-top:1px">${(c.sold/c.eff*100).toFixed(0)}% sold · ${c.sold}/${c.eff} moved</div>
@@ -4979,11 +4971,11 @@ function catSectionHtml(cat) {
     </div>
     <div class="grid-2" style="margin-bottom:20px">
       <div class="card">
-        <div class="card-title">🏆 Top Sellers by Item</div>
+        <div class="card-title">Top Sellers by Item</div>
         <div data-hook="topsellers"></div>
       </div>
       <div class="card" data-hook="lowstockcard">
-        <div class="card-title" data-hook="lowstocktitle">⚠️ Low Stock Warning</div>
+        <div class="card-title" data-hook="lowstocktitle">Low Stock Warning</div>
         <div data-hook="lowstocklist"></div>
       </div>
     </div>
@@ -4998,7 +4990,7 @@ function catSectionHtml(cat) {
     </div>
     <div class="grid-2" style="margin-bottom:20px">
       <div class="card" style="grid-column:1/-1">
-        <div class="card-title">📦 Order &amp; Restock History</div>
+        <div class="card-title">Order &amp; Restock History</div>
         <div style="font-size:0.75rem;color:var(--text2);margin-bottom:10px">Every batch you've bought — new items and reorders — with what each one cost you.</div>
         <div class="table-wrap">
           <table>
@@ -5172,13 +5164,12 @@ function renderCatTopSellers(t, el, color) {
   el.innerHTML = sorted.map((i, idx) => {
     if (i.sold === 0) return '';
     const pct = (i.sold / max * 100).toFixed(0);
-    const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉'
-      : `<span style="display:inline-block;width:18px;text-align:center;font-size:0.75rem;color:var(--text2);font-weight:600">${idx + 1}</span>`;
-    const barColor = idx === 0 ? '#f59e0b' : idx === 1 ? '#a1a1a6' : idx === 2 ? '#cd7f32' : color;
+    const medal = `<span class="rank">${idx + 1}</span>`;
+    const barColor = 'var(--accent)';
     return `<div style="margin-bottom:11px">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
         <span style="font-size:.83rem;font-weight:600;display:flex;align-items:center;gap:5px">${medal} ${esc(i.name)}</span>
-        <span style="font-size:.8rem;font-weight:600;color:${barColor};font-variant-numeric:tabular-nums">${i.sold} sold</span>
+        <span style="font-size:.8rem;font-weight:600;font-variant-numeric:tabular-nums">${i.sold} sold</span>
       </div>
       <div style="background:var(--surface2);border-radius:99px;height:8px;overflow:hidden">
         <div style="width:${pct}%;background:${barColor};border-radius:99px;height:8px"></div>
@@ -5190,31 +5181,28 @@ function renderCatTopSellers(t, el, color) {
 
 function renderCatLowStock(cat, t, titleEl, listEl, cardEl) {
   if (!t.stock.length) {
-    titleEl.textContent = '⚠️ Low Stock Warning';
+    titleEl.textContent = 'Low Stock Warning';
     cardEl.style.borderLeft = '';
     listEl.innerHTML = '<div style="color:var(--text2);font-size:.83rem;padding:16px 0">Add items to start tracking stock levels.</div>';
     return;
   }
   const items = t.stock.filter(i => i.left <= 3).sort((a, b) => a.left - b.left);
   if (!items.length) {
-    titleEl.textContent = '✅ Stock Levels';
-    cardEl.style.borderLeft = '3px solid var(--green)';
-    listEl.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:14px 0"><span style="font-size:1.6rem">✅</span><span style="color:var(--green);font-size:.88rem;font-weight:600">All ${esc(catPlural(cat, 2))} well-stocked</span></div>`;
+    titleEl.textContent = 'Stock Levels';
+    cardEl.style.borderLeft = '';
+    listEl.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:14px 0"><span style="color:var(--green);display:flex"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#check"/></svg></span><span style="color:var(--green);font-size:.88rem;font-weight:600">All ${esc(catPlural(cat, 2))} well-stocked</span></div>`;
     return;
   }
   const soldOut = items.filter(i => i.left === 0);
   titleEl.innerHTML = soldOut.length
-    ? `🚫 Low Stock — <span style="color:var(--red)">${soldOut.length} sold out</span>`
-    : `⚠️ Low Stock — <span style="color:var(--yellow)">${items.length} item${items.length > 1 ? 's' : ''}</span>`;
-  cardEl.style.borderLeft = soldOut.length ? '3px solid var(--red)' : '3px solid var(--yellow)';
+    ? `Low Stock — <span style="color:var(--red)">${soldOut.length} sold out</span>`
+    : `Low Stock — <span style="color:var(--orange)">${items.length} item${items.length > 1 ? 's' : ''}</span>`;
+  cardEl.style.borderLeft = '';
   listEl.innerHTML = items.map(i => {
     const isSoldOut = i.left === 0;
-    const color = isSoldOut ? 'var(--red)' : 'var(--yellow)';
-    const bg    = isSoldOut ? 'rgba(255, 105, 97,0.08)' : 'rgba(255, 214, 10,0.08)';
-    const bdr   = isSoldOut ? 'rgba(255, 105, 97,0.25)' : 'rgba(255, 214, 10,0.25)';
-    const icon  = isSoldOut ? '🚫' : i.left === 1 ? '🔴' : '⚠️';
-    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;background:${bg};margin-bottom:8px;border:1px solid ${bdr}">
-      <span style="font-size:1.1rem;flex-shrink:0">${icon}</span>
+    const color = isSoldOut || i.left === 1 ? 'var(--red)' : 'var(--orange)';
+    return `<div class="stock-row">
+      <span class="stock-dot" style="background:${color}"></span>
       <div style="flex:1;min-width:0">
         <div style="font-size:.85rem;font-weight:600">${esc(i.name)}</div>
         <div style="font-size:0.75rem;color:var(--text2);margin-top:1px">${i.effective ? (i.sold / i.effective * 100).toFixed(0) : 0}% sold · ${i.sold}/${i.effective} moved</div>

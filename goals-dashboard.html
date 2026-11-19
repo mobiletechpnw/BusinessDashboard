@@ -403,14 +403,14 @@ function goalHTML(g) {
         <div class="goal-title ${g.done ? 'done' : ''}" onclick="toggleGoal('${g.id}')">${esc(g.title)}</div>
         <div class="goal-actions">
           <button class="icon-btn" title="Add objective" onclick="openObjModal('${g.id}')">＋</button>
-          <button class="icon-btn" title="Edit goal" onclick="openGoalModal('${g.id}')">✏️</button>
-          <button class="icon-btn" title="Delete goal" onclick="deleteGoal('${g.id}')">🗑</button>
+          <button class="icon-btn" title="Edit goal" onclick="openGoalModal('${g.id}')"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#pencil"/></svg></button>
+          <button class="icon-btn" title="Delete goal" onclick="deleteGoal('${g.id}')"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#trash"/></svg></button>
         </div>
       </div>
       ${g.desc ? `<div style="font-size:0.78rem;color:var(--text2);margin-top:6px;margin-left:30px">${esc(g.desc)}</div>` : ''}
       <div class="goal-meta" style="margin-left:30px">
         <span class="badge badge-${g.priority || 'none'}">${g.priority || 'no priority'}</span>
-        ${g.due ? `<span class="due-date ${dueClass}">📅 ${dueStr}</span>` : ''}
+        ${g.due ? `<span class="due-date ${dueClass}">${dueStr}</span>` : ''}
         ${objs.length ? `<span style="font-size:0.75rem;color:var(--text2)">${done}/${objs.length} done</span>` : ''}
       </div>
       ${objs.length ? `<div class="progress-bar-wrap" style="margin-left:30px">
@@ -437,7 +437,7 @@ function objHTML(gid, o) {
     ${pri ? `<span class="obj-priority obj-priority-${pri}">${pri}</span>` : ''}
     ${o.due ? `<span class="obj-due ${dueClass}">${fmtDate(o.due)}</span>` : ''}
     <div class="obj-actions">
-      <button class="icon-btn btn-icon" title="Edit" onclick="openObjModal('${gid}','${o.id}')">✏️</button>
+      <button class="icon-btn btn-icon" title="Edit" onclick="openObjModal('${gid}','${o.id}')"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#pencil"/></svg></button>
       <button class="icon-btn btn-icon" title="Delete" onclick="deleteObj('${gid}','${o.id}')">✕</button>
     </div>
   </div>`;

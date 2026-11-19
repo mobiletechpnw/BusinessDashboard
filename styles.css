@@ -1518,6 +1518,49 @@ div.modal-overlay {
   }
 }
 
+/* ── Icons in context (icons.svg via VPCUtil.icon) ── */
+.e-icon .vpc-ico,
+.empty-icon .vpc-ico {
+  width: 44px;
+  height: 44px;
+  stroke-width: 1.5;
+  color: var(--label-3);
+}
+.icon-btn .vpc-ico,
+.act-btn .vpc-ico {
+  width: 16px;
+  height: 16px;
+}
+/* Rank in a top-sellers list */
+.rank {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--fill);
+  color: var(--label-2);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+/* A low-stock row: a state dot, the item, how many are left */
+.stock-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: var(--fill-2);
+}
+.stock-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+}
+
 /* ── Shared table ── */
 table {
   width: 100%;

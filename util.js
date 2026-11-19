@@ -834,6 +834,13 @@
       return d >= from && d <= to;
     });
 
+  // ── Icons ──────────────────────────────────────────
+  // One line-icon set, in icons.svg. Returns an inline <svg> that uses a
+  // symbol from it; .vpc-ico (styles.css) sizes it and strokes it in the
+  // current text colour, so icons follow state colours and both themes.
+  const icon = (name, cls = '') =>
+    `<svg class="vpc-ico${cls ? ' ' + cls : ''}" aria-hidden="true"><use href="icons.svg#${name}"/></svg>`;
+
   const api = {
     money,
     sumMoney,
@@ -855,6 +862,7 @@
     HISTORICAL_ORDERS,
     orderList,
     seedOrders,
+    icon,
   };
 
   // Browser global + CommonJS (for the test runner).

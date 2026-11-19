@@ -23,9 +23,11 @@
     flex-wrap: wrap; gap: 12px; margin-bottom: 28px;
   }
   .review-title { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.5px; }
-  .review-title span { color: var(--accent); }
+  .review-title span { color: inherit; }
   .review-date { font-size: 0.8rem; color: var(--text2); }
 
+  #narrate-icon { display: flex; }
+  #narrate-icon .vpc-ico { width: 16px; height: 16px; }
   .narrate-btn {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 999px; padding: 8px 16px; color: var(--text2);
@@ -70,7 +72,10 @@
   .alert-danger  { background: rgba(255, 105, 97,0.08); border: 1px solid rgba(255, 105, 97,0.3); }
   .alert-warning { background: rgba(255, 214, 10,0.08);  border: 1px solid rgba(255, 214, 10,0.3); }
   .alert-ok      { background: rgba(48, 209, 88,0.08);  border: 1px solid rgba(48, 209, 88,0.3); }
-  .alert-icon { font-size: 1rem; flex-shrink: 0; }
+  .alert-icon { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; background: var(--label-3); }
+  .alert-danger .alert-icon { background: var(--red); }
+  .alert-warning .alert-icon { background: var(--orange); }
+  .alert-ok .alert-icon { background: var(--green); }
   .alert-text { flex: 1; }
   .alert-action { font-size: 0.75rem; color: var(--accent); text-decoration: none; white-space: nowrap; }
 
@@ -158,7 +163,8 @@
     font-size: 0.8rem; color: #07211a; transition: all 0.15s;
   }
   .ritual-step.done .step-check { background: var(--green); border-color: var(--green); }
-  .step-icon { font-size: 1.1rem; flex-shrink: 0; }
+  .step-icon { flex-shrink: 0; display: flex; color: var(--accent); }
+  .step-icon .vpc-ico { width: 20px; height: 20px; }
   .step-body { flex: 1; min-width: 0; }
   .step-label { font-size: 0.86rem; font-weight: 600; }
   .ritual-step.done .step-label { text-decoration: line-through; color: var(--text2); }
@@ -223,7 +229,7 @@
       <div class="review-date" id="review-date"></div>
     </div>
     <button class="narrate-btn" id="narrate-btn" onclick="toggleNarrate()">
-      <span id="narrate-icon">🔊</span>
+      <span id="narrate-icon"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#volume"/></svg></span>
       <span id="narrate-label">Narrate Summary</span>
     </button>
   </div>
@@ -234,15 +240,15 @@
     <div class="panel section-full ritual-card" id="ritual-card">
       <div class="ritual-head">
         <div>
-          <div class="ritual-title">🥋 Weekly Money Ritual</div>
+          <div class="ritual-title">Weekly Money Ritual</div>
           <div class="ritual-sub">The 15-minute habit that ties every tool together. Do it once a week — same day, every week.</div>
         </div>
-        <div class="streak-badge" id="streak-badge" title="Consecutive weeks completed">🔥 <span id="streak-num">0</span><small>wk streak</small></div>
+        <div class="streak-badge" id="streak-badge" title="Consecutive weeks completed"><span id="streak-num">0</span><small>wk streak</small></div>
       </div>
       <div class="ritual-progress"><div class="ritual-progress-fill" id="ritual-progress-fill"></div></div>
       <div id="ritual-steps"></div>
       <div class="ritual-reflect" id="ritual-reflect">
-        <div class="reflect-label">✍️ Lock it in — one line each (optional)</div>
+        <div class="reflect-label">Lock it in — one line each (optional)</div>
         <div class="reflect-row">
           <input type="text" id="reflect-win" placeholder="One win this week…" onchange="saveReflection()">
           <input type="text" id="reflect-fix" placeholder="One thing to fix next week…" onchange="saveReflection()">
@@ -382,7 +388,7 @@ function renderAlerts() {
 
   el.innerHTML = alerts.map(a => `
     <div class="alert-item alert-${a.type}">
-      <span class="alert-icon">${a.icon}</span>
+      <span class="alert-icon"></span>
       <span class="alert-text">${a.text}</span>
       ${a.url ? `<a class="alert-action" href="${a.url}">${a.label} →</a>` : ''}
     </div>`).join('');
@@ -599,7 +605,7 @@ function renderObjectivesDue() {
     });
     due.sort((a,b) => (a.due||'').localeCompare(b.due||''));
 
-    if (!due.length) { el.innerHTML = '<div class="empty-msg">No objectives due this week. 🎉</div>'; return; }
+    if (!due.length) { el.innerHTML = '<div class="empty-msg">No objectives due this week.</div>'; return; }
 
     el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px">` +
       due.map(o => {
@@ -685,11 +691,11 @@ function ritualSteps() {
   } catch(e) {}
 
   return [
-    { id:'log',      icon:'🧾', label:'Log any missed expenses',     sub:logSub,    link:'expenses.html',         linkLabel:'Open Expenses' },
-    { id:'budget',   icon:'💸', label:'Check your budget status',    sub:budgetSub, link:'expenses.html',         linkLabel:'Review' },
-    { id:'margin',   icon:'📈', label:'Glance at your profit margin',sub:marginSub, link:'analytics.html',        linkLabel:'Analytics' },
-    { id:'goals',    icon:'🎯', label:'Review goals & deadlines',    sub:goalsSub,  link:'goals-dashboard.html',  linkLabel:'Goals' },
-    { id:'snapshot', icon:'💰', label:'Save a net-worth snapshot',   sub:nwSub,     action:'snapshot',            linkLabel:'Save now' },
+    { id:'log',      icon:'receipt', label:'Log any missed expenses',     sub:logSub,    link:'expenses.html',         linkLabel:'Open Expenses' },
+    { id:'budget',   icon:'expenses', label:'Check your budget status',    sub:budgetSub, link:'expenses.html',         linkLabel:'Review' },
+    { id:'margin',   icon:'analytics', label:'Glance at your profit margin',sub:marginSub, link:'analytics.html',        linkLabel:'Analytics' },
+    { id:'goals',    icon:'goals', label:'Review goals & deadlines',    sub:goalsSub,  link:'goals-dashboard.html',  linkLabel:'Goals' },
+    { id:'snapshot', icon:'star', label:'Save a net-worth snapshot',   sub:nwSub,     action:'snapshot',            linkLabel:'Save now' },
   ];
 }
 
@@ -743,7 +749,7 @@ function renderRitual() {
   $('ritual-steps').innerHTML = steps.map(s => `
     <div class="ritual-step ${checked[s.id] ? 'done' : ''}" onclick="toggleRitualStep('${s.id}')">
       <div class="step-check">${checked[s.id] ? '✓' : ''}</div>
-      <div class="step-icon">${s.icon}</div>
+      <div class="step-icon">${VPCUtil.icon(s.icon)}</div>
       <div class="step-body">
         <div class="step-label">${s.label}</div>
         <div class="step-sub">${s.sub}</div>
@@ -783,7 +789,7 @@ function renderRitual() {
     banner.style.display = 'block';
     banner.style.background = 'rgba(10, 132, 255,0.06)';
     banner.style.borderColor = 'rgba(10, 132, 255,0.22)';
-    banner.innerHTML = `<b style="color:var(--accent)">${doneCount}/${steps.length} steps done.</b> Finish all five to log this week${streak ? ` and keep your ${streak}-week streak alive 🔥` : ' and start your streak 🔥'}.`;
+    banner.innerHTML = `<b style="color:var(--accent)">${doneCount}/${steps.length} steps done.</b> Finish all five to log this week${streak ? ` and keep your ${streak}-week streak alive` : ' and start your streak'}.`;
   }
 }
 
@@ -794,14 +800,14 @@ function toggleNarrate() {
     window.speechSynthesis?.cancel();
     isNarrating = false;
     $('narrate-btn').classList.remove('active');
-    $('narrate-icon').textContent = '🔊';
+    $('narrate-icon').innerHTML = VPCUtil.icon('volume');
     $('narrate-label').textContent = 'Narrate Summary';
     return;
   }
   if (!window.speechSynthesis) { alert('Text-to-speech not supported in this browser.'); return; }
   isNarrating = true;
   $('narrate-btn').classList.add('active');
-  $('narrate-icon').textContent = '⏹';
+  $('narrate-icon').innerHTML = VPCUtil.icon('stop');
   $('narrate-label').textContent = 'Stop';
 
   // Build narration text
@@ -836,7 +842,7 @@ function toggleNarrate() {
 
   const utt = new SpeechSynthesisUtterance(text);
   utt.rate = 0.9; utt.pitch = 1.0; utt.volume = 1.0;
-  utt.onend = () => { isNarrating = false; $('narrate-btn').classList.remove('active'); $('narrate-icon').textContent='🔊'; $('narrate-label').textContent='Narrate Summary'; };
+  utt.onend = () => { isNarrating = false; $('narrate-btn').classList.remove('active'); $('narrate-icon').innerHTML=VPCUtil.icon('volume'); $('narrate-label').textContent='Narrate Summary'; };
   utt.onerror = () => { isNarrating = false; $('narrate-btn').classList.remove('active'); };
   window.speechSynthesis.speak(utt);
 }

@@ -294,7 +294,7 @@
 <header>
   <h1>Financial Guru</h1>
   <div class="header-right" style="display:flex;align-items:center;gap:10px;">
-    <div class="rank-chip" id="rank-chip" title="Highest Academy belt earned">🥋 No belt yet</div>
+    <div class="rank-chip" id="rank-chip" title="Highest Academy belt earned">No belt yet</div>
   </div>
 </header>
 
@@ -328,12 +328,12 @@
 
   <!-- ── Tabs ── -->
   <div class="guru-tabs">
-    <button class="gtab active" data-tab="academy"    onclick="showGuruTab('academy')">📚 Academy</button>
-    <button class="gtab" data-tab="health"     onclick="showGuruTab('health')">💪 Health Score</button>
-    <button class="gtab" data-tab="networth"   onclick="showGuruTab('networth')">💰 Net Worth</button>
-    <button class="gtab" data-tab="report"     onclick="showGuruTab('report')">📋 Report Card</button>
-    <button class="gtab" data-tab="milestones" onclick="showGuruTab('milestones')">🏆 Milestones</button>
-    <button class="gtab" data-tab="tools"      onclick="showGuruTab('tools')">🧮 Tools</button>
+    <button class="gtab active" data-tab="academy"    onclick="showGuruTab('academy')">Academy</button>
+    <button class="gtab" data-tab="health"     onclick="showGuruTab('health')">Health Score</button>
+    <button class="gtab" data-tab="networth"   onclick="showGuruTab('networth')">Net Worth</button>
+    <button class="gtab" data-tab="report"     onclick="showGuruTab('report')">Report Card</button>
+    <button class="gtab" data-tab="milestones" onclick="showGuruTab('milestones')">Milestones</button>
+    <button class="gtab" data-tab="tools"      onclick="showGuruTab('tools')">Tools</button>
   </div>
 
   <div class="panel active" id="panel-academy"></div>
@@ -361,7 +361,7 @@
       <div class="nw-chart-wrap">
         <div class="nw-chart-head">
           <span>Net Worth Trend</span>
-          <button class="btn-snapshot" onclick="takeSnapshot()">📸 Save snapshot</button>
+          <button class="btn-snapshot" onclick="takeSnapshot()">Save snapshot</button>
         </div>
         <canvas id="nw-chart"></canvas>
         <div class="nw-chart-hint" id="nw-chart-hint"></div>
@@ -371,7 +371,7 @@
     <!-- Income / savings rate -->
     <div class="nw-income-card">
       <div style="flex:1;min-width:200px;">
-        <div class="tool-title" style="margin-bottom:2px;">💵 Monthly Take-Home Income</div>
+        <div class="tool-title" style="margin-bottom:2px;">Monthly Take-Home Income</div>
         <div class="tool-why" style="margin-bottom:0;">Set this once and your savings rate, 50/30/20 split, and emergency-fund math all become real — not hypothetical.</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
@@ -386,21 +386,21 @@
     <div class="nw-cols">
       <div class="nw-col">
         <div class="nw-col-head">
-          <span>🟢 Assets <small>what you own</small></span>
+          <span>Assets <small>what you own</small></span>
           <button class="nw-add" onclick="openNwItem('asset')">+ Add</button>
         </div>
         <div id="nw-asset-list"></div>
       </div>
       <div class="nw-col">
         <div class="nw-col-head">
-          <span>🔴 Liabilities <small>what you owe</small></span>
+          <span>Liabilities <small>what you owe</small></span>
           <button class="nw-add" onclick="openNwItem('liability')">+ Add</button>
         </div>
         <div id="nw-liab-list"></div>
       </div>
     </div>
     <p style="font-size:0.75rem;color:var(--text2);line-height:1.6;margin-top:16px;">
-      💡 Sensei: net worth is the true scoreboard — income is a snapshot, this is the movie. Update it monthly and save a snapshot to watch the line climb. Include business cash, equipment, and inventory value as assets.
+      Sensei: net worth is the true scoreboard — income is a snapshot, this is the movie. Update it monthly and save a snapshot to watch the line climb. Include business cash, equipment, and inventory value as assets.
     </p>
   </div>
 
@@ -415,7 +415,7 @@
     <div class="report-rows" id="report-rows"></div>
     <div class="report-pace" id="report-pace"></div>
     <p style="font-size:0.75rem;color:var(--text2);line-height:1.6;margin-top:16px;">
-      💡 Sensei: a business you don't review is a business you don't run. This card compares your last full month to the one before it — revenue, spending, margin, net worth, and your health score — so you see the trend, not just today's number. Read it on the 1st of every month.
+      Sensei: a business you don't review is a business you don't run. This card compares your last full month to the one before it — revenue, spending, margin, net worth, and your health score — so you see the trend, not just today's number. Read it on the 1st of every month.
     </p>
   </div>
 
@@ -430,7 +430,7 @@
     <div class="tool-grid">
 
       <div class="tool-card">
-        <div class="tool-title">⚖️ Break-Even Calculator</div>
+        <div class="tool-title">Break-Even Calculator</div>
         <div class="tool-why">How many items must you sell before a booth fee, a new tool, or your fixed monthly costs are paid off? Below this number you're covering costs — above it, everything is profit.</div>
         <div class="field"><label>Fixed cost to cover ($)</label><input type="number" id="be-fixed" placeholder="e.g. 100 booth fee" oninput="calcBreakEven()"></div>
         <div class="field"><label>Profit per item ($)</label><input type="number" id="be-profit" placeholder="price minus cost, e.g. 8" oninput="calcBreakEven()"></div>
@@ -438,7 +438,7 @@
       </div>
 
       <div class="tool-card">
-        <div class="tool-title">📊 Profit Margin Calculator</div>
+        <div class="tool-title">Profit Margin Calculator</div>
         <div class="tool-why">Margin tells you how much of every sale you actually keep. Product businesses should target 40–60% gross margin. Below 30% usually means underpricing.</div>
         <div class="field"><label>Sale price ($)</label><input type="number" id="pm-price" placeholder="e.g. 25" oninput="calcMargin()"></div>
         <div class="field"><label>Cost to make/buy ($)</label><input type="number" id="pm-cost" placeholder="e.g. 9" oninput="calcMargin()"></div>
@@ -446,7 +446,7 @@
       </div>
 
       <div class="tool-card">
-        <div class="tool-title">🛡️ Emergency Fund Builder</div>
+        <div class="tool-title">Emergency Fund Builder</div>
         <div class="tool-why">An emergency fund turns disasters into inconveniences. Start with $500, then build toward 3–6 months of essential living costs.</div>
         <div class="field"><label>Essential monthly expenses ($)</label><input type="number" id="ef-monthly" placeholder="rent + food + bills" oninput="calcFund()"></div>
         <div class="field"><label>Months of cover (3–6 typical)</label><input type="number" id="ef-months" value="3" min="1" max="12" oninput="calcFund()"></div>
@@ -455,14 +455,14 @@
       </div>
 
       <div class="tool-card">
-        <div class="tool-title">🧭 50/30/20 Split</div>
+        <div class="tool-title">50/30/20 Split</div>
         <div class="tool-why">The classic budgeting compass: 50% of take-home pay to needs, 30% to wants, 20% to savings &amp; debt payoff. Adjust to your reality — the point is intentional allocation.</div>
         <div class="field"><label>Monthly take-home income ($)</label><input type="number" id="fs-income" placeholder="e.g. 3000" oninput="calcSplit()"></div>
         <div class="tool-result" id="fs-result">Enter income to see your suggested split.</div>
       </div>
 
       <div class="tool-card" style="grid-column: 1 / -1;">
-        <div class="tool-title">🔄 Subscription &amp; Recurring Bill Audit</div>
+        <div class="tool-title">Subscription &amp; Recurring Bill Audit</div>
         <div class="tool-why">Small monthly charges hide their real size — $12.99/month is $156 a year. This audit reads the recurring bills you've logged in Expenses and shows their true annual cost. Cancel anything you wouldn't re-buy today at the annual price.</div>
         <div id="sub-audit">Loading…</div>
       </div>
@@ -850,7 +850,7 @@ function openLesson(id) {
   modal.style.setProperty('--belt-c', belt.color);
   modal.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
-      <span class="lm-belt">🥋 ${belt.name} · ${belt.sub}</span>
+      <span class="lm-belt">${belt.name} · ${belt.sub}</span>
       <button onclick="closeLesson()" style="background:none;border:none;color:var(--text2);font-size:1rem;cursor:pointer;padding:0;min-height:unset;font-family:inherit;">✕</button>
     </div>
     <div class="lm-title">${l.title}</div>
@@ -862,7 +862,7 @@ function openLesson(id) {
       <div id="quiz-feedback" style="font-size:0.75rem;margin-top:6px;min-height:18px;"></div>
     </div>
     <div class="lm-actions">
-      ${l.action ? `<a class="lm-action-link" href="${l.action.url}">⚡ ${l.action.label}</a>` : ''}
+      ${l.action ? `<a class="lm-action-link" href="${l.action.url}">${l.action.label}</a>` : ''}
       <button class="btn-complete ${isDone ? 'is-done' : ''}" id="btn-complete" onclick="completeLesson()">
         ${isDone ? '✓ Lesson completed' : 'Mark lesson complete'}
       </button>
@@ -1199,9 +1199,9 @@ function calcSplit() {
   const el = document.getElementById('fs-result');
   if (!income || income <= 0) { el.innerHTML = 'Enter income to see your suggested split.'; return; }
   el.innerHTML = `
-    🏠 Needs (50%): <b>${fmt$(income * 0.5)}</b> — housing, food, utilities, transport<br>
-    🎉 Wants (30%): <b>${fmt$(income * 0.3)}</b> — guilt-free by design<br>
-    💰 Savings (20%): <span class="big">${fmt$(income * 0.2)}</span> — pay yourself first`;
+    Needs (50%): <b>${fmt$(income * 0.5)}</b> — housing, food, utilities, transport<br>
+    Wants (30%): <b>${fmt$(income * 0.3)}</b> — guilt-free by design<br>
+    Savings (20%): <span class="big">${fmt$(income * 0.2)}</span> — pay yourself first`;
 }
 
 function renderSubAudit() {
@@ -1473,7 +1473,7 @@ function renderReportCard() {
   const projRev = dom ? cur.revenue / dom * dim : 0;
   const projExp = dom ? cur.expenses / dom * dim : 0;
   paceEl.innerHTML = `
-    <h4>📅 ${monthLabel(now)} so far — day ${dom} of ${dim}</h4>
+    <h4>${monthLabel(now)} so far — day ${dom} of ${dim}</h4>
     <div class="pace-grid">
       <div><div class="pace-val" style="color:var(--green)">${fmt$(cur.revenue)}</div><div class="pace-lbl">Revenue · proj ${fmt$(projRev)}</div></div>
       <div><div class="pace-val" style="color:var(--red)">${fmt$(cur.expenses)}</div><div class="pace-lbl">Spending · proj ${fmt$(projExp)}</div></div>

@@ -150,10 +150,10 @@
 
 
 <div class="tab-bar">
-  <div class="tab active" data-tab="margins" onclick="switchTab('margins')">💰 Margins</div>
-  <div class="tab" data-tab="shows" onclick="switchTab('shows')">🎪 Shows</div>
-  <div class="tab" data-tab="trends" onclick="switchTab('trends')">📈 Trends</div>
-  <div class="tab" data-tab="pnl" onclick="switchTab('pnl')">📊 P&amp;L</div>
+  <div class="tab active" data-tab="margins" onclick="switchTab('margins')">Margins</div>
+  <div class="tab" data-tab="shows" onclick="switchTab('shows')">Shows</div>
+  <div class="tab" data-tab="trends" onclick="switchTab('trends')">Trends</div>
+  <div class="tab" data-tab="pnl" onclick="switchTab('pnl')">P&amp;L</div>
 </div>
 
 <main>
@@ -165,10 +165,10 @@
 
     <!-- Cost Config -->
     <div class="card">
-      <div class="card-title">⚙️ Cost Per Unit (Edit to Recalculate)</div>
+      <div class="card-title">Cost Per Unit (Edit to Recalculate)</div>
       <div class="cost-row">
         <div>
-          <div class="cost-label">🖨️ Riser (per unit)</div>
+          <div class="cost-label">Riser (per unit)</div>
           <div class="cost-sub">Filament + hardware cost per single riser</div>
         </div>
         <div class="cost-input-wrap">
@@ -178,7 +178,7 @@
       </div>
       <div class="cost-row">
         <div>
-          <div class="cost-label">🏷️ Jet Tag (per tag)</div>
+          <div class="cost-label">Jet Tag (per tag)</div>
           <div class="cost-sub">Current calculated: ~$0.86/tag</div>
         </div>
         <div class="cost-input-wrap">
@@ -188,7 +188,7 @@
       </div>
       <div class="cost-row">
         <div>
-          <div class="cost-label">📌 Pin (per pin)</div>
+          <div class="cost-label">Pin (per pin)</div>
           <div class="cost-sub">Current calculated: ~$0.95/pin</div>
         </div>
         <div class="cost-input-wrap">
@@ -201,14 +201,14 @@
 
     <!-- Per-product summary -->
     <div class="card">
-      <div class="card-title">📦 Revenue by Product Line</div>
+      <div class="card-title">Revenue by Product Line</div>
       <div id="product-line-chart" style="margin-top:8px"></div>
     </div>
   </div>
 
   <!-- Margin Table -->
   <div class="card">
-    <div class="card-title">📋 Margin Breakdown by Product Type</div>
+    <div class="card-title">Margin Breakdown by Product Type</div>
     <div style="overflow-x:auto">
       <table>
         <thead>
@@ -237,7 +237,7 @@
 <div class="panel" id="tab-trends">
   <div id="kpi-trends" class="kpi-strip" style="margin-bottom:28px"></div>
   <div class="card" style="margin-bottom:24px">
-    <div class="card-title">📅 Monthly Revenue & Profit</div>
+    <div class="card-title">Monthly Revenue & Profit</div>
     <div class="legend">
       <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div> Revenue</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Profit</div>
@@ -246,11 +246,11 @@
   </div>
   <div class="grid-2">
     <div class="card">
-      <div class="card-title">🏆 Top Customers by Revenue</div>
+      <div class="card-title">Top Customers by Revenue</div>
       <div id="top-customers"></div>
     </div>
     <div class="card">
-      <div class="card-title">📦 Best-Selling Products</div>
+      <div class="card-title">Best-Selling Products</div>
       <div id="top-products"></div>
     </div>
   </div>
@@ -471,7 +471,7 @@ function renderShows() {
   const costs = getCosts();
 
   if (events.length === 0) {
-    $('show-cards').innerHTML = `<div class="empty"><div class="e-icon">🎪</div>No events logged yet.<br>Add events in the <a href="vault-pine-collective.html#events" style="color:var(--accent)">Events tab</a> to see show comparisons.</div>`;
+    $('show-cards').innerHTML = `<div class="empty"><div class="e-icon"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#events"/></svg></div>No events logged yet.<br>Add events in the <a href="vault-pine-collective.html#events" style="color:var(--accent)">Events tab</a> to see show comparisons.</div>`;
     kpiStrip('shows-summary', [
       { val: '0', label: 'Events Logged' },
       { val: '$0', label: 'Total Show Revenue' },
@@ -546,11 +546,11 @@ function renderShows() {
           <span style="color:var(--text2)">Booth cost: <strong style="color:var(--red)">${fmt(booth)}</strong></span>
           <span>Net: <strong style="color:${netColor}">${fmt(net)}</strong></span>
         </div>
-        ${ev.notes ? `<div style="font-size:0.75rem;color:var(--text2);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">📝 ${ev.notes}</div>` : ''}
+        ${ev.notes ? `<div style="font-size:0.75rem;color:var(--text2);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">${ev.notes}</div>` : ''}
       </div>`;
   });
 
-  $('show-cards').innerHTML = cards.join('') || `<div class="empty"><div class="e-icon">🎪</div>No data matched to events yet.</div>`;
+  $('show-cards').innerHTML = cards.join('') || `<div class="empty"><div class="e-icon"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#events"/></svg></div>No data matched to events yet.</div>`;
   const netAll = totalRev - totalBooth;
   kpiStrip('shows-summary', [
     { val: sortedEvents.length,   label: 'Events Tracked' },
@@ -616,7 +616,7 @@ function renderTrends() {
   ]);
 
   if (keys.length === 0) {
-    $('monthly-chart').innerHTML = `<div class="empty" style="width:100%"><div class="e-icon">📈</div>No sales data yet.</div>`;
+    $('monthly-chart').innerHTML = `<div class="empty" style="width:100%"><div class="e-icon"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#growth"/></svg></div>No sales data yet.</div>`;
   } else {
     $('monthly-chart').innerHTML = keys.map(k => {
       const m = monthly[k];
@@ -769,9 +769,9 @@ function renderPnl() {
     </div>
 
     <div class="pnl-section">Revenue</div>
-    <div class="pnl-row"><span>🖨️ Riser Orders<span class="pnl-qty">${rUnits} units</span></span><span>${fmt(rRevenue)}</span></div>
-    <div class="pnl-row"><span>🏷️ Jet Tags<span class="pnl-qty">${jtUnits} units</span></span><span>${fmt(jtRevenue)}</span></div>
-    <div class="pnl-row"><span>📌 Pins<span class="pnl-qty">${pinUnits} units</span></span><span>${fmt(pinRevenue)}</span></div>
+    <div class="pnl-row"><span>Riser Orders<span class="pnl-qty">${rUnits} units</span></span><span>${fmt(rRevenue)}</span></div>
+    <div class="pnl-row"><span>Jet Tags<span class="pnl-qty">${jtUnits} units</span></span><span>${fmt(jtRevenue)}</span></div>
+    <div class="pnl-row"><span>Pins<span class="pnl-qty">${pinUnits} units</span></span><span>${fmt(pinRevenue)}</span></div>
     <div class="pnl-sep"></div>
     <div class="pnl-total"><span>Total Revenue</span><span style="color:var(--accent)">${fmt(totalRevenue)}</span></div>
 

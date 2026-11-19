@@ -18,7 +18,8 @@
 
   /* Alert banner */
   .alert-banner { background: rgba(255, 214, 10,0.12); border-bottom: 1px solid rgba(255, 214, 10,0.3); padding: 10px 32px; display: flex; align-items: center; gap: 10px; font-size: 0.84rem; }
-  .alert-banner strong { color: var(--yellow); }
+  .alert-banner strong { color: var(--orange); }
+  .alert-banner .vpc-ico { width: 18px; height: 18px; color: var(--orange); flex: none; }
   .alert-banner.hidden { display: none; }
 
   .tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 32px; background: var(--surface); position: sticky; top: var(--header-h); z-index: 150; }
@@ -56,7 +57,8 @@
   .job-card.status-queued   { border-left: 3px solid var(--accent); }
   .job-card.status-done     { border-left: 3px solid var(--border); opacity: 0.65; }
   .job-card.status-failed   { border-left: 3px solid var(--red); }
-  .job-icon { font-size: 1.8rem; flex-shrink: 0; }
+  .job-icon { flex-shrink: 0; width: 44px; height: 44px; border-radius: var(--r-md); background: var(--fill); display: grid; place-items: center; color: var(--text2); }
+  .job-icon .vpc-ico { width: 22px; height: 22px; }
   .job-info { flex: 1; min-width: 0; }
   .job-name { font-size: 0.95rem; font-weight: 600; }
   .job-meta { font-size: 0.75rem; color: var(--text2); margin-top: 3px; display: flex; flex-wrap: wrap; gap: 12px; }
@@ -152,12 +154,12 @@
 
 <!-- Low-stock alert banner -->
 <div class="alert-banner hidden" id="low-stock-banner">
-  ⚠️ <strong>Low Stock Alert:</strong> <span id="low-stock-text"></span>
+  <svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#alert"/></svg> <strong>Low Stock Alert:</strong> <span id="low-stock-text"></span>
 </div>
 
 <div class="tab-bar">
-  <div class="tab active" data-tab="queue" onclick="switchTab('queue')">🖨️ Print Queue</div>
-  <div class="tab" data-tab="inventory" onclick="switchTab('inventory')">📦 Inventory</div>
+  <div class="tab active" data-tab="queue" onclick="switchTab('queue')">Print Queue</div>
+  <div class="tab" data-tab="inventory" onclick="switchTab('inventory')">Inventory</div>
 </div>
 
 <main>
@@ -204,11 +206,11 @@
     <div class="field">
       <label>Item Type</label>
       <select id="job-item" onchange="applyJobProduct()">
-        <option value="Large Riser">🖨️ Large Riser</option>
-        <option value="Medium Riser">🖨️ Medium Riser</option>
-        <option value="Small Riser">🖨️ Small Riser</option>
-        <option value="End Caps">🖨️ End Caps</option>
-        <option value="Custom Order">🖨️ Custom Order</option>
+        <option value="Large Riser">Large Riser</option>
+        <option value="Medium Riser">Medium Riser</option>
+        <option value="Small Riser">Small Riser</option>
+        <option value="End Caps">End Caps</option>
+        <option value="Custom Order">Custom Order</option>
       </select>
       <div id="job-item-hint" style="font-size:0.75rem;color:var(--text2);margin-top:6px;display:none"></div>
     </div>
@@ -339,16 +341,16 @@ function savedProductByName(name) { return getSavedProducts().find(p => p.name =
 function renderJobItemOptions(current) {
   const sel = $('job-item');
   sel.innerHTML = '';
-  JOB_BUILTIN_ITEMS.forEach(n => sel.add(new Option('🖨️ ' + n, n)));
+  JOB_BUILTIN_ITEMS.forEach(n => sel.add(new Option(n, n)));
   const saved = getSavedProducts();
   if (saved.length) {
     const grp = document.createElement('optgroup');
     grp.label = 'My Products';
-    saved.forEach(p => grp.appendChild(new Option('🖨️ ' + p.name, p.name)));
+    saved.forEach(p => grp.appendChild(new Option(p.name, p.name)));
     sel.appendChild(grp);
   }
   // Keep a job's item selectable even if its product was since deleted.
-  if (current && ![...sel.options].some(o => o.value === current)) sel.add(new Option('🖨️ ' + current, current));
+  if (current && ![...sel.options].some(o => o.value === current)) sel.add(new Option(current, current));
   sel.value = current || JOB_BUILTIN_ITEMS[0];
 }
 
@@ -474,10 +476,9 @@ function estDone(job) {
   return '~' + (diff/60).toFixed(1) + 'h left';
 }
 
-const itemIcons = { 'Large Riser':'🖨️', 'Medium Riser':'🖨️', 'Small Riser':'🖨️', 'End Caps':'🔲', 'Custom Order':'⭐' };
 
 function jobCardHTML(job) {
-  const icon = itemIcons[job.item] || '🖨️';
+  const icon = VPCUtil.icon(job.item === 'Custom Order' ? 'star' : 'printer');
   const badgeMap = { printing: 'badge-printing', queued: 'badge-queued', done: 'badge-done', failed: 'badge-failed' };
   const badgeLbl = { printing: '▶ Printing', queued: '⏸ Queued', done: '✓ Done', failed: '✗ Failed' };
   const prog = job.status === 'printing' ? estimateProgress(job) : null;
@@ -487,7 +488,7 @@ function jobCardHTML(job) {
   if (job.status === 'printing')  actions.push(`<button class="btn btn-green btn-sm" onclick="updateJobStatus('${job.id}','done')">✓ Done</button>`);
   if (job.status !== 'done')      actions.push(`<button class="btn btn-ghost btn-sm" onclick="openJobModal('${job.id}')">Edit</button>`);
   if (job.status === 'printing')  actions.push(`<button class="btn btn-red btn-sm" onclick="updateJobStatus('${job.id}','failed')">✗ Failed</button>`);
-  actions.push(`<button class="btn btn-red btn-sm" onclick="deleteJob('${job.id}')">🗑</button>`);
+  actions.push(`<button class="btn btn-red btn-sm" onclick="deleteJob('${job.id}')"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#trash"/></svg></button>`);
 
   return `
     <div class="job-card status-${job.status}">
@@ -495,11 +496,11 @@ function jobCardHTML(job) {
       <div class="job-info">
         <div class="job-name">${VPCUtil.esc(job.item)} × ${job.qty}</div>
         <div class="job-meta">
-          ${job.filament ? `<span>🎨 ${job.filament}</span>` : ''}
-          <span>⏱ ${job.estHours}h est.</span>
+          ${job.filament ? `<span>${job.filament}</span>` : ''}
+          <span>${job.estHours}h est.</span>
           ${job.status === 'printing' ? `<span>${estDone(job)}</span><span>Started ${formatRelTime(job.startedAt)}</span>` : ''}
           ${job.status === 'done' && job.completedAt ? `<span>Done ${formatRelTime(job.completedAt)}</span>` : ''}
-          ${job.notes ? `<span>📝 ${job.notes}</span>` : ''}
+          ${job.notes ? `<span>${job.notes}</span>` : ''}
         </div>
         ${prog !== null ? `
           <div class="job-progress">
@@ -547,7 +548,7 @@ function renderQueue() {
         const o = {printing:0, queued:1, failed:2};
         return (o[a.status]||9) - (o[b.status]||9);
       }).map(jobCardHTML).join('')
-    : `<div class="empty"><div class="e-icon">🖨️</div>No jobs in queue.<br>Add a print job to get started.</div>`;
+    : `<div class="empty"><div class="e-icon"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#printer"/></svg></div>No jobs in queue.<br>Add a print job to get started.</div>`;
 
   $('done-queue').innerHTML = done.length
     ? done.sort((a,b) => (b.completedAt||'').localeCompare(a.completedAt||'')).map(jobCardHTML).join('')
@@ -642,7 +643,7 @@ function renderInventory() {
   ]);
 
   if (inv.length === 0) {
-    $('inv-grid').innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="e-icon">📦</div>No inventory items yet. Click "Add Product" to start tracking stock.</div>`;
+    $('inv-grid').innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="e-icon"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#box"/></svg></div>No inventory items yet. Click "Add Product" to start tracking stock.</div>`;
     return;
   }
 
@@ -654,7 +655,7 @@ function renderInventory() {
     const barPct = Math.min((stock / Math.max(thresh * 1.5, 1)) * 100, 100).toFixed(0);
     const barClr = isOut ? 'var(--red)' : isLow ? 'var(--yellow)' : 'var(--green)';
     const cardCls = isOut ? 'out-stock' : isLow ? 'low-stock' : '';
-    const statusTxt = isOut ? `<span style="color:var(--red)">⚠️ OUT OF STOCK</span>` : isLow ? `<span style="color:var(--yellow)">⚠️ LOW — reorder soon</span>` : `<span style="color:var(--green)">✓ Stocked</span>`;
+    const statusTxt = isOut ? `<span style="color:var(--red)">OUT OF STOCK</span>` : isLow ? `<span style="color:var(--yellow)">LOW — reorder soon</span>` : `<span style="color:var(--green)">✓ Stocked</span>`;
 
     return `
       <div class="inv-card ${cardCls}">
