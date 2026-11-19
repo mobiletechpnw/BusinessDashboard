@@ -279,7 +279,7 @@
     </p>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
       <button class="btn-ghost" onclick="openEndpointModal()">Configure endpoint</button>
-      <button class="btn-ghost" id="fetchNowBtn" onclick="fetchNow()" style="display:none">↻ Fetch now</button>
+      <button class="btn-ghost" id="fetchNowBtn" onclick="fetchNow()" style="display:none">Fetch now</button>
     </div>
     <details class="auto-details" style="margin-top:16px">
       <summary>How the automated sync works &amp; how to turn it on</summary>
@@ -597,7 +597,7 @@ function renderAuto() {
 async function fetchNow() {
   if (!data.endpoint) return;
   const btn = document.getElementById('fetchNowBtn');
-  btn.disabled = true; btn.textContent = '↻ Fetching…';
+  btn.disabled = true; btn.textContent = 'Fetching…';
   try {
     const res = await fetch(data.endpoint, { headers: { 'Accept': 'application/json' } });
     if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -617,7 +617,7 @@ async function fetchNow() {
   } catch (e) {
     toast('Fetch failed: ' + e.message);
   } finally {
-    btn.disabled = false; btn.textContent = '↻ Fetch now';
+    btn.disabled = false; btn.textContent = 'Fetch now';
   }
 }
 function numOrNull(v) { const n = Number(v); return Number.isFinite(n) ? n : null; }

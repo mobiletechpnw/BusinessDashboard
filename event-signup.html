@@ -9,11 +9,38 @@
 <title>Vendor Sign-Up — Vault &amp; Pine Collective</title>
 <style>
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+/* Tokens: dark below; light follows the device, or the Appearance setting
+   (util.js sets data-theme before the page paints). Same values as styles.css. */
 :root {
-  --bg:#000000; --surface:#1c1c1e; --border:rgba(255,255,255,.1);
-  --accent:#2997ff; --accent-fill:#0071e3; --accent2:#bf5af2; --green:#30d158; --yellow:#ffd60a;
-  --red:#ff6961; --text:#f5f5f7; --text2:#a1a1a6; --radius:12px;
+  color-scheme: dark;
+  --bg: #000000; --surface: #1c1c1e; --surface2: #2c2c2e; --fill: rgba(118, 118, 128, 0.24);
+  --border: rgba(255, 255, 255, 0.1); --text: #f5f5f7; --text2: #a1a1a6;
+  --accent: #2997ff; --accent-fill: #0071e3; --accent-hover: #0077ed; --ring: #2997ff; --on-accent: #ffffff;
+  --accent2: #bf5af2; --green: #30d158; --yellow: #ffd60a; --red: #ff6961;
+  --shadow: 0 24px 80px rgba(0, 0, 0, 0.45); --overlay: rgba(0, 0, 0, 0.6);
+  --radius: 12px;
 }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    color-scheme: light;
+    --bg: #f5f5f7; --surface: #ffffff; --surface2: #f2f2f7; --fill: rgba(118, 118, 128, 0.12);
+    --border: rgba(60, 60, 67, 0.14); --text: #1d1d1f; --text2: #636366;
+    --accent: #0060c4; --accent-fill: #0071e3; --accent-hover: #0077ed; --ring: #0071e3;
+    --accent2: #8944ab; --green: #187634; --yellow: #8a6200; --red: #c4001a;
+    --shadow: 0 24px 60px rgba(0, 0, 0, 0.08); --overlay: rgba(0, 0, 0, 0.35);
+  }
+}
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f5f5f7; --surface: #ffffff; --surface2: #f2f2f7; --fill: rgba(118, 118, 128, 0.12);
+  --border: rgba(60, 60, 67, 0.14); --text: #1d1d1f; --text2: #636366;
+  --accent: #0060c4; --accent-fill: #0071e3; --accent-hover: #0077ed; --ring: #0071e3;
+  --accent2: #8944ab; --green: #187634; --yellow: #8a6200; --red: #c4001a;
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.08); --overlay: rgba(0, 0, 0, 0.35);
+}
+/* Line icons from icons.svg */
+.vpc-ico { width: 1.15em; height: 1.15em; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; vertical-align: -0.2em; }
+.vpc-ico.inline { margin-right: 0.3em; }
 html, body {
   font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',system-ui,sans-serif;
   background:var(--bg); color:var(--text); overflow-x:hidden; max-width:100%;
@@ -24,11 +51,11 @@ body {
 }
 .wrap { max-width:520px; margin:32px auto; }
 .logo { display:inline-flex; align-items:center; gap:10px; margin-bottom:20px; }
-.logo-icon { width:42px; height:42px; background:var(--accent-fill); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; }
+.logo-icon { width:42px; height:42px; background:var(--accent-fill); color:var(--on-accent); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; }
 .logo-name { font-size:1.05rem; font-weight:600; letter-spacing:-.3px; }
 .logo-name span { color: inherit; }
 
-.card { background:#1c1c1e; border:1px solid var(--border); border-radius:20px; padding:26px; box-shadow:0 24px 80px rgba(0,0,0,.5); }
+.card { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:26px; box-shadow:var(--shadow); }
 .tag { font-size:0.75rem; font-weight:600; color:var(--accent2); margin-bottom:10px; }
 .ev-name { font-size:1.45rem; font-weight:600; letter-spacing:-.4px; line-height:1.25; margin-bottom:8px; }
 .ev-meta { font-size:.82rem; color:var(--text2); display:flex; flex-wrap:wrap; gap:12px; margin-bottom:8px; }
@@ -38,31 +65,32 @@ body {
 .field label { display:block; font-size:0.75rem; font-weight:600; color:var(--text2); margin-bottom:6px; }
 .field .opt { color:var(--text2); text-transform:none; letter-spacing:0; font-weight:500; }
 input, textarea {
-  width:100%; background:rgba(255,255,255,.03); border:1px solid var(--border);
+  width:100%; background:color-mix(in srgb, var(--text) 3%, transparent); border:1px solid var(--border);
   border-radius:8px; padding:11px 13px; color:var(--text); font-size:.95rem; font-family:inherit;
 }
 input:focus, textarea:focus { outline:none; border-color:var(--accent); }
 textarea { resize:vertical; min-height:74px; }
 
-.btn-primary { width:100%; background:var(--accent-fill); color:#fff; border:none; border-radius:999px; padding:13px; font-size:.92rem; font-weight:600; cursor:pointer; transition:all .2s; box-shadow:none; }
+.btn-primary { width:100%; background:var(--accent-fill); color:var(--on-accent); border:none; border-radius:999px; padding:13px; font-size:.92rem; font-weight:600; cursor:pointer; transition:all .2s; box-shadow:none; }
 .btn-primary:hover { opacity:.92; transform:translateY(-1px); }
 .btn-primary:disabled { opacity:.5; cursor:not-allowed; transform:none; }
 
 .claim-pills { display:flex; gap:8px; flex-wrap:wrap; }
 .claim-pill {
-  flex:1 1 auto; min-width:86px; background:rgba(255,255,255,.03); border:1px solid var(--border);
+  flex:1 1 auto; min-width:86px; background:color-mix(in srgb, var(--text) 3%, transparent); border:1px solid var(--border);
   border-radius:8px; padding:11px 10px; color:var(--text2); font-size:.88rem; font-weight:600;
   font-family:inherit; cursor:pointer; transition:all .15s; text-align:center;
 }
 .claim-pill:hover { border-color:var(--accent); color:var(--text); }
-.claim-pill.selected { background:rgba(10, 132, 255,.16); border-color:var(--accent); color:var(--text); box-shadow:0 0 0 1px var(--accent) inset; }
+.claim-pill.selected { background:color-mix(in srgb, var(--accent) 16%, transparent); border-color:var(--accent); color:var(--text); box-shadow:0 0 0 1px var(--accent) inset; }
 .claim-cost { font-size:.8rem; color:var(--green); font-weight:600; margin-top:9px; line-height:1.5; }
 
 .note { font-size:0.75rem; color:var(--text2); text-align:center; margin-top:14px; line-height:1.5; }
 .msg { border-radius:8px; padding:12px 14px; font-size:.85rem; margin-bottom:16px; display:none; }
-.msg.err  { display:block; background:rgba(255, 105, 97,.12); border:1px solid rgba(255, 105, 97,.35); color:var(--red); }
+.msg.err  { display:block; background:color-mix(in srgb, var(--red) 12%, transparent); border:1px solid color-mix(in srgb, var(--red) 35%, transparent); color:var(--red); }
 .success { text-align:center; padding:20px 0; }
-.success-icon { font-size:3rem; margin-bottom:10px; }
+.success-icon { width:64px; height:64px; margin:0 auto 12px; border-radius:50%; display:grid; place-items:center; font-size:2rem; background:color-mix(in srgb, var(--green) 14%, transparent); color:var(--green); }
+.success-icon .vpc-ico { stroke-width:2.2; vertical-align:0; }
 .success-title { font-size:1.2rem; font-weight:600; margin-bottom:8px; }
 .success-sub { font-size:.85rem; color:var(--text2); line-height:1.6; }
 footer { text-align:center; padding:22px; font-size:0.75rem; color:var(--text2); }
@@ -73,12 +101,12 @@ footer { text-align:center; padding:22px; font-size:0.75rem; color:var(--text2);
 
 <div class="wrap">
   <div class="logo">
-    <div class="logo-icon">🎪</div>
+    <div class="logo-icon"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#events"/></svg></div>
     <div class="logo-name">Vault <span>&amp;</span> Pine Collective</div>
   </div>
 
   <div class="card" id="card">
-    <div class="tag">🪑 Crew Table Claim</div>
+    <div class="tag">Crew Table Claim</div>
     <div class="ev-name" id="ev-name">Loading…</div>
     <div class="ev-meta" id="ev-meta"></div>
     <p class="intro" id="intro">Claim your spot — we book the block together so the whole crew sits together, then settle up once the tables are confirmed.</p>
@@ -114,7 +142,7 @@ footer { text-align:center; padding:22px; font-size:0.75rem; color:var(--text2);
 
   <div class="card" id="success-card" style="display:none">
     <div class="success">
-      <div class="success-icon">✅</div>
+      <div class="success-icon"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#check"/></svg></div>
       <div class="success-title">Request sent!</div>
       <div class="success-sub">Thanks — your claim for <strong id="s-ev"></strong> is in. We'll confirm your table once the crew block is booked.</div>
     </div>
@@ -151,9 +179,9 @@ let _calId = 'vault-pine';
   }
   document.getElementById('ev-name').textContent = _event.name;
   let meta = '';
-  if (_event.date)     meta += `<span>📅 ${esc(fmtDate(_event.date))}</span>`;
-  if (_event.location) meta += `<span>📍 ${esc(_event.location)}</span>`;
-  if (+_event.tablePrice > 0) meta += `<span>💵 $${(+_event.tablePrice).toFixed(2)}/table</span>`;
+  if (_event.date)     meta += `<span>${VPCUtil.icon('calendar', 'inline')}${esc(fmtDate(_event.date))}</span>`;
+  if (_event.location) meta += `<span>${VPCUtil.icon('map-pin', 'inline')}${esc(_event.location)}</span>`;
+  if (+_event.tablePrice > 0) meta += `<span>$${(+_event.tablePrice).toFixed(2)} a table</span>`;
   document.getElementById('ev-meta').innerHTML = meta;
   document.getElementById('s-ev').textContent = _event.name;
 })();

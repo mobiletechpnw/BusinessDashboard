@@ -679,7 +679,7 @@ function renderMatrix() {
     const n = pastPaid.length;
     h += `<tr class="matrix-section"><td colspan="${colSpan}">
       <button class="matrix-past-toggle" onclick="toggleMatrixPast()">
-        ${showPast ? '▾ Hide' : '▸ Show'} ${n} past event${n > 1 ? 's' : ''} (all paid)
+        ${showPast ? 'Hide' : 'Show'} ${n} past event${n > 1 ? 's' : ''} (all paid)
       </button>
     </td></tr>`;
     if (showPast) pastPaid.forEach(ev => { h += rowFor(ev, true); });
@@ -765,7 +765,7 @@ function updateEvApprovedToggle() {
     btn.textContent = 'Approved — tap to mark as Unapproved';
     btn.className   = 'paid-big-toggle is-paid';
   } else {
-    btn.textContent = '○ Unapproved — tap to mark as Approved';
+    btn.textContent = 'Unapproved — tap to mark as Approved';
     btn.className   = 'paid-big-toggle is-unpaid';
   }
 }
@@ -898,7 +898,7 @@ function updatePaidToggle() {
     btn.textContent = 'Paid — tap to mark as Unpaid';
     btn.className   = 'paid-big-toggle is-paid';
   } else {
-    btn.textContent = '○ Unpaid — tap to mark as Paid';
+    btn.textContent = 'Unpaid — tap to mark as Paid';
     btn.className   = 'paid-big-toggle is-unpaid';
   }
 }
