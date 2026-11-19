@@ -21,11 +21,16 @@
   header { gap: 12px; }
 
   /* ── KPI tiles (Sales › Overview): label above the number ── */
-  .kpi-bar { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .kpi-bar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
   .kpi { display: flex; flex-direction: column; background: var(--surface); border-radius: var(--r-lg); padding: 16px 18px; min-width: 0; }
   .kpi-val { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .kpi-label { order: -1; font-size: 0.75rem; color: var(--text2); margin-bottom: 4px; }
-  .kpi-sub { font-size: 0.75rem; margin-top: 4px; }
+  .kpi-label { font-size: 0.75rem; color: var(--text2); }
+  .kpi-sub { font-size: 0.75rem; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* Label with the change chip beside it, the figure, then its trend line */
+  .kpi-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 22px; margin-bottom: 2px; }
+  .kpi-head .kpi-label { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .kpi-spark { margin: 10px 0 2px; }
+  .kpi-basis { grid-column: 1 / -1; margin: -4px 0 0; }
 
   /* ── Sales sub-tab bar ── */
   .tab-bar {
@@ -289,7 +294,6 @@
     .exp-tab-bar::-webkit-scrollbar { display: none; }
     .exp-tab { white-space: nowrap; }
     .kpi-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-    .kpi:last-child { grid-column: span 2; }
     .kpi { padding: 12px 14px; }
     .kpi-val { font-size: 1.25rem; }
     .jt-stat-bar, .pin-stat-bar, .exp-stat-bar { grid-template-columns: repeat(2, 1fr); }
@@ -358,30 +362,30 @@
     <div class="panel active" id="panel-overview">
       <div class="kpi-bar">
         <div class="kpi">
+          <div class="kpi-head"><span class="kpi-label">Revenue</span><span class="delta" id="kpiRevChip" hidden></span></div>
           <div class="kpi-val" id="kpiRevenue">—</div>
-          <div class="kpi-label">Total Revenue</div>
+          <svg class="spark kpi-spark" id="kpiRevSpark" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true" focusable="false"></svg>
           <div class="kpi-sub text-2" id="kpiRevSub"></div>
         </div>
         <div class="kpi">
+          <div class="kpi-head"><span class="kpi-label">Profit</span><span class="delta" id="kpiProfitChip" hidden></span></div>
           <div class="kpi-val" id="kpiProfit">—</div>
-          <div class="kpi-label">Gross Profit</div>
+          <svg class="spark kpi-spark" id="kpiProfitSpark" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true" focusable="false"></svg>
           <div class="kpi-sub text-2" id="kpiProfitSub"></div>
         </div>
         <div class="kpi">
+          <div class="kpi-head"><span class="kpi-label">Margin</span><span class="delta" id="kpiRoiChip" hidden></span></div>
           <div class="kpi-val" id="kpiRoi">—</div>
-          <div class="kpi-label">Gross Margin</div>
+          <svg class="spark kpi-spark" id="kpiRoiSpark" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true" focusable="false"></svg>
           <div class="kpi-sub text-2" id="kpiRoiSub"></div>
         </div>
         <div class="kpi">
+          <div class="kpi-head"><span class="kpi-label">Orders</span><span class="delta" id="kpiOrdersChip" hidden></span></div>
           <div class="kpi-val" id="kpiOrders">—</div>
-          <div class="kpi-label">Orders</div>
+          <svg class="spark kpi-spark" id="kpiOrdersSpark" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true" focusable="false"></svg>
           <div class="kpi-sub text-2" id="kpiOrdersSub"></div>
         </div>
-        <div class="kpi">
-          <div class="kpi-val" id="kpiCustomers">—</div>
-          <div class="kpi-label">Avg Order Value</div>
-          <div class="kpi-sub text-2" id="kpiCustSub"></div>
-        </div>
+        <p class="caption kpi-basis" id="kpiBasis" hidden></p>
       </div>
       <div class="attn-list mb-20" id="toPrintList" hidden>
         <button type="button" class="attn-row" data-tone="orange" onclick="showPrintQueue()">
@@ -1530,22 +1534,13 @@ window.addEventListener('hashchange', routeFromHash);
 // ══════════════════════════════════════════════════════════════
 let ACTIVE_RANGE = 'all';
 
-function getRangeStart(range) {
-  const now = new Date();
-  if (range === 'all') return null;
-  if (range === 'ytd') return new Date(now.getFullYear(), 0, 1);
-  if (range === '6m')  { const d = new Date(now); d.setMonth(d.getMonth() - 6); return d; }
-  if (range === '3m')  { const d = new Date(now); d.setMonth(d.getMonth() - 3); return d; }
-  if (range === '30d') { const d = new Date(now); d.setDate(d.getDate() - 30); return d; }
-  if (range === '7d')  { const d = new Date(now); d.setDate(d.getDate() - 7); return d; }
-  return null;
-}
-
+// A range counts back from today, inclusive: 7D is today and the six days
+// before it (VPCUtil.rangePeriods, which the KPI tiles compare with too).
 function getFilteredOrders() {
   const all = getOrders();
-  const start = getRangeStart(ACTIVE_RANGE);
-  if (!start) return all;
-  return all.filter(o => o.date && new Date(o.date + 'T00:00:00') >= start);
+  if (ACTIVE_RANGE === 'all') return all;
+  const { from } = VPCUtil.rangePeriods(ACTIVE_RANGE, TODAY);
+  return all.filter(o => o.date && o.date >= from);
 }
 
 const RANGE_LABELS = { all: 'All time', ytd: 'Year to date', '6m': 'Last 6 months', '3m': 'Last 3 months', '30d': 'Last 30 days', '7d': 'Last 7 days' };
@@ -1648,36 +1643,77 @@ function daysSince(dateStr) {
 }
 
 // ── Sales KPIs ──
+// Four tiles. Each shows the range's figure, how it moved against the period
+// before (green up, red down, grey within 1%) and a trend line across the
+// range. All has nothing before it, so it shows no chips.
+function kpiTotals(orders) {
+  const revenue = orders.reduce((s, o) => s + o.salePrice, 0);
+  const cogs    = orders.reduce((s, o) => s + o.cogs, 0);
+  const profit  = revenue - cogs;
+  return { revenue, cogs, profit, margin: revenue > 0 ? profit / revenue * 100 : null, orders: orders.length };
+}
 function renderKPIs() {
+  const all    = getOrders();
   const orders = getFilteredOrders();
-  const totalRev  = orders.reduce((s, o) => s + o.salePrice, 0);
-  const totalProf = orders.reduce((s, o) => s + o.salePrice - o.cogs, 0);
-  const totalCogs = orders.reduce((s, o) => s + o.cogs, 0);
-  const custMap   = byCustomer(orders);
-  const custCount = Object.keys(custMap).length;
-  const thisMonth = THIS_MONTH;
-  const thisMoOrders = orders.filter(o => o.date.startsWith(thisMonth));
-  const thisMoRev = thisMoOrders.reduce((s, o) => s + o.salePrice, 0);
-  const grossMargin = totalRev > 0 ? (totalProf / totalRev * 100).toFixed(1) : '0.0';
-  const avgOrderVal = orders.length ? totalRev / orders.length : 0;
+  const t      = kpiTotals(orders);
+  const period = VPCUtil.rangePeriods(ACTIVE_RANGE, TODAY, all.length ? all[0].date : TODAY);
+  const before = period.prev
+    ? kpiTotals(all.filter(o => o.date >= period.prev.from && o.date <= period.prev.to)) : null;
+  const custCount = Object.keys(byCustomer(orders)).length;
+  const pct = (n) => n == null ? '—' : n.toFixed(1) + '%';
 
   // Values roll to their new figure when the range changes (vpcRoll, shared.js).
   const setVal = (id, text) => {
     const el = document.getElementById(id);
     if (window.vpcRoll) vpcRoll(el, String(text)); else el.textContent = text;
   };
-  setVal('kpiRevenue', fmt$(totalRev));
-  setVal('kpiProfit', fmt$(totalProf));
-  setVal('kpiRoi', grossMargin + '%');
-  setVal('kpiOrders', orders.length);
-  setVal('kpiCustomers', fmt$(avgOrderVal));
-  document.getElementById('kpiRevSub').textContent    = `${fmt$(thisMoRev)} this month`;
-  document.getElementById('kpiProfitSub').textContent = `COGS: ${fmt$(totalCogs)}`;
-  document.getElementById('kpiRoiSub').textContent    = `${fmt$(totalCogs)} total COGS`;
-  document.getElementById('kpiOrdersSub').textContent = `${thisMoOrders.length} this month`;
-  document.getElementById('kpiCustSub').textContent   = `${custCount} unique customers`;
+  const setText = (id, text) => { document.getElementById(id).textContent = text; };
+  setVal('kpiRevenue', fmt$(t.revenue));
+  setVal('kpiProfit', fmt$(t.profit));
+  setVal('kpiRoi', pct(t.margin));
+  setVal('kpiOrders', t.orders);
+  setText('kpiRevSub', t.orders ? `${fmt$(t.revenue / t.orders)} average order` : 'No orders in this range');
+  setText('kpiProfitSub', `${fmt$(t.cogs)} cost of goods`);
+  setText('kpiRoiSub', t.orders ? `${fmt$(t.profit / t.orders)} profit per order` : '');
+  setText('kpiOrdersSub', `${custCount} customer${custCount === 1 ? '' : 's'}`);
 
-  // header quick-stats
+  // Change chips: "+12%" to the eye, a full sentence to a screen reader.
+  const setChip = (id, change, was) => {
+    const el = document.getElementById(id);
+    el.hidden = !change;
+    if (!change) { el.removeAttribute('title'); return; }
+    el.dataset.dir = change.dir;
+    const said = change.dir === 'flat'
+      ? `About the same as ${period.before} (${was})`
+      : `${change.dir === 'up' ? 'Up' : 'Down'} ${change.text.replace(/^[+−]/, '')} on ${period.before} (${was})`;
+    el.title = said;
+    el.innerHTML = `<span aria-hidden="true">${change.text}</span><span class="sr-only">${esc(said)}</span>`;
+  };
+  setChip('kpiRevChip', before && VPCUtil.periodChange(t.revenue, before.revenue), before && fmt$(before.revenue));
+  setChip('kpiProfitChip', before && VPCUtil.periodChange(t.profit, before.profit), before && fmt$(before.profit));
+  setChip('kpiRoiChip', before && t.margin != null && VPCUtil.periodChange(t.margin, before.margin, true), before && pct(before.margin));
+  setChip('kpiOrdersChip', before && VPCUtil.periodChange(t.orders, before.orders), before && String(before.orders));
+  const basis = document.getElementById('kpiBasis');
+  basis.hidden = !before;
+  basis.textContent = before ? `Changes compare with ${period.before}.` : '';
+
+  // Trend lines: the range in up to 14 steps, each step's figure per day so a
+  // short first step doesn't dip. Margin is a ratio, so it isn't per day.
+  const steps = VPCUtil.trendBuckets(period.from, period.to).map(b => {
+    const bt = kpiTotals(orders.filter(o => o.date >= b.from && o.date <= b.to));
+    return { revenue: bt.revenue / b.days, profit: bt.profit / b.days, margin: bt.margin, orders: bt.orders / b.days };
+  });
+  const setSpark = (id, values, zero = true) => {
+    const p = VPCUtil.sparkPath(values, { zero });
+    document.getElementById(id).innerHTML = p
+      ? `<path class="spark-area" d="${p.area}"/><path class="spark-line" d="${p.line}" vector-effect="non-scaling-stroke"/>` +
+        `<path class="spark-dot" d="M${p.end[0]} ${p.end[1]}h0" vector-effect="non-scaling-stroke"/>`
+      : '';
+  };
+  setSpark('kpiRevSpark', steps.map(x => x.revenue));
+  setSpark('kpiProfitSpark', steps.map(x => x.profit));
+  setSpark('kpiRoiSpark', steps.map(x => x.margin), false);
+  setSpark('kpiOrdersSpark', steps.map(x => x.orders));
 }
 
 // ── Monthly Chart ──

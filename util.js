@@ -834,6 +834,120 @@
       return d >= from && d <= to;
     });
 
+  // ── Periods and trends ─────────────────────────────
+  // Dates are local 'YYYY-MM-DD' strings. The arithmetic runs in UTC, so a
+  // daylight-saving change never moves a day.
+  const pad2 = (n) => String(n).padStart(2, '0');
+  const ymdParts = (s) => String(s).split('-').map(Number);
+  const utcDay = (y, m, d) => new Date(Date.UTC(y, m - 1, d)).toISOString().slice(0, 10);
+  const addDays = (s, n) => {
+    const [y, m, d] = ymdParts(s);
+    return utcDay(y, m, d + n);
+  };
+  const daysBetween = (a, b) => {
+    const [y1, m1, d1] = ymdParts(a);
+    const [y2, m2, d2] = ymdParts(b);
+    return Math.round((Date.UTC(y2, m2 - 1, d2) - Date.UTC(y1, m1 - 1, d1)) / 864e5);
+  };
+
+  // The days a date range covers, counted back from today and inclusive (7d
+  // is today and the six days before it), and the stretch it is compared
+  // with: as many days just before it, or for YTD the same days last year.
+  // 'all' starts at `first`, the earliest record, and has nothing before it.
+  const RANGE_BEFORE = Object.freeze({
+    '7d': 'the 7 days before',
+    '30d': 'the 30 days before',
+    '3m': 'the 3 months before',
+    '6m': 'the 6 months before',
+    ytd: 'the same days last year',
+  });
+  const rangePeriods = (range, today, first) => {
+    const [y, m, d] = ymdParts(today);
+    let from;
+    if (range === '7d') from = addDays(today, -6);
+    else if (range === '30d') from = addDays(today, -29);
+    // The same day 3 or 6 months back (a missing day runs on into the next
+    // month, as Date#setMonth does), then the day after it.
+    else if (range === '3m') from = utcDay(y, m - 3, d + 1);
+    else if (range === '6m') from = utcDay(y, m - 6, d + 1);
+    else if (range === 'ytd') from = `${y}-01-01`;
+    else return { from: first && first < today ? first : today, to: today, prev: null, before: '' };
+    let prev;
+    if (range === 'ytd') {
+      const daysInMonth = new Date(Date.UTC(y - 1, m, 0)).getUTCDate();
+      prev = {
+        from: `${y - 1}-01-01`,
+        to: `${y - 1}-${pad2(m)}-${pad2(Math.min(d, daysInMonth))}`,
+      };
+    } else {
+      const len = daysBetween(from, today) + 1;
+      prev = { from: addDays(from, -len), to: addDays(from, -1) };
+    }
+    return { from, to: today, prev, before: RANGE_BEFORE[range] };
+  };
+
+  // How a figure moved against the period before: percent, or points for a
+  // figure that is itself a percentage. Under 1 either way is steady. null
+  // when there is nothing to compare with.
+  const periodChange = (cur, prev, points = false) => {
+    if (prev == null || !isFinite(prev) || !isFinite(cur) || (!points && prev === 0)) return null;
+    const by = points ? cur - prev : ((cur - prev) / Math.abs(prev)) * 100;
+    const dir = Math.abs(by) < 1 ? 'flat' : by > 0 ? 'up' : 'down';
+    const sign = dir === 'up' ? '+' : '−';
+    let text;
+    if (dir === 'flat') text = 'Steady';
+    else if (points) text = `${sign}${Math.abs(by).toFixed(1)} pts`;
+    else if (by >= 1000 && prev > 0) text = `${Math.round(cur / prev)}×`;
+    else text = `${sign}${Math.round(Math.abs(by))}%`;
+    return { dir, by, text };
+  };
+
+  // Buckets for a trend line over [from, to]: runs of whole days counted back
+  // from `to`, sized so there are no more than 14. A short leftover at the
+  // start joins its neighbour, so one quiet day doesn't start the line at 0.
+  const TREND_STEPS = [1, 3, 7, 14, 30, 61, 91, 182, 365];
+  const trendBuckets = (from, to) => {
+    const days = daysBetween(from, to) + 1;
+    if (!(days >= 1)) return [];
+    const step = TREND_STEPS.find((n) => days / n <= 14) || Math.ceil(days / 14);
+    const out = [];
+    for (let end = to; daysBetween(from, end) >= 0; ) {
+      let start = addDays(end, 1 - step);
+      if (daysBetween(from, start) < 0) start = from;
+      out.unshift({ from: start, to: end, days: daysBetween(start, end) + 1 });
+      end = addDays(start, -1);
+    }
+    if (out.length > 2 && out[0].days < step / 2) {
+      out[1].from = out[0].from;
+      out[1].days += out[0].days;
+      out.shift();
+    }
+    return out;
+  };
+
+  // A sparkline in a w×h box: the line, the area under it and the last
+  // point. Null values are skipped. `zero` keeps 0 on the scale, so a small
+  // figure doesn't look like a big one. null with fewer than two points.
+  const sparkPath = (values, { w = 100, h = 30, pad = 3, zero = true } = {}) => {
+    const pts = values.map((v, i) => [i, v]).filter(([, v]) => v != null && isFinite(v));
+    if (pts.length < 2) return null;
+    let lo = Math.min(...pts.map((p) => p[1]));
+    let hi = Math.max(...pts.map((p) => p[1]));
+    if (zero) {
+      lo = Math.min(lo, 0);
+      hi = Math.max(hi, 0);
+    }
+    const span = hi - lo;
+    const num = (n) => +n.toFixed(2);
+    const x = (i) => num((i / (values.length - 1)) * w);
+    const y = (v) =>
+      num(span ? h - pad - ((v - lo) / span) * (h - pad * 2) : hi === 0 ? h - pad : h / 2);
+    const xy = pts.map(([i, v]) => [x(i), y(v)]);
+    const line = xy.map(([a, b], k) => `${k ? 'L' : 'M'}${a} ${b}`).join(' ');
+    const last = xy[xy.length - 1];
+    return { line, area: `${line} L${last[0]} ${h} L${xy[0][0]} ${h} Z`, end: last };
+  };
+
   // ── Icons ──────────────────────────────────────────
   // One line-icon set, in icons.svg. Returns an inline <svg> that uses a
   // symbol from it; .vpc-ico (styles.css) sizes it and strokes it in the
@@ -892,6 +1006,12 @@
     customCatTotals,
     salesInPeriod,
     salesBetween,
+    addDays,
+    daysBetween,
+    rangePeriods,
+    periodChange,
+    trendBuckets,
+    sparkPath,
     HISTORICAL_ORDERS,
     orderList,
     seedOrders,
