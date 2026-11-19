@@ -274,7 +274,7 @@
     <h2 id="goalModalTitle">New Goal</h2>
     <div class="field">
       <label>Goal Title</label>
-      <input type="text" id="gTitle" placeholder="e.g. Launch personal portfolio site" />
+      <input type="text" id="gTitle" data-error="Give the goal a title" required placeholder="e.g. Launch personal portfolio site" />
     </div>
     <div class="field">
       <label>Description (optional)</label>
@@ -306,7 +306,7 @@
     <h2 id="objModalTitle">Add Objective</h2>
     <div class="field">
       <label>Objective</label>
-      <input type="text" id="oText" placeholder="e.g. Write 3 case studies" />
+      <input type="text" id="oText" data-error="Write the objective" required placeholder="e.g. Write 3 case studies" />
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
       <div class="field">
@@ -508,6 +508,7 @@ function openGoalModal(id) {
 function closeGoalModal() { document.getElementById('goalModal').classList.remove('open'); }
 
 function saveGoal() {
+  if (window.vpcValidate && !vpcValidate('goalModal')) return;
   const title = document.getElementById('gTitle').value.trim();
   if (!title) { toast('Please enter a goal title.'); return; }
   if (editGoalId) {
@@ -569,6 +570,7 @@ function openObjModal(gid, oid) {
 function closeObjModal() { document.getElementById('objModal').classList.remove('open'); }
 
 function saveObj() {
+  if (window.vpcValidate && !vpcValidate('objModal')) return;
   const text = document.getElementById('oText').value.trim();
   if (!text) { toast('Please enter an objective.'); return; }
   const g = data.goals.find(x => x.id === editObjGoalId);

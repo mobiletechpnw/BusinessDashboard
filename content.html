@@ -381,7 +381,7 @@ main{max-width:1300px;margin:0 auto;padding:24px 20px;}
     </div>
     <div class="field">
       <label>Title / Content Name</label>
-      <input type="text" id="f-title" placeholder="e.g. Upcoming Show Announcement">
+      <input type="text" id="f-title" data-error="Give it a title" required placeholder="e.g. Upcoming Show Announcement">
     </div>
     <div class="field-row">
       <div class="field">
@@ -947,6 +947,7 @@ function insertTag(tag) {
 }
 
 function saveContent() {
+  if (window.vpcValidate && !vpcValidate('content-modal')) return;
   const title = document.getElementById('f-title').value.trim();
   if (!title) { alert('Please enter a title.'); return; }
   const platforms = [...document.querySelectorAll('.plat-btn.on')].map(b => b.dataset.p);

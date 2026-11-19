@@ -542,8 +542,8 @@
   <div class="modal" style="width:420px">
     <h2 id="pcModalTitle">Apply Credit</h2>
     <div class="field-row">
-      <div class="field"><label>Date</label><input type="date" id="pcDate"></div>
-      <div class="field"><label>Amount ($)</label><input type="number" id="pcAmount" placeholder="0.00" step="0.01" min="0.01"></div>
+      <div class="field"><label>Date</label><input type="date" id="pcDate" data-error="Pick a date" required></div>
+      <div class="field"><label>Amount ($)</label><input type="number" id="pcAmount" data-error="Enter the amount" required placeholder="0.00" step="0.01" min="0.01"></div>
     </div>
     <div class="field"><label>Notes (optional)</label><input type="text" id="pcNotes" placeholder="e.g. May profit allocation, lump sum…"></div>
     <div class="modal-actions">
@@ -558,7 +558,7 @@
   <div class="modal">
     <h2>Log Filament Purchase</h2>
     <div class="field-row">
-      <div class="field"><label>Date</label><input type="date" id="afDate"></div>
+      <div class="field"><label>Date</label><input type="date" id="afDate" data-error="Pick a date" required></div>
       <div class="field">
         <label>Brand</label>
         <select id="afBrand">
@@ -571,7 +571,7 @@
     </div>
     <div class="field-row">
       <div class="field"><label>Qty (rolls)</label><input type="number" id="afQty" value="4" min="1"></div>
-      <div class="field"><label>Total Cost ($)</label><input type="number" id="afTotal" placeholder="45.00" step="0.01"></div>
+      <div class="field"><label>Total Cost ($)</label><input type="number" id="afTotal" data-error="Enter the total cost" min="0" required placeholder="45.00" step="0.01"></div>
     </div>
     <div class="field"><label>Notes (optional)</label><input type="text" id="afNotes" placeholder="PLA, Matte, bad batch, etc."></div>
     <div class="modal-actions">
@@ -726,14 +726,14 @@
 
 <div class="modal-overlay" id="addOrderModal">
   <div class="modal">
-    <h2 id="aoTitle">Log New Order</h2>
+    <h2 id="aoTitle">New Order</h2>
     <div class="field-row">
-      <div class="field"><label>Date</label><input type="date" id="aoDate"></div>
-      <div class="field"><label>Customer Name</label><input type="text" id="aoCustomer" placeholder="e.g. Mike - CardStore"></div>
+      <div class="field"><label for="aoCustomer">Customer</label><input type="text" id="aoCustomer" data-error="Enter the customer's name" required placeholder="e.g. Mike - CardStore" autocomplete="off"></div>
+      <div class="field"><label for="aoDate">Date</label><input type="date" id="aoDate" data-error="Pick the order date" required></div>
     </div>
     <div class="field-row">
       <div class="field">
-        <label>Product / Description</label>
+        <label for="aoProduct">Product</label>
         <select id="aoProduct">
           <option>18 Large Risers + 9 End Cap Pairs</option>
           <option>Large Risers Only</option>
@@ -748,45 +748,43 @@
           <button type="button" class="btn-ghost" id="aoEditProduct" style="font-size:0.75rem;padding:5px 10px;margin-top:6px;display:none" onclick="openOrderProductModal(document.getElementById('aoProduct').value)">Edit Product</button>
         </div>
       </div>
-      <div class="field"><label>Qty / Sets</label><input type="number" id="aoQty" value="1" min="1"></div>
+      <div class="field"><label for="aoQty">Quantity</label><input type="number" id="aoQty" data-stepper value="1" min="1"></div>
     </div>
     <div class="field-row">
-      <div class="field"><label>Sale Price ($)</label><input type="number" id="aoSale" placeholder="90.00" step="0.01"></div>
-      <div class="field"><label>COGS ($)</label><input type="number" id="aoCogs" placeholder="21.33" step="0.01" value="21.33"></div>
+      <div class="field"><label for="aoSale">Sale price ($)</label><input type="number" id="aoSale" data-error="Enter the sale price" min="0" required placeholder="90.00" step="0.01"></div>
+      <div class="field"><label for="aoCogs">Cost ($)</label><input type="number" id="aoCogs" min="0" placeholder="21.33" step="0.01" value="21.33"></div>
     </div>
     <div class="field-row">
-      <div class="field"><label>Referred By</label><input type="text" id="aoRef" placeholder="Mike / Me / Instagram"></div>
-      <div class="field"><label>Notes</label><input type="text" id="aoNotes" placeholder="Delivery date, special requests…"></div>
+      <div class="field"><label for="aoRef">Referred by</label><input type="text" id="aoRef" placeholder="Mike / Me / Instagram"></div>
+      <div class="field"><label for="aoNotes">Notes</label><input type="text" id="aoNotes" placeholder="Delivery date, special requests…"></div>
+    </div>
+    <div class="field">
+      <label>Payment</label>
+      <select id="aoPayStatus" data-seg>
+        <option value="paid">Paid</option>
+        <option value="partial">Partial</option>
+        <option value="unpaid">Unpaid</option>
+      </select>
     </div>
     <div class="field-row">
       <div class="field">
-        <label>Payment Status</label>
-        <select id="aoPayStatus">
-          <option value="paid">✅ Paid</option>
-          <option value="partial">🟡 Partial</option>
-          <option value="unpaid">🔴 Unpaid</option>
+        <label>Order</label>
+        <select id="aoFulfillStatus" data-seg>
+          <option value="in_progress">In progress</option>
+          <option value="completed">Done</option>
         </select>
       </div>
       <div class="field">
-        <label>Fulfillment Status</label>
-        <select id="aoFulfillStatus">
-          <option value="completed">✅ Completed</option>
-          <option value="in_progress">🔵 In Progress</option>
-        </select>
-      </div>
-    </div>
-    <div class="field-row">
-      <div class="field">
-        <label>Print Status</label>
-        <select id="aoPrintStatus">
-          <option value="not_printed">⏳ Not Printed</option>
-          <option value="printed">🖨️ Printed</option>
+        <label>Printed</label>
+        <select id="aoPrintStatus" data-switch="printed">
+          <option value="not_printed">Not printed</option>
+          <option value="printed">Printed</option>
         </select>
       </div>
     </div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeAddOrder()">Cancel</button>
-      <button class="btn-primary" id="aoSaveBtn" onclick="saveNewOrder()">Save Order</button>
+      <button class="btn-primary" id="aoSaveBtn" onclick="saveNewOrder()">Add Order</button>
     </div>
   </div>
 </div>
@@ -796,9 +794,9 @@
   <div class="modal" style="width:480px">
     <h2 id="opTitle">New Product</h2>
     <div style="font-size:0.76rem;color:var(--text2);margin:-6px 0 14px">Saved products appear in the order form's product list and fill in Sale Price and COGS for you (per unit × quantity).</div>
-    <div class="field"><label>Product Name</label><input type="text" id="opName" maxlength="60" placeholder="e.g. KickStands"></div>
+    <div class="field"><label>Product Name</label><input type="text" id="opName" data-error="Give the product a name" required maxlength="60" placeholder="e.g. KickStands"></div>
     <div class="field-row">
-      <div class="field"><label>Cost per Unit ($)</label><input type="number" id="opCost" step="0.01" min="0" placeholder="e.g. 1.25"></div>
+      <div class="field"><label>Cost per Unit ($)</label><input type="number" id="opCost" data-error="Enter your cost per unit" required step="0.01" min="0" placeholder="e.g. 1.25"></div>
       <div class="field"><label>Sale Price per Unit ($)</label><input type="number" id="opPrice" step="0.01" min="0" placeholder="e.g. 5.00 (optional)"></div>
     </div>
     <div class="field-row">
@@ -821,7 +819,7 @@
   <div class="modal" style="width:480px">
     <h2 id="expModalTitle">Add Expense</h2>
     <div class="field-row">
-      <div class="field"><label>Date</label><input type="date" id="expDate"></div>
+      <div class="field"><label>Date</label><input type="date" id="expDate" data-error="Pick a date" required></div>
       <div class="field">
         <label>Type</label>
         <select id="expType">
@@ -844,8 +842,8 @@
         <option>Other</option>
       </select>
     </div>
-    <div class="field"><label>Description</label><input type="text" id="expDesc" placeholder="e.g. Overture PLA White 1kg — 2 rolls"></div>
-    <div class="field"><label>Amount ($)</label><input type="number" id="expAmount" placeholder="0.00" step="0.01" min="0"></div>
+    <div class="field"><label>Description</label><input type="text" id="expDesc" data-error="Describe the expense" required placeholder="e.g. Overture PLA White 1kg — 2 rolls"></div>
+    <div class="field"><label>Amount ($)</label><input type="number" id="expAmount" data-error="Enter the amount" required placeholder="0.00" step="0.01" min="0"></div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeExpModal()">Cancel</button>
       <button class="btn-primary" onclick="saveExpense()">Save Expense</button>
@@ -960,8 +958,8 @@
   <div class="modal" style="width:520px">
     <h2 id="jtSaleModalTitle">Log Jet Tag Sale</h2>
     <div class="field-row">
-      <div class="field"><label>Date</label><input type="date" id="jtDate"></div>
-      <div class="field"><label>Total Qty Sold</label><input type="number" id="jtQty" value="1" min="1" oninput="jtUpdateRevPreview()"></div>
+      <div class="field"><label>Date</label><input type="date" id="jtDate" data-error="Pick a date" required></div>
+      <div class="field"><label>Total Qty Sold</label><input type="number" id="jtQty" data-error="Enter how many" data-stepper required value="1" min="1" oninput="jtUpdateRevPreview()"></div>
     </div>
     <div class="field">
       <label>Character(s) Sold — select one or more</label>
@@ -969,7 +967,7 @@
     </div>
     <div class="field">
       <label>Sale Price per Tag ($)</label>
-      <input type="number" id="jtPrice" value="5.00" step="0.01" min="0" oninput="jtUpdateRevPreview()">
+      <input type="number" id="jtPrice" data-error="Enter the price" required value="5.00" step="0.01" min="0" oninput="jtUpdateRevPreview()">
     </div>
     <div id="jtRevPreview" style="background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:4px;font-size:0.82rem;color:var(--text2);display:none"></div>
     <div class="field"><label>Notes (optional)</label><input type="text" id="jtNotes" placeholder="e.g. Card show, Whatnot, eBay"></div>
@@ -1011,10 +1009,10 @@
 <div class="modal-overlay" id="jtCharModal">
   <div class="modal" style="width:520px">
     <h2>Add New Character</h2>
-    <div class="field"><label>Character Name</label><input type="text" id="jtCharName" maxlength="60" placeholder="e.g. Snorlax"></div>
+    <div class="field"><label>Character Name</label><input type="text" id="jtCharName" data-error="Enter a character name" required maxlength="60" placeholder="e.g. Snorlax"></div>
     <div class="field-row">
-      <div class="field"><label>Date Purchased</label><input type="date" id="jtCharDate"></div>
-      <div class="field"><label>Qty Purchased</label><input type="number" id="jtCharQty" value="10" min="1"></div>
+      <div class="field"><label>Date Purchased</label><input type="date" id="jtCharDate" data-error="Pick a date" required></div>
+      <div class="field"><label>Qty Purchased</label><input type="number" id="jtCharQty" data-error="Enter how many" data-stepper required value="10" min="1"></div>
     </div>
     <div class="field">
       <label>Total Cost of This Order ($) — what you paid</label>
@@ -1131,8 +1129,8 @@
   <div class="modal" style="width:520px">
     <h2>Log Pin Sale</h2>
     <div class="field-row">
-      <div class="field"><label>Date</label><input type="date" id="pinDate"></div>
-      <div class="field"><label>Total Qty Sold</label><input type="number" id="pinQty" value="1" min="1" oninput="pinUpdateRevPreview()"></div>
+      <div class="field"><label>Date</label><input type="date" id="pinDate" data-error="Pick a date" required></div>
+      <div class="field"><label>Total Qty Sold</label><input type="number" id="pinQty" data-error="Enter how many" data-stepper required value="1" min="1" oninput="pinUpdateRevPreview()"></div>
     </div>
     <div class="field">
       <label>Character(s) Sold — select one or more</label>
@@ -1140,7 +1138,7 @@
     </div>
     <div class="field">
       <label>Sale Price per Pin ($)</label>
-      <input type="number" id="pinPrice" value="5.00" step="0.01" min="0" oninput="pinUpdateRevPreview()">
+      <input type="number" id="pinPrice" data-error="Enter the price" required value="5.00" step="0.01" min="0" oninput="pinUpdateRevPreview()">
     </div>
     <div id="pinRevPreview" style="background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:4px;font-size:0.82rem;color:var(--text2);display:none"></div>
     <div class="field"><label>Notes (optional)</label><input type="text" id="pinNotes" placeholder="e.g. Card show, Whatnot, eBay"></div>
@@ -1182,10 +1180,10 @@
 <div class="modal-overlay" id="pinCharModal">
   <div class="modal" style="width:520px">
     <h2>Add New Character</h2>
-    <div class="field"><label>Character Name</label><input type="text" id="pinCharName" maxlength="60" placeholder="e.g. Gengar"></div>
+    <div class="field"><label>Character Name</label><input type="text" id="pinCharName" data-error="Enter a character name" required maxlength="60" placeholder="e.g. Gengar"></div>
     <div class="field-row">
-      <div class="field"><label>Date Purchased</label><input type="date" id="pinCharDate"></div>
-      <div class="field"><label>Qty Purchased</label><input type="number" id="pinCharQty" value="20" min="1"></div>
+      <div class="field"><label>Date Purchased</label><input type="date" id="pinCharDate" data-error="Pick a date" required></div>
+      <div class="field"><label>Qty Purchased</label><input type="number" id="pinCharQty" data-error="Enter how many" data-stepper required value="20" min="1"></div>
     </div>
     <div class="field">
       <label>Total Cost of This Order ($) — what you paid</label>
@@ -1207,7 +1205,7 @@
     <h2 id="cmTitle">New Category</h2>
     <div style="font-size:0.76rem;color:var(--text2);margin:-6px 0 14px">A category gets its own tracker tab — inventory by item, stock orders with real costs, a sales log, and low-stock alerts — just like Jet Tags and Pins.</div>
     <div class="field-row">
-      <div class="field"><label>Category Name</label><input type="text" id="cmName" maxlength="40" placeholder="e.g. Stickers"></div>
+      <div class="field"><label>Category Name</label><input type="text" id="cmName" data-error="Give the category a name" required maxlength="40" placeholder="e.g. Stickers"></div>
       <div class="field"><label>Unit Name (singular)</label><input type="text" id="cmUnit" maxlength="20" placeholder="e.g. sticker"></div>
     </div>
     <div class="field-row">
@@ -1229,10 +1227,10 @@
 <div class="modal-overlay" id="catItemModal">
   <div class="modal" style="width:520px">
     <h2 id="ciTitle">Add New Item</h2>
-    <div class="field"><label>Item Name</label><input type="text" id="ciName" maxlength="60" placeholder="e.g. Charizard"></div>
+    <div class="field"><label>Item Name</label><input type="text" id="ciName" data-error="Enter an item name" required maxlength="60" placeholder="e.g. Charizard"></div>
     <div class="field-row">
-      <div class="field"><label>Date Purchased</label><input type="date" id="ciDate"></div>
-      <div class="field"><label>Qty Purchased</label><input type="number" id="ciQty" value="10" min="1"></div>
+      <div class="field"><label>Date Purchased</label><input type="date" id="ciDate" data-error="Pick a date" required></div>
+      <div class="field"><label>Qty Purchased</label><input type="number" id="ciQty" data-error="Enter how many" data-stepper required value="10" min="1"></div>
     </div>
     <div class="field">
       <label>Total Cost of This Order ($) — what you paid</label>
@@ -1278,8 +1276,8 @@
   <div class="modal" style="width:520px">
     <h2 id="csTitle">Log Sale</h2>
     <div class="field-row">
-      <div class="field"><label>Date</label><input type="date" id="csDate"></div>
-      <div class="field"><label>Total Qty Sold</label><input type="number" id="csQty" value="1" min="1" oninput="catUpdateRevPreview()"></div>
+      <div class="field"><label>Date</label><input type="date" id="csDate" data-error="Pick a date" required></div>
+      <div class="field"><label>Total Qty Sold</label><input type="number" id="csQty" data-error="Enter how many" data-stepper required value="1" min="1" oninput="catUpdateRevPreview()"></div>
     </div>
     <div class="field">
       <label>Item(s) Sold — select one or more</label>
@@ -1287,7 +1285,7 @@
     </div>
     <div class="field">
       <label id="csPriceLabel">Sale Price per Unit ($)</label>
-      <input type="number" id="csPrice" step="0.01" min="0" oninput="catUpdateRevPreview()">
+      <input type="number" id="csPrice" data-error="Enter the price" required step="0.01" min="0" oninput="catUpdateRevPreview()">
     </div>
     <div id="csRevPreview" style="background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:4px;font-size:0.82rem;color:var(--text2);display:none"></div>
     <div class="field"><label>Notes (optional)</label><input type="text" id="csNotes" placeholder="e.g. Card show, Whatnot, eBay"></div>
@@ -2398,6 +2396,7 @@ function openOrderProductModal(name) {
 function closeOrderProductModal() { document.getElementById('orderProductModal').classList.remove('open'); }
 
 function saveOrderProduct() {
+  if (window.vpcValidate && !vpcValidate('orderProductModal')) return;
   const name  = document.getElementById('opName').value.trim();
   const cost  = parseFloat(document.getElementById('opCost').value);
   const price = parseFloat(document.getElementById('opPrice').value);
@@ -2535,15 +2534,29 @@ function openAddOrder(id) {
     document.getElementById('aoPayStatus').value    = 'paid';
     document.getElementById('aoFulfillStatus').value= 'in_progress';
     document.getElementById('aoPrintStatus').value  = 'not_printed';
-    titleEl.textContent = 'Log New Order';
-    saveEl.textContent  = 'Save Order';
+    titleEl.textContent = 'New Order';
+    saveEl.textContent  = 'Add Order';
   }
   document.getElementById('addOrderModal').classList.add('open');
   setTimeout(() => document.getElementById('aoCustomer').focus(), 50);
 }
 function closeAddOrder() { editOrderId = null; document.getElementById('addOrderModal').classList.remove('open'); }
+// In the form too: Done implies Printed, and Not printed reopens the order.
+document.getElementById('aoFulfillStatus').addEventListener('change', e => {
+  if (e.target.value === 'completed') {
+    document.getElementById('aoPrintStatus').value = 'printed';
+    window.vpcSyncForms?.(document.getElementById('addOrderModal'));
+  }
+});
+document.getElementById('aoPrintStatus').addEventListener('change', e => {
+  if (e.target.value === 'not_printed' && document.getElementById('aoFulfillStatus').value === 'completed') {
+    document.getElementById('aoFulfillStatus').value = 'in_progress';
+    window.vpcSyncForms?.(document.getElementById('addOrderModal'));
+  }
+});
 
 function saveNewOrder() {
+  if (window.vpcValidate && !vpcValidate('addOrderModal')) return;
   const sale = parseFloat(document.getElementById('aoSale').value);
   const cogs = parseFloat(document.getElementById('aoCogs').value);
   const cust = document.getElementById('aoCustomer').value.trim();
@@ -2723,6 +2736,7 @@ function closePrinterCreditModal() {
   _pcPrinterId = null;
 }
 function savePrinterCreditEntry() {
+  if (window.vpcValidate && !vpcValidate('printerCreditModal')) return;
   const amount = parseFloat(document.getElementById('pcAmount').value);
   const date   = document.getElementById('pcDate').value;
   const notes  = document.getElementById('pcNotes').value.trim();
@@ -3313,6 +3327,7 @@ function openAddFilament() {
 }
 function closeAddFilament() { document.getElementById('addFilamentModal').classList.remove('open'); }
 function saveNewFilament() {
+  if (window.vpcValidate && !vpcValidate('addFilamentModal')) return;
   const total = parseFloat(document.getElementById('afTotal').value);
   const qty   = parseInt(document.getElementById('afQty').value) || 1;
   const date  = document.getElementById('afDate').value;
@@ -3612,6 +3627,7 @@ function openExpModal(id) {
 function closeExpModal() { document.getElementById('expModal').classList.remove('open'); }
 
 function saveExpense() {
+  if (window.vpcValidate && !vpcValidate('expModal')) return;
   const amount = parseFloat(document.getElementById('expAmount').value);
   const desc   = document.getElementById('expDesc').value.trim();
   const date   = document.getElementById('expDate').value;
@@ -4155,6 +4171,7 @@ function jtUpdateRevPreview() {
 }
 
 function saveJtSale() {
+  if (window.vpcValidate && !vpcValidate('jtSaleModal')) return;
   const date  = document.getElementById('jtDate').value;
   const qty   = parseInt(document.getElementById('jtQty').value);
   const price = parseFloat(document.getElementById('jtPrice').value);
@@ -4310,6 +4327,7 @@ function openJtCharModal() {
 function closeJtCharModal() { document.getElementById('jtCharModal').classList.remove('open'); }
 
 function saveJtCharacter() {
+  if (window.vpcValidate && !vpcValidate('jtCharModal')) return;
   const name    = document.getElementById('jtCharName').value.trim();
   const date    = document.getElementById('jtCharDate').value;
   const qty     = parseInt(document.getElementById('jtCharQty').value);
@@ -4701,6 +4719,7 @@ function pinUpdateRevPreview() {
 }
 
 function savePinSale() {
+  if (window.vpcValidate && !vpcValidate('pinSaleModal')) return;
   const date  = document.getElementById('pinDate').value;
   const qty   = parseInt(document.getElementById('pinQty').value);
   const price = parseFloat(document.getElementById('pinPrice').value);
@@ -4856,6 +4875,7 @@ function openPinCharModal() {
 function closePinCharModal() { document.getElementById('pinCharModal').classList.remove('open'); }
 
 function savePinCharacter() {
+  if (window.vpcValidate && !vpcValidate('pinCharModal')) return;
   const name    = document.getElementById('pinCharName').value.trim();
   const date    = document.getElementById('pinCharDate').value;
   const qty     = parseInt(document.getElementById('pinCharQty').value);
@@ -5223,6 +5243,7 @@ function openCatModal(catId) {
 function closeCatModal() { document.getElementById('catModal').classList.remove('open'); }
 
 function saveCategory() {
+  if (window.vpcValidate && !vpcValidate('catModal')) return;
   const name  = document.getElementById('cmName').value.trim();
   const unit  = document.getElementById('cmUnit').value.trim().toLowerCase();
   const emoji = document.getElementById('cmEmoji').value.trim();
@@ -5281,6 +5302,7 @@ function openCatItemModal(catId) {
 function closeCatItemModal() { document.getElementById('catItemModal').classList.remove('open'); }
 
 function saveCatItem() {
+  if (window.vpcValidate && !vpcValidate('catItemModal')) return;
   const cat = catById(CAT_ACTIVE); if (!cat) return;
   const name    = document.getElementById('ciName').value.trim();
   const date    = document.getElementById('ciDate').value;
@@ -5460,6 +5482,7 @@ function catUpdateRevPreview() {
 }
 
 function saveCatSale() {
+  if (window.vpcValidate && !vpcValidate('catSaleModal')) return;
   const cat = catById(CAT_ACTIVE); if (!cat) return;
   const date  = document.getElementById('csDate').value;
   const qty   = parseInt(document.getElementById('csQty').value);

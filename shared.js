@@ -527,6 +527,213 @@ window.vpcSeg = function (el, onChange) {
   };
 };
 
+// ── FORMS: steppers, segmented statuses, switches, inline errors ──
+// Pages opt in with attributes; the underlying input or select keeps the
+// value, so each page's own open/save code is unchanged.
+//   <input type="number" data-stepper>      − value + buttons
+//   <select data-seg>                        a segmented control
+//   <select data-switch="printed">           a switch, on when the value is "printed"
+//   <input required min="0" data-error="…">  error text under the field
+// Money inputs (step="0.01") get the decimal keypad, and a "($)" in their
+// label becomes a $ inside the field.
+const plainText = (s) =>
+  String(s)
+    .replace(/^[^\p{L}\p{N}]+/u, '')
+    .trim();
+let _formUid = 0;
+const formId = (el, prefix) => el.id || (el.id = `${prefix}-${++_formUid}`);
+const fieldLabel = (el) => el.closest('.field')?.querySelector(':scope > label');
+
+function enhanceStepper(input) {
+  const wrap = document.createElement('div');
+  wrap.className = 'stepper';
+  input.replaceWith(wrap);
+  const btn = (dir, text, name) =>
+    `<button type="button" class="step-btn" data-step="${dir}" aria-label="${name}" tabindex="-1">${text}</button>`;
+  wrap.insertAdjacentHTML('afterbegin', btn(-1, '−', 'Decrease'));
+  wrap.appendChild(input);
+  wrap.insertAdjacentHTML('beforeend', btn(1, '+', 'Increase'));
+  input.inputMode = 'numeric';
+  wrap.addEventListener('click', (e) => {
+    const b = e.target.closest('.step-btn');
+    if (!b) return;
+    const step = parseFloat(input.step) || 1;
+    const min = input.min === '' ? -Infinity : parseFloat(input.min);
+    const max = input.max === '' ? Infinity : parseFloat(input.max);
+    const next = (parseFloat(input.value) || 0) + step * +b.dataset.step;
+    input.value = String(Math.min(max, Math.max(min, next)));
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+}
+
+function enhanceSelectSeg(select) {
+  const seg = document.createElement('div');
+  seg.className = 'seg seg-field';
+  seg.innerHTML = [...select.options]
+    .map(
+      (o) =>
+        `<button data-value="${navEsc(o.value)}" aria-checked="${o.selected}">${navEsc(plainText(o.textContent))}</button>`
+    )
+    .join('');
+  const label = fieldLabel(select);
+  if (label) seg.setAttribute('aria-labelledby', formId(label, 'lbl'));
+  select.hidden = true;
+  select.after(seg);
+  select._seg = vpcSeg(seg, (v) => {
+    select.value = v;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+}
+
+function enhanceSelectSwitch(select) {
+  const on = select.dataset.switch;
+  const off = [...select.options].find((o) => o.value !== on)?.value ?? '';
+  const sw = document.createElement('input');
+  sw.type = 'checkbox';
+  sw.className = 'switch';
+  sw.setAttribute('role', 'switch');
+  const label = fieldLabel(select);
+  if (label) label.htmlFor = formId(sw, 'sw');
+  label?.closest('.field')?.classList.add('field-switch');
+  select.hidden = true;
+  select.after(sw);
+  sw.addEventListener('change', () => {
+    select.value = sw.checked ? on : off;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  select._switch = sw;
+}
+
+function enhanceMoney(input) {
+  input.inputMode = 'decimal';
+  const label = fieldLabel(input);
+  if (
+    !label ||
+    !/\(\$\)/.test(label.textContent) ||
+    input.parentElement.classList.contains('money')
+  )
+    return;
+  label.innerHTML = label.innerHTML.replace(/\s*\(\$\)/, '<span class="unit"> ($)</span>');
+  const wrap = document.createElement('div');
+  wrap.className = 'money';
+  input.replaceWith(wrap);
+  wrap.appendChild(input);
+}
+
+window.vpcEnhanceForms = function (root = document) {
+  root.querySelectorAll('input[type="number"][data-stepper]').forEach((i) => {
+    if (!i.closest('.stepper')) enhanceStepper(i);
+  });
+  root.querySelectorAll('select[data-seg]').forEach((s) => s._seg || enhanceSelectSeg(s));
+  root.querySelectorAll('select[data-switch]').forEach((s) => s._switch || enhanceSelectSwitch(s));
+  root.querySelectorAll('input[type="number"][step="0.01"]').forEach(enhanceMoney);
+  // A field that is just a label and one control can read as an inset row
+  // on a phone (styles.css); anything richer keeps its label above.
+  const SIMPLE =
+    'input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="color"]):not([type="range"]):not([type="file"]), select:not([hidden]), .money, .stepper';
+  root.querySelectorAll('.modal .field').forEach((f) => {
+    const kids = [...f.children].filter((c) => !c.classList.contains('field-error'));
+    f.classList.toggle(
+      'field-inset',
+      kids.length === 2 && kids[0].tagName === 'LABEL' && kids[1].matches(SIMPLE)
+    );
+  });
+};
+
+// Pull the controls back in line with their select after a page set
+// values (for example when an edit dialog opens), and clear old errors.
+window.vpcSyncForms = function (root) {
+  root.querySelectorAll('select[data-seg]').forEach((s) => s._seg?.set(s.value));
+  root.querySelectorAll('select[data-switch]').forEach((s) => {
+    if (s._switch) s._switch.checked = s.value === s.dataset.switch;
+  });
+  root.querySelectorAll('[aria-invalid="true"]').forEach((i) => fieldError(i, ''));
+};
+
+function fieldError(input, msg) {
+  const field = input.closest('.field') || input.parentElement;
+  let el = field.querySelector(':scope > .field-error');
+  if (!msg) {
+    el?.remove();
+    input.removeAttribute('aria-invalid');
+    return;
+  }
+  if (!el) {
+    el = document.createElement('div');
+    el.className = 'field-error';
+    el.id = formId(input, 'in') + '-error';
+    field.appendChild(el);
+  }
+  el.textContent = msg;
+  input.setAttribute('aria-invalid', 'true');
+  input.setAttribute('aria-describedby', el.id);
+}
+function checkField(input) {
+  const v = input.validity;
+  let msg = '';
+  if (!v.valid) {
+    msg =
+      input.dataset.error ||
+      (v.valueMissing
+        ? 'Required'
+        : v.rangeUnderflow
+          ? `Enter ${input.min} or more`
+          : v.rangeOverflow
+            ? `Enter ${input.max} or less`
+            : 'Enter a valid value');
+  }
+  fieldError(input, msg);
+  return !msg;
+}
+const CHECKED = 'input[required], input[min], input[max], select[required], textarea[required]';
+// Check every field in a form (or dialog) at once: errors appear under the
+// fields, the first one gets focus, and the result says whether to save.
+window.vpcValidate = function (root) {
+  if (typeof root === 'string') root = document.getElementById(root);
+  if (!root) return true;
+  const bad = [...root.querySelectorAll(CHECKED)].filter(
+    (i) => i.offsetParent !== null && !checkField(i)
+  );
+  bad[0]?.focus();
+  return !bad.length;
+};
+// Errors show as soon as you leave a field, and clear as you fix them.
+document.addEventListener('focusout', (e) => {
+  if (e.target.matches?.(CHECKED) && e.target.closest('.modal')) checkField(e.target);
+});
+document.addEventListener('input', (e) => {
+  if (e.target.getAttribute?.('aria-invalid') === 'true') checkField(e.target);
+});
+
+// A dialog opening re-syncs its controls; Escape closes the top one the
+// way its own Cancel button would.
+function watchDialogs() {
+  const seen = new WeakSet();
+  const mo = new MutationObserver((records) =>
+    records.forEach((r) => {
+      if (r.target.classList.contains('open')) vpcSyncForms(r.target);
+    })
+  );
+  document.querySelectorAll('.modal-overlay').forEach((o) => {
+    if (seen.has(o)) return;
+    seen.add(o);
+    mo.observe(o, { attributes: true, attributeFilter: ['class'] });
+  });
+}
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape' || e.defaultPrevented) return;
+  // Search, shortcuts and the activity log close first (their own handler).
+  if (document.querySelector('#search-overlay, #shortcuts-overlay, #audit-overlay')) return;
+  const top = [...document.querySelectorAll('.modal-overlay.open')].pop();
+  if (!top) return;
+  const cancel = [...top.querySelectorAll('button')].find(
+    (b) => b.classList.contains('sheet-close') || /^(cancel|close)$/i.test(b.textContent.trim())
+  );
+  if (cancel) cancel.click();
+  else top.classList.remove('open');
+});
+
 // ── GLOBAL SEARCH ──────────────────────────────────
 function buildSearchIndex() {
   const results = [];
@@ -1330,6 +1537,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   sessionStorage.setItem('vpc_last_page', _curPage);
   injectAppNav();
+  vpcEnhanceForms();
+  watchDialogs();
   registerSW();
   // Deferred: daily reminder check (only if reminders are turned on)
   setTimeout(checkAndNotify, 2000);

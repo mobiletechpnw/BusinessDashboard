@@ -301,11 +301,11 @@
     <div class="field-grid">
       <div class="field">
         <label>Date</label>
-        <input type="date" id="sDate" />
+        <input type="date" id="sDate" data-error="Pick a date" required />
       </div>
       <div class="field">
         <label>Followers</label>
-        <input type="number" id="sFollowers" min="0" inputmode="numeric" placeholder="0" />
+        <input type="number" id="sFollowers" data-error="Enter a follower count" required min="0" inputmode="numeric" placeholder="0" />
       </div>
     </div>
     <div class="field-grid">
@@ -644,6 +644,7 @@ function openSnapModal(id) {
 function closeSnapModal() { document.getElementById('snapModal').classList.remove('open'); }
 
 function saveSnap() {
+  if (window.vpcValidate && !vpcValidate('snapModal')) return;
   const date = document.getElementById('sDate').value;
   const followers = parseInt(document.getElementById('sFollowers').value, 10);
   if (!date) { toast('Pick a date.'); return; }

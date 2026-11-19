@@ -206,7 +206,7 @@
     <div class="field-2col">
       <div class="field">
         <label>Date</label>
-        <input type="date" id="sn-date" onchange="snUpdateTotal()">
+        <input type="date" id="sn-date" data-error="Pick a date" required onchange="snUpdateTotal()">
       </div>
       <div class="field">
         <label>Show / Label (optional)</label>
@@ -589,6 +589,7 @@ function snUpdateTotal() {
 }
 
 function saveSnapshot() {
+  if (window.vpcValidate && !vpcValidate('snap-modal')) return;
   const date = document.getElementById('sn-date').value;
   const label = document.getElementById('sn-label').value.trim();
   if (!date) { alert('Pick a date.'); return; }
