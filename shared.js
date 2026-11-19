@@ -875,8 +875,8 @@ function closeDialog(overlay) {
 }
 
 // The title bar gains its hairline only once content passes under it. A
-// page with a large title shows its small title in the bar only after the
-// large one has scrolled away.
+// page with a large title starts with a clear bar and shows its small title
+// there only after the large one has scrolled away.
 function watchScroll() {
   const root = document.documentElement;
   const onScroll = () => root.classList.toggle('scrolled', window.scrollY > 4);

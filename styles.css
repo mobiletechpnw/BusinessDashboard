@@ -648,7 +648,9 @@ header {
   -webkit-backdrop-filter: var(--chrome-blur);
   backdrop-filter: var(--chrome-blur);
   border-bottom: var(--hairline) solid transparent;
-  transition: border-color var(--t-base) var(--ease);
+  transition:
+    background-color var(--t-base) var(--ease),
+    border-color var(--t-base) var(--ease);
   padding: 0 32px;
   display: flex;
   align-items: center;
@@ -661,6 +663,13 @@ header {
 /* The bar gains its hairline once content passes under it (shared.js). */
 html.scrolled header {
   border-bottom-color: var(--separator);
+}
+/* A page with a large title starts with a clear bar, as on iOS; the glass
+   comes in with the hairline. */
+html.has-large-title:not(.scrolled) header {
+  background-color: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 /* A page with a large title shows its small title only after scrolling. */
 html.has-large-title header .brand {
