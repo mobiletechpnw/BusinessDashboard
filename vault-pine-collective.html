@@ -107,16 +107,20 @@
   #orderTable tbody tr[data-id]:hover { background: var(--fill-2); }
   .cust-sub { display: block; margin-top: 2px; font-size: 0.75rem; color: var(--text2); }
   /* Ten columns: the product stays on one line, and cells tighten below
-     1280px; narrower than that the table scrolls inside its card. */
+     1280px (narrower windows: below the list styles). */
   #orderTable .cust-sub { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #orderTable td > strong { overflow-wrap: anywhere; } /* a long name with no spaces wraps, never widens the table */
   @media (max-width: 1279px) {
     #orderTable th, #orderTable td { padding-left: 7px; padding-right: 7px; }
     #orderTable .badge.status-btn { padding: 3px 7px; }
+    /* the chips' hover fill reaches the cell's edge, never past it */
+    #orderTable .color-chip, #orderTable .date-chip { margin-left: -7px; margin-right: -7px; }
   }
   .tfoot-row td { background: var(--surface2); font-weight: 600; }
   .order-list { display: none; flex-direction: column; background: var(--surface); border-radius: var(--r-lg); overflow: hidden; }
   .order-row { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 10px 14px; border-radius: 0; background: none; color: var(--text); font-weight: 400; text-align: left; }
   .order-row:active { transform: none; background: var(--fill-2); }
+  @media (hover: hover) { .order-row:hover { background: var(--fill-2); } } /* as table rows, for a mouse on a narrow window */
   .order-row + .order-row::before { content: ''; position: absolute; top: 0; left: 14px; right: 0; border-top: 1px solid var(--separator); }
   .or-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
   .or-title, .or-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -127,6 +131,18 @@
   .or-flags { display: flex; gap: 4px; }
   .order-row > .vpc-ico { width: 16px; height: 16px; color: var(--label-3); }
   .order-empty { padding: 28px 16px; text-align: center; color: var(--text2); font-size: 0.875rem; }
+  /* The table never scrolls sideways: fitOrderTable() picks the widest layout
+     that fits. Where ten columns don't (long products, a narrow window, the
+     sidebar), Qty and Profit step out: a quantity above 1 joins the product
+     line, as elsewhere ("10 × KickStands"), and profit stays in the order
+     sheet. Where eight don't either, the phone list takes over. */
+  #orderTable .qty-inline { display: none; }
+  .orders-compact #orderTable .col-qty, .orders-compact #orderTable .col-profit { display: none; }
+  .orders-compact #orderTable .qty-inline { display: inline; }
+  .orders-compact #orderTable .cust-sub { max-width: 150px; }
+  .orders-compact #orderTable .color-chip > span:not(.swatch) { max-width: 64px; overflow: hidden; text-overflow: ellipsis; }
+  .orders-as-list #orderTableCard { display: none; }
+  .orders-as-list .order-list { display: flex; }
   /* Colour and deliver-by: a swatch per order, a date that turns orange then red */
   .swatch { display: inline-block; flex: none; width: 14px; height: 14px; border-radius: 50%; vertical-align: -2px; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--label) 22%, transparent); }
   .swatch.none { position: relative; overflow: hidden; background: none; box-shadow: inset 0 0 0 1.5px var(--label-3); }
@@ -433,9 +449,9 @@
                 <th onclick="sortTable('date')" class="clickable">Date ↕</th>
                 <th onclick="sortTable('customer')" class="clickable">Customer ↕</th>
                 <th onclick="sortTable('color')" class="clickable">Color ↕</th>
-                <th class="num clickable" onclick="sortTable('sets')">Qty ↕</th>
+                <th class="num clickable col-qty" onclick="sortTable('sets')">Qty ↕</th>
                 <th class="num clickable" onclick="sortTable('salePrice')">Sale ↕</th>
-                <th class="num clickable" onclick="sortTable('profit')">Profit ↕</th>
+                <th class="num clickable col-profit" onclick="sortTable('profit')">Profit ↕</th>
                 <th onclick="sortTable('payStatus')" class="clickable">Payment ↕</th>
                 <th onclick="sortTable('printStatus')" class="clickable">Printed ↕</th>
                 <th onclick="sortTable('fulfillStatus')" class="clickable">Status ↕</th>
@@ -730,7 +746,7 @@
 </div>
 
 <!-- Order details: opens from a row (a sheet on phones). Statuses apply at once. -->
-<div class="modal-overlay" id="orderSheet">
+<div class="modal-overlay" id="orderSheet" data-detents>
   <div class="modal order-sheet" role="dialog" aria-modal="true" aria-labelledby="osTitle">
     <div class="sheet-head">
       <div style="min-width:0"><h2 id="osTitle">Order</h2><div class="sheet-sub" id="osSub"></div></div>
@@ -2081,13 +2097,13 @@ function renderOrderTable() {
       `<button type="button" class="badge badge-${val} status-btn" aria-haspopup="menu" aria-expanded="false" data-menu-key="${o.id}-${kind}" title="${title}" onclick="openStatusMenu(event,'${o.id}','${kind}')">${text}</button>`;
     return `<tr data-id="${o.id}" tabindex="0" onclick="openOrderSheet('${o.id}')" onkeydown="if(event.key==='Enter'&&event.target===this)openOrderSheet('${o.id}')" oncontextmenu="orderContextMenu(event,'${o.id}')">
       <td class="nowrap">${fmtDate(o.date)}</td>
-      <td><strong>${esc(o.customer)}</strong><span class="cust-sub">${esc(o.product)}</span></td>
+      <td><strong>${esc(o.customer)}</strong><span class="cust-sub">${orderQty(o) > 1 ? `<span class="qty-inline">${orderQty(o)} × </span>` : ''}${esc(o.product)}</span></td>
       <td>${o.color
         ? `<button type="button" class="color-chip" title="Change color" onclick="openOrderColor(event,'${o.id}')">${swatchHTML(o.color)}<span>${esc(o.color)}</span></button>`
         : `<button type="button" class="color-chip is-empty" title="Set a color" aria-label="Set a color" onclick="openOrderColor(event,'${o.id}')">—</button>`}</td>
-      <td class="num">${orderQty(o)}</td>
+      <td class="num col-qty">${orderQty(o)}</td>
       <td class="num">${fmt$(o.salePrice)}</td>
-      <td class="num"${profit < 0 ? ' style="color:var(--red)"' : ''}>${fmt$(profit)}</td>
+      <td class="num col-profit"${profit < 0 ? ' style="color:var(--red)"' : ''}>${fmt$(profit)}</td>
       <td>${statusBtn('pay', pay, PAY_LABELS[pay] || pay, 'Change payment status')}</td>
       <td class="nowrap">${statusBtn('print', print, PRINT_LABELS[print], 'Change print status')}</td>
       <td>${statusBtn('fill', fill, FILL_LABELS[fill] || fill, 'Change order status')}</td>
@@ -2100,9 +2116,9 @@ function renderOrderTable() {
   // Summary footer row (always shows totals across all filtered orders)
   const footerRow = total ? `<tr class="tfoot-row">
     <td colspan="3" class="text-2">Total — ${total} order${total === 1 ? '' : 's'}${pageCount > 1 ? ` (page ${orderPage+1}/${pageCount})` : ''}</td>
-    <td class="num">${totalQty}</td>
+    <td class="num col-qty">${totalQty}</td>
     <td class="num">${fmt$(totalRev)}</td>
-    <td class="num">${fmt$(totalProf)}</td>
+    <td class="num col-profit">${fmt$(totalProf)}</td>
     <td colspan="4"></td>
   </tr>` : `<tr><td colspan="10" class="order-empty">No orders match.</td></tr>`;
   document.getElementById('orderTbody').innerHTML = rows + footerRow;
@@ -2114,13 +2130,14 @@ function renderOrderTable() {
     const flags = (due && due.tone ? `<span class="badge badge-${due.tone === 'late' ? 'late' : 'due'}">${due.tone === 'late' ? 'Late' : 'Due ' + due.when}</span>` : '')
       + (isUnpaid(o) ? `<span class="badge badge-${pay}">${PAY_LABELS[pay]}</span>` : '')
       + (printStatusOf(o) === 'not_printed' ? '<span class="badge badge-not_printed">Not printed</span>' : '');
-    return `<button type="button" class="order-row" data-id="${o.id}" onclick="openOrderSheet('${o.id}')">
-      <span class="or-main"><span class="or-title">${esc(o.customer)}</span><span class="or-sub">${o.color ? swatchHTML(o.color) + esc(o.color) + ' · ' : ''}${esc(o.product)} · ${fmtShortDate(o.date)}</span></span>
+    return `<button type="button" class="order-row" data-id="${o.id}" onclick="openOrderSheet('${o.id}')" oncontextmenu="orderRowMenu(event,'${o.id}')">
+      <span class="or-main"><span class="or-title">${esc(o.customer)}</span><span class="or-sub">${o.color ? swatchHTML(o.color) + esc(o.color) + ' · ' : ''}${orderQty(o) > 1 ? orderQty(o) + ' × ' : ''}${esc(o.product)} · ${fmtShortDate(o.date)}</span></span>
       <span class="or-end"><span class="or-amount">${fmt$(o.salePrice)}</span>${flags ? `<span class="or-flags">${flags}</span>` : ''}</span>
       <svg class="vpc-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
     </button>`;
   }).join('') || '<div class="order-empty">No orders match.</div>';
 
+  fitOrderTable();
   renderPrintQueue();
   if (sheetOrderId) refreshOrderSheet();
 
@@ -2196,6 +2213,14 @@ function openSheetColor(btn) {
 function sheetSetDeliverBy(v) { if (sheetOrderId) setOrderField(sheetOrderId, 'deliverBy', v); }
 function deleteFromSheet() { if (deleteOrder(sheetOrderId)) closeOrderSheet(); }
 
+// A right-click on a list row opens the same menu: the list stands in for
+// the table on narrow windows, often with a mouse. A long press on a phone
+// has its own path (vpcLongPress), so a touch is left to it.
+function orderRowMenu(e, id) {
+  if (e.pointerType === 'touch' || document.getElementById('orderList')._longPressed) return;
+  orderContextMenu(e, id);
+}
+
 // Right-click a row: the common jobs, without opening the order.
 function orderContextMenu(e, id) {
   e.preventDefault();
@@ -2219,7 +2244,31 @@ function orderContextMenu(e, id) {
   });
 }
 
+// The orders table never scrolls sideways: after each render, and whenever
+// the panel changes width, it takes the widest layout that fits — all ten
+// columns, eight (no Qty or Profit), or the phone list. Phones get the list
+// from the stylesheet.
+function fitOrderTable() {
+  const panel = document.getElementById('panel-orders');
+  const wrap = document.querySelector('#orderTableCard .table-wrap');
+  panel.classList.remove('orders-compact', 'orders-as-list');
+  if (matchMedia('(max-width: 700px)').matches || !wrap.offsetParent) return; // a hidden panel measures nothing
+  const fits = () => wrap.scrollWidth <= wrap.clientWidth;
+  if (fits()) return;
+  panel.classList.add('orders-compact');
+  if (!fits()) panel.classList.replace('orders-compact', 'orders-as-list');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  // Watch the toolbar, not the panel: it spans the panel's width, and its
+  // size doesn't change when the table gives way to the list.
+  let fitWidth = -1;
+  new ResizeObserver(([e]) => {
+    const w = Math.round(e.contentRect.width);
+    if (w !== fitWidth) { fitWidth = w; fitOrderTable(); }
+  }).observe(document.querySelector('#panel-orders .orders-toolbar'));
+  // The web font arrives after the first measure and widens the cells.
+  document.fonts?.addEventListener?.('loadingdone', fitOrderTable);
   // Phones: long-press an order for the same quick actions as right-click.
   vpcLongPress(document.getElementById('orderList'), e => {
     const row = e.target?.closest?.('.order-row');

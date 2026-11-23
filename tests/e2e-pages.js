@@ -441,6 +441,17 @@ async function runProfile(browser, { name, viewport, mobile, seeded }) {
       if (mobile) {
         await pg.click(first);
         await pg.waitForTimeout(500);
+        // Phones open the order sheet at half; a tap on its grabber lifts it
+        // to full, where the Color row is, as a person would.
+        const sheet = await pg.$eval('#orderSheet > .modal', (m) => {
+          const r = m.getBoundingClientRect();
+          return { stop: m.dataset.stop || null, x: r.left + r.width / 2, y: r.top + 8 };
+        });
+        if (sheet.stop !== 'half') errs.push(`the order sheet opened at ${sheet.stop}, not half`);
+        await pg.touchscreen.tap(sheet.x, sheet.y);
+        await pg.waitForTimeout(500);
+        const lifted = await pg.$eval('#orderSheet > .modal', (m) => m.dataset.stop || null);
+        if (lifted !== 'full') errs.push(`a tap on the grabber left the sheet at ${lifted}`);
         await pg.click('#osColor');
       } else await pg.click(`#orderTable tr[data-id="${id}"] .color-chip`);
       await pg.waitForTimeout(250);
