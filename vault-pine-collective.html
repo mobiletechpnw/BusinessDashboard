@@ -109,14 +109,18 @@
   /* Ten columns: the product stays on one line, and cells tighten below
      1280px (narrower windows: below the list styles). */
   #orderTable .cust-sub { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #orderTable td > strong { overflow-wrap: anywhere; } /* a long name with no spaces wraps, never widens the table */
   @media (max-width: 1279px) {
     #orderTable th, #orderTable td { padding-left: 7px; padding-right: 7px; }
     #orderTable .badge.status-btn { padding: 3px 7px; }
+    /* the chips' hover fill reaches the cell's edge, never past it */
+    #orderTable .color-chip, #orderTable .date-chip { margin-left: -7px; margin-right: -7px; }
   }
   .tfoot-row td { background: var(--surface2); font-weight: 600; }
   .order-list { display: none; flex-direction: column; background: var(--surface); border-radius: var(--r-lg); overflow: hidden; }
   .order-row { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 10px 14px; border-radius: 0; background: none; color: var(--text); font-weight: 400; text-align: left; }
   .order-row:active { transform: none; background: var(--fill-2); }
+  @media (hover: hover) { .order-row:hover { background: var(--fill-2); } } /* as table rows, for a mouse on a narrow window */
   .order-row + .order-row::before { content: ''; position: absolute; top: 0; left: 14px; right: 0; border-top: 1px solid var(--separator); }
   .or-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
   .or-title, .or-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -2126,8 +2130,8 @@ function renderOrderTable() {
     const flags = (due && due.tone ? `<span class="badge badge-${due.tone === 'late' ? 'late' : 'due'}">${due.tone === 'late' ? 'Late' : 'Due ' + due.when}</span>` : '')
       + (isUnpaid(o) ? `<span class="badge badge-${pay}">${PAY_LABELS[pay]}</span>` : '')
       + (printStatusOf(o) === 'not_printed' ? '<span class="badge badge-not_printed">Not printed</span>' : '');
-    return `<button type="button" class="order-row" data-id="${o.id}" onclick="openOrderSheet('${o.id}')">
-      <span class="or-main"><span class="or-title">${esc(o.customer)}</span><span class="or-sub">${o.color ? swatchHTML(o.color) + esc(o.color) + ' · ' : ''}${esc(o.product)} · ${fmtShortDate(o.date)}</span></span>
+    return `<button type="button" class="order-row" data-id="${o.id}" onclick="openOrderSheet('${o.id}')" oncontextmenu="orderRowMenu(event,'${o.id}')">
+      <span class="or-main"><span class="or-title">${esc(o.customer)}</span><span class="or-sub">${o.color ? swatchHTML(o.color) + esc(o.color) + ' · ' : ''}${orderQty(o) > 1 ? orderQty(o) + ' × ' : ''}${esc(o.product)} · ${fmtShortDate(o.date)}</span></span>
       <span class="or-end"><span class="or-amount">${fmt$(o.salePrice)}</span>${flags ? `<span class="or-flags">${flags}</span>` : ''}</span>
       <svg class="vpc-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
     </button>`;
@@ -2208,6 +2212,14 @@ function openSheetColor(btn) {
 }
 function sheetSetDeliverBy(v) { if (sheetOrderId) setOrderField(sheetOrderId, 'deliverBy', v); }
 function deleteFromSheet() { if (deleteOrder(sheetOrderId)) closeOrderSheet(); }
+
+// A right-click on a list row opens the same menu: the list stands in for
+// the table on narrow windows, often with a mouse. A long press on a phone
+// has its own path (vpcLongPress), so a touch is left to it.
+function orderRowMenu(e, id) {
+  if (e.pointerType === 'touch' || document.getElementById('orderList')._longPressed) return;
+  orderContextMenu(e, id);
+}
 
 // Right-click a row: the common jobs, without opening the order.
 function orderContextMenu(e, id) {

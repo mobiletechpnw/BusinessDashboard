@@ -894,9 +894,11 @@ function enableSheetSwipe() {
       else if (at > half + 120) to = 'close';
       else to = at < half / 2 ? 'full' : 'half';
       if (to === 'close') return close(sheet);
+      // Settles on the sheet's own timing, so the page behind keeps pace.
+      sheet.style.transition = 'transform var(--t-sheet) var(--ease-sheet)';
       setSheetStop(sheet, to);
       sheet.style.transform = '';
-      setTimeout(() => (sheet.style.transition = ''), 320);
+      setTimeout(() => (sheet.style.transition = ''), 440);
       return;
     }
     if (dy > 120 || (flick && v > 0 && dy > 40)) close(sheet);
@@ -924,11 +926,15 @@ function enableSheetSwipe() {
     }
   });
   // Content scrolled at half (bringing something into view) lifts it to full.
+  // Back at the top is the reset on opening, not a scroll by the reader.
   document.addEventListener(
     'scroll',
     (e) => {
       const sheet = e.target;
-      if (sheet.matches?.('.modal-overlay[data-detents] > .modal[data-stop="half"]')) {
+      if (
+        sheet.scrollTop > 0 &&
+        sheet.matches?.('.modal-overlay[data-detents] > .modal[data-stop="half"]')
+      ) {
         setSheetStop(sheet, 'full');
       }
     },
@@ -943,8 +949,11 @@ function enableSheetSwipe() {
 // little to show opens at its own height, as every other sheet does.
 function sheetStopsToggle(overlay) {
   const sheet = overlay.querySelector(':scope > .modal');
-  if (!sheet) return;
-  if (!overlay.classList.contains('open')) return setSheetStop(sheet, null);
+  const open = overlay.classList.contains('open');
+  // Only opening and closing count, not another class changing on the overlay.
+  if (!sheet || open === !!overlay._stopsOpen) return;
+  overlay._stopsOpen = open;
+  if (!open) return setSheetStop(sheet, null);
   if (!window.matchMedia('(max-width: 700px) and (pointer: coarse)').matches) return;
   sheet.scrollTop = 0;
   setSheetStop(sheet, sheet.offsetHeight - sheetHalfPx() > 48 ? 'half' : null);
