@@ -2255,6 +2255,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const w = Math.round(e.contentRect.width);
     if (w !== fitWidth) { fitWidth = w; fitOrderTable(); }
   }).observe(document.querySelector('#panel-orders .orders-toolbar'));
+  // The web font arrives after the first measure and widens the cells.
+  document.fonts?.addEventListener?.('loadingdone', fitOrderTable);
   // Phones: long-press an order for the same quick actions as right-click.
   vpcLongPress(document.getElementById('orderList'), e => {
     const row = e.target?.closest?.('.order-row');

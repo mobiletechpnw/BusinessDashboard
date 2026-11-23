@@ -1948,7 +1948,7 @@ div.modal-overlay {
     transition: transform var(--t-sheet) var(--ease-sheet);
   }
   html.vpc-recede body > .vpc-recedes {
-    transform: translateY(12px) scale(var(--sheet-recede));
+    transform: translateY(var(--s3)) scale(var(--sheet-recede));
   }
 }
 @keyframes sheet-up {
