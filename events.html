@@ -20,6 +20,9 @@ body { display:block; overflow-x:hidden; }
 
 /* HEADER */
 .header-right { display:flex; align-items:center; gap:8px; }
+/* Phones under 481px have room for one more button, so Share Calendar and
+   Add Vendor move into this More menu beside New Event */
+.hdr-more { display:none; }
 .btn-primary { background:var(--accent-fill); color: var(--on-accent); border:none; border-radius:999px; padding:7px 16px; font-size:.8rem; font-weight:600; cursor:pointer; transition:all .2s; white-space:nowrap; box-shadow:none; }
 .btn-primary:hover { opacity:.9; transform:translateY(-1px); box-shadow:none; }
 .btn-ghost { background:color-mix(in srgb, var(--label) 4%, transparent); border:1px solid var(--border); border-radius:999px; padding:6px 14px; font-size:.78rem; font-weight:600; color:var(--text2); cursor:pointer; transition:all .15s; white-space:nowrap; }
@@ -257,6 +260,9 @@ main { padding:0 0 24px; }
   .modal-actions { flex-direction:column-reverse; align-items:stretch; }
   .modal-actions button { width:100%; }
   .header-right .btn-ghost { display:none; }
+  /* Drawn like the title bar's + on phones: a bare 44px icon in the accent */
+  .hdr-more { display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; min-height:44px; padding:0; background:none; color:var(--accent); }
+  .hdr-more .vpc-ico { width:24px; height:24px; }
 }
 </style>
 </head>
@@ -267,6 +273,7 @@ main { padding:0 0 24px; }
   <div class="header-right">
     <button class="btn-ghost" onclick="generateShareLink()" title="Generate a shareable link for vendors">Share Calendar</button>
     <button class="btn-ghost" onclick="openVendorModal()"><svg class="vpc-ico inline" aria-hidden="true"><use href="icons.svg#plus"/></svg>Add Vendor</button>
+    <button class="hdr-more" type="button" onclick="openEventsMore(this)" aria-haspopup="menu" aria-expanded="false" aria-label="More actions"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#more"/></svg></button>
     <button class="btn-primary vpc-primary" type="button" onclick="openEventModal()" aria-label="New event"><svg class="vpc-ico" aria-hidden="true"><use href="icons.svg#plus"/></svg><span>New Event</span></button>
   </div>
 </header>
@@ -439,6 +446,19 @@ main { padding:0 0 24px; }
 </div>
 
 <script>
+// Phones under 481px: the title bar's More menu holds the two actions that
+// don't fit beside New Event.
+function openEventsMore(btn) {
+  vpcMenu(btn, {
+    label: 'Events',
+    options: [
+      { value: 'share', label: 'Share calendar', icon: VPCUtil.icon('share') },
+      { value: 'vendor', label: 'Add vendor', icon: VPCUtil.icon('plus') },
+    ],
+    onSelect: v => (v === 'share' ? generateShareLink() : openVendorModal()),
+  });
+}
+
 // ── SHARE CALENDAR LINK ──────────────────────────────
 async function generateShareLink() {
   if (!getEvents().length) {

@@ -107,7 +107,7 @@
   #orderTable tbody tr[data-id]:hover { background: var(--fill-2); }
   .cust-sub { display: block; margin-top: 2px; font-size: 0.75rem; color: var(--text2); }
   /* Ten columns: the product stays on one line, and cells tighten below
-     1280px; narrower than that the table scrolls inside its card. */
+     1280px (narrower windows: below the list styles). */
   #orderTable .cust-sub { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   @media (max-width: 1279px) {
     #orderTable th, #orderTable td { padding-left: 7px; padding-right: 7px; }
@@ -127,6 +127,18 @@
   .or-flags { display: flex; gap: 4px; }
   .order-row > .vpc-ico { width: 16px; height: 16px; color: var(--label-3); }
   .order-empty { padding: 28px 16px; text-align: center; color: var(--text2); font-size: 0.875rem; }
+  /* The table never scrolls sideways: fitOrderTable() picks the widest layout
+     that fits. Where ten columns don't (long products, a narrow window, the
+     sidebar), Qty and Profit step out: a quantity above 1 joins the product
+     line, as elsewhere ("10 × KickStands"), and profit stays in the order
+     sheet. Where eight don't either, the phone list takes over. */
+  #orderTable .qty-inline { display: none; }
+  .orders-compact #orderTable .col-qty, .orders-compact #orderTable .col-profit { display: none; }
+  .orders-compact #orderTable .qty-inline { display: inline; }
+  .orders-compact #orderTable .cust-sub { max-width: 150px; }
+  .orders-compact #orderTable .color-chip > span:not(.swatch) { max-width: 64px; overflow: hidden; text-overflow: ellipsis; }
+  .orders-as-list #orderTableCard { display: none; }
+  .orders-as-list .order-list { display: flex; }
   /* Colour and deliver-by: a swatch per order, a date that turns orange then red */
   .swatch { display: inline-block; flex: none; width: 14px; height: 14px; border-radius: 50%; vertical-align: -2px; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--label) 22%, transparent); }
   .swatch.none { position: relative; overflow: hidden; background: none; box-shadow: inset 0 0 0 1.5px var(--label-3); }
@@ -433,9 +445,9 @@
                 <th onclick="sortTable('date')" class="clickable">Date ↕</th>
                 <th onclick="sortTable('customer')" class="clickable">Customer ↕</th>
                 <th onclick="sortTable('color')" class="clickable">Color ↕</th>
-                <th class="num clickable" onclick="sortTable('sets')">Qty ↕</th>
+                <th class="num clickable col-qty" onclick="sortTable('sets')">Qty ↕</th>
                 <th class="num clickable" onclick="sortTable('salePrice')">Sale ↕</th>
-                <th class="num clickable" onclick="sortTable('profit')">Profit ↕</th>
+                <th class="num clickable col-profit" onclick="sortTable('profit')">Profit ↕</th>
                 <th onclick="sortTable('payStatus')" class="clickable">Payment ↕</th>
                 <th onclick="sortTable('printStatus')" class="clickable">Printed ↕</th>
                 <th onclick="sortTable('fulfillStatus')" class="clickable">Status ↕</th>
@@ -2081,13 +2093,13 @@ function renderOrderTable() {
       `<button type="button" class="badge badge-${val} status-btn" aria-haspopup="menu" aria-expanded="false" data-menu-key="${o.id}-${kind}" title="${title}" onclick="openStatusMenu(event,'${o.id}','${kind}')">${text}</button>`;
     return `<tr data-id="${o.id}" tabindex="0" onclick="openOrderSheet('${o.id}')" onkeydown="if(event.key==='Enter'&&event.target===this)openOrderSheet('${o.id}')" oncontextmenu="orderContextMenu(event,'${o.id}')">
       <td class="nowrap">${fmtDate(o.date)}</td>
-      <td><strong>${esc(o.customer)}</strong><span class="cust-sub">${esc(o.product)}</span></td>
+      <td><strong>${esc(o.customer)}</strong><span class="cust-sub">${orderQty(o) > 1 ? `<span class="qty-inline">${orderQty(o)} × </span>` : ''}${esc(o.product)}</span></td>
       <td>${o.color
         ? `<button type="button" class="color-chip" title="Change color" onclick="openOrderColor(event,'${o.id}')">${swatchHTML(o.color)}<span>${esc(o.color)}</span></button>`
         : `<button type="button" class="color-chip is-empty" title="Set a color" aria-label="Set a color" onclick="openOrderColor(event,'${o.id}')">—</button>`}</td>
-      <td class="num">${orderQty(o)}</td>
+      <td class="num col-qty">${orderQty(o)}</td>
       <td class="num">${fmt$(o.salePrice)}</td>
-      <td class="num"${profit < 0 ? ' style="color:var(--red)"' : ''}>${fmt$(profit)}</td>
+      <td class="num col-profit"${profit < 0 ? ' style="color:var(--red)"' : ''}>${fmt$(profit)}</td>
       <td>${statusBtn('pay', pay, PAY_LABELS[pay] || pay, 'Change payment status')}</td>
       <td class="nowrap">${statusBtn('print', print, PRINT_LABELS[print], 'Change print status')}</td>
       <td>${statusBtn('fill', fill, FILL_LABELS[fill] || fill, 'Change order status')}</td>
@@ -2100,9 +2112,9 @@ function renderOrderTable() {
   // Summary footer row (always shows totals across all filtered orders)
   const footerRow = total ? `<tr class="tfoot-row">
     <td colspan="3" class="text-2">Total — ${total} order${total === 1 ? '' : 's'}${pageCount > 1 ? ` (page ${orderPage+1}/${pageCount})` : ''}</td>
-    <td class="num">${totalQty}</td>
+    <td class="num col-qty">${totalQty}</td>
     <td class="num">${fmt$(totalRev)}</td>
-    <td class="num">${fmt$(totalProf)}</td>
+    <td class="num col-profit">${fmt$(totalProf)}</td>
     <td colspan="4"></td>
   </tr>` : `<tr><td colspan="10" class="order-empty">No orders match.</td></tr>`;
   document.getElementById('orderTbody').innerHTML = rows + footerRow;
@@ -2121,6 +2133,7 @@ function renderOrderTable() {
     </button>`;
   }).join('') || '<div class="order-empty">No orders match.</div>';
 
+  fitOrderTable();
   renderPrintQueue();
   if (sheetOrderId) refreshOrderSheet();
 
@@ -2219,7 +2232,29 @@ function orderContextMenu(e, id) {
   });
 }
 
+// The orders table never scrolls sideways: after each render, and whenever
+// the panel changes width, it takes the widest layout that fits — all ten
+// columns, eight (no Qty or Profit), or the phone list. Phones get the list
+// from the stylesheet.
+function fitOrderTable() {
+  const panel = document.getElementById('panel-orders');
+  const wrap = document.querySelector('#orderTableCard .table-wrap');
+  panel.classList.remove('orders-compact', 'orders-as-list');
+  if (matchMedia('(max-width: 700px)').matches || !wrap.offsetParent) return; // a hidden panel measures nothing
+  const fits = () => wrap.scrollWidth <= wrap.clientWidth;
+  if (fits()) return;
+  panel.classList.add('orders-compact');
+  if (!fits()) panel.classList.replace('orders-compact', 'orders-as-list');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  // Watch the toolbar, not the panel: it spans the panel's width, and its
+  // size doesn't change when the table gives way to the list.
+  let fitWidth = -1;
+  new ResizeObserver(([e]) => {
+    const w = Math.round(e.contentRect.width);
+    if (w !== fitWidth) { fitWidth = w; fitOrderTable(); }
+  }).observe(document.querySelector('#panel-orders .orders-toolbar'));
   // Phones: long-press an order for the same quick actions as right-click.
   vpcLongPress(document.getElementById('orderList'), e => {
     const row = e.target?.closest?.('.order-row');
