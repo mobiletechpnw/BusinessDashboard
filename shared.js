@@ -690,6 +690,7 @@ function watchDialogs() {
   const mo = new MutationObserver((records) =>
     records.forEach((r) => {
       if (r.target.classList.contains('open')) vpcSyncForms(r.target);
+      if (r.target.hasAttribute('data-detents')) sheetStopsToggle(r.target);
     })
   );
   document.querySelectorAll('.modal-overlay').forEach((o) => {
@@ -803,19 +804,29 @@ window.vpcLongPress = function (el, handler, ms = 450) {
 // Swipe a phone sheet down by its top edge to close it, like iOS. Touch
 // events, not pointer events: the browser would take a downward drag as a
 // scroll and cancel the pointer stream, so the sheet never followed.
+// A sheet with stops (sheetStops, below) drags between half and full too.
 function enableSheetSwipe() {
   let drag = null;
+  let lastDrag = 0;
   document.addEventListener(
     'touchstart',
     (e) => {
       drag = null;
       if (e.touches.length !== 1 || window.innerWidth > 700) return;
       const sheet = e.target.closest?.('.modal-overlay.open > .modal, .vpc-sheet');
-      if (!sheet || sheet.scrollTop > 0) return;
+      if (!sheet) return;
       const { clientY } = e.touches[0];
-      if (clientY - sheet.getBoundingClientRect().top > 64) return; // the top edge, not the content
+      const stop = sheet.dataset.stop;
+      // At half the whole sheet is the handle; at full, any of it once the
+      // content is scrolled to its top; a plain sheet, only its top edge.
+      if (stop !== 'half' && sheet.scrollTop > 0) return;
+      if (!stop && clientY - sheet.getBoundingClientRect().top > 64) return;
       const now = performance.now();
-      drag = { sheet, y0: clientY, dy: 0, moved: false, lastY: clientY, lastT: now, v: 0 };
+      drag = { sheet, stop, y0: clientY, dy: 0, moved: false, lastY: clientY, lastT: now, v: 0 };
+      if (stop) {
+        drag.half = Math.max(0, sheet.offsetHeight - sheetHalfPx()); // the half stop, in px down
+        drag.base = stop === 'half' ? drag.half : 0;
+      }
     },
     { passive: true }
   );
@@ -824,10 +835,19 @@ function enableSheetSwipe() {
     (e) => {
       if (!drag) return;
       const y = e.touches[0].clientY;
-      // Upward first: the content scrolls as usual.
-      if (!drag.moved && y < drag.y0) {
-        drag = null;
-        return;
+      const d = y - drag.y0;
+      if (!drag.moved) {
+        // Upward first: the content scrolls as usual. At the half stop an
+        // upward drag lifts the sheet instead.
+        if (d < 0 && drag.stop !== 'half') {
+          drag = null;
+          return;
+        }
+        // A sheet with stops waits a few pixels, so taps on its controls stay taps.
+        if (drag.stop && Math.abs(d) < 6) {
+          if (d > 0) e.preventDefault(); // no bounce while it decides
+          return;
+        }
       }
       e.preventDefault(); // the sheet follows the finger instead of the page scrolling
       const now = performance.now();
@@ -836,33 +856,142 @@ function enableSheetSwipe() {
       drag.lastT = now;
       if (!drag.moved) drag.sheet.style.transition = 'none';
       drag.moved = true;
-      drag.dy = Math.max(0, y - drag.y0);
-      drag.sheet.style.transform = `translateY(${drag.dy}px)`;
+      if (drag.stop) {
+        drag.dy = d;
+        const at = drag.base + d;
+        // Above the full stop it gives a little, then holds.
+        drag.sheet.style.transform = `translateY(${at < 0 ? Math.max(-24, at / 4) : at}px)`;
+      } else {
+        drag.dy = Math.max(0, d);
+        drag.sheet.style.transform = `translateY(${drag.dy}px)`;
+      }
     },
     { passive: false }
   );
-  const end = () => {
+  const close = (sheet) => {
+    sheet.style.transform = 'translateY(100%)';
+    setTimeout(() => {
+      sheet.style.transform = '';
+      sheet.style.transition = '';
+      if (sheet.classList.contains('vpc-sheet')) closeMoreSheet(true);
+      else closeDialog(sheet.closest('.modal-overlay'));
+    }, 220);
+  };
+  const end = (e) => {
     if (!drag) return;
-    const { sheet, dy, moved, v, lastT } = drag;
+    const { sheet, stop, dy, moved, v, lastT } = drag;
+    const { half, base } = drag;
     drag = null;
     if (!moved) return; // a tap
-    const flick = v > 0.5 && performance.now() - lastT < 100;
+    const flick = Math.abs(v) > 0.5 && performance.now() - lastT < 100;
     sheet.style.transition = 'transform var(--t-move) var(--ease-sheet)';
-    if (dy > 120 || (flick && dy > 40)) {
-      sheet.style.transform = 'translateY(100%)';
-      setTimeout(() => {
-        sheet.style.transform = '';
-        sheet.style.transition = '';
-        if (sheet.classList.contains('vpc-sheet')) closeMoreSheet(true);
-        else closeDialog(sheet.closest('.modal-overlay'));
-      }, 220);
-    } else {
+    if (stop) {
+      if (e.cancelable) e.preventDefault(); // the drag was not a tap on what it began on
+      lastDrag = performance.now();
+      const at = base + dy; // 0 is the full stop, half the half one
+      let to;
+      if (flick) to = v < 0 ? 'full' : at < half ? 'half' : at > half + 40 ? 'close' : 'half';
+      else if (at > half + 120) to = 'close';
+      else to = at < half / 2 ? 'full' : 'half';
+      if (to === 'close') return close(sheet);
+      setSheetStop(sheet, to);
+      sheet.style.transform = '';
+      setTimeout(() => (sheet.style.transition = ''), 320);
+      return;
+    }
+    if (dy > 120 || (flick && v > 0 && dy > 40)) close(sheet);
+    else {
       sheet.style.transform = '';
       setTimeout(() => (sheet.style.transition = ''), 320);
     }
   };
   document.addEventListener('touchend', end);
   document.addEventListener('touchcancel', end);
+
+  // A tap on the grabber strip switches half and full; focus moving into the
+  // part a half sheet hides lifts it to full, so nothing is reached unseen.
+  document.addEventListener('click', (e) => {
+    const sheet = e.target;
+    if (!sheet.matches?.('.modal-overlay[data-detents] > .modal[data-stop]')) return;
+    if (performance.now() - lastDrag < 400) return;
+    if (e.clientY - sheet.getBoundingClientRect().top > 24) return;
+    setSheetStop(sheet, sheet.dataset.stop === 'half' ? 'full' : 'half');
+  });
+  document.addEventListener('focusin', (e) => {
+    const sheet = e.target.closest?.('.modal-overlay[data-detents] > .modal[data-stop="half"]');
+    if (sheet && e.target.getBoundingClientRect().bottom > window.innerHeight - 8) {
+      setSheetStop(sheet, 'full');
+    }
+  });
+  // Content scrolled at half (bringing something into view) lifts it to full.
+  document.addEventListener(
+    'scroll',
+    (e) => {
+      const sheet = e.target;
+      if (sheet.matches?.('.modal-overlay[data-detents] > .modal[data-stop="half"]')) {
+        setSheetStop(sheet, 'full');
+      }
+    },
+    true
+  );
+}
+
+// ── SHEET STOPS ────────────────────────────────────
+// A sheet whose overlay carries data-detents opens on touch phones with half
+// the screen showing (--sheet-half), drags up to its full height, and at full
+// the page behind recedes a little (--sheet-recede), as on iOS. A sheet with
+// little to show opens at its own height, as every other sheet does.
+function sheetStopsToggle(overlay) {
+  const sheet = overlay.querySelector(':scope > .modal');
+  if (!sheet) return;
+  if (!overlay.classList.contains('open')) return setSheetStop(sheet, null);
+  if (!window.matchMedia('(max-width: 700px) and (pointer: coarse)').matches) return;
+  sheet.scrollTop = 0;
+  setSheetStop(sheet, sheet.offsetHeight - sheetHalfPx() > 48 ? 'half' : null);
+}
+function setSheetStop(sheet, stop) {
+  if (stop) sheet.dataset.stop = stop;
+  else delete sheet.dataset.stop;
+  recedePage(stop === 'full');
+}
+// --sheet-half in pixels, as the stylesheet resolves it on this screen.
+function sheetHalfPx() {
+  const probe = document.createElement('div');
+  probe.style.cssText = 'position:fixed;top:0;visibility:hidden;height:var(--sheet-half)';
+  document.body.appendChild(probe);
+  const h = probe.offsetHeight;
+  probe.remove();
+  return h;
+}
+// The page behind shrinks toward the top centre of the screen. Each block of
+// the body scales about that one point, so together they move as one page;
+// sheets, popovers and toasts stay as they are.
+let recedeTimer = 0;
+function recedePage(on) {
+  const root = document.documentElement;
+  if (on === root.classList.contains('vpc-recede')) return;
+  clearTimeout(recedeTimer);
+  if (on) {
+    const cx = window.innerWidth / 2;
+    for (const el of document.body.children) {
+      if (el.matches('.modal-overlay, script, style, link, template, .toast, [role="status"]')) {
+        continue;
+      }
+      const r = el.getBoundingClientRect();
+      el.style.transformOrigin = `${cx - r.left}px ${-r.top}px`;
+      el.classList.add('vpc-recedes');
+    }
+    root.classList.add('vpc-recede');
+  } else {
+    root.classList.remove('vpc-recede');
+    // Keep the transition until the page is back, then let the blocks go.
+    recedeTimer = setTimeout(() => {
+      document.querySelectorAll('.vpc-recedes').forEach((el) => {
+        el.classList.remove('vpc-recedes');
+        el.style.transformOrigin = '';
+      });
+    }, 600);
+  }
 }
 // Close a dialog the way its own Cancel button would.
 function closeDialog(overlay) {

@@ -124,6 +124,9 @@
   --t-base: 200ms;
   --t-move: 320ms;
   --t-sheet: 420ms;
+  /* Sheets with stops (shared.js: sheetStops) */
+  --sheet-half: 50dvh; /* how much of the sheet the half stop shows */
+  --sheet-recede: 0.94; /* the page behind a sheet at its full stop */
 }
 
 @media (min-resolution: 2dppx) {
@@ -1928,6 +1931,24 @@ div.modal-overlay {
     flex: 1;
     width: auto;
     min-height: 50px;
+  }
+
+  /* A sheet with stops (data-detents) on touch phones: at half, the rest of
+     it waits below the screen and a drag lifts it instead of scrolling; at
+     full, the page behind recedes. shared.js: enableSheetSwipe, sheetStops. */
+  .modal-overlay[data-detents] > .modal[data-stop] {
+    transition: transform var(--t-sheet) var(--ease-sheet);
+  }
+  .modal-overlay[data-detents] > .modal[data-stop='half'] {
+    transform: translateY(max(0px, calc(100% - var(--sheet-half))));
+    overflow: hidden;
+    touch-action: none;
+  }
+  body > .vpc-recedes {
+    transition: transform var(--t-sheet) var(--ease-sheet);
+  }
+  html.vpc-recede body > .vpc-recedes {
+    transform: translateY(12px) scale(var(--sheet-recede));
   }
 }
 @keyframes sheet-up {
